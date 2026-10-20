@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- **Meiro has a website.** It shows what Meiro is, what it does, a player you
+  can play with, and the download links, in a light or dark theme.
+
 ## [0.4.12] - 2026-10-28
 
 ### Changed
