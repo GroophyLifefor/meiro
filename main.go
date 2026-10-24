@@ -231,6 +231,7 @@ func (a *app) openAudioCache() {
 
 // shutdown flushes the settings, then closes what belongs to the app.
 func (a *app) shutdown() {
+	a.notificationArtwork.stop()
 	a.finishEpisodeProgress(true)
 	a.savePlayback(0)
 	a.saver.Wait()

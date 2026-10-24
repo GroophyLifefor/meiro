@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- **Windows track notifications show the current cover art.** A missing or invalid cover falls back to Meiro's coloured app icon.
+
 ### Fixed
 
 - **Discord and the window title show the artist of a track whose row links none.** Some track rows name the artist as plain text, so Discord left the member list as Meiro and the title dropped the artist. Both now fall back to the byline the player shows.
