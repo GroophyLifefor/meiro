@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.4.10] - 2026-10-24
+
 ### Added
 
 - **Windows track notifications show the current cover art.** A missing or invalid cover falls back to Meiro's coloured app icon.
