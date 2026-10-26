@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- **A dialog taller than the window scrolls.** The sign-in dialog no longer runs past the bottom of a short window, so its buttons stay reachable.
+
 ## [0.4.10] - 2026-10-24
 
 ### Added

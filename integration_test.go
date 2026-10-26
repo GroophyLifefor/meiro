@@ -1655,6 +1655,99 @@ func TestFailedBrowserImportOffersPastingTheCookieHeader(t *testing.T) {
 	}
 }
 
+// A window shorter than the dialog used to clip it, with the actions past
+// the bottom and no way to reach them. The dialog scrolls instead.
+func TestSignInDialogScrollsInAShortWindow(t *testing.T) {
+	a := newTestApp(t)
+	a.openSignIn()
+	a.account.signIn.advanced = true
+	const height = 480
+	tt := ui.NewTester(a.view, 800, height)
+	tt.Frame()
+
+	panel, ok := tt.Find("dialog-panel")
+	if !ok || panel.Y < 0 || panel.Y+panel.H > height {
+		t.Fatalf("the dialog is not inside the window: %+v", panel)
+	}
+	// A text the panel clips keeps its label and loses its box. A window
+	// tall enough for the dialog would show the note already, and the test
+	// would be passing for lack of anything to scroll.
+	const note = "Meiro saves the session in a file in its data folder that only your user can read. Sign out to remove Meiro's saved copy."
+	if r, ok := tt.Find(note); ok && r.H > 0 {
+		t.Fatal("the end of the dialog is already in view, so the window is not shorter than it")
+	}
+	// Cancel is past the panel too. A click uses the element's own box, so
+	// one that lands while the button is clipped says the panel did not
+	// scroll it into reach.
+	cancel, ok := tt.Find("Cancel")
+	if !ok || cancel.H > 0 && cancel.Y+cancel.H <= panel.Y+panel.H {
+		t.Fatalf("Cancel is already inside the panel, at %+v; panel %+v", cancel, panel)
+	}
+
+	tt.Scroll(panel.X+panel.W/2, panel.Y+panel.H/2, 0, 4000)
+	tt.Frame()
+	end, ok := tt.Find(note)
+	if !ok || end.H == 0 || end.Y < panel.Y || end.Y+end.H > panel.Y+panel.H {
+		t.Fatalf("scrolling did not bring the end of the dialog into view: ok=%v %+v panel %+v", ok, end, panel)
+	}
+	if err := tt.Click("Cancel"); err != nil {
+		t.Fatalf("Cancel is in the dialog and still not clickable: %v", err)
+	}
+	if a.account.signIn.open {
+		t.Error("Cancel did not close the scrolled dialog")
+	}
+}
+
+// Escape closes the dialog and leaves the player. The dialog's Escape is an
+// overlay shortcut, which must take the key rather than let the player's
+// own Escape run.
+func TestEscapeClosesTheDialogAndLeavesThePlayer(t *testing.T) {
+	a := newTestApp(t)
+	a.current.VideoID = "vid-3"
+	a.account.signIn.open = true
+	tt := ui.NewTester(a.view, 800, 700)
+	tt.Frame()
+	// Opening the player before the first frame does not last: that frame
+	// navigates, and a navigation closes the player.
+	a.nowPlaying.open = true
+	tt.Frame()
+	tt.Key(0, ui.KeyEscape)
+	if a.account.signIn.open {
+		t.Error("Escape left the dialog open")
+	}
+	if !a.nowPlaying.open || a.nowPlaying.closing {
+		t.Error("Escape closed the player as well as the dialog")
+	}
+}
+
+// Escape closes the browser menu the dialog opened, and leaves the dialog.
+// The menu is the overlay on top, so it has to take the key.
+func TestEscapeClosesTheBrowserMenuBeforeTheDialog(t *testing.T) {
+	a := newTestApp(t)
+	a.account.sources = func() []cookies.Source {
+		return []cookies.Source{{Label: "Fakefox"}}
+	}
+	a.openSignIn()
+	a.account.signIn.advanced = true
+	tt := ui.NewTester(a.view, 800, 900)
+	tt.Frame()
+	if err := tt.Click("Import from a browser"); err != nil {
+		t.Fatal(err)
+	}
+	tt.Frame()
+	if !tt.HasText("Fakefox") {
+		t.Fatal("the browser menu did not open")
+	}
+	tt.Key(0, ui.KeyEscape)
+	tt.Frame()
+	if tt.HasText("Fakefox") {
+		t.Error("Escape left the browser menu open")
+	}
+	if !a.account.signIn.open {
+		t.Error("Escape closed the dialog with the menu")
+	}
+}
+
 // The browser window signs in without naming a browser, so nothing re-reads
 // the user's own browser for it later, and a window that fails says why.
 func TestSignInWithABrowserWindow(t *testing.T) {

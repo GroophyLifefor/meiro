@@ -1,4 +1,4 @@
-load("@rules_go//go:def.bzl", "go_library")
+load("@rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "m3",
@@ -16,5 +16,12 @@ go_library(
     ],
     importpath = "github.com/elianiva/meiro/m3",
     visibility = ["//visibility:public"],
+    deps = ["@com_github_egoist_mygo//ui"],
+)
+
+go_test(
+    name = "m3_test",
+    srcs = ["dialog_test.go"],
+    embed = [":m3"],
     deps = ["@com_github_egoist_mygo//ui"],
 )

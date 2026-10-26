@@ -72,16 +72,51 @@ func switchWithTrack(c *ui.Context, on *bool, label string, trackWidth, trackHei
 }
 
 // Dialog shows a Material dialog over a scrim while *open is true. build
-// fills the panel; a press on the scrim or Escape closes it.
+// fills the panel; a press on the scrim or Escape closes it. A panel taller
+// than the window scrolls, so its actions stay reachable.
 func Dialog(c *ui.Context, open *bool, width float32, build func()) {
+	if !*open {
+		return
+	}
 	sc := Of(c).Scheme
-	ui.DialogBase(c, open, func(backdrop, panel ui.Element) {
-		backdrop.Background(sc.Scrim.Alpha(0.4))
-		panel.Width(width).MaxWidthPercent(92).Padding(24).Gap(16).Radius(ExtraLarge).
-			Background(sc.SurfaceContainerHigh).TextColor(sc.OnSurface)
-		Elevation(c, panel, 3)
-		build()
+	_, windowHeight := c.Size()
+	// DialogBase's panel is a box without the scroll flag, so it cannot
+	// scroll. Built here, the panel is a scrolling column, so content past
+	// the window scrolls. The backdrop covers the window and centers the
+	// panel, as DialogBase's does.
+	ui.Overlay(c, func() {
+		back := ui.Box(c).Absolute().Left(0).Top(0).Right(0).Bottom(0).Center().
+			Background(sc.Scrim.Alpha(0.4)).Modal()
+		var panel ui.Element
+		back.Children(func() {
+			// A percentage of the panel's own content is the content, so it
+			// never caps the panel. The window's height does; leave a margin.
+			panel = ui.Scroll(c).Width(width).MaxWidthPercent(92).MaxHeight(windowHeight-48).
+				Padding(24).Gap(16).Radius(ExtraLarge).Background(sc.SurfaceContainerHigh).
+				TextColor(sc.OnSurface).Role(ui.RoleDialog).Label("dialog-panel").
+				ScrollbarInsets(16, 6, 16, 0)
+			Elevation(c, panel, 3)
+			panel.Children(build)
+		})
+		// A press on the scrim closes the dialog; a press on the panel does
+		// not. Clicked reports a press on the panel too, since the panel
+		// does not take it, so only a press outside the panel counts.
+		if scrimPressed(back, panel) || back.OverlayShortcut(0, ui.KeyEscape) {
+			*open = false
+		}
 	})
+}
+
+// scrimPressed reports a press on the scrim that missed the panel. The panel
+// does not take presses, so the scrim's Clicked is true for a press on the
+// panel too; the pointer's place tells them apart.
+func scrimPressed(scrim, panel ui.Element) bool {
+	if !scrim.Clicked() {
+		return false
+	}
+	x, y, _ := panel.PointerPosition()
+	r := panel.Bounds()
+	return x < 0 || y < 0 || x >= r.W || y >= r.H
 }
 
 // Snackbars shows the window's toasts as Material snackbars along the bottom

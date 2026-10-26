@@ -36,7 +36,7 @@ Preconditions:
 - **Suggestions under a playlist.** The fake's playlist page carries the continuation YouTube sends (`playlist-more`), and its answer is a shelf: the suggested songs are on the page as it opens, under a `Similar songs` heading, five at a time, while `a.page.playable` keeps only the playlist's own songs. Clicking a suggestion plays from the suggestions alone; `Show more` shows the next ones. Mirror `TestAPlaylistShowsItsSuggestionsFiveAtATime`.
 - **Delete a playlist.** On `/library`, right-click the `Hype` card and choose `Delete playlist`. The dialog names the playlist (`“Hype” is deleted from your account, and this cannot be undone.`) and writes nothing until it is answered: `playlistDeletes.Load()` stays `0` after `Cancel`, which leaves the card where it was. `Delete` writes one `playlist/delete` with `playlistId` `PLhype`, takes the card off the page and shows `Deleted “Hype”`. The menu on a playlist page offers the same entry, and deleting the playlist that page shows leaves for the library.
 - **Refused.** `resetFakes()`, `refuseWrites.Store(true)`, then click `Save to library`. Verified: the button still reads `Save to library`.
-- **Sign in.** Mirror `TestSignInWithABrowserWindow` and `TestFailedBrowserImportOffersPastingTheCookieHeader`.
+- **Sign in.** Mirror `TestSignInWithABrowserWindow` and `TestFailedBrowserImportOffersPastingTheCookieHeader`. A window shorter than the dialog scrolls it (`TestSignInDialogScrollsInAShortWindow`): the panel carries the label `dialog-panel`, and a text the panel clips keeps that label with a zero-height box until scrolling brings it into the panel.
 
 ## Gotchas
 
