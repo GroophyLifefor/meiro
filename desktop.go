@@ -55,6 +55,15 @@ type desktop struct {
 	// quitting is set while App.Quit closes the windows, so OnClose hides
 	// nothing and the quit goes through.
 	quitting bool
+	// restoreFullScreen is set when hiding the window had to leave full
+	// screen first. macOS leaves a black Space behind a window hidden
+	// while it is full screen, so the window leaves first and goes back
+	// when it is shown again.
+	restoreFullScreen bool
+	// leavingFullScreen counts a hide that asked the window to leave full
+	// screen and has not heard that it did. A leave the user started
+	// themselves is not one of these, so it must not hide the window.
+	leavingFullScreen int
 }
 
 // update runs fn on the main thread and draws a frame with what it changed.
@@ -344,6 +353,11 @@ func (d *desktop) closeToTray(setting func() *bool, answer func(toTray, remember
 	}
 	d.closeChoice, d.answerClose = setting, answer
 	d.win.OnClose(func(e *mygo.CloseEvent) { d.onClose(e) })
+	d.win.OnShow(d.restoreFullScreenOnShow)
+	// Registered with the close handler, not from it: the close dialog is
+	// modal, so AppKit asks windowShouldClose from inside it, and a
+	// listener added there races the list MyGo is calling.
+	d.win.OnLeaveFullScreen(d.hideAfterLeavingFullScreen)
 }
 
 // onClose decides between hiding the window and letting the close through.
@@ -377,8 +391,45 @@ func (d *desktop) onClose(e *mygo.CloseEvent) {
 	}
 	if d.answerClose(toTray, remember) {
 		e.PreventDefault()
-		d.win.Hide()
+		d.hideToTray()
 	}
+}
+
+// hideToTray hides the window. On macOS a full-screen window leaves full
+// screen first: orderOut on one that is still full screen keeps its Space
+// and paints it black, which is what closing to the tray used to do. The
+// leave is animated and finishes later, so the hide waits for it. The
+// window goes back to full screen when it is shown again.
+func (d *desktop) hideToTray() {
+	if runtime.GOOS == "darwin" && d.win.IsFullScreen() {
+		d.restoreFullScreen = true
+		d.leavingFullScreen++
+		d.win.SetFullScreen(false)
+		return
+	}
+	d.win.Hide()
+}
+
+// hideAfterLeavingFullScreen hides the window once a hide to the tray has
+// finished leaving full screen. A leave the user started is ignored. It
+// runs on the main thread, from OnLeaveFullScreen.
+func (d *desktop) hideAfterLeavingFullScreen() {
+	if d.leavingFullScreen == 0 {
+		return
+	}
+	d.leavingFullScreen--
+	d.win.Hide()
+}
+
+// restoreFullScreenOnShow puts the window back in full screen when hiding
+// it to the tray had to leave first. It runs on the main thread, from
+// OnShow.
+func (d *desktop) restoreFullScreenOnShow() {
+	if !d.restoreFullScreen {
+		return
+	}
+	d.restoreFullScreen = false
+	d.win.SetFullScreen(true)
 }
 
 // close releases what the desktop holds, for shutdown.
