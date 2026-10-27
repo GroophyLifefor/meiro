@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.4.11] - 2026-10-27
+
 ### Added
 
 - **The interface can be zoomed.** Settings > Appearance has a Zoom control that makes everything larger or smaller, from 80% to 200%. The window keeps its size, and text, icons and artwork stay sharp at the new size. Cmd/Ctrl with `=` and `-` zoom anywhere, and with `0` go back to 100%. The three keys are shortcuts like any other, so Settings > Keyboard can rebind them.
@@ -18,6 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - **Closing a full-screen window to the tray on macOS leaves the desktop.** The window used to stay as a black full-screen space. It now leaves full screen, hides, and comes back full screen the next time you open it.
 - **A dialog taller than the window scrolls.** The sign-in dialog no longer runs past the bottom of a short window, so its buttons stay reachable.
+- **Smaller platform fixes arrive with the toolkit update.** On macOS, Meiro no longer starts the AutoFill helper, which used CPU and could stall scrolling, and Cmd-Q always quits. On Windows, a window hidden to the tray no longer costs a second of work on each frame, and short button labels are no longer cut off with an ellipsis. On Linux, closing the window from its own title bar no longer crashes, and the first click on the tray icon works.
 
 ## [0.4.10] - 2026-10-24
 
