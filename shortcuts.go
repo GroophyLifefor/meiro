@@ -150,6 +150,12 @@ func (a *app) perform(action keymap.Action) {
 		a.navigate(routeSettings)
 	case keymap.ClosePlayer:
 		a.nowPlaying.closing = true
+	case keymap.ZoomIn:
+		a.zoomBy(1)
+	case keymap.ZoomOut:
+		a.zoomBy(-1)
+	case keymap.ResetZoom:
+		a.resetZoom()
 	}
 }
 

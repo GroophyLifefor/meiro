@@ -1469,7 +1469,7 @@ func TestClearHistoryFromSettings(t *testing.T) {
 		t.Fatalf("saved %d plays, want 2", len(got))
 	}
 	a.router.Push("/settings")
-	tt := ui.NewTester(a.view, 1000, 4000)
+	tt := ui.NewTester(a.view, 1000, 4400)
 	tt.Frame()
 	if !tt.HasText("2 plays are kept on this device") {
 		t.Fatalf("settings do not count the plays: %q", tt.Texts())
@@ -1531,7 +1531,7 @@ func TestReportProblemOpensPrefilledIssue(t *testing.T) {
 	var opened []string
 	a.openURL = func(link string) error { opened = append(opened, link); return nil }
 	a.router.Push("/settings")
-	tt := ui.NewTester(a.view, 1000, 5000)
+	tt := ui.NewTester(a.view, 1000, 5400)
 	tt.Frame()
 
 	if err := tt.Click("Report a problem"); err != nil {

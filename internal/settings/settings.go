@@ -34,6 +34,9 @@ type Settings struct {
 	Dynamic bool `json:"dynamic"`
 	// RailExpanded keeps the navigation rail open, with labels beside icons.
 	RailExpanded bool `json:"railExpanded"`
+	// Zoom is how large the interface is, as a percentage: 100 shows it at
+	// its own size.
+	Zoom int `json:"zoom,omitempty"`
 	// Volume is the player's, from 0 to 100.
 	Volume float64 `json:"volume"`
 	// AutoPlay adds YouTube Music's generated queue after the selected tracks.
@@ -104,7 +107,29 @@ const (
 func Defaults() Settings {
 	return Settings{
 		Seed: "#6750a4", Mode: "system", Volume: 70, AutoPlay: true, CacheSongs: audio.DefaultLimit, NotifyTrack: true, ShowTray: true, TrayMark: TrayMarkWordmark,
+		Zoom: DefaultZoom,
 	}
+}
+
+// The interface zooms the app offers, as percentages, and the step between
+// them.
+const (
+	// MinZoom is the smallest the interface gets, and MaxZoom the largest.
+	MinZoom = 80
+	MaxZoom = 200
+	// ZoomStep is how much one shortcut or button moves the zoom.
+	ZoomStep = 10
+	// DefaultZoom is the interface at its own size.
+	DefaultZoom = 100
+)
+
+// ClampZoom keeps a zoom between the ones the app offers, and reads the zero
+// value of a settings file that has none as the default.
+func ClampZoom(percent int) int {
+	if percent == 0 {
+		return DefaultZoom
+	}
+	return min(max(percent, MinZoom), MaxZoom)
 }
 
 // clone returns a copy that shares no memory with s, for work that outlives
@@ -218,6 +243,7 @@ func Load(path string) Settings {
 	if read.TrayMark != TrayMarkWordmark && read.TrayMark != TrayMarkOMark {
 		read.TrayMark = s.TrayMark
 	}
+	read.Zoom = ClampZoom(read.Zoom)
 	return read
 }
 

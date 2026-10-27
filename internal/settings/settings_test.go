@@ -41,6 +41,35 @@ func TestWriterKeepsTheLastStateAndLoadRepairsIt(t *testing.T) {
 	}
 }
 
+func TestClampZoomKeepsTheInterfaceReadable(t *testing.T) {
+	for _, tc := range []struct{ in, want int }{
+		{0, DefaultZoom}, // a settings file from before the field
+		{50, MinZoom},
+		{120, 120},
+		{500, MaxZoom},
+	} {
+		if got := ClampZoom(tc.in); got != tc.want {
+			t.Errorf("ClampZoom(%d) = %d, want %d", tc.in, got, tc.want)
+		}
+	}
+
+	// A file's zoom comes back within the range, and one without the field
+	// takes the default.
+	path := filepath.Join(t.TempDir(), "settings.json")
+	if err := os.WriteFile(path, []byte(`{"zoom":900}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if got := Load(path).Zoom; got != MaxZoom {
+		t.Errorf("loaded zoom = %d, want %d", got, MaxZoom)
+	}
+	if err := os.WriteFile(path, []byte(`{}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if got := Load(path).Zoom; got != DefaultZoom {
+		t.Errorf("zoom of a file without one = %d, want %d", got, DefaultZoom)
+	}
+}
+
 func TestRememberKeepsRecentSearchesUniqueAndBounded(t *testing.T) {
 	var s Settings
 	for _, q := range []string{"a", "b", "A", "c", "d", "e", "f", "g", "h", "i"} {

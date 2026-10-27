@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- **The interface can be zoomed.** Settings > Appearance has a Zoom control that makes everything larger or smaller, from 80% to 200%. The window keeps its size, and text, icons and artwork stay sharp at the new size. Cmd/Ctrl with `=` and `-` zoom anywhere, and with `0` go back to 100%. The three keys are shortcuts like any other, so Settings > Keyboard can rebind them.
+
 ### Fixed
 
 - **Closing a full-screen window to the tray on macOS leaves the desktop.** The window used to stay as a black full-screen space. It now leaves full screen, hides, and comes back full screen the next time you open it.

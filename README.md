@@ -99,6 +99,8 @@ half of the title.
   preset. Turn on volume levelling so songs play at a similar loudness.
 - **Colours and themes.** Light, dark, or follow your computer. Pick a colour,
   or let the app take its colours from the album art of the song playing.
+- **Zoom.** Make everything on screen larger or smaller, from 80% to 200%, in
+  Settings → Appearance or with `Cmd`/`Ctrl` and `=` or `-`.
 
 ### Keep track of what you hear
 

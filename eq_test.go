@@ -13,7 +13,7 @@ import (
 func TestTheSoundCardSwitchAndPreset(t *testing.T) {
 	a := newTestApp(t)
 	a.router.Push("/settings")
-	tt := ui.NewTester(a.view, 1000, 4000)
+	tt := ui.NewTester(a.view, 1000, 4400)
 	tt.Frame()
 
 	// The preset sits under the switch, and disabled presets ignore clicks,

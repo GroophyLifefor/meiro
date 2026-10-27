@@ -11,6 +11,7 @@ import (
 	"github.com/egoist/mygo/ui"
 
 	"github.com/elianiva/meiro/internal/audio"
+	"github.com/elianiva/meiro/internal/keymap"
 	"github.com/elianiva/meiro/internal/settings"
 	"github.com/elianiva/meiro/m3"
 	"github.com/elianiva/meiro/player"
@@ -264,6 +265,32 @@ func (a *app) appearanceCard(c *ui.Context) {
 				a.settings.Dynamic = on
 				a.saveSettings()
 			}
+		})
+
+		// How large the interface is, at a readable size in the interface
+		// that grows with it.
+		ui.Row(c).Gap(16).AlignItems(ui.Center).Children(func() {
+			settingLabel(c, "Zoom", "Make everything larger or smaller.").Grow(1)
+			zoom := settings.ClampZoom(a.settings.Zoom)
+			ui.Row(c).Gap(4).AlignItems(ui.Center).Children(func() {
+				a.hinted(c, func() {
+					if m3.IconButton(c, m3.IconButtonSpec{
+						Icon: m3.IconRemove, Label: "Zoom out", Kind: m3.StandardIcon, Size: m3.Small40,
+						Key: "zoom-out", Disabled: zoom <= settings.MinZoom,
+					}).Clicked() {
+						a.zoomBy(-1)
+					}
+				}, keymap.ZoomOut)
+				m3.EmphasizedText(c, m3.TitleMedium, strconv.Itoa(zoom)+"%").Width(64).TextAlign(ui.Center).TextColor(sc.OnSurface)
+				a.hinted(c, func() {
+					if m3.IconButton(c, m3.IconButtonSpec{
+						Icon: m3.IconAdd, Label: "Zoom in", Kind: m3.StandardIcon, Size: m3.Small40,
+						Key: "zoom-in", Disabled: zoom >= settings.MaxZoom,
+					}).Clicked() {
+						a.zoomBy(1)
+					}
+				}, keymap.ZoomIn)
+			})
 		})
 	})
 }

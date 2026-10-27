@@ -54,7 +54,7 @@ func TestVolumeShortcuts(t *testing.T) {
 func TestRecordingANewShortcut(t *testing.T) {
 	a := newTestApp(t)
 	a.router.Push("/settings")
-	tt := ui.NewTester(a.view, 1000, 5000)
+	tt := ui.NewTester(a.view, 1000, 5400)
 	tt.Frame()
 	label := keymap.Binding{Cmd: true, Key: ui.KeyK}.Label(keymap.OS()) + " / " + keymap.Binding{Cmd: true, Key: ui.KeyF}.Label(keymap.OS())
 	if err := tt.Click(label); err != nil {
@@ -105,7 +105,7 @@ func TestRecordingANewShortcut(t *testing.T) {
 func TestEscapeCancelsRecording(t *testing.T) {
 	a := newTestApp(t)
 	a.router.Push("/settings")
-	tt := ui.NewTester(a.view, 1000, 5000)
+	tt := ui.NewTester(a.view, 1000, 5400)
 	tt.Frame()
 	a.startRecording(keymap.Mute)
 	tt.Frame()

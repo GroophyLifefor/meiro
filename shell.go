@@ -21,6 +21,9 @@ const (
 // view builds the window: the navigation rail, the sheet that holds the page
 // under its top bar, and the player floating over the foot of the sheet.
 func (a *app) view(c *ui.Context) {
+	// The zoom comes first: the frame that sets another one builds again at
+	// the new size, and everything below measures the window it zoomed.
+	c.SetZoom(a.zoom())
 	m3.Provide(c, a.resolveTheme(c))
 	a.updateHints(c)
 	// The window paints no background of its own: the rail, the sheet's

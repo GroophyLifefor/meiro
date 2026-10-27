@@ -30,6 +30,9 @@ const (
 	Library     Action = "library"
 	Settings    Action = "settings"
 	ClosePlayer Action = "closePlayer"
+	ZoomIn      Action = "zoomIn"
+	ZoomOut     Action = "zoomOut"
+	ResetZoom   Action = "resetZoom"
 )
 
 // Binding is a key with the modifiers held for it. Cmd is the platform's
@@ -88,10 +91,13 @@ var Actions = []Info{
 	{Library, "Library", "Navigation", []Binding{cmd(ui.Key3)}},
 	{Settings, "Settings", "Navigation", []Binding{cmd(ui.KeyComma)}},
 	{ClosePlayer, "Close the player panel", "Navigation", []Binding{{Key: ui.KeyEscape}}},
+	{ZoomIn, "Zoom in", "Window", []Binding{cmd(ui.KeyEqual)}},
+	{ZoomOut, "Zoom out", "Window", []Binding{cmd(ui.KeyMinus)}},
+	{ResetZoom, "Actual size", "Window", []Binding{cmd(ui.Key0)}},
 }
 
 // Groups are the headings of Actions, in order.
-var Groups = []string{"Playback", "Navigation"}
+var Groups = []string{"Playback", "Navigation", "Window"}
 
 // Title is the name of an action, or its ID for one this version does not
 // know.
