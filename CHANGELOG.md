@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - **The interface can be zoomed.** Settings > Appearance has a Zoom control that makes everything larger or smaller, from 80% to 200%. The window keeps its size, and text, icons and artwork stay sharp at the new size. Cmd/Ctrl with `=` and `-` zoom anywhere, and with `0` go back to 100%. The three keys are shortcuts like any other, so Settings > Keyboard can rebind them.
 
+### Changed
+
+- **Moving elements are painted at a steadier rate.** The loading indicator, the dancing bars beside the playing track and the wavy progress bar now redraw about 60 times a second, aligned to the screen's refresh, instead of on a timer that drifted against it. They also redraw on their own, so the rest of the window costs nothing while they move, and a display that can refresh less often does.
+
 ### Fixed
 
 - **Closing a full-screen window to the tray on macOS leaves the desktop.** The window used to stay as a black full-screen space. It now leaves full screen, hides, and comes back full screen the next time you open it.
