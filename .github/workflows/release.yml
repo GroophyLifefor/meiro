@@ -340,7 +340,7 @@ jobs:
               cp "$dmg" "artifacts/Meiro-${VERSION}-macos-${arch}${suffix}.dmg"
               ;;
             windows-*)
-              installer="$(find "dist/${{ matrix.platform }}" -maxdepth 1 -name '*Setup*.exe')"
+              installer="$(find "dist/${{ matrix.platform }}" -maxdepth 1 -name '*-setup-*.exe')"
               suffix=""
               if [ "${{ matrix.variant }}" = minimal ]; then suffix=-minimal; fi
               cp "$installer" "artifacts/Meiro-${VERSION}-windows-${arch}${suffix}-setup.exe"
@@ -361,7 +361,7 @@ jobs:
                       (relative.name.startswith("update-") and path.suffix == ".json")
                       or path.suffix == ".delta"
                       or path.name.endswith(".tar.gz")
-                      or (" Setup " in relative.name and path.suffix == ".exe")
+                      or ("-setup-" in relative.name and path.suffix == ".exe")
                   ):
                       continue
                   archive.write(path, Path("Meiro") / relative)

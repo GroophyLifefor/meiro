@@ -3,13 +3,13 @@ set -euo pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
-GO_VERSION="1.27.1"
+GO_VERSION="1.27.3"
 GO_ROOT="$HOME/.local/share/go/$GO_VERSION"
 GO_ARCHIVE_DIR="$HOME/.cache/amp/downloads"
 GO_ARCHIVE="$GO_ARCHIVE_DIR/go${GO_VERSION}.linux-$(uname -m).tar.gz"
 # Bazelisk reads the repository's .bazelversion, so this is the only Bazel
 # version the repository needs to agree on.
-BAZELISK_VERSION="1.29.0"
+BAZELISK_VERSION="1.30.0"
 BAZELISK_ROOT="$HOME/.local/share/bazelisk/$BAZELISK_VERSION"
 BAZELISK_ARCHIVE_DIR="$GO_ARCHIVE_DIR"
 
@@ -33,16 +33,16 @@ fi
 
 case "$(uname -m)" in
 	x86_64)
-		GO_SHA256="63d339f0da5ab53635a56f2490a7984dfe12dfcff22ad749f63edaf590168445"
+		GO_SHA256="65efbc80fdc1fa2cd2631cad5b481777a68e8725f34e89f50fc6ac714e379b40"
 		GO_PLATFORM="amd64"
 		BAZELISK_PLATFORM="amd64"
-		BAZELISK_SHA256="5a408715e932c0250d28bd84555f12edbf70117de42f9181691c736eacc4a992"
+		BAZELISK_SHA256="a248ae2b2b62b5baebb748f6fba7203bff1a27e5d01b55399a8406744cb539e8"
 		;;
 	aarch64 | arm64)
-		GO_SHA256="3450b45a3f9ee8568792736a5c5e70a1f2e9b36c35a8f74958c03e51d7d92bec"
+		GO_SHA256="a06e99309dbcbdca1a8ccd2282c3ee146e55930886e26b4f1193269587165f49"
 		GO_PLATFORM="arm64"
 		BAZELISK_PLATFORM="arm64"
-		BAZELISK_SHA256="e20e8b0f4f240091b7a55bf17b9398bd4f40ee70ae0208dff95dd4c445fb4010"
+		BAZELISK_SHA256="b2bcc040c213b44586b121bda6d983c35df121b917c3a7a66fb16f2fa0df1a4f"
 		;;
 	*)
 		printf 'Unsupported Go architecture: %s\n' "$(uname -m)" >&2
