@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- **Clicking the playing track in the queue pauses or resumes it.** It used to start the track again from the beginning.
+
 ### Fixed
 
 - **Adding a song a playlist already holds says so.** The picker used to keep itself open over YouTube's raw failed status. It now closes and tells you the song is already in that playlist.

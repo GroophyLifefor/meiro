@@ -202,6 +202,10 @@ func (a *app) songRow(c *ui.Context, item youtube.MusicItem, queue []youtube.Mus
 				return
 			}
 			a.clearQueueSelection()
+			if playing {
+				a.togglePlay()
+				return
+			}
 		}
 		switch {
 		case o.directQueue:

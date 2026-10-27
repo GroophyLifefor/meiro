@@ -1682,3 +1682,38 @@ func TestTheWindowTitleNamesTheTrackPlaying(t *testing.T) {
 		t.Errorf("once paused the title is %q", got)
 	}
 }
+
+// Clicking the playing track in the queue pauses it, and clicking it again
+// resumes it, rather than starting it over. Another track still plays.
+func TestClickingThePlayingQueueRowTogglesPlayback(t *testing.T) {
+	a, _ := tonesApp(t, 5)
+	items := tracks("a", "b")
+	a.play(items[0], items)
+	pollUntil(t, a, "a to play", func() bool { return a.player.Playing() })
+	tt := ui.NewTester(a.view, 1180, 850)
+	tt.Frame()
+	if err := tt.Click("Track a"); err != nil { // the bar's title opens the player on the queue
+		t.Fatal(err)
+	}
+	tt.Frame()
+
+	// The player names the track too, so the row is found by its place:
+	// the one above the next track's.
+	next, ok := tt.Find("Track b")
+	if !ok {
+		t.Fatalf("the queue shows no Track b: %q", tt.Texts())
+	}
+	rowA := func() { tt.ClickAt(next.X+next.W/2, next.Y+next.H/2-rowHeight) }
+	rowA()
+	if !a.player.Paused() {
+		t.Fatal("clicking the playing row did not pause")
+	}
+	rowA()
+	if !a.player.Playing() || a.current.VideoID != "a" {
+		t.Fatalf("clicking again did not resume: playing %v, current %q", a.player.Playing(), a.current.VideoID)
+	}
+	if err := tt.Click("Track b"); err != nil {
+		t.Fatal(err)
+	}
+	pollUntil(t, a, "b to play", func() bool { return a.current.VideoID == "b" && a.player.Playing() })
+}
