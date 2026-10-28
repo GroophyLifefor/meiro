@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.4.12] - 2026-10-28
+
 ### Changed
 
 - **Clicking the playing track in the queue pauses or resumes it.** It used to start the track again from the beginning.
