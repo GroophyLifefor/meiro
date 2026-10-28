@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://meiro.elianiva.com/sitemap.xml

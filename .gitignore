@@ -15,3 +15,5 @@ mygo_windows_*.syso
 
 # Local Cloudflare Workers state for the website.
 website/.wrangler/
+
+website/node_modules/

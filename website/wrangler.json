@@ -1,0 +1,10 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "meiro",
+  "compatibility_date": "2026-10-20",
+  "assets": {
+    "directory": ".",
+    "not_found_handling": "404-page"
+  },
+  "routes": [{ "pattern": "meiro.elianiva.com", "custom_domain": true }]
+}

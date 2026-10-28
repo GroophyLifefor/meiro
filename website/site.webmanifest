@@ -1,0 +1,13 @@
+{
+  "name": "Meiro",
+  "short_name": "Meiro",
+  "description": "A native desktop player for YouTube Music.",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#fbf8f9",
+  "theme_color": "#fbf8f9",
+  "icons": [
+    { "src": "/assets/brand/icon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "/assets/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}

@@ -1,5 +1,8 @@
 # Files in the assets directory that Cloudflare must not serve.
 .assetsignore
-wrangler.jsonc
+wrangler.json
+package.json
+package-lock.json
+node_modules
 .wrangler
 .DS_Store
