@@ -90,6 +90,9 @@ type route struct {
 	bare bool
 }
 
+// refreshable pages load their content, which can change under them.
+func (r route) refreshable() bool { return r.load != nil && !r.isDetail() }
+
 // emptyMessage is the title and the line under it of a page with no content.
 type emptyMessage struct{ title, body string }
 

@@ -148,6 +148,10 @@ func (a *app) perform(action keymap.Action) {
 		a.navigate(routeLibrary)
 	case keymap.Settings:
 		a.navigate(routeSettings)
+	case keymap.Refresh:
+		if r, _ := a.route(); r.refreshable() {
+			a.reloadPage()
+		}
 	case keymap.ClosePlayer:
 		a.nowPlaying.closing = true
 	case keymap.ZoomIn:

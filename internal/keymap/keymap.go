@@ -29,6 +29,7 @@ const (
 	Explore     Action = "explore"
 	Library     Action = "library"
 	Settings    Action = "settings"
+	Refresh     Action = "refresh"
 	ClosePlayer Action = "closePlayer"
 	ZoomIn      Action = "zoomIn"
 	ZoomOut     Action = "zoomOut"
@@ -90,6 +91,7 @@ var Actions = []Info{
 	{Explore, "Explore", "Navigation", []Binding{cmd(ui.Key2)}},
 	{Library, "Library", "Navigation", []Binding{cmd(ui.Key3)}},
 	{Settings, "Settings", "Navigation", []Binding{cmd(ui.KeyComma)}},
+	{Refresh, "Refresh the page", "Navigation", []Binding{cmd(ui.KeyR)}},
 	{ClosePlayer, "Close the player panel", "Navigation", []Binding{{Key: ui.KeyEscape}}},
 	{ZoomIn, "Zoom in", "Window", []Binding{cmd(ui.KeyEqual)}},
 	{ZoomOut, "Zoom out", "Window", []Binding{cmd(ui.KeyMinus)}},
