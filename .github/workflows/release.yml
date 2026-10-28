@@ -320,6 +320,12 @@ jobs:
       - name: Set up Linux package tools
         if: startsWith(matrix.platform, 'linux-')
         run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends flatpak
+          sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+          for arch in x86_64 aarch64; do
+            sudo flatpak install --noninteractive --arch="$arch" flathub org.gnome.Platform//48 org.gnome.Sdk//48
+          done
           go install github.com/goreleaser/nfpm/v2/cmd/nfpm@v2.48.0
           echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
           curl --fail --location --silent --show-error \
@@ -437,7 +443,7 @@ jobs:
             echo
             echo "- **macOS**: the universal \`.dmg\` (Apple Silicon and Intel)."
             echo "- **Windows** (\`amd64\`): the \`-portable.zip\` (extract and run \`Meiro.exe\`), or the \`-setup.exe\` installer. Untested: the author has no Windows machine."
-            echo "- **Linux** (\`amd64\`, \`arm64\`): \`.deb\`, \`.rpm\`, \`.AppImage\` or \`.tar.gz\`."
+            echo "- **Linux** (\`amd64\`, \`arm64\`): \`.deb\`, \`.rpm\`, \`.flatpak\` (full build only), \`.AppImage\` or \`.tar.gz\`."
             echo "- Full builds bundle ffmpeg and yt-dlp; \`minimal\` builds use the ones on your system."
             echo "- Verify downloads with \`SHA256SUMS.txt\`."
             echo

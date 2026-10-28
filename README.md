@@ -188,6 +188,7 @@ The release page lists several files. Choose one for your system:
 | Windows, no installer | `-portable.zip` |
 | Ubuntu, Debian, Linux Mint, Pop!_OS | `.deb` |
 | Fedora | `.rpm` |
+| Any Linux with Flatpak (full build only) | `.flatpak` |
 | Arch, Manjaro, or any other Linux | `.AppImage` |
 
 On Windows, you can also choose the `-setup.exe` installer instead.
@@ -229,7 +230,8 @@ notarized by Apple yet, so the first time, right-click it and choose **Open**
 (or allow it under System Settings > Privacy & Security).
 
 **Linux:** Install the `.deb` on Debian or Ubuntu, or the `.rpm` on Fedora or a
-compatible RPM-based distribution. You can also make the `.AppImage` executable
+compatible RPM-based distribution. With Flatpak, run
+`flatpak install --user Meiro-<version>-linux-amd64.flatpak`. You can also make the `.AppImage` executable
 and run it, or unpack the `.tar.gz` and run its `install.sh`. All Linux builds
 need GTK 3 and WebKitGTK 4.1. The tray also needs the AppIndicator runtime:
 Debian/Ubuntu packages install `libayatana-appindicator3-1`, and Fedora packages
@@ -436,7 +438,7 @@ The minimal build expects `ffmpeg`, `yt-dlp`, and either Node.js or Bun on
 
 Releases include full and minimal builds: a universal DMG for macOS, a Windows
 `amd64` installer for each build and a full-build portable ZIP, plus Linux
-`amd64` and `arm64` `.deb`, `.rpm`, `.AppImage`, and `.tar.gz` downloads.
+`amd64` and `arm64` `.deb`, `.rpm`, `.flatpak` (full build only), `.AppImage`, and `.tar.gz` downloads.
 Minimal downloads include `-minimal` in the filename. Find them on the
 [releases page](https://github.com/elianiva/meiro/releases).
 

@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- **Meiro is available as a Flatpak.** Releases include a `.flatpak` for Linux `amd64` and `arm64`, in the full build. Install it with `flatpak install --user`.
 - **Meiro has a website.** It shows what Meiro is, what it does, a player you
   can play with, and the download links, in a light or dark theme.
 

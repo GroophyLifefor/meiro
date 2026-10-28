@@ -99,6 +99,39 @@ APPIMAGETOOL_APP_NAME=Meiro VERSION="$version" ARCH="$appimage_arch" \
   "$APPIMAGETOOL" --appimage-extract-and-run --no-appstream \
     "$appdir" "$artifacts/Meiro-$version-linux-$arch.AppImage"
 
+# The Flatpak runs in a sandbox with its own runtime, so it cannot find ffmpeg
+# or yt-dlp on the host. Only the full build, which bundles them, gets one.
+# It repackages the same files as the AppImage with `flatpak build-*`, which
+# runs nothing from the target architecture, so arm64 needs no emulation.
+if [[ "$variant" == full ]]; then
+  if ! command -v flatpak >/dev/null; then
+    echo "flatpak is required" >&2
+    exit 2
+  fi
+  app_id=com.elianiva.meiro
+  runtime_version=48
+  build="$tmp/flatpak-build"
+  repo="$tmp/flatpak-repo"
+  flatpak build-init --arch="$appimage_arch" "$build" "$app_id" \
+    org.gnome.Sdk org.gnome.Platform "$runtime_version"
+  mkdir -p "$build/files/bin" "$build/files/share/applications" \
+    "$build/files/share/icons/hicolor/512x512/apps"
+  tar -xzf "$archive" -C "$build/files/bin"
+  cp "$dist/meiro.png" "$build/files/share/icons/hicolor/512x512/apps/$app_id.png"
+  sed -e 's/^Exec=.*/Exec=meiro %U/' -e "s/^Icon=.*/Icon=$app_id/" \
+    "$dist/meiro.desktop" > "$build/files/share/applications/$app_id.desktop"
+  flatpak build-finish "$build" --command=meiro \
+    --share=network --share=ipc \
+    --socket=wayland --socket=fallback-x11 --socket=pulseaudio --device=dri \
+    --talk-name=org.kde.StatusNotifierWatcher \
+    --talk-name=org.freedesktop.Notifications \
+    --own-name='org.mpris.MediaPlayer2.meiro.*'
+  flatpak build-export --arch="$appimage_arch" "$repo" "$build"
+  flatpak build-bundle --arch="$appimage_arch" \
+    --runtime-repo=https://dl.flathub.org/repo/flathub.flatpakrepo \
+    "$repo" "$artifacts/Meiro-$version-linux-$arch.flatpak" "$app_id"
+fi
+
 if [[ "$variant" == minimal ]]; then
   for file in "$artifacts"/*; do
     [[ -f "$file" ]] || continue
