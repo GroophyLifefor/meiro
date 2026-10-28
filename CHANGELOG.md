@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.4.13] - 2026-10-28
+
 ### Added
 
 - **Meiro is available as a Flatpak.** Releases include a `.flatpak` for Linux `amd64` and `arm64`, in the full build. Install it with `flatpak install --user`.
