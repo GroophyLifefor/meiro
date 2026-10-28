@@ -132,7 +132,7 @@ if [[ "$variant" == full ]]; then
   browser_access=(--talk-name=org.freedesktop.secrets)
   for dir in xdg-config/google-chrome xdg-config/BraveSoftware \
     xdg-config/microsoft-edge xdg-config/net.imput.helium \
-    xdg-config/mozilla xdg-config/zen '~/.mozilla' '~/.zen'; do
+    xdg-config/mozilla xdg-config/zen home/.mozilla home/.zen; do
     browser_access+=("--filesystem=$dir:ro")
   done
   for dir in com.google.Chrome org.chromium.Chromium com.microsoft.Edge \
