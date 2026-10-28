@@ -29,7 +29,7 @@ type playback struct {
 	seekTarget  time.Duration
 	seekVersion uint64
 	volume      float64
-	muted       float64 // the volume to return to, while muted
+	muted       float64 // the last volume above 0, to return to on unmute
 	loudness    float64
 	loudnessOK  bool
 	loudnessMap *lru.Cache[string, youtube.Loudness]
@@ -601,20 +601,26 @@ func (a *app) setShuffle(on bool) {
 // setVolume sets the volume, from 0 to 100, and keeps it for the next run.
 func (a *app) setVolume(v float64) {
 	a.volume = min(max(v, 0), 100)
+	if a.volume > 0 {
+		a.muted = a.volume
+	}
 	a.player.SetVolume(playbackVolume(a.volume, a.loudness, a.loudnessOK && a.settings.NormalizeLoudness))
 	a.settings.Volume = a.volume
 	a.syncSystemMedia()
 }
 
-// toggleMute silences the player, or brings the volume back, never quieter
-// than 40.
+// toggleMute silences the player, or brings back the last volume above 0. With
+// no such volume in this run, it unmutes to 40.
 func (a *app) toggleMute() {
-	if a.volume > 0 {
-		a.muted = a.volume
+	switch {
+	case a.volume > 0:
+		a.muted = a.volume // the volume from settings at startup skips setVolume
 		a.setVolume(0)
-		return
+	case a.muted > 0:
+		a.setVolume(a.muted)
+	default:
+		a.setVolume(40)
 	}
-	a.setVolume(max(a.muted, 40))
 }
 
 // cycleRepeat goes from not repeating to repeating the queue to repeating the

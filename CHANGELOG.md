@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- **Unmuting brings back the volume you had.** It no longer jumps to 40% when the volume was lower.
+
 ## [0.4.13] - 2026-10-28
 
 ### Added

@@ -473,6 +473,12 @@ func TestNormalizationToggleImmediatelyUpdatesPlayerVolume(t *testing.T) {
 
 func TestVolumeAndMutePersistToSettings(t *testing.T) {
 	a, _ := playbackApp(t)
+	a.volume = 30 // as restored from settings at startup
+	a.toggleMute()
+	a.toggleMute()
+	if a.settings.Volume != 30 {
+		t.Errorf("unmuting the startup volume restored %v, want 30", a.settings.Volume)
+	}
 	a.setVolume(30)
 	if a.settings.Volume != 30 || a.player.Volume() != 0.3 {
 		t.Errorf("volume: settings %v, player %v", a.settings.Volume, a.player.Volume())
@@ -482,8 +488,14 @@ func TestVolumeAndMutePersistToSettings(t *testing.T) {
 		t.Errorf("mute left the player at %v", a.player.Volume())
 	}
 	a.toggleMute()
-	if a.settings.Volume != 40 { // unmuting never comes back quieter than 40
-		t.Errorf("unmuting restored %v, want 40", a.settings.Volume)
+	if a.settings.Volume != 30 {
+		t.Errorf("unmuting restored %v, want 30", a.settings.Volume)
+	}
+	a.setVolume(15)
+	a.setVolume(0) // the slider dragged down to 0
+	a.toggleMute()
+	if a.settings.Volume != 15 {
+		t.Errorf("unmuting after the slider went to 0 restored %v, want 15", a.settings.Volume)
 	}
 	a.setVolume(500)
 	if a.settings.Volume != 100 {
