@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Fixed
 
 - **Unmuting brings back the volume you had.** It no longer jumps to 40% when the volume was lower.
+- **The Flatpak can sign in with your browser.** Import from a browser reads the profiles of your Chrome, Brave, Edge, Helium, Firefox or Zen, and the keyring that unlocks Chromium cookies. Sign in with a browser window needs one permission the Flatpak does not ask for by default: the dialog shows the `flatpak override` command that grants it, with a button to copy it. After you run it and restart Meiro, the window opens your default browser, whether you installed it natively, with Flatpak or with Snap.
 
 ## [0.4.13] - 2026-10-28
 

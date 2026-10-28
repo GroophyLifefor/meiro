@@ -262,6 +262,19 @@ cannot find, or cannot read because yt-dlp is missing, falls back to the first
 Chromium-based browser it finds. Firefox and Zen need yt-dlp, which Meiro
 also needs for playback.
 
+The Flatpak cannot open a browser window until you let it start programs
+outside its sandbox. It does not ask for this permission by default. To grant
+it, run this command, then restart Meiro:
+
+```sh
+flatpak override --user --talk-name=org.freedesktop.Flatpak com.elianiva.meiro
+```
+
+To remove the permission again, run
+`flatpak override --user --no-talk-name=org.freedesktop.Flatpak com.elianiva.meiro`.
+Without it, you can still sign in by importing from a browser or by pasting
+the Cookie header.
+
 YouTube Music does not offer a sign-in method for third-party apps. Meiro uses
 a browser session, which has the same account access as that browser session.
 Treat it like a password.
