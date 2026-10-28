@@ -321,7 +321,7 @@ jobs:
         if: startsWith(matrix.platform, 'linux-')
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends flatpak
+          sudo apt-get install -y --no-install-recommends flatpak imagemagick
           sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
           for arch in x86_64 aarch64; do
             sudo flatpak install --noninteractive --arch="$arch" flathub org.gnome.Platform//48 org.gnome.Sdk//48
