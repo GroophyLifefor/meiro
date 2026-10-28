@@ -109,7 +109,7 @@ html[data-theme="dark"] {
 }
 
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; scroll-padding-top: 20px; background: var(--bg); }
+html { scroll-behavior: smooth; scroll-padding-top: calc(var(--head) + 24px); background: var(--bg); }
 body {
   margin: 0;
   background: var(--bg);
@@ -163,7 +163,8 @@ html[data-theme="dark"] .only-dark { display: block; }
 .small { font-size: 14px; line-height: 1.5; }
 .muted { color: var(--muted); }
 
-:root { --capsule: color-mix(in oklab, var(--bg) 88%, var(--field)); }
+:root { --capsule: oklch(1 0 0); }
+html[data-theme="dark"] { --capsule: color-mix(in oklab, var(--bg-soft) 50%, var(--field)); }
 .site-head { position: sticky; top: 0; z-index: 40; height: 0; pointer-events: none; }
 .head-inner {
   display: flex; align-items: center; gap: 16px; padding-top: 14px;
@@ -172,7 +173,7 @@ html[data-theme="dark"] .only-dark { display: block; }
 .head-inner > * { pointer-events: auto; }
 .brand, .nav, .head-actions {
   background: var(--capsule); border-radius: 999px;
-  box-shadow: 0 10px 30px -18px oklch(0.2 0.05 var(--h) / 0.5);
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--ink) 8%, transparent), 0 10px 30px -18px oklch(0.2 0.05 var(--h) / 0.5);
   transition: background-color 0.4s ease;
 }
 .brand { display: flex; align-items: center; height: 52px; padding: 0 22px; }
@@ -244,7 +245,8 @@ html[data-over-dark="true"] .icon-btn:hover { background: oklch(0.34 calc(var(--
 .yt { position: absolute; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
 
 /* Sections */
-.section { padding: var(--gap) 0; }
+.section { padding: var(--gap) 0; scroll-margin-top: calc(-1 * var(--gap)); }
+#download { scroll-margin-top: 0; }
 .section-head { margin-bottom: clamp(48px, 6vw, 88px); }
 
 /* Memory: the same dot, the same size, counted out. */
@@ -485,8 +487,10 @@ kbd { display: inline-grid; place-items: center; min-width: 32px; height: 32px; 
   .gone li { grid-template-columns: 1fr; gap: 4px; }
 }
 @media (max-width: 560px) {
+  :root { --head: 60px; }
   .wrap, .head-inner { width: calc(100% - 32px); }
-  .os { padding: 22px; }
+  .os { padding: 22px; grid-template-columns: minmax(0, 1fr); }
+  .os-go { grid-column: 1; grid-row: auto; justify-content: center; margin-top: 12px; }
   .head-actions .btn, .nav { display: none; }
   .brand { height: 46px; padding: 0 18px; }
   .head-actions { padding: 2px; margin-left: auto; }
