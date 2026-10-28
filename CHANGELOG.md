@@ -12,6 +12,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - **Meiro has a website.** It shows what Meiro is, what it does, a player you
   can play with, and the download links, in a light or dark theme.
 
+### Fixed
+
+- **Go to artist is in the menu of a video from the queue.** A video whose
+  channel the queue links, as an uploaded video does, had no such item.
+
 ## [0.4.12] - 2026-10-28
 
 ### Changed

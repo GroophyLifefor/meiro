@@ -32,10 +32,12 @@ func cardArtistBrowseID(renderer *jsonObject) string {
 }
 
 // rendererArtistBrowseID reads an artist browse endpoint from a track's
-// subtitle or second flex column, without treating album links as artists.
+// subtitle, byline or second flex column, without treating album links as artists.
 func rendererArtistBrowseID(renderer *jsonObject) string {
-	if id := artistBrowseEndpoint(renderer.get("subtitle")); id != "" {
-		return id
+	for _, byline := range []string{"subtitle", "longBylineText", "shortBylineText"} {
+		if id := artistBrowseEndpoint(renderer.get(byline)); id != "" {
+			return id
+		}
 	}
 	columns, ok := renderer.get("flexColumns").([]any)
 	if !ok || len(columns) < 2 {

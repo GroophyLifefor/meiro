@@ -49,6 +49,9 @@ func TestPanelItemsCreditArtistAndAlbum(t *testing.T) {
 	if a := got["a"]; a.Artist != "First" || a.Artists != "First, Second, Third" || a.Album != "The Album" {
 		t.Errorf("a: artist %q artists %q album %q, want every linked artist in order and the album", a.Artist, a.Artists, a.Album)
 	}
+	if a := got["a"]; a.ArtistID() != "UCfirst" {
+		t.Errorf("a queue track cannot open its artist: %q", a.ArtistID())
+	}
 	if b := got["b"]; b.Artist != "" {
 		t.Errorf("an artist that is only text was guessed: %q", b.Artist)
 	}
