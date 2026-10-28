@@ -1686,7 +1686,7 @@ func TestTheWindowTitleNamesTheTrackPlaying(t *testing.T) {
 // Clicking the playing track in the queue pauses it, and clicking it again
 // resumes it, rather than starting it over. Another track still plays.
 func TestClickingThePlayingQueueRowTogglesPlayback(t *testing.T) {
-	a, _ := tonesApp(t, 5)
+	a, _ := tonesApp(t, 600)
 	items := tracks("a", "b")
 	a.play(items[0], items)
 	pollUntil(t, a, "a to play", func() bool { return a.player.Playing() })
