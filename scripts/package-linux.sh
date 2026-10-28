@@ -117,7 +117,9 @@ if [[ "$variant" == full ]]; then
   mkdir -p "$build/files/bin" "$build/files/share/applications" \
     "$build/files/share/icons/hicolor/512x512/apps"
   tar -xzf "$archive" -C "$build/files/bin"
-  cp "$dist/meiro.png" "$build/files/share/icons/hicolor/512x512/apps/$app_id.png"
+  # Flatpak rejects an icon larger than 512x512, and the app icon is 1024x1024.
+  convert "$dist/meiro.png" -resize 512x512 \
+    "$build/files/share/icons/hicolor/512x512/apps/$app_id.png"
   sed -e 's/^Exec=.*/Exec=meiro %U/' -e "s/^Icon=.*/Icon=$app_id/" \
     "$dist/meiro.desktop" > "$build/files/share/applications/$app_id.desktop"
   flatpak build-finish "$build" --command=meiro \
