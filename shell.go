@@ -34,12 +34,15 @@ func (a *app) view(c *ui.Context) {
 	a.syncLocation()
 	a.followArtwork()
 	if a.notice != "" {
-		if a.noticeHelp {
+		switch {
+		case a.noticeHelp:
 			c.AddToast(ui.Toast{Title: a.notice, Action: "Learn more", OnAction: a.openToolHelp})
-		} else {
+		case a.noticeTimeout > 0:
+			c.AddToast(ui.Toast{Title: a.notice, Timeout: a.noticeTimeout})
+		default:
 			c.Toast(a.notice)
 		}
-		a.notice, a.noticeHelp = "", false
+		a.notice, a.noticeHelp, a.noticeTimeout = "", false, 0
 	}
 	a.syncSignInDialog()
 
@@ -56,6 +59,10 @@ func (a *app) view(c *ui.Context) {
 	a.newPlaylistDialog(c)
 	a.deletePlaylistDialog(c)
 	a.addToPlaylistDialog(c)
+	a.libraryNameDialog(c)
+	a.libraryPickerDialog(c)
+	a.libraryDeleteDialog(c)
+	a.linkDialog(c)
 	a.toolHelpDialog(c)
 	a.crashDialog(c)
 	m3.Snackbars(c, 0)
@@ -101,6 +108,8 @@ func (a *app) rail(c *ui.Context, bar ui.TitleBar) {
 		Selected: selected,
 		Expanded: a.settings.RailExpanded,
 		TopInset: topInset,
+		Logo:     a.logoBitmap(),
+		Name:     "Meiro",
 	})
 	if event.Toggle {
 		a.settings.RailExpanded = !a.settings.RailExpanded
@@ -185,7 +194,7 @@ func (a *app) sheetContents(c *ui.Context) {
 	ui.Column(c).Grow(1).MinHeight(0).Children(func() {
 		a.routerView(c)
 	})
-	if a.current.VideoID != "" {
+	if a.current.Key() != "" {
 		a.playerBar(c)
 	}
 }
@@ -193,7 +202,7 @@ func (a *app) sheetContents(c *ui.Context) {
 // clearance is the room a list leaves at its foot so the player never hides
 // its last row.
 func (a *app) clearance() float32 {
-	if a.current.VideoID == "" {
+	if a.current.Key() == "" {
 		return 24
 	}
 	return playerHeight + playerGutter*2
@@ -225,7 +234,7 @@ func (a *app) topBar(c *ui.Context) {
 		if r.heading != nil {
 			title = r.heading(c.Now())
 		}
-		m3.EmphasizedText(c, m3.HeadlineMedium, title).SingleLine().TextColor(sc.OnSurface).Shrink(0)
+		m3.EmphasizedText(c, m3.HeadlineMedium, title).SingleLine().Tooltip(title).TextColor(sc.OnSurface).Shrink(0)
 		ui.Spacer(c)
 		if r.bare {
 			// Settings has a local filter; Stats has no search entry point.
@@ -251,7 +260,7 @@ func (a *app) routerView(c *ui.Context) {
 		case r.needsAccount != nil && !a.signedIn():
 			prompt := *r.needsAccount
 			if a.account.expired != "" {
-				prompt = signInPrompt{m3.IconLogin, "Your session expired", "Sign in again to see " + prompt.what + ".", prompt.what}
+				prompt = signInPrompt{m3.IconLogin, "Your YouTube Music session expired", "Sign in to YouTube Music again to see " + prompt.what + ".", prompt.what}
 			}
 			ui.Column(c).Fill().Center().Children(func() {
 				a.message(c, prompt.icon, prompt.title, prompt.body, "Sign in", a.openSignIn)

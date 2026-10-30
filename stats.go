@@ -8,24 +8,119 @@ import (
 	"github.com/egoist/mygo/ui/chart"
 
 	"github.com/elianiva/meiro/internal/history"
+	meirosync "github.com/elianiva/meiro/internal/sync"
 	"github.com/elianiva/meiro/m3"
+	"github.com/elianiva/meiro/media"
 	"github.com/elianiva/meiro/youtube"
 )
 
 // recordHistory remembers a track once playback starts. It runs on the main
-// thread; the write goes off it.
-func (a *app) recordHistory(item youtube.MusicItem) {
-	if item.VideoID == "" {
-		return
+// thread; the write goes off it. The play is given a stable event ID at once,
+// so the same play is one event however often it is sent to the server.
+func (a *app) recordHistory(item youtube.MusicItem) string {
+	if item.Key() == "" {
+		return ""
 	}
 	a.loadHistory()
-	a.history = history.Append(a.history, history.Entry{
-		VideoID:  item.VideoID,
-		Title:    item.Title,
-		Artist:   item.Subtitle,
-		PlayedAt: time.Now(),
-	})
+	artist := item.Artist
+	if artist == "" {
+		artist = item.Subtitle
+	}
+	entry := history.Entry{
+		VideoID:    streamKey(item),
+		Title:      item.Title,
+		Artist:     artist,
+		Source:     string(resolveSource(item)),
+		DurationMS: int64(parseDuration(item.Duration) / time.Millisecond),
+		Device:     a.device,
+		EventID:    meirosync.NewID(),
+		PlayedAt:   time.Now(),
+	}
+	a.history = history.Append(a.history, entry)
 	a.saveHistory()
+	return entry.EventID
+}
+
+// playRecord follows the play being written to the history, to measure how
+// much of it was heard and to file it for syncing once it ends. One playRecord
+// is one play; the zero value follows nothing.
+type playRecord struct {
+	active  bool
+	eventID string
+	watch   history.Watch
+}
+
+// beginPlayRecord starts a play: the one before it is filed as not finished,
+// the new one is added to the history, and the clock on it starts.
+func (a *app) beginPlayRecord(item youtube.MusicItem) {
+	a.finishPlayRecord(false)
+	if id := a.recordHistory(item); id != "" {
+		a.record = playRecord{active: true, eventID: id}
+	}
+}
+
+// observeRecord adds a sample of the playing track to the play in progress.
+func (a *app) observeRecord(at time.Time, position time.Duration) {
+	if !a.record.active {
+		return
+	}
+	a.record.watch.Observe(at, position)
+	if i := a.entryIndex(a.record.eventID); i >= 0 {
+		a.history[i].PlayedMS = int64(a.record.watch.Listened() / time.Millisecond)
+	}
+}
+
+// breakRecord says the sound stopped flowing between samples: a pause or a
+// stall is not listening.
+func (a *app) breakRecord() {
+	if a.record.active {
+		a.record.watch.Break()
+	}
+}
+
+// finishPlayRecord files the play in progress: how much of it was heard,
+// whether it finished, and the event the sync sends.
+func (a *app) finishPlayRecord(completed bool) {
+	if !a.record.active {
+		return
+	}
+	a.record.active = false
+	i := a.entryIndex(a.record.eventID)
+	if i < 0 {
+		return
+	}
+	a.history[i].PlayedMS = int64(a.record.watch.Listened() / time.Millisecond)
+	a.history[i].Completed = completed
+	a.saveHistory()
+	a.queueEvent(a.history[i])
+}
+
+// entryIndex is the place of a history entry by its event ID, newest first.
+func (a *app) entryIndex(id string) int {
+	for i := len(a.history) - 1; i >= 0; i-- {
+		if a.history[i].EventID == id {
+			return i
+		}
+	}
+	return -1
+}
+
+// queueEvent files a finished play with the sync, which sends it when the
+// server is reachable. A play with no event ID was recorded before plays were
+// synced, and is left out.
+func (a *app) queueEvent(e history.Entry) {
+	if a.sync.outbox == nil || e.EventID == "" {
+		return
+	}
+	a.sync.outbox.AddEvent(meirosync.Event{
+		ClientEventID: e.EventID,
+		Track:         meirosync.TrackFor(media.Source(e.Source), e.VideoID, "", e.Title, e.Artist, e.DurationMS),
+		PlayedMS:      e.PlayedMS,
+		DurationMS:    e.DurationMS,
+		Completed:     e.Completed,
+		Device:        e.Device,
+		PlayedAt:      e.PlayedAt,
+	})
 }
 
 // loadHistory starts reading the history once, off the main thread: the file
@@ -42,7 +137,7 @@ func (a *app) loadHistory() {
 		if a.historyDiscard {
 			entries, pending, a.historyDiscard = nil, true, false
 		}
-		a.history = history.Append(entries, a.history...)
+		a.history, _ = history.Merge(entries, a.history)
 		a.historyLoaded, a.historyLoading = true, false
 		if pending {
 			a.saveHistory()
@@ -113,7 +208,10 @@ func (a *app) statsPage(c *ui.Context) {
 	ui.Scroll(c).Grow(1).Padding(0, pageGutter, a.clearance()).Children(func() {
 		ui.Column(c).MaxWidth(780).Gap(16).Children(func() {
 			ui.Row(c).Gap(16).AlignItems(ui.Center).Children(func() {
-				settingLabel(c, "Listening stats", "From plays on this device.").Grow(1)
+				settingLabel(c, "Listening stats", "From the plays in your listening history.").Grow(1)
+				if m3.Button(c, m3.ButtonSpec{Label: "History", Kind: m3.Tonal, Key: "stats-history"}).Clicked() {
+					a.navigate(routeHistory)
+				}
 				labels := []string{"7 days", "14 days", "30 days"}
 				picked := 1
 				for i, days := range statsRanges {
@@ -199,9 +297,9 @@ func (a *app) topList(c *ui.Context, title string, counts []history.Count, showA
 						if name == "" {
 							name = "Unknown track"
 						}
-						m3.EmphasizedText(c, m3.BodyLarge, name).SingleLine()
+						m3.EmphasizedText(c, m3.BodyLarge, name).SingleLine().Tooltip(name)
 						if showArtist && tc.Artist != "" {
-							m3.Text(c, m3.BodySmall, tc.Artist).SingleLine().TextColor(m3.Of(c).Scheme.OnSurfaceVariant)
+							m3.Text(c, m3.BodySmall, tc.Artist).SingleLine().Tooltip(tc.Artist).TextColor(m3.Of(c).Scheme.OnSurfaceVariant)
 						}
 					})
 					m3.Text(c, m3.LabelLarge, pluralPlays(tc.Plays)).TextColor(m3.Of(c).Scheme.OnSurfaceVariant)

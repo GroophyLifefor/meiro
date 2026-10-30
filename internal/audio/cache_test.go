@@ -103,6 +103,73 @@ func TestCacheFromDownloadToRestart(t *testing.T) {
 	}
 }
 
+// The cache keeps what it knows of a cached track beside the audio, so a
+// local search can find it without the network, and drops it with the file.
+func TestCacheKeepsTrackMeta(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "audio/mp4")
+		_, _ = w.Write([]byte("audio"))
+	}))
+	defer server.Close()
+
+	root := t.TempDir()
+	cache, _, err := Open(root, 2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cached := func(id string) bool { _, ok := cache.Get(id); return ok }
+	waitCached := func(id string) {
+		t.Helper()
+		deadline := time.Now().Add(5 * time.Second)
+		for !cached(id) {
+			if time.Now().After(deadline) {
+				t.Fatalf("%s was never cached", id)
+			}
+			time.Sleep(5 * time.Millisecond)
+		}
+	}
+	meta := func(key, title string) TrackMeta {
+		return TrackMeta{Key: key, Source: "ytm", Title: title, Artist: "Someone", Duration: "3:00"}
+	}
+
+	cache.Add("ytm:vid-1", server.URL+"/one", meta("vid-1", "One"))
+	waitCached("ytm:vid-1")
+	if metas := cache.Meta(); len(metas) != 1 || metas[0].Title != "One" || metas[0].Key != "vid-1" {
+		t.Fatalf("metadata after a cache = %+v", metas)
+	}
+
+	// The metadata survives a restart, read back beside the file. The smaller
+	// limit lets the next track evict this one.
+	cache.Close()
+	again, _, err := Open(root, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer again.Close()
+	if metas := again.Meta(); len(metas) != 1 || metas[0].Title != "One" {
+		t.Fatalf("metadata after a restart = %+v", metas)
+	}
+
+	// A track that evicts vid-1 takes its metadata with it.
+	again.Add("ytm:vid-2", server.URL+"/two", meta("vid-2", "Two"))
+	deadline := time.Now().Add(5 * time.Second)
+	for {
+		if _, ok := again.Get("ytm:vid-2"); ok {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("ytm:vid-2 was never cached")
+		}
+		time.Sleep(5 * time.Millisecond)
+	}
+	if _, ok := again.Get("ytm:vid-1"); ok {
+		t.Fatal("vid-1 was not evicted")
+	}
+	if metas := again.Meta(); len(metas) != 1 || metas[0].Key != "vid-2" {
+		t.Fatalf("metadata after eviction = %+v", metas)
+	}
+}
+
 // Requests for one track share a single resolve, and a failed resolve is
 // asked again.
 func TestURLsShareOneResolve(t *testing.T) {

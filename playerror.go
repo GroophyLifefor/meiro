@@ -42,6 +42,10 @@ var playErrorRules = []struct {
 		"YouTube did not offer audio for this track. Try again later, or update Meiro.",
 	},
 	{
+		[]string{"offline: this track is not downloaded"},
+		"You are offline and this track is not downloaded, so it cannot play.",
+	},
+	{
 		[]string{"playing needs ffmpeg"},
 		"Playing needs ffmpeg and yt-dlp, and one of them was not found.",
 	},

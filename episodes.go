@@ -43,7 +43,7 @@ func (a *app) reportPlayback(item youtube.MusicItem) {
 	if !a.signedIn() {
 		return
 	}
-	client := a.client()
+	client := a.ytClient()
 	a.run(func() {
 		ctx, cancel := context.WithTimeout(context.Background(), upNextTimeout)
 		defer cancel()
@@ -78,7 +78,7 @@ func (a *app) beginEpisodeProgress(item youtube.MusicItem, position, duration ti
 		a.finishEpisodeProgress(false)
 	}
 	state := &episodeProgressSync{
-		item: item, client: a.client(), duration: duration, lastReported: position,
+		item: item, client: a.ytClient(), duration: duration, lastReported: position,
 		lastPosition: position, lastSample: time.Now(), seekVersion: a.seekVersion,
 		pending: true,
 	}

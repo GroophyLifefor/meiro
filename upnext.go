@@ -41,7 +41,7 @@ func (a *app) ensureUpNext() {
 	if !a.settings.AutoPlay || a.current.VideoID == "" || u.load.busy() || a.queue.len() == 0 {
 		return
 	}
-	client := a.client()
+	client := a.ytClient()
 	continuation := ""
 	if u.fetched {
 		switch {
@@ -100,7 +100,7 @@ func (a *app) ensureUpNext() {
 			u.token = ""
 		}
 		a.clearQueueSelection()
-		a.queue.appendGenerated(result.Items)
+		a.queue.appendGenerated(a.withSuggestions(result.Items))
 		// A recommended track can be the one that plays next, so warm it too.
 		a.warmNext()
 		if !u.waiting {

@@ -1,0 +1,18 @@
+load("@rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "mblinks",
+    srcs = ["mblinks.go"],
+    importpath = "github.com/elianiva/meiro/internal/mblinks",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/fsutil",
+        "//internal/match",
+    ],
+)
+
+go_test(
+    name = "mblinks_test",
+    srcs = ["mblinks_test.go"],
+    embed = [":mblinks"],
+)

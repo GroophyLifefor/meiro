@@ -13,8 +13,8 @@ func TestArtistPagesSaySubscribed(t *testing.T) {
 		name, page string
 		want       Subscription
 	}{
-		{"followed", page(`"subscriptionButton":{"subscribeButtonRenderer":{"subscribed":true,"channelId":"UC1"}}`), Subscription{"UC1", true}},
-		{"not followed", page(`"subscriptionButton":{"subscribeButtonRenderer":{"subscribed":false,"channelId":"UC1"}}`), Subscription{"UC1", false}},
+		{"followed", page(`"subscriptionButton":{"subscribeButtonRenderer":{"subscribed":true,"channelId":"UC1"}}`), Subscription{ChannelID: "UC1", Subscribed: true}},
+		{"not followed", page(`"subscriptionButton":{"subscribeButtonRenderer":{"subscribed":false,"channelId":"UC1"}}`), Subscription{ChannelID: "UC1", Subscribed: false}},
 		{"no channel to write", page(`"subscriptionButton":{"subscribeButtonRenderer":{"subscribed":true}}`), Subscription{}},
 		{"no button", page(`"x":1`), Subscription{}},
 		{"not in the header", `{"contents":{"subscribeButtonRenderer":{"subscribed":true,"channelId":"UC1"}}}`, Subscription{}},

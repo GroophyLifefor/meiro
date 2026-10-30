@@ -48,7 +48,7 @@ func (a *app) miniPlayer(c *ui.Context) {
 						m3.VideoBadge(c, miniArt)
 					}
 				})
-				if a.current.VideoID == "" {
+				if a.current.Key() == "" {
 					ui.Column(c).Grow(1).MinWidth(0).Gap(2).Children(func() {
 						m3.EmphasizedText(c, m3.TitleMedium, "Nothing playing").TextColor(sc.OnSurface)
 						m3.Text(c, m3.BodySmall, "Pick something in Meiro").TextColor(sc.OnSurfaceVariant)

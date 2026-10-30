@@ -14,15 +14,21 @@ import (
 	"github.com/elianiva/meiro/internal/audio"
 	"github.com/elianiva/meiro/internal/cookies"
 	"github.com/elianiva/meiro/internal/discordrpc"
+	"github.com/elianiva/meiro/internal/downloads"
 	"github.com/elianiva/meiro/internal/history"
+	"github.com/elianiva/meiro/internal/library"
 	"github.com/elianiva/meiro/internal/lrclib"
 	"github.com/elianiva/meiro/internal/lru"
+	"github.com/elianiva/meiro/internal/mblinks"
 	"github.com/elianiva/meiro/internal/proc"
 	"github.com/elianiva/meiro/internal/report"
 	"github.com/elianiva/meiro/internal/settings"
 	"github.com/elianiva/meiro/internal/ytdlp"
 	"github.com/elianiva/meiro/m3"
+	"github.com/elianiva/meiro/media"
+	"github.com/elianiva/meiro/musicbrainz"
 	"github.com/elianiva/meiro/player"
+	"github.com/elianiva/meiro/soundcloud"
 	"github.com/elianiva/meiro/systemmedia"
 	"github.com/elianiva/meiro/youtube"
 )
@@ -63,6 +69,11 @@ type app struct {
 	account accountState
 	// scrobble is the Last.fm connection and the plays waiting for it.
 	scrobble scrobbler
+	// sync is the Meiro server connection and the records waiting for it.
+	sync syncer
+	// device is the machine's name, which plays and downloads report as the
+	// device they happened on.
+	device string
 	// keyboard is the shortcuts, and the recording of a new one.
 	keyboard keyboardState
 	// openPath shows a file or folder in the system; tests replace it.
@@ -74,6 +85,9 @@ type app struct {
 	// noticeHelp adds a Learn more button to the notice that opens the
 	// explanation of an outdated yt-dlp.
 	noticeHelp bool
+	// noticeTimeout, when set, is how long the notice shows; zero keeps the
+	// toast's own time.
+	noticeTimeout time.Duration
 
 	theme themeState
 
@@ -112,6 +126,36 @@ type app struct {
 	detailSortOpen       bool
 	menu                 itemMenu
 
+	// libraries are the user's own playlists, kept on this device. The store
+	// is built in memory until setup gives it a file in the user data folder.
+	libraries *library.Store
+	// libSelected is the ID of the list the page shows open, or empty for the
+	// row of lists.
+	libSelected string
+	// libName, libPicker and libDelete are the app's own dialogs, held while
+	// one is open and nil otherwise.
+	libName   *libNameState
+	libPicker *libPickerState
+	libDelete *libDeleteState
+	// otherLooked says which songs were already looked for on the other
+	// provider, by key, so each is looked up once.
+	otherLooked map[string]bool
+	// logo is the logo as a picture for the rail, and logoFailed says it could
+	// not be read.
+	logo       *ui.Bitmap
+	logoFailed bool
+	// lastPress is the playing track a press last landed on, for telling a
+	// double press from two single ones.
+	lastPress pressedTrack
+	// recs is what the app recommends, and how it learns it.
+	recs recState
+	// links is what the app knows of which MusicBrainz record each song and
+	// artist is, and which provider's copy of a song is another's.
+	links *mblinks.Store
+	// link is the dialog that ties a track or its artist to MusicBrainz, held
+	// while it is open.
+	link *linkState
+
 	// Dialogs.
 	crash          *crashState
 	toolHelp       *toolHelpState
@@ -123,6 +167,21 @@ type app struct {
 	knownPlaylists knownPlaylists
 
 	playback
+	// soundcloudStreams resolves SoundCloud tracks, which are keyed by page
+	// URL rather than a video ID, so they keep a URL cache of their own.
+	soundcloudStreams *audio.URLs
+	// soundcloud reads SoundCloud's pages through yt-dlp, and is the client
+	// the app uses while SoundCloud is the active provider. It is built in
+	// newApp so its runner is ready before a page asks.
+	soundcloud *soundcloud.Client
+	// mb reads MusicBrainz and ListenBrainz: the artist section of a search
+	// and an artist's page. It is nil until setup gives it a cache folder,
+	// and nil in a build without one, so a page that needs it says so.
+	mb metadataClient
+	// artists is the MusicBrainz artist section of the search page, and
+	// mbArtist the MusicBrainz artist page shown.
+	artists    artistSection
+	mbArtist   mbArtistState
 	nowPlaying nowPlayingState
 
 	// The local listening history and the stats page built from it.
@@ -137,28 +196,50 @@ type app struct {
 	// until they confirm or keep it.
 	confirmClearHistory bool
 	historyWriter       history.Writer
-	statsRange          int // days the stats page covers: 7, 14 or 30
-	stats               statsMemo
+	// record follows the play being written to the history, to count how much
+	// of it was heard and to file it for syncing when it ends.
+	record     playRecord
+	statsRange int // days the stats page covers: 7, 14 or 30
+	stats      statsMemo
+	// historyFilter and historyPlays are what the listening history page
+	// shows: which plays, and the rows built from them.
+	historyFilter string
+	historyPlays  historyMemo
 
 	// audioCache is the cache playback uses now; the settings page swaps it
 	// from the main thread while background work holds on to the one it
 	// started with.
 	audioCacheMu       sync.RWMutex
 	audioCache         *audio.Cache
+	soundcloudCache    *audio.Cache
 	retiredAudioCaches []*audio.Cache
-	cacheSongsText     string
-	cacheLimitError    string
 	cacheDirectoryText string
 	cacheDirError      string
-	// report is the lookup of tool versions for a problem report, and
-	// reportError what went wrong opening it.
-	report      task
-	reportError string
+	// youtubeCacheMBText and soundcloudCacheMBText are the size bounds shown
+	// in the settings, and the Error fields are why a value they held was not
+	// accepted.
+	youtubeCacheMBText    string
+	youtubeCacheError     string
+	soundcloudCacheMBText string
+	soundcloudCacheError  string
+	// downloads are the tracks the user chose to keep, and downloadStates is
+	// the state of each download shown, by its source-qualified audio key.
+	downloads      *downloads.Store
+	downloadStates map[string]downloadState
+	// networkOnline reports whether the network can be reached; tests replace
+	// it so an offline path can be driven without one.
+	networkOnline func() bool
 	// tools are the versions of the bundled programs, shown in Settings once
 	// toolsLookup has read them.
 	tools       report.Info
 	toolsLoaded bool
 	toolsLookup task
+	// mbEntries are the answers the MusicBrainz cache holds, read when
+	// Settings opens and after one is forgotten, and mbEntriesLoaded says they
+	// were read.
+	mbEntries       []musicbrainz.CacheEntry
+	mbEntriesLoaded bool
+	mbEntriesLoad   task
 
 	// eqApplied is the band table the player last received, so slider changes
 	// update the live filter only when a gain actually changes.
@@ -181,25 +262,35 @@ type app struct {
 // newApp builds the app with no window. setup gives it one.
 func newApp() *app {
 	a := &app{
-		router:     ui.NewRouter(routeByID(routeHome).path("")),
-		player:     player.New(playerOptions()...),
-		settings:   settings.Defaults(),
-		openURL:    mygo.Shell.OpenExternal,
-		bundled:    proc.Bundled,
-		nowPlaying: nowPlayingState{queueSelectionAnchor: -1, queueSelectionCursor: -1},
-		page:       &pageData{},
-		list:       &ui.ListState{},
-		pages:      lru.New[string, *pageData](pageCacheLimit),
-		details:    lru.New[string, detail](pageCacheLimit),
-		carousels:  lru.New[string, *m3.CarouselState](pageCacheLimit * 4),
-		writing:    make(map[string]bool),
-		stop:       make(chan struct{}),
-		statsRange: 14,
-		keyboard:   keyboardState{hintDelay: hintDelay},
+		router:        ui.NewRouter(routeByID(routeHome).path("")),
+		player:        player.New(playerOptions()...),
+		settings:      settings.Defaults(),
+		openURL:       mygo.Shell.OpenExternal,
+		bundled:       proc.Bundled,
+		nowPlaying:    nowPlayingState{queueSelectionAnchor: -1, queueSelectionCursor: -1},
+		page:          &pageData{},
+		list:          &ui.ListState{},
+		pages:         lru.New[string, *pageData](pageCacheLimit),
+		details:       lru.New[string, detail](pageCacheLimit),
+		carousels:     lru.New[string, *m3.CarouselState](pageCacheLimit * 4),
+		writing:       make(map[string]bool),
+		stop:          make(chan struct{}),
+		statsRange:    14,
+		keyboard:      keyboardState{hintDelay: hintDelay},
+		libraries:     library.New(""),
+		links:         mblinks.Open(""),
+		downloads:     downloads.New("", ""),
+		networkOnline: networkOnline,
 	}
 	a.scrobble = newScrobbler()
+	a.sync = newSyncer()
+	a.device = hostname()
+	a.downloadStates = make(map[string]downloadState)
 	a.playback = newPlayback(audio.NewURLs(ytdlp.Resolve), a.settings.Volume)
-	a.cacheSongsText = strconv.Itoa(a.settings.CacheSongs)
+	a.soundcloudStreams = audio.NewURLs(audio.SoundCloudResolver)
+	a.soundcloud = soundcloud.New(soundcloud.Options{})
+	a.youtubeCacheMBText = strconv.Itoa(a.settings.YouTubeCacheMB)
+	a.soundcloudCacheMBText = strconv.Itoa(a.settings.SoundCloudCacheMB)
 	a.run = func(work func()) {
 		go func() {
 			defer a.recoverBackground("background work")
@@ -236,14 +327,24 @@ func (a *app) refresh() { a.desktop.invalidate() }
 // saveSettings keeps the settings, off the main thread.
 func (a *app) saveSettings() { a.saver.Save(&a.settings) }
 
-// client returns the client to use for a request: the account's when the
-// user is signed in, the public one otherwise.
-func (a *app) client() *youtube.Client {
+// client returns the client the pages that read a provider's own catalogue
+// use. After the provider model changed, those pages are all YouTube Music's:
+// search reads both sources directly, through ytClient and soundcloudClient.
+func (a *app) client() media.Client {
+	return a.ytClient()
+}
+
+// ytClient returns the YouTube Music client behind the interface, for the
+// calls that are still specific to it.
+func (a *app) ytClient() *youtube.Client {
 	if s := a.account.session; s != nil {
 		return s.client
 	}
 	return a.account.public
 }
+
+// soundcloudClient returns the client that reads SoundCloud through yt-dlp.
+func (a *app) soundcloudClient() *soundcloud.Client { return a.soundcloud }
 
 // signedIn reports whether an account is in use.
 func (a *app) signedIn() bool { return a.account.session != nil }
@@ -254,6 +355,23 @@ func (a *app) currentAudioCache() *audio.Cache {
 	a.audioCacheMu.RLock()
 	defer a.audioCacheMu.RUnlock()
 	return a.audioCache
+}
+
+// currentSoundCloudCache is the SoundCloud audio cache, or nil while SoundCloud
+// caching is off.
+func (a *app) currentSoundCloudCache() *audio.Cache {
+	a.audioCacheMu.RLock()
+	defer a.audioCacheMu.RUnlock()
+	return a.soundcloudCache
+}
+
+// cacheFor is the audio cache a provider's tracks are cached in. SoundCloud
+// keeps a cache of its own, so the two never mix.
+func (a *app) cacheFor(source media.Source) *audio.Cache {
+	if source == media.SourceSoundCloud {
+		return a.currentSoundCloudCache()
+	}
+	return a.currentAudioCache()
 }
 
 // replaceAudioCache makes cache the one playback uses, and returns the one it
@@ -269,12 +387,25 @@ func (a *app) replaceAudioCache(cache *audio.Cache) *audio.Cache {
 	return previous
 }
 
+// replaceSoundCloudCache makes cache the SoundCloud cache, or turns it off
+// when cache is nil, and returns the one it replaced.
+func (a *app) replaceSoundCloudCache(cache *audio.Cache) *audio.Cache {
+	a.audioCacheMu.Lock()
+	defer a.audioCacheMu.Unlock()
+	previous := a.soundcloudCache
+	if previous != nil && previous != cache {
+		a.retiredAudioCaches = append(a.retiredAudioCaches, previous)
+	}
+	a.soundcloudCache = cache
+	return previous
+}
+
 // closeAudioCaches stops every cache's downloads and waits for them.
 func (a *app) closeAudioCaches() {
 	a.audioCacheMu.Lock()
 	caches := a.retiredAudioCaches
-	caches = append(caches, a.audioCache)
-	a.retiredAudioCaches, a.audioCache = nil, nil
+	caches = append(caches, a.audioCache, a.soundcloudCache)
+	a.retiredAudioCaches, a.audioCache, a.soundcloudCache = nil, nil, nil
 	a.audioCacheMu.Unlock()
 	for _, cache := range caches {
 		cache.Close()

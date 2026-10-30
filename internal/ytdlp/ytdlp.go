@@ -4,6 +4,7 @@ package ytdlp
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -188,4 +189,47 @@ func durationFromURL(streamURL string) time.Duration {
 		return 0
 	}
 	return time.Duration(seconds * float64(time.Second))
+}
+
+// runSoundCloud runs yt-dlp for a SoundCloud page and returns its standard
+// output. SoundCloud needs no JavaScript runtime, so a plain yt-dlp run reads
+// it. It is a variable so a test can stand in for yt-dlp, both to check the
+// arguments and to answer from a fixture.
+var runSoundCloud = func(ctx context.Context, args ...string) ([]byte, error) {
+	path, err := proc.Tool("yt-dlp")
+	if err != nil {
+		return nil, ErrMissing
+	}
+	command := proc.Command(ctx, path, args...)
+	var stderr bytes.Buffer
+	command.Stderr = &stderr
+	output, err := command.Output()
+	if err != nil {
+		if reason := LastError(stderr.String()); reason != "" {
+			return nil, fmt.Errorf("yt-dlp could not resolve the SoundCloud audio: %s", reason)
+		}
+		return nil, fmt.Errorf("yt-dlp could not resolve the SoundCloud audio: %w", err)
+	}
+	return output, nil
+}
+
+// ResolveSoundCloud asks yt-dlp for a direct audio URL of a SoundCloud track
+// page and its length. The URL is an HLS manifest for a full track and an
+// ordinary media file for a preview, and ffmpeg opens both.
+func ResolveSoundCloud(ctx context.Context, pageURL string) (string, time.Duration, error) {
+	output, err := runSoundCloud(ctx, "-f", "bestaudio", "--dump-single-json", "--no-warnings", pageURL)
+	if err != nil {
+		return "", 0, err
+	}
+	var track struct {
+		URL      string  `json:"url"`
+		Duration float64 `json:"duration"`
+	}
+	if err := json.Unmarshal(output, &track); err != nil {
+		return "", 0, fmt.Errorf("yt-dlp returned no SoundCloud track: %w", err)
+	}
+	if track.URL == "" {
+		return "", 0, errors.New("yt-dlp returned no SoundCloud audio")
+	}
+	return track.URL, time.Duration(track.Duration * float64(time.Second)), nil
 }

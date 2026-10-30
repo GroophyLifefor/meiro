@@ -7,6 +7,7 @@ import (
 	"time"
 	"unicode"
 
+	"github.com/elianiva/meiro/media"
 	"github.com/elianiva/meiro/youtube"
 )
 
@@ -76,8 +77,8 @@ func (q *queue) replace(item youtube.MusicItem, tracks []youtube.MusicItem, inde
 	// the queue must not share its backing array.
 	*q = newQueue()
 	q.items, q.source = slices.Clone(tracks), source
-	if index < 0 || index >= len(q.items) || q.items[index].VideoID != item.VideoID {
-		index = slices.IndexFunc(q.items, func(t youtube.MusicItem) bool { return t.VideoID == item.VideoID })
+	if index < 0 || index >= len(q.items) || q.items[index].Key() != item.Key() {
+		index = slices.IndexFunc(q.items, func(t youtube.MusicItem) bool { return t.Key() == item.Key() })
 	}
 	if index < 0 {
 		q.items, index = []youtube.MusicItem{item}, 0
@@ -99,7 +100,7 @@ func (q *queue) limit(autoPlay bool) int {
 func (q *queue) next(autoPlay bool, repeat repeatMode) (int, bool) {
 	if q.playNext != "" {
 		for i := max(q.index+1, 0); i < len(q.items); i++ {
-			if q.items[i].VideoID == q.playNext {
+			if q.items[i].Key() == q.playNext {
 				return i, true
 			}
 		}
@@ -119,15 +120,23 @@ func (q *queue) next(autoPlay bool, repeat repeatMode) (int, bool) {
 // moveTo makes the track at index the current one.
 func (q *queue) moveTo(index int) youtube.MusicItem {
 	q.index = index
-	if q.items[index].VideoID == q.playNext {
+	if q.items[index].Key() == q.playNext {
 		q.playNext = ""
 	}
 	return q.items[index]
 }
 
 // find is the place of a track in the queue, or -1.
-func (q *queue) find(videoID string) int {
-	return slices.IndexFunc(q.items, func(t youtube.MusicItem) bool { return t.VideoID == videoID })
+func (q *queue) find(key string) int {
+	return slices.IndexFunc(q.items, func(t youtube.MusicItem) bool { return t.Key() == key })
+}
+
+// setSource makes source the one the track with key plays from, keeping its
+// place in the queue.
+func (q *queue) setSource(key string, source media.Source) {
+	if i := q.find(key); i >= 0 {
+		q.items[i] = q.items[i].WithSource(source)
+	}
 }
 
 // insert adds a chosen track: after the current one when playNext is set,
@@ -149,7 +158,7 @@ func (q *queue) insert(item youtube.MusicItem, playNext, autoPlay bool) {
 		q.recStart++
 	}
 	if playNext {
-		q.playNext = item.VideoID
+		q.playNext = item.Key()
 		// With auto-play off the queue stops at the generated tracks, so a
 		// track to play next placed among them moves the boundary past it.
 		if !autoPlay && q.recStart >= 0 && position >= q.recStart {
@@ -165,7 +174,7 @@ func (q *queue) remove(index int) bool {
 	if index < 0 || index >= len(q.items) || index == q.index {
 		return false
 	}
-	id := q.items[index].VideoID
+	id := q.items[index].Key()
 	q.items = slices.Delete(q.items, index, index+1)
 	if index < q.index {
 		q.index--
@@ -221,8 +230,8 @@ func (q *queue) regenerate() {
 		return
 	}
 	for _, item := range q.items[q.recStart:] {
-		if item.VideoID != "" {
-			q.generated[item.VideoID] = struct{}{}
+		if item.Key() != "" {
+			q.generated[item.Key()] = struct{}{}
 		}
 	}
 }
@@ -282,20 +291,20 @@ func (q *queue) appendGenerated(items []youtube.MusicItem) {
 	seen := make(map[string]struct{}, len(q.items)+min(len(items), autoplayQueueLimit+1))
 	versions := make(map[songID][]time.Duration, len(q.items))
 	for _, queued := range q.items {
-		if queued.VideoID != "" {
-			seen[queued.VideoID] = struct{}{}
+		if queued.Key() != "" {
+			seen[queued.Key()] = struct{}{}
 		}
 		noteVersion(versions, queued)
 	}
 	fresh := make([]youtube.MusicItem, 0, min(len(items), autoplayQueueLimit+1))
 	for _, item := range items {
-		if item.VideoID == "" || item.Kind == youtube.KindVideo {
+		if item.Key() == "" || item.Kind == youtube.KindVideo {
 			continue
 		}
-		if _, exists := seen[item.VideoID]; exists {
+		if _, exists := seen[item.Key()]; exists {
 			continue
 		}
-		seen[item.VideoID] = struct{}{}
+		seen[item.Key()] = struct{}{}
 		if hasVersion(versions, item) {
 			continue
 		}
@@ -308,7 +317,7 @@ func (q *queue) appendGenerated(items []youtube.MusicItem) {
 	if len(q.generated)+len(fresh) > autoplayQueueLimit && q.index > 0 {
 		played := q.index
 		for _, queued := range q.items[:played] {
-			delete(q.generated, queued.VideoID)
+			delete(q.generated, queued.Key())
 		}
 		q.items = slices.Clone(q.items[played:])
 		q.index = 0
@@ -324,7 +333,7 @@ func (q *queue) appendGenerated(items []youtube.MusicItem) {
 			q.recStart = len(q.items)
 		}
 		q.items = append(q.items, item)
-		q.generated[item.VideoID] = struct{}{}
+		q.generated[item.Key()] = struct{}{}
 	}
 }
 
@@ -376,7 +385,7 @@ func (q *queue) restoreQueue() {
 	}
 	playing := ""
 	if q.index >= 0 && q.index < limit {
-		playing = q.items[q.index].VideoID
+		playing = q.items[q.index].Key()
 	}
 	// The arranged tracks, taken in the order they are put back, each once:
 	// a playlist that holds a song twice keeps both copies.
@@ -384,7 +393,7 @@ func (q *queue) restoreQueue() {
 	ordered := make([]youtube.MusicItem, 0, limit)
 	take := func(want youtube.MusicItem) {
 		for i, queued := range left {
-			if queued.VideoID == want.VideoID {
+			if queued.Key() == want.Key() {
 				ordered = append(ordered, queued)
 				left = slices.Delete(left, i, i+1)
 				return
@@ -402,7 +411,7 @@ func (q *queue) restoreQueue() {
 		return
 	}
 	for i, item := range q.items[:limit] {
-		if item.VideoID == playing {
+		if item.Key() == playing {
 			q.index = i
 			break
 		}
@@ -467,7 +476,7 @@ func (q *queue) moveRows(rows []int, to int) bool {
 	}
 	current := q.current()
 	moved := reorder(q.items, indices, toIndex)
-	index := slices.IndexFunc(moved, func(item youtube.MusicItem) bool { return item.VideoID == current.VideoID })
+	index := slices.IndexFunc(moved, func(item youtube.MusicItem) bool { return item.Key() == current.Key() })
 	if index < 0 {
 		return false
 	}
@@ -475,7 +484,7 @@ func (q *queue) moveRows(rows []int, to int) bool {
 	q.recStart = -1
 	if len(q.generated) > 0 {
 		q.recStart = slices.IndexFunc(moved, func(item youtube.MusicItem) bool {
-			_, ok := q.generated[item.VideoID]
+			_, ok := q.generated[item.Key()]
 			return ok
 		})
 	}

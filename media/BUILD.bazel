@@ -1,0 +1,13 @@
+load("@rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "media",
+    srcs = [
+        "client.go",
+        "item.go",
+        "page.go",
+        "source.go",
+    ],
+    importpath = "github.com/elianiva/meiro/media",
+    visibility = ["//visibility:public"],
+)

@@ -1,0 +1,19 @@
+load("@rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "downloads",
+    srcs = ["downloads.go"],
+    importpath = "github.com/elianiva/meiro/internal/downloads",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/fsutil",
+        "//media",
+    ],
+)
+
+go_test(
+    name = "downloads_test",
+    srcs = ["downloads_test.go"],
+    embed = [":downloads"],
+    deps = ["//media"],
+)

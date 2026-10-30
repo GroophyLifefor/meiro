@@ -1,0 +1,15 @@
+load("@rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "taste",
+    srcs = ["taste.go"],
+    importpath = "github.com/elianiva/meiro/internal/taste",
+    visibility = ["//:__subpackages__"],
+    deps = ["//internal/match"],
+)
+
+go_test(
+    name = "taste_test",
+    srcs = ["taste_test.go"],
+    embed = [":taste"],
+)

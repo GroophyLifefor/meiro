@@ -94,7 +94,7 @@ the turn after subscribing and continue when it arrives.
    ```js
    import { create_github_subscription } from "amp"
    text(await create_github_subscription({
-     title: "Meiro 0.4.2 CI", repository: "elianiva/meiro", filter_kind: "ci",
+     title: "Meiro 0.4.2 CI", repository: "GroophyLifefor/meiro", filter_kind: "ci",
      commit_sha: "<full sha>", workflow_file: "ci.yml",
      automatic: true, branch: "master",
    }))
@@ -121,7 +121,7 @@ the turn after subscribing and continue when it arrives.
    ```js
    import { create_github_subscription } from "amp"
    text(await create_github_subscription({
-     title: "Meiro 0.4.2 release", repository: "elianiva/meiro", filter_kind: "ci",
+     title: "Meiro 0.4.2 release", repository: "GroophyLifefor/meiro", filter_kind: "ci",
      commit_sha: "<full sha>", workflow_file: "release.yml", automatic: false,
    }))
    ```

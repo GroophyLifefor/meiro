@@ -56,7 +56,7 @@ func (a *app) createNewPlaylist() {
 	if d.busy || name == "" {
 		return
 	}
-	client, song := a.client(), d.song
+	client, song := a.ytClient(), d.song
 	d.busy, d.err = true, ""
 	type created struct {
 		id  string
@@ -210,7 +210,7 @@ func (a *app) confirmDeletePlaylist() {
 	if d == nil || d.busy {
 		return
 	}
-	client, id, title := a.client(), d.id, d.title
+	client, id, title := a.ytClient(), d.id, d.title
 	d.busy, d.err = true, ""
 	spawn(a, func() error {
 		ctx, cancel := context.WithTimeout(context.Background(), writeTimeout)
@@ -300,7 +300,7 @@ const likedMusicID = "LM"
 func (a *app) openAddToPlaylist(item youtube.MusicItem) {
 	d := &addToPlaylistState{open: true, item: item}
 	a.addToPlaylist = d
-	client := a.client()
+	client := a.ytClient()
 	// The playlists the library last showed are offered at once, while the
 	// library is read again to catch up with what changed since.
 	if known := a.knownPlaylists; known.client == client {
@@ -371,7 +371,7 @@ func libraryPlaylists(library *youtube.BrowseResult) []youtube.MusicItem {
 
 // choosePlaylist puts the song the dialog holds into the playlist chosen.
 func (a *app) removeFromPlaylist(playlistID string, item youtube.MusicItem) {
-	client := a.client()
+	client := a.ytClient()
 	spawn(a, func() error {
 		ctx, cancel := context.WithTimeout(context.Background(), writeTimeout)
 		defer cancel()
@@ -394,7 +394,7 @@ func (a *app) choosePlaylist(playlist youtube.MusicItem) {
 	if d == nil || d.busy || d.item.VideoID == "" || target.ID == "" {
 		return
 	}
-	client, item := a.client(), d.item
+	client, item := a.ytClient(), d.item
 	d.busy, d.err = true, ""
 	spawn(a, func() error {
 		ctx, cancel := context.WithTimeout(context.Background(), writeTimeout)
@@ -491,7 +491,7 @@ func (a *app) playlistChoice(c *ui.Context, playlist youtube.MusicItem) {
 		Background(m3.StateFill(ui.Transparent, sc.OnSurface, row.Hovered(), row.Pressed(), row.FocusVisible()))
 	row.Children(func() {
 		a.art(c, playlist.Thumbnail, 96, 40, m3.Small)
-		m3.Text(c, m3.BodyLarge, playlist.Title).Grow(1).SingleLine().TextColor(sc.OnSurface)
+		m3.Text(c, m3.BodyLarge, playlist.Title).Grow(1).SingleLine().Tooltip(playlist.Title).TextColor(sc.OnSurface)
 	})
 	if row.Clicked() {
 		a.choosePlaylist(playlist)

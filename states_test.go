@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"io"
 	"net/http"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/egoist/mygo/ui"
 
+	"github.com/elianiva/meiro/soundcloud"
 	"github.com/elianiva/meiro/youtube"
 )
 
@@ -49,6 +51,15 @@ func stateApp(t *testing.T, s *switchable, signedIn bool) *app {
 		a.account.session = &session{client: make(auth), cookie: "SAPISID=test"}
 	}
 	return a
+}
+
+// offlineSoundCloud makes the app's SoundCloud client answer nothing, as a
+// network that is out of reach, so a search that also fails on YouTube falls
+// back to what the device holds.
+func offlineSoundCloud() *soundcloud.Client {
+	return soundcloud.New(soundcloud.Options{Runner: func(context.Context, ...string) ([]byte, error) {
+		return nil, errors.New("no network")
+	}})
 }
 
 // pageCases are the pages that load their content, and what each shows when
@@ -120,9 +131,13 @@ func TestOfflinePagesSayWhyAndOfferRetry(t *testing.T) {
 	}
 	t.Run("search", func(t *testing.T) {
 		a := stateApp(t, &switchable{mode: "offline"}, false)
+		a.soundcloud = offlineSoundCloud()
 		tt := ui.NewTester(a.view, 1000, 700)
 		search(t, a, tt, "yorushika")
-		mustShow(t, tt, "You are offline", "Retry")
+		// Both sources are out of reach, so the search falls back to what the
+		// device holds and says so, rather than failing.
+		mustShow(t, tt, "From this device", "No results for “yorushika”")
+		mustNotShow(t, tt, "You are offline")
 	})
 }
 
@@ -138,10 +153,12 @@ func TestFailedPagesShowTheErrorAndOfferRetry(t *testing.T) {
 		})
 	}
 	t.Run("search", func(t *testing.T) {
+		// A search that fails on one source still shows the other's tracks.
 		a := stateApp(t, &switchable{mode: "server"}, false)
 		tt := ui.NewTester(a.view, 1000, 700)
 		search(t, a, tt, "yorushika")
-		mustShow(t, tt, "Could not load this page", "HTTP 500", "Retry")
+		mustShow(t, tt, "Cloud Song")
+		mustNotShow(t, tt, "Could not load this page", "Retry")
 	})
 }
 
@@ -156,7 +173,10 @@ func TestEmptyPagesSayWhatIsMissingAndOfferRetry(t *testing.T) {
 		})
 	}
 	t.Run("search", func(t *testing.T) {
+		// YouTube answers with nothing and SoundCloud is out of reach, so there
+		// is nothing to show.
 		a := stateApp(t, &switchable{mode: "empty"}, false)
+		a.soundcloud = offlineSoundCloud()
 		tt := ui.NewTester(a.view, 1000, 700)
 		search(t, a, tt, "yorushika")
 		mustShow(t, tt, "No results for “yorushika”", "Retry")
@@ -190,19 +210,24 @@ func TestRetryRecoversAndClearsTheMessage(t *testing.T) {
 			})
 		}
 	}
-	t.Run("search", func(t *testing.T) {
+	t.Run("search falls back and recovers", func(t *testing.T) {
 		s := &switchable{mode: "offline"}
 		a := stateApp(t, s, false)
+		online := a.soundcloud
+		a.soundcloud = offlineSoundCloud()
 		tt := ui.NewTester(a.view, 1000, 700)
 		search(t, a, tt, "yorushika")
-		mustShow(t, tt, "You are offline")
+		mustShow(t, tt, "From this device")
+		// The network comes back, and searching again reads the sources.
 		s.mode = ""
-		if err := tt.Click("Retry"); err != nil {
+		a.soundcloud = online
+		if err := tt.Click(searchPlaceholder); err != nil {
 			t.Fatal(err)
 		}
+		tt.Key(0, ui.KeyEnter)
 		tt.Frame()
 		mustShow(t, tt, "Yorushika")
-		mustNotShow(t, tt, "Retry", "You are offline")
+		mustNotShow(t, tt, "From this device")
 	})
 	t.Run("still failing keeps the message", func(t *testing.T) {
 		s := &switchable{mode: "offline"}

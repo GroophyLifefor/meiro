@@ -26,9 +26,11 @@ func (a *app) applyLoudness() {
 const loudnessWait = 2 * time.Second
 
 // loudnessClient returns the client to ask for a track's loudness, or nil
-// when normalization is off, nobody is signed in, or the value is known.
+// when normalization is off, nobody is signed in, the value is known, or the
+// track has no video ID: YouTube's loudness is asked by video ID, which a
+// provider such as SoundCloud does not carry.
 func (a *app) loudnessClient(videoID string) *youtube.Client {
-	if a.account.session == nil || !a.settings.NormalizeLoudness {
+	if videoID == "" || a.account.session == nil || !a.settings.NormalizeLoudness {
 		return nil
 	}
 	if _, ok := a.loudnessMap.Get(videoID); ok {

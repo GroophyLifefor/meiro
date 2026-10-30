@@ -29,6 +29,19 @@ const (
 	routePlaylist
 	routeArtist
 	routePodcast
+	// routeMBArtist is an artist page read from MusicBrainz, which the app
+	// shows beside its own provider's pages.
+	routeMBArtist
+	// routeLibraries is Meiro's own playlists: lists of tracks from any
+	// provider, kept on this device. It is not a service's library page
+	// (routeLibrary).
+	routeLibraries
+	// routeDownloads is the tracks the user chose to keep on this device, so
+	// they play without the network and without the cache evicting them.
+	routeDownloads
+	// routeHistory is every play of the account, day by day. It is reached
+	// from the stats and from the settings, and has no place on the rail.
+	routeHistory
 )
 
 // loader reads a page's content. partial, when the loader can use it, shows
@@ -138,13 +151,13 @@ func appRoutes() []route {
 			},
 		},
 		{
-			id: routeLibrary, empty: emptyMessage{"Your library is empty", "Songs, albums and playlists you save will show up here."}, pattern: "/library", title: "Library", rail: &railEntry{label: "Library", action: keymap.Library, icon: m3.IconLibrary, filled: m3.IconLibraryFilled}, heading: heading("Library"), nav: routeLibrary, source: "Your library", grid: true,
+			id: routeLibrary, empty: emptyMessage{"Your library is empty", "Songs, albums and playlists you save will show up here."}, pattern: "/library", title: "Library", rail: &railEntry{label: "Library", action: keymap.Library, icon: m3.IconLibrary, filled: m3.IconLibraryFilled, withAccount: true}, heading: heading("Library"), nav: routeLibrary, source: "Your library", grid: true,
 			// The library shows once, whole: a grid that fills in as the rest
 			// arrives redraws every card and its artwork a second time.
 			load: func(ctx context.Context, c *youtube.Client, _ string, _ func(*youtube.BrowseResult)) (*youtube.BrowseResult, error) {
 				return c.StreamLibrary(ctx, nil)
 			},
-			needsAccount: &signInPrompt{m3.IconLibraryFilled, "Your library lives here", "Sign in to see your songs, albums and playlists.", "your songs, albums and playlists"},
+			needsAccount: &signInPrompt{m3.IconLibraryFilled, "Your library lives here", "Sign in to YouTube Music to see your songs, albums and playlists.", "your songs, albums and playlists"},
 		},
 		{
 			id: routeRecap, empty: emptyMessage{"No recap yet", "Listen to some music and your recap will fill in."}, pattern: "/recap", title: "Recap", rail: &railEntry{label: "Recap", icon: m3.IconTrending, filled: m3.IconTrending, withAccount: true}, heading: heading("Recap"), nav: routeRecap, source: "Your recap",
@@ -152,11 +165,11 @@ func appRoutes() []route {
 				return c.GetRecap(ctx)
 			},
 			// The recap is built from the account's play history.
-			needsAccount: &signInPrompt{m3.IconTrending, "Your recap lives here", "Sign in to see the music you have had on repeat.", "the music you have had on repeat"},
+			needsAccount: &signInPrompt{m3.IconTrending, "Your recap lives here", "Sign in to YouTube Music to see the music you have had on repeat.", "the music you have had on repeat"},
 		},
 		{
 			id: routeSettings, pattern: "/settings", title: "Settings", rail: &railEntry{label: "Settings", action: keymap.Settings, icon: m3.IconSettings, filled: m3.IconSettings, footer: true}, heading: heading("Settings"), nav: routeSettings, bare: true,
-			view: (*app).settingsPage, open: (*app).loadToolVersions,
+			view: (*app).settingsPage, open: (*app).openSettings,
 		},
 		{
 			id: routeStats, pattern: "/stats", title: "Stats", heading: heading("Listening stats"), nav: routeSettings, bare: true,
@@ -185,6 +198,35 @@ func appRoutes() []route {
 			load: func(ctx context.Context, c *youtube.Client, id string, _ func(*youtube.BrowseResult)) (*youtube.BrowseResult, error) {
 				return c.GetPodcast(ctx, id)
 			},
+		},
+		{
+			// A MusicBrainz artist page loads through the metadata client, not
+			// the provider's browse client, and so has a view of its own.
+			id: routeMBArtist, pattern: "/mb/artist/{id}", title: "Artist", heading: heading("Artist"),
+			view: (*app).mbArtistPage, open: (*app).openMBArtistPage,
+		},
+		{
+			// The app's own playlists, which hold tracks from any provider.
+			// They are read and written on this device, so the page loads
+			// nothing and is offered by every source.
+			id: routeLibraries, pattern: "/libraries", title: "Playlists",
+			rail:    &railEntry{label: "Playlists", icon: m3.IconQueue, filled: m3.IconQueue},
+			heading: heading("Playlists"), nav: routeLibraries, source: "Playlists",
+			view: (*app).librariesPage,
+		},
+		{
+			// The tracks the user downloaded to keep. Like the playlists, the
+			// page is the app's own and loads nothing; the files are read from
+			// this device.
+			id: routeDownloads, pattern: "/downloads", title: "Downloads",
+			rail:    &railEntry{label: "Downloads", icon: m3.IconFolder, filled: m3.IconFolder},
+			heading: heading("Downloads"), nav: routeDownloads, source: "Downloads",
+			bare: true,
+			view: (*app).downloadsPage,
+		},
+		{
+			id: routeHistory, pattern: "/history", title: "Listening history", heading: heading("Listening history"), nav: routeSettings, bare: true,
+			view: (*app).historyPage, open: (*app).openHistory,
 		},
 	}
 }
@@ -275,6 +317,11 @@ func targetPath(target youtube.Target) (string, bool) {
 		return "", false
 	}
 	return r.path(target.ID), true
+}
+
+// routeByPath is the page of a route that shows something named by id.
+func routeByPath(id routeID, value string) string {
+	return routeByID(id).path(value)
 }
 
 // greeting names the part of the day.

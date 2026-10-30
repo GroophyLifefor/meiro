@@ -27,12 +27,17 @@ This directory is the maintained source for verifying what a Meiro user can do. 
 
 ## Features
 
+- [MusicBrainz links](./musicbrainz-links.md) covers tying a playlist song and its artist to MusicBrainz, by itself when certain and by hand otherwise.
 - [Browse pages](./browse.md) covers Home, Explore, album, playlist and artist pages, and going back.
 - [Podcasts](./podcast.md) covers opening a show, reading its episodes and resuming an episode.
 - [Search](./search.md) covers the bar, suggestions, results, filters, and the next page.
+- [MusicBrainz artists](./musicbrainz-artists.md) covers the artist section on search, an artist's MusicBrainz page, its top recordings and their provider links.
 - [Playback and queue](./playback-queue.md) covers playing, the queue, repeat, shuffle, seeking, failures, resume, and the mini player.
 - [Account and library](./account-library.md) covers sign-in, like, subscribe, saving, and playlists.
+- [Playlists](./playlists.md) covers the app's own lists: making one, adding and removing tracks, refusing duplicates, and playing a mixed list.
+- [Downloads and offline](./downloads-offline.md) covers keeping a track on this device, the Downloads page, offline playback, and the two playback caches.
 - [Settings and shortcuts](./settings-shortcuts.md) covers theme, equaliser, shortcuts, history, and Last.fm.
 - [Discord Rich Presence](./discord-presence.md) covers the settings, track activity, elapsed time, and clearing presence.
 - [Page states](./page-states.md) covers loading, empty, failed and offline pages, and Retry.
+- [Provider source](./provider-source.md) covers the two provider marks a shared song shows, switching its source, the default source, the preference order in Settings, and the fallback when a source fails.
 - [Native-only behavior](./native-only.md) lists what no headless proof can show.

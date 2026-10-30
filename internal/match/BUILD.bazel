@@ -1,0 +1,14 @@
+load("@rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "match",
+    srcs = ["match.go"],
+    importpath = "github.com/elianiva/meiro/internal/match",
+    visibility = ["//:__subpackages__"],
+)
+
+go_test(
+    name = "match_test",
+    srcs = ["match_test.go"],
+    embed = [":match"],
+)

@@ -510,7 +510,7 @@ func (a *app) syncDesktop() {
 // windowTitle names the track while it plays, as "Artist - Title" the way
 // the taskbar and the window switcher show it, and the app otherwise.
 func (a *app) windowTitle() string {
-	if a.current.VideoID == "" || !a.player.Playing() {
+	if a.current.Key() == "" || !a.player.Playing() {
 		return "Meiro"
 	}
 	artist := shownArtist(a.current)
@@ -564,7 +564,7 @@ func (a *app) answerClose(toTray, remember bool) bool {
 // trayTip names the track playing, or the app when nothing plays.
 func (a *app) trayTip() string {
 	switch {
-	case a.current.VideoID == "":
+	case a.current.Key() == "":
 		return "Meiro"
 	case a.current.Subtitle != "":
 		return a.current.Title + " — " + a.current.Subtitle

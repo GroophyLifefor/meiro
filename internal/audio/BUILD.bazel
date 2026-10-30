@@ -4,8 +4,10 @@ go_library(
     name = "audio",
     srcs = [
         "cache.go",
+        "meta.go",
         "probe.go",
         "probe_frames.go",
+        "soundcloud.go",
         "urls.go",
     ],
     importpath = "github.com/elianiva/meiro/internal/audio",
@@ -13,6 +15,7 @@ go_library(
     deps = [
         "//internal/fsutil",
         "//internal/proc",
+        "//internal/ytdlp",
     ],
 )
 

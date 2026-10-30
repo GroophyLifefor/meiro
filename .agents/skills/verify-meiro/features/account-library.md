@@ -15,7 +15,7 @@ A user signs in, sees their library, likes tracks, subscribes to artists, saves 
 
 ## How to get to it (user POV)
 
-- Click the account button, then `Sign in`, `Sign in with a browser window`, or `Import from a browser`.
+- Open `Settings`, find the `YouTube Music account` card, then click `Sign in`, `Sign in with a browser window`, or `Import from a browser`. The account button in the top bar is the Meiro account, not YouTube Music's.
 - Click `Library`, then `New playlist`.
 - Hover a track row and click `More options for <title>`, then `Like` or `Add to playlist`.
 - Click `Subscribe` on an artist page. Click `Save to library` on an album.

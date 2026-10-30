@@ -9,19 +9,21 @@ import (
 	"github.com/elianiva/meiro/youtube"
 )
 
-// accountButton is the account's picture in the top bar, which opens a menu
-// of the account, the settings and the sign-in.
+// accountButton is the Meiro account's picture in the top bar, which opens a
+// menu of the account, the settings and the sign-in. The account is the one on
+// the Meiro server; a YouTube Music session is a provider's and lives in
+// Settings.
 func (a *app) accountButton(c *ui.Context) {
 	sc := m3.Of(c).Scheme
 	button := ui.ButtonBase(c.Key("account"))
-	button.Size(48, 48).Radius(m3.Full).Center().Cursor(ui.CursorPointer).Label("Account").Tooltip("Account")
+	button.Size(48, 48).Radius(m3.Full).Center().Cursor(ui.CursorPointer).Label("Account").Tooltip("Meiro account")
 	if button.Hovered() || a.menuOpen {
 		button.Background(sc.OnSurface.Alpha(m3.StateHover))
 	}
-	current := a.account.session
+	email := a.settings.SyncEmail
 	button.Children(func() {
-		if current != nil {
-			a.avatar(c, current.name(), current.details.Thumbnail, 96, 36)
+		if email != "" {
+			a.avatar(c, email, "", 96, 36)
 			return
 		}
 		ui.Box(c).Size(36, 36).Radius(m3.Full).Background(sc.SurfaceContainerHighest).Center().Children(func() {
@@ -32,34 +34,34 @@ func (a *app) accountButton(c *ui.Context) {
 		a.menuOpen = !a.menuOpen
 	}
 	m3.Menu(c, button, &a.menuOpen, 280, func() {
-		if current != nil {
-			ui.Column(c).Padding(12, 12, 8).Gap(2).Children(func() {
-				m3.EmphasizedText(c, m3.TitleSmall, current.name()).SingleLine()
-				if current.details.Email != "" {
-					m3.Text(c, m3.BodySmall, current.details.Email).SingleLine().TextColor(sc.OnSurfaceVariant)
-				}
-			})
-			ui.Divider(c)
-			a.channelItems(c, current)
-		}
+		ui.Column(c).Padding(12, 12, 8).Gap(2).Children(func() {
+			m3.EmphasizedText(c, m3.TitleSmall, "Meiro account").SingleLine()
+			if email != "" {
+				m3.Text(c, m3.BodySmall, email).SingleLine().Tooltip(email).TextColor(sc.OnSurfaceVariant)
+			} else {
+				m3.Text(c, m3.BodySmall, "Not signed in").SingleLine().TextColor(sc.OnSurfaceVariant)
+			}
+		})
+		ui.Divider(c)
 		if m3.MenuItem(c, "Settings", m3.IconSettings).Clicked() {
 			a.menuOpen = false
 			a.navigate(routeSettings)
 		}
-		if current != nil {
+		if email != "" {
 			if m3.MenuItem(c, "Sign out", m3.IconLogout).Clicked() {
 				a.menuOpen = false
-				a.signOut()
+				a.signOutSync()
 			}
 		} else if m3.MenuItem(c, "Sign in", m3.IconLogin).Clicked() {
+			// The sign-in form is the first card of Settings.
 			a.menuOpen = false
-			a.openSignIn()
+			a.navigate(routeSettings)
 		}
 	})
 }
 
-// channelItems lists the channels the account can act as. It shows nothing
-// when there is only one, and marks the one in use.
+// channelItems lists the channels the YouTube Music account can act as. It
+// shows nothing when there is only one, and marks the one in use.
 func (a *app) channelItems(c *ui.Context, current *session) {
 	if len(current.channels) < 2 {
 		return
@@ -88,14 +90,12 @@ func (a *app) channelItems(c *ui.Context, current *session) {
 			} else {
 				ui.Box(c).Size(22, 22)
 			}
-			m3.Text(c, m3.BodyLarge, name).Grow(1).SingleLine().TextColor(sc.OnSurface)
+			m3.Text(c, m3.BodyLarge, name).Grow(1).SingleLine().Tooltip(name).TextColor(sc.OnSurface)
 		})
 		if row.Clicked() && !selected {
-			a.menuOpen = false
 			a.switchChannel(channel.ChannelID)
 		}
 	}
-	ui.Divider(c)
 }
 
 // accountChannelSelected uses YouTube's selected bit when it gives one. An

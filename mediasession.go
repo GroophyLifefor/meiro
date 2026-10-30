@@ -81,7 +81,7 @@ func (a *app) syncSystemMedia() {
 	if a.player.Active() {
 		position = a.player.Position()
 	}
-	hasTrack := a.current.VideoID != ""
+	hasTrack := a.current.Key() != ""
 	canNext := false
 	if hasTrack {
 		_, canNext = a.queue.next(a.settings.AutoPlay, a.repeat)
@@ -90,7 +90,7 @@ func (a *app) syncSystemMedia() {
 		}
 	}
 	if err := a.media.Update(systemmedia.State{
-		VideoID:     a.current.VideoID,
+		VideoID:     a.current.Key(),
 		Title:       a.current.Title,
 		Artist:      a.current.Subtitle,
 		ArtworkURL:  a.current.Thumbnail,
@@ -130,7 +130,7 @@ func (a *app) syncDiscordPresence() {
 	if a.desktop == nil {
 		return
 	}
-	if !a.player.Playing() || a.current.VideoID == "" {
+	if !a.player.Playing() || a.current.Key() == "" {
 		if a.discord != nil {
 			a.discord.Update(discordrpc.State{})
 		}
@@ -162,7 +162,7 @@ func shownArtist(item youtube.MusicItem) string {
 // in Discord's compact activity.
 func discordPresenceState(item youtube.MusicItem, position, total time.Duration, seekVersion uint64) discordrpc.State {
 	return discordrpc.State{
-		VideoID:     item.VideoID,
+		VideoID:     item.Key(),
 		Title:       item.Title,
 		Artist:      shownArtist(item),
 		ArtworkURL:  item.Thumbnail,

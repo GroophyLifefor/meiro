@@ -118,7 +118,9 @@ func TestEscapeCancelsRecording(t *testing.T) {
 
 func TestHoldingTheModifierShowsTheKeysOverTheControls(t *testing.T) {
 	for _, mods := range []ui.Modifiers{ui.Ctrl, ui.Super} {
-		a := newTestApp(t)
+		// Library is offered only to a signed-in user.
+		resetFakes()
+		a := signedInApp(t)
 		a.settings.Shortcuts = map[string]string{"settings": "Cmd+Shift+P", "next": "Cmd+J"}
 		a.keyboard.hintDelay = 0
 		a.current = tracks("a")[0]
@@ -194,16 +196,27 @@ func TestKeyboardMenusKeepFocusAndRunActions(t *testing.T) {
 				tt.Key(0, ui.KeyEnter)
 			}
 			tabTo(t, tt, item.title)
-			tt.Key(0, ui.KeyTab)
 			menu := "More options for " + item.title
+			// A song row has its MusicBrainz link button between the row and
+			// its menu button, so the menu is one Tab further there.
+			tt.Key(0, ui.KeyTab)
+			tabs := 1
+			for !tt.Focused(menu) && tabs < 3 {
+				tt.Key(0, ui.KeyTab)
+				tabs++
+			}
 			if !tt.Focused(menu) {
 				t.Fatal("Tab lost the menu button")
 			}
-			tt.Key(ui.Shift, ui.KeyTab)
+			for range tabs {
+				tt.Key(ui.Shift, ui.KeyTab)
+			}
 			if !tt.Focused(item.title) {
 				t.Fatal("Shift+Tab lost the item")
 			}
-			tt.Key(0, ui.KeyTab)
+			for range tabs {
+				tt.Key(0, ui.KeyTab)
+			}
 			tt.Key(0, ui.KeyEnter)
 			if !tt.Focused(item.first) {
 				t.Fatal("the menu did not focus its first action")
@@ -220,7 +233,9 @@ func TestKeyboardMenusKeepFocusAndRunActions(t *testing.T) {
 			if a.menu.open || tt.Clipboard() != item.link || !tt.Focused(menu) {
 				t.Fatalf("copy: %q, open: %v, focus restored: %v", tt.Clipboard(), a.menu.open, tt.Focused(menu))
 			}
-			tt.Key(ui.Shift, ui.KeyTab)
+			for range tabs {
+				tt.Key(ui.Shift, ui.KeyTab)
+			}
 			tt.Key(ui.Shift, ui.KeyF10)
 			if !tt.Focused(item.first) {
 				t.Fatal("Shift+F10 did not open the item's menu")

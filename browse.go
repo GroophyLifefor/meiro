@@ -74,7 +74,7 @@ func (a *app) rowView(c *ui.Context, rows []row, i int) {
 		if r.shelf == "playlist-sort-header" {
 			sc := m3.Of(c).Scheme
 			ui.Row(c).Padding(8, pageGutter-8, 8, pageGutter).AlignItems(ui.Center).Children(func() {
-				m3.EmphasizedText(c, m3.TitleLarge, r.title).SingleLine().Grow(1).MinWidth(0).TextColor(sc.OnSurface)
+				m3.EmphasizedText(c, m3.TitleLarge, r.title).SingleLine().Tooltip(r.title).Grow(1).MinWidth(0).TextColor(sc.OnSurface)
 				a.playlistSort(c)
 			})
 		} else {
@@ -91,7 +91,8 @@ func (a *app) rowView(c *ui.Context, rows []row, i int) {
 		if queue == nil {
 			queue = a.page.playable
 		}
-		a.songRow(c, r.item, queue, songOptions{number: r.number(), list: r.shelf, position: r.position, track: r.track, inset: true})
+		page, _ := a.route()
+		a.songRow(c, r.item, queue, songOptions{number: r.number(), list: r.shelf, position: r.position, track: r.track, inset: true, doublePress: page.id == routePlaylist && r.shelf != ""})
 	case rowSimilar:
 		sc := m3.Of(c).Scheme
 		ui.Column(c).Padding(24, pageGutter, 4, pageGutter).Children(func() {
@@ -112,6 +113,8 @@ func (a *app) rowView(c *ui.Context, rows []row, i int) {
 		ui.Row(c).Height(360).Justify(ui.Center).AlignItems(ui.Center).Children(func() {
 			m3.LoadingIndicator(c, 72, true)
 		})
+	case rowArtists:
+		a.artistSectionView(c)
 	case rowStreaming:
 		ui.Row(c).Height(96).Justify(ui.Center).AlignItems(ui.Center).Children(func() {
 			m3.LoadingIndicator(c, 40, true)
@@ -140,7 +143,7 @@ func (a *app) sectionHeading(c *ui.Context, r row, paged, first bool) {
 		top = 4
 	}
 	ui.Row(c).Padding(top, pageGutter-8, 8, pageGutter).Gap(8).AlignItems(ui.Center).Children(func() {
-		m3.EmphasizedText(c, m3.TitleLarge, r.title).SingleLine().Grow(1).MinWidth(0).TextColor(sc.OnSurface)
+		m3.EmphasizedText(c, m3.TitleLarge, r.title).SingleLine().Tooltip(r.title).Grow(1).MinWidth(0).TextColor(sc.OnSurface)
 		if !paged {
 			return
 		}
@@ -373,9 +376,16 @@ func (a *app) card(c *ui.Context, item youtube.MusicItem, queue []youtube.MusicI
 				}
 			}
 		})
-		m3.EmphasizedText(c, m3.TitleSmall, item.Title).Width(cardArt).SingleLine().TextColor(sc.OnSurface)
+		// The mark of the provider the card comes from sits on the title's
+		// line, at its end.
+		ui.Row(c).Width(cardArt).Gap(6).AlignItems(ui.Center).Children(func() {
+			m3.EmphasizedText(c, m3.TitleSmall, item.Title).Grow(1).MinWidth(0).SingleLine().TextColor(sc.OnSurface).Tooltip(item.Title)
+			if !isNewPlaylist(item) {
+				sourceMark(c, resolveSource(item))
+			}
+		})
 		if item.Subtitle != "" {
-			m3.Text(c, m3.BodySmall, item.Subtitle).Width(cardArt).SingleLine().TextColor(sc.OnSurfaceVariant).Margin(-6, 0, 0)
+			m3.Text(c, m3.BodySmall, item.Subtitle).Width(cardArt).SingleLine().TextColor(sc.OnSurfaceVariant).Margin(-6, 0, 0).Tooltip(item.Subtitle)
 		}
 		// A menu the pointer opened points at the pointer; one the menu
 		// button opened points at the button.
@@ -400,6 +410,8 @@ func (a *app) card(c *ui.Context, item youtube.MusicItem, queue []youtube.MusicI
 		a.playCollection(item, key, false)
 	case card.Clicked() && isNewPlaylist(item):
 		a.openNewPlaylist(youtube.MusicItem{})
+	case card.Clicked() && item.IsTrack() && item.Key() == a.current.Key():
+		a.pressPlaying(item)
 	case card.Clicked():
 		a.activate(item, queue)
 	}

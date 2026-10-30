@@ -1,6 +1,10 @@
 package youtube
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/elianiva/meiro/media"
+)
 
 func findRenderer(root any, rendererName string) *jsonObject {
 	var walk func(any) *jsonObject
@@ -153,7 +157,7 @@ type itemIdentity struct {
 // card opens, the artist's browse endpoint sits in the subtitle runs, and the
 // length trails the subtitle.
 func parseMusicCardShelf(renderer *jsonObject) (MusicItem, bool) {
-	item := MusicItem{Kind: KindMusicItem}
+	item := MusicItem{Kind: KindMusicItem, Source: media.SourceYTM}
 	item.Title = rendererText(renderer.get("title"))
 	if item.Title == "" {
 		return MusicItem{}, false
@@ -165,12 +169,13 @@ func parseMusicCardShelf(renderer *jsonObject) (MusicItem, bool) {
 	}
 	item.BrowseID, item.VideoID = cardTarget(renderer)
 	if item.VideoID == "" {
-		item.VideoID = episodeVideoIDFromBrowseID(item.BrowseID)
+		item.VideoID = media.EpisodeVideoIDFromBrowseID(item.BrowseID)
 		if item.VideoID != "" {
 			item.Kind = KindEpisode
 		}
 	}
-	item.setCredits(bylineCredits(renderer.get("subtitle")))
+	artists, album := bylineCredits(renderer.get("subtitle"))
+	setCredits(&item, artists, album)
 	if item.VideoID != "" && item.Kind != KindEpisode {
 		// A card of a song plays its video, and says so.
 		item.Kind = KindVideo
@@ -251,8 +256,20 @@ func rendererKind(key string) (ItemKind, bool) {
 	}
 }
 
+// setCredits makes item credit the artists a byline links and the album.
+// Artist names the first of them, which the scrobble and the lyrics search
+// take, and Artists names every one, the line the presence shows.
+func setCredits(item *MusicItem, artists []string, album string) {
+	item.Album = album
+	item.Artists = strings.Join(artists, ", ")
+	item.Artist = ""
+	if len(artists) > 0 {
+		item.Artist = artists[0]
+	}
+}
+
 func parseMusicItem(kind ItemKind, renderer *jsonObject) MusicItem {
-	item := MusicItem{Kind: kind}
+	item := MusicItem{Kind: kind, Source: media.SourceYTM}
 	item.Title = rendererText(renderer.get("title"))
 	if item.Title == "" {
 		item.Title = rendererText(renderer.get("headline"))
@@ -291,7 +308,7 @@ func parseMusicItem(kind ItemKind, renderer *jsonObject) MusicItem {
 	if item.BrowseID == "" {
 		item.BrowseID = navigationID(renderer.get("title"))
 	}
-	episodeVideoID := episodeVideoIDFromBrowseID(item.BrowseID)
+	episodeVideoID := media.EpisodeVideoIDFromBrowseID(item.BrowseID)
 	if item.VideoID == "" {
 		item.VideoID = episodeVideoID
 	}
@@ -310,7 +327,8 @@ func parseMusicItem(kind ItemKind, renderer *jsonObject) MusicItem {
 	if kind == KindTrack || kind == KindVideo || item.VideoID != "" {
 		// A two-row item is a song or a video when it carries a video, as the
 		// cards of a home shelf do; one without is an album or an artist.
-		item.setCredits(rendererCredits(renderer))
+		artists, album := rendererCredits(renderer)
+		setCredits(&item, artists, album)
 	}
 	item.PlaylistID, _ = renderer.get("playlistId").(string)
 	item.PlaylistSetID = nestedString(renderer.get("playlistItemData"), "playlistSetVideoId")
@@ -569,7 +587,7 @@ func navigationID(value any) string {
 			}
 			for _, name := range []string{"browseId", "playlistId"} {
 				if value, ok := node.get(name).(string); ok && value != "" {
-					if name == "playlistId" && !isBrowsablePlaylist(value) {
+					if name == "playlistId" && !media.IsBrowsablePlaylist(value) {
 						continue
 					}
 					result = value

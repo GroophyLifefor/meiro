@@ -33,9 +33,23 @@ const DefaultLimit = 10
 // parent folder does not change that folder's permissions.
 func cacheDir(root string) string { return filepath.Join(root, "Meiro Audio Cache") }
 
+// Limits bound how much a cache keeps. Count is a number of tracks; Bytes is
+// a total file size in bytes, and 0 means no byte bound. Both are applied: the
+// cache evicts the least-recently-used files until it is within each.
+type Limits struct {
+	Count int
+	Bytes int64
+}
+
 // Open opens the cache inside the folder root, which must exist, keeping at
 // most limit tracks. It returns the cache and root made absolute.
 func Open(root string, limit int) (*Cache, string, error) {
+	return OpenLimits(root, Limits{Count: limit})
+}
+
+// OpenLimits opens the cache inside the folder root with the given limits. It
+// returns the cache and root made absolute.
+func OpenLimits(root string, limits Limits) (*Cache, string, error) {
 	if strings.TrimSpace(root) == "" {
 		return nil, "", errors.New("cache directory is empty")
 	}
@@ -50,7 +64,7 @@ func Open(root string, limit int) (*Cache, string, error) {
 	if !info.IsDir() {
 		return nil, "", fmt.Errorf("%q is not a directory", absolute)
 	}
-	cache, err := openDir(cacheDir(absolute), limit)
+	cache, err := openDir(cacheDir(absolute), limits)
 	if err != nil {
 		return nil, "", err
 	}
@@ -61,10 +75,15 @@ func Open(root string, limit int) (*Cache, string, error) {
 // private app cache, not a user-facing download library. Its methods are safe
 // for concurrent use, and do nothing on a nil Cache.
 type Cache struct {
-	mu      sync.Mutex
-	dir     string
-	limit   int
-	files   map[string]cachedFile
+	mu         sync.Mutex
+	dir        string
+	metaPath   string
+	limit      int
+	limitBytes int64
+	files      map[string]cachedFile
+	// meta is what is known of the cached tracks, by their cache key, so a
+	// search can find them without the network. It is kept beside the audio.
+	meta    map[string]TrackMeta
 	queue   []pendingDownload
 	pending map[string]struct{}
 	running bool
@@ -74,16 +93,17 @@ type Cache struct {
 	fetch   func(ctx context.Context, streamURL, dir string) (string, error)
 }
 
-// pendingDownload is a track waiting to be cached, and the direct audio URL
-// the app already resolved for it.
+// pendingDownload is a track waiting to be cached, the direct audio URL the
+// app already resolved for it, and what is known of it.
 type pendingDownload struct {
 	videoID   string
 	streamURL string
+	meta      TrackMeta
 }
 
 // openDir prepares a private directory and removes any files over the
-// limit left by an earlier run.
-func openDir(dir string, limit int) (*Cache, error) {
+// limits left by an earlier run.
+func openDir(dir string, limits Limits) (*Cache, error) {
 	if err := os.MkdirAll(dir, 0o700); err != nil {
 		return nil, err
 	}
@@ -91,10 +111,13 @@ func openDir(dir string, limit int) (*Cache, error) {
 		return nil, err
 	}
 	c := &Cache{
-		dir:     dir,
-		limit:   ValidLimit(limit),
-		files:   make(map[string]cachedFile),
-		pending: make(map[string]struct{}),
+		dir:        dir,
+		metaPath:   filepath.Join(dir, metaFileName),
+		limit:      ValidLimit(limits.Count),
+		limitBytes: max(limits.Bytes, 0),
+		files:      make(map[string]cachedFile),
+		meta:       make(map[string]TrackMeta),
+		pending:    make(map[string]struct{}),
 		fetch: func(ctx context.Context, streamURL, cacheDir string) (string, error) {
 			return downloadURL(ctx, http.DefaultClient, streamURL, cacheDir)
 		},
@@ -102,6 +125,8 @@ func openDir(dir string, limit int) (*Cache, error) {
 	c.mu.Lock()
 	c.scanLocked()
 	evicted := c.trimLocked("")
+	c.loadMetaLocked()
+	c.pruneMetaLocked()
 	c.mu.Unlock()
 	c.removeFiles(evicted)
 	return c, nil
@@ -136,6 +161,60 @@ func (c *Cache) SetLimit(limit int) {
 	evicted := c.trimLocked("")
 	c.mu.Unlock()
 	c.removeFiles(evicted)
+}
+
+// SetBytesLimit applies a new total-size bound, in bytes, and evicts old
+// files immediately. Zero means no byte bound.
+func (c *Cache) SetBytesLimit(bytes int64) {
+	if c == nil {
+		return
+	}
+	c.mu.Lock()
+	if c.closed {
+		c.mu.Unlock()
+		return
+	}
+	c.limitBytes = max(bytes, 0)
+	evicted := c.trimLocked("")
+	c.mu.Unlock()
+	c.removeFiles(evicted)
+}
+
+// Usage reports how many bytes the cache's files take and how many tracks they
+// are. A nil cache holds nothing.
+func (c *Cache) Usage() (bytes int64, tracks int) {
+	if c == nil {
+		return 0, 0
+	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	for _, file := range c.files {
+		bytes += file.size
+	}
+	return bytes, len(c.files)
+}
+
+// Clear deletes every file this cache holds and empties its index, leaving
+// anything else in the directory alone. It does not touch a track the caller
+// names as keep, so clearing while a track plays never removes its audio. It
+// affects only this cache: downloaded tracks live elsewhere.
+func (c *Cache) Clear(keep string) {
+	if c == nil {
+		return
+	}
+	c.mu.Lock()
+	paths := make([]string, 0, len(c.files))
+	for key, file := range c.files {
+		if key == keep {
+			continue
+		}
+		delete(c.files, key)
+		delete(c.meta, key)
+		paths = append(paths, file.path)
+	}
+	c.saveMetaLocked()
+	c.mu.Unlock()
+	c.removeFiles(paths)
 }
 
 // Warmable reports whether the cache keeps enough tracks for one downloaded
@@ -177,11 +256,16 @@ func (c *Cache) Get(videoID string) (string, bool) {
 // Add caches a track from the direct audio URL the app resolved for it, in
 // the background, unless the track is already cached or on its way. The URL
 // is downloaded as it is, so caching never resolves a track a second time.
-func (c *Cache) Add(videoID, streamURL string) {
+// meta, when given, is kept with the audio so a local search can find the
+// track without the network.
+func (c *Cache) Add(videoID, streamURL string, meta ...TrackMeta) {
 	if c == nil || videoID == "" || streamURL == "" {
 		return
 	}
 	next := pendingDownload{videoID: videoID, streamURL: streamURL}
+	if len(meta) > 0 {
+		next.meta = meta[0]
+	}
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	if c.closed || c.limit == 0 {
@@ -252,7 +336,7 @@ func (c *Cache) drain() {
 			var evicted []string
 			if err == nil && c.limit > 0 {
 				var installErr error
-				evicted, installErr = c.installLocked(download.videoID, temp)
+				evicted, installErr = c.installLocked(download.videoID, download.meta, temp)
 				if installErr != nil {
 					log.Printf("caching audio video_id=%s: %v", download.videoID, installErr)
 				}
@@ -274,8 +358,9 @@ func (c *Cache) drain() {
 
 // installLocked moves a completed temporary download into the cache and drops
 // the entries over the limit from the index. It returns the paths to delete;
-// the caller releases c.mu before deleting them. The caller holds c.mu.
-func (c *Cache) installLocked(videoID, temp string) ([]string, error) {
+// the caller releases c.mu before deleting them. meta, when its Key is set, is
+// kept with the audio. The caller holds c.mu.
+func (c *Cache) installLocked(videoID string, meta TrackMeta, temp string) ([]string, error) {
 	if temp == "" {
 		return nil, errors.New("the download left no audio file")
 	}
@@ -294,12 +379,21 @@ func (c *Cache) installLocked(videoID, temp string) ([]string, error) {
 	if err := os.Chtimes(temp, now, now); err != nil {
 		return nil, fmt.Errorf("mark audio as recently used: %w", err)
 	}
+	var size int64
+	if info, err := os.Stat(temp); err == nil {
+		size = info.Size()
+	}
 	final := filepath.Join(c.dir, key+ext)
 	if err := os.Rename(temp, final); err != nil {
 		return nil, fmt.Errorf("store audio file: %w", err)
 	}
-	c.files[key] = cachedFile{key: key, path: final, used: now}
-	return c.trimLocked(key), nil
+	c.files[key] = cachedFile{key: key, path: final, used: now, size: size}
+	if meta.Key != "" {
+		c.meta[key] = meta
+	}
+	evicted := c.trimLocked(key)
+	c.saveMetaLocked()
+	return evicted, nil
 }
 
 // findLocked returns the cache entry for videoID from the in-memory index. The
@@ -310,12 +404,20 @@ func (c *Cache) findLocked(videoID string) (cachedFile, bool) {
 }
 
 // trimLocked drops the least-recently-used entries from the index until the
-// cache is within its limit, except for keep, and returns their paths. It
-// updates only the index, so the caller can delete the paths after releasing
-// c.mu. The caller holds c.mu.
+// cache is within its count and size limits, except for keep, and returns
+// their paths. It updates only the index, so the caller can delete the paths
+// after releasing c.mu. The caller holds c.mu.
 func (c *Cache) trimLocked(keep string) []string {
-	excess := len(c.files) - c.limit
-	if excess <= 0 {
+	excessCount := len(c.files) - c.limit
+	excessBytes := int64(0)
+	if c.limitBytes > 0 {
+		var total int64
+		for _, file := range c.files {
+			total += file.size
+		}
+		excessBytes = total - c.limitBytes
+	}
+	if excessCount <= 0 && excessBytes <= 0 {
 		return nil
 	}
 	candidates := make([]cachedFile, 0, len(c.files))
@@ -330,10 +432,16 @@ func (c *Cache) trimLocked(keep string) []string {
 	slices.SortFunc(candidates, func(a, b cachedFile) int {
 		return a.used.Compare(b.used)
 	})
-	evicted := make([]string, 0, min(excess, len(candidates)))
-	for _, file := range candidates[:min(excess, len(candidates))] {
+	evicted := make([]string, 0, len(candidates))
+	for _, file := range candidates {
+		if excessCount <= 0 && excessBytes <= 0 {
+			break
+		}
 		delete(c.files, file.key)
+		delete(c.meta, file.key)
 		evicted = append(evicted, file.path)
+		excessCount--
+		excessBytes -= file.size
 	}
 	return evicted
 }
@@ -367,6 +475,10 @@ func (c *Cache) Purge() {
 		switch {
 		case entry.IsDir() && strings.HasPrefix(entry.Name(), tempPrefix):
 			fsutil.RemoveAll(path)
+		case !entry.IsDir() && entry.Name() == metaFileName:
+			if err := os.Remove(path); err != nil && !errors.Is(err, os.ErrNotExist) {
+				log.Printf("removing old audio cache metadata %s: %v", path, err)
+			}
 		case !entry.IsDir() && isAudioCacheFile(entry.Name()):
 			if err := os.Remove(path); err != nil && !errors.Is(err, os.ErrNotExist) {
 				log.Printf("removing old cached audio %s: %v", path, err)
@@ -392,6 +504,7 @@ type cachedFile struct {
 	key  string
 	path string
 	used time.Time
+	size int64
 }
 
 // scanLocked builds the in-memory index from the cache directory. It runs once
@@ -412,7 +525,7 @@ func (c *Cache) scanLocked() {
 		if err != nil {
 			continue
 		}
-		c.files[key] = cachedFile{key: key, path: filepath.Join(c.dir, entry.Name()), used: info.ModTime()}
+		c.files[key] = cachedFile{key: key, path: filepath.Join(c.dir, entry.Name()), used: info.ModTime(), size: info.Size()}
 	}
 }
 

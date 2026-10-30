@@ -6,8 +6,8 @@ go_library(
     importpath = "github.com/elianiva/meiro/internal/settings",
     visibility = ["//:__subpackages__"],
     deps = [
-        "//internal/audio",
         "//internal/fsutil",
+        "//internal/sync",
         "//m3",
         "@com_github_egoist_mygo//ui",
     ],

@@ -1,0 +1,19 @@
+load("@rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "recommend",
+    srcs = [
+        "recommend.go",
+        "replay.go",
+    ],
+    importpath = "github.com/elianiva/meiro/internal/recommend",
+    visibility = ["//:__subpackages__"],
+    deps = ["//internal/taste"],
+)
+
+go_test(
+    name = "recommend_test",
+    srcs = ["recommend_test.go"],
+    embed = [":recommend"],
+    deps = ["//internal/taste"],
+)

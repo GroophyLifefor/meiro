@@ -189,12 +189,12 @@ func (a *app) compactVolumeControl(c *ui.Context) {
 func (a *app) trackLine(c *ui.Context, title, subtitle m3.Role) ui.Element {
 	sc := m3.Of(c).Scheme
 	return ui.Column(c).Gap(1).MinWidth(0).Children(func() {
-		m3.EmphasizedText(c, title, a.current.Title).SingleLine().TextColor(sc.OnSurface)
+		m3.EmphasizedText(c, title, a.current.Title).SingleLine().Tooltip(a.current.Title).TextColor(sc.OnSurface)
 		line, colour := a.current.Subtitle, sc.OnSurfaceVariant
 		if a.playErr != "" {
 			line, colour = firstLine(a.playErr), sc.Error
 		}
-		m3.Text(c, subtitle, line).SingleLine().TextColor(colour)
+		m3.Text(c, subtitle, line).SingleLine().Tooltip(line).TextColor(colour)
 	})
 }
 
@@ -218,6 +218,7 @@ func (a *app) playerBar(c *ui.Context) {
 		info.Grow(1).Basis(0).MinWidth(0).Gap(14).AlignItems(ui.Center).Radius(m3.Large).Padding(0, 8, 0, 0).
 			Cursor(ui.CursorPointer).Label("Open the player").
 			Background(m3.StateFill(ui.Transparent, sc.OnSurface, info.Hovered(), info.Pressed(), info.FocusVisible()))
+		sourceSwitched := false
 		info.Children(func() {
 			a.art(c, a.current.Thumbnail, playerArt, 64, m3.Large, func() {
 				if a.current.IsVideo() {
@@ -225,8 +226,13 @@ func (a *app) playerBar(c *ui.Context) {
 				}
 			})
 			a.trackLine(c, m3.TitleSmall, m3.BodySmall).Grow(1)
+			// A track two providers hold can be switched here too, so the
+			// player says which source is playing and lets it change.
+			if a.sourceBadges(c, a.current) {
+				sourceSwitched = true
+			}
 		})
-		if info.Clicked() {
+		if info.Clicked() && !sourceSwitched {
 			a.nowPlaying.open, a.nowPlaying.closing = true, false
 			a.loadPanel()
 		}

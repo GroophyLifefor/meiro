@@ -57,9 +57,10 @@ func TestAccountChannelSelection(t *testing.T) {
 	}
 }
 
-func TestChannelMenuSwitchesToBrandChannel(t *testing.T) {
+// The top bar's account is the Meiro account, apart from any provider: a
+// YouTube Music session does not name it, and its channels are not in its menu.
+func TestAccountMenuIsTheMeiroAccount(t *testing.T) {
 	resetFakes()
-	fakePageID.Store("")
 	a := signedInApp(t)
 	list, err := a.account.session.client.GetAccounts(context.Background())
 	if err != nil {
@@ -72,9 +73,45 @@ func TestChannelMenuSwitchesToBrandChannel(t *testing.T) {
 		t.Fatal(err)
 	}
 	tt.Frame()
+	for _, want := range []string{"Meiro account", "Not signed in", "Settings", "Sign in"} {
+		if !tt.HasText(want) {
+			t.Errorf("the menu of an account signed in only to YouTube Music omits %q: %q", want, tt.Texts())
+		}
+	}
+	if tt.HasText("Sign out") || tt.HasText("Brand channel") {
+		t.Errorf("the menu shows the YouTube Music session: %q", tt.Texts())
+	}
+
+	a.settings.SyncEmail = "murat@example.com"
+	tt.Frame()
+	if !tt.HasText("murat@example.com") || !tt.HasText("Sign out") {
+		t.Fatalf("the menu of a signed-in Meiro account does not name it: %q", tt.Texts())
+	}
+	if err := tt.Click("Sign out"); err != nil {
+		t.Fatal(err)
+	}
+	tt.Frame()
+	if a.settings.SyncEmail != "" || !a.signedIn() {
+		t.Errorf("Sign out in the menu: Meiro email %q, YouTube signed in %v; want the Meiro account out and YouTube kept", a.settings.SyncEmail, a.signedIn())
+	}
+}
+
+// The channel a YouTube Music account acts as is chosen on its Settings card.
+func TestSettingsSwitchesToBrandChannel(t *testing.T) {
+	resetFakes()
+	fakePageID.Store("")
+	a := signedInApp(t)
+	list, err := a.account.session.client.GetAccounts(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	a.account.session.channels = list.Items
+	a.router.Push("/settings")
+	tt := ui.NewTester(a.view, 1000, 8000)
+	tt.Frame()
 	for _, name := range []string{"Main channel", "Brand channel", "Music channel", "Studio channel"} {
 		if !tt.HasText(name) {
-			t.Fatalf("account menu omitted %q: %q", name, tt.Texts())
+			t.Fatalf("the YouTube Music account card omitted %q: %q", name, tt.Texts())
 		}
 	}
 	if err := tt.Click("Brand channel"); err != nil {

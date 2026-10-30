@@ -7,39 +7,6 @@ import (
 	"strings"
 )
 
-// SearchFilter is one of the filters YouTube Music offers for a search: the
-// name it shows, and the parameters that search with it. The filter that
-// clears them all carries neither.
-type SearchFilter struct {
-	Label  string `json:"label,omitempty"`
-	Params string `json:"params,omitempty"`
-}
-
-// SearchOptions controls a music search. Params is what one of the search's
-// own filters carries; an empty value searches every category.
-type SearchOptions struct {
-	Params string
-}
-
-// SearchResult contains the parsed music items of a search.
-type SearchResult struct {
-	Items             []MusicItem `json:"items"`
-	ContinuationToken string      `json:"continuationToken,omitempty"`
-	// TopResult is the card a search leads with, which opens a page or plays
-	// a video. Its zero value says the search has none.
-	TopResult MusicItem `json:"topResult,omitempty"`
-	// Filters are the categories the search can be narrowed to, in the order
-	// YouTube Music offers them for this query.
-	Filters []SearchFilter `json:"filters,omitempty"`
-}
-
-// SearchSuggestions is what YouTube Music offers for a query being typed: the
-// completed queries, and the items the query already matches.
-type SearchSuggestions struct {
-	Queries []string    `json:"queries"`
-	Items   []MusicItem `json:"items,omitempty"`
-}
-
 // Search searches YouTube Music. Params narrows the search to one of the
 // categories YouTube offers for it, as SearchResult.Filters gives them; without
 // any, every category is searched.

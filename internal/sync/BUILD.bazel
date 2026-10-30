@@ -1,0 +1,31 @@
+load("@rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "sync",
+    srcs = [
+        "changes.go",
+        "events.go",
+        "links.go",
+        "outbox.go",
+        "sync.go",
+        "token.go",
+        "uuid.go",
+    ],
+    importpath = "github.com/elianiva/meiro/internal/sync",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/fsutil",
+        "//media",
+    ],
+)
+
+go_test(
+    name = "sync_test",
+    srcs = [
+        "changes_test.go",
+        "events_test.go",
+        "sync_test.go",
+    ],
+    embed = [":sync"],
+    deps = ["//media"],
+)

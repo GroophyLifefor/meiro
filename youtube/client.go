@@ -16,6 +16,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/elianiva/meiro/media"
 )
 
 const (
@@ -58,7 +60,8 @@ type Options struct {
 	AllowInsecureCookieAuth bool
 }
 
-// Client issues read-only YouTube Music requests.
+// Client issues read-only YouTube Music requests. It is one provider's client
+// behind the interface the app reads a music source through.
 type Client struct {
 	httpClient              *http.Client
 	baseURL                 string
@@ -72,6 +75,9 @@ type Client struct {
 	cookieAuth              *CookieAuth
 	allowInsecureCookieAuth bool
 }
+
+// The YouTube Music client is the provider the app's interface reads through.
+var _ media.Client = (*Client)(nil)
 
 // defaultHTTPClient is the HTTP client of every Client that is not given one.
 // It bounds only the wait for response headers: the request context governs

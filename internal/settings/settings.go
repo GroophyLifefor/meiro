@@ -16,8 +16,8 @@ import (
 
 	"github.com/egoist/mygo/ui"
 
-	"github.com/elianiva/meiro/internal/audio"
 	"github.com/elianiva/meiro/internal/fsutil"
+	meirosync "github.com/elianiva/meiro/internal/sync"
 	"github.com/elianiva/meiro/m3"
 )
 
@@ -41,12 +41,27 @@ type Settings struct {
 	Volume float64 `json:"volume"`
 	// AutoPlay adds YouTube Music's generated queue after the selected tracks.
 	AutoPlay bool `json:"autoPlay"`
+	// Suggestions turns on the songs Meiro recommends from what was played: the
+	// Daily mix and the songs added to the queue. Explore is how many of every
+	// hundred may be by artists new to the listener.
+	Suggestions bool `json:"suggestions"`
+	Explore     int  `json:"explore"`
+	// DailyMixID is the playlist the Daily mix is kept in, and DailyMixDate the
+	// day it was last made, as 2006-01-02 in local time.
+	DailyMixID   string `json:"dailyMixId,omitempty"`
+	DailyMixDate string `json:"dailyMixDate,omitempty"`
 	// NormalizeLoudness applies YouTube's per-track loudness correction when signed in.
 	NormalizeLoudness bool `json:"normalizeLoudness"`
-	// CacheSongs is how many recently played audio files to keep on disk.
-	CacheSongs int `json:"cacheSongs"`
+	// YouTubeCacheMB bounds the YouTube Music audio cache in megabytes; zero
+	// turns it off. It is measured like SoundCloudCacheMB, so the two caches
+	// read alike.
+	YouTubeCacheMB int `json:"youtubeCacheMB"`
 	// CacheDirectory is the parent folder for the app-managed audio cache.
 	CacheDirectory string `json:"cacheDirectory,omitempty"`
+	// SoundCloudCacheMB bounds the SoundCloud audio cache in megabytes; zero
+	// turns it off. The cache keeps a folder of its own, so it never mixes
+	// with the YouTube Music cache.
+	SoundCloudCacheMB int `json:"soundCloudCacheMB"`
 	// Recent holds the searches submitted, newest first.
 	Recent []string `json:"recent,omitempty"`
 	// Channel is the signed-in account's channel to act as, or empty for the
@@ -91,6 +106,42 @@ type Settings struct {
 	// EQBands holds each band's gain in dB, low to high, one per the player's
 	// equaliser frequencies.
 	EQBands []float64 `json:"eqBands,omitempty"`
+	// Provider is the music source older runs read, by its short name. It is
+	// kept only to migrate a settings file written before ProviderOrder: it is
+	// no longer read by the app.
+	Provider string `json:"provider,omitempty"`
+	// ProviderOrder is the preference order of the music sources Meiro
+	// searches and plays, by short name. A recording found on more than one
+	// source plays from the first one that holds it, and a failure falls
+	// through to the next. Empty reads as DefaultProviderOrder.
+	ProviderOrder []string `json:"providerOrder,omitempty"`
+	// SyncURL is the Meiro server this device syncs with.
+	SyncURL string `json:"syncUrl,omitempty"`
+	// SyncEnabled turns syncing on: while it is off nothing is sent, and the
+	// plays that wait are kept.
+	SyncEnabled bool `json:"syncEnabled,omitempty"`
+	// SyncEmail is the account signed in for syncing, or empty when none is.
+	// Its session token is not kept here: see sync.TokenStore.
+	SyncEmail string `json:"syncEmail,omitempty"`
+	// SyncLastAt is when a sync last delivered everything it had.
+	SyncLastAt time.Time `json:"syncLastAt,omitempty"`
+	// SyncCursor is how far into the server's order of changes this device has
+	// read, and SyncCursorURL and SyncCursorEmail are the server and account
+	// it was read from. A cursor of another server or account is not this one's
+	// and reads as zero.
+	SyncCursor      int64  `json:"syncCursor,omitempty"`
+	SyncCursorURL   string `json:"syncCursorUrl,omitempty"`
+	SyncCursorEmail string `json:"syncCursorEmail,omitempty"`
+	// EventCursor is the same for the plays of the account, which the server
+	// orders apart from the changes to lists: how far into them this device has
+	// read, and the server and account it was read from.
+	EventCursor      int64  `json:"eventCursor,omitempty"`
+	EventCursorURL   string `json:"eventCursorUrl,omitempty"`
+	EventCursorEmail string `json:"eventCursorEmail,omitempty"`
+	// SyncTwoWay says this device has begun reading lists back from the server.
+	// An install that synced before it could read has it unset, and its first
+	// read takes this device's lists as the truth.
+	SyncTwoWay bool `json:"syncTwoWay,omitempty"`
 }
 
 // TrayMark names one of the menu bar icon styles.
@@ -106,10 +157,67 @@ const (
 // Defaults is what a first run starts with.
 func Defaults() Settings {
 	return Settings{
-		Seed: "#6750a4", Mode: "system", Volume: 70, AutoPlay: true, CacheSongs: audio.DefaultLimit, NotifyTrack: true, ShowTray: true, TrayMark: TrayMarkWordmark,
-		Zoom: DefaultZoom,
+		Seed: "#6750a4", Mode: "system", Volume: 70, AutoPlay: true, Suggestions: true, Explore: 30, YouTubeCacheMB: DefaultCacheMB, ShowTray: true, TrayMark: TrayMarkWordmark,
+		Zoom: DefaultZoom, ProviderOrder: DefaultProviderOrder(), SoundCloudCacheMB: DefaultCacheMB,
+		SyncURL: meirosync.DefaultURL,
 	}
 }
+
+// legacyCaches are the cache settings older files wrote: the YouTube Music
+// cache kept a number of songs, and the SoundCloud one had a switch beside its
+// size.
+type legacyCaches struct {
+	CacheSongs      *int  `json:"cacheSongs"`
+	SoundCloudCache *bool `json:"soundCloudCache"`
+	YouTubeCacheMB  *int  `json:"youtubeCacheMB"`
+}
+
+// migrateCaches turns the cache settings of an older file into sizes. A count
+// of songs has no size, so a cache that was on takes the default size and one
+// that was off stays off; a SoundCloud cache that was switched off is a size
+// of zero. A size below zero is the default.
+func migrateCaches(data []byte, read *Settings, defaults Settings) {
+	var old legacyCaches
+	if err := json.Unmarshal(data, &old); err == nil {
+		if old.YouTubeCacheMB == nil && old.CacheSongs != nil && *old.CacheSongs == 0 {
+			read.YouTubeCacheMB = 0
+		}
+		if old.SoundCloudCache != nil && !*old.SoundCloudCache {
+			read.SoundCloudCacheMB = 0
+		}
+	}
+	if read.YouTubeCacheMB < 0 {
+		read.YouTubeCacheMB = defaults.YouTubeCacheMB
+	}
+	if read.SoundCloudCacheMB < 0 {
+		read.SoundCloudCacheMB = defaults.SoundCloudCacheMB
+	}
+}
+
+// DefaultProviderOrder is the order Meiro searches and plays sources in on a
+// first run: YouTube Music first, then SoundCloud.
+func DefaultProviderOrder() []string { return []string{"ytm", "soundcloud"} }
+
+// migrateProviderOrder reads the provider an older settings file named and
+// puts it first in the default order, so a user who had chosen SoundCloud
+// keeps it preferred.
+func migrateProviderOrder(provider string) []string {
+	order := DefaultProviderOrder()
+	if provider == "" || provider == order[0] {
+		return order
+	}
+	moved := []string{provider}
+	for _, name := range order {
+		if name != provider {
+			moved = append(moved, name)
+		}
+	}
+	return moved
+}
+
+// DefaultCacheMB is how much audio each provider's cache keeps on disk on a
+// first run.
+const DefaultCacheMB = 512
 
 // The interface zooms the app offers, as percentages, and the step between
 // them.
@@ -138,6 +246,7 @@ func (s *Settings) clone() Settings {
 	c := *s
 	c.Recent = slices.Clone(s.Recent)
 	c.Shortcuts = maps.Clone(s.Shortcuts)
+	c.ProviderOrder = slices.Clone(s.ProviderOrder)
 	return c
 }
 
@@ -233,7 +342,8 @@ func Load(path string) Settings {
 	if read.Volume < 0 || read.Volume > 100 {
 		read.Volume = s.Volume
 	}
-	read.CacheSongs = audio.ValidLimit(read.CacheSongs)
+	migrateCaches(data, &read, s)
+	read.Explore = min(max(read.Explore, 0), 100)
 	if _, ok := ParseSeed(read.Seed); !ok {
 		read.Seed = s.Seed
 	}
@@ -242,6 +352,14 @@ func Load(path string) Settings {
 	}
 	if read.TrayMark != TrayMarkWordmark && read.TrayMark != TrayMarkOMark {
 		read.TrayMark = s.TrayMark
+	}
+	if read.ProviderOrder == nil {
+		// A settings file written before the order existed names at most the
+		// one source it read; that source goes first in the default order.
+		read.ProviderOrder = migrateProviderOrder(read.Provider)
+	}
+	if strings.TrimSpace(read.SyncURL) == "" {
+		read.SyncURL = s.SyncURL
 	}
 	read.Zoom = ClampZoom(read.Zoom)
 	return read

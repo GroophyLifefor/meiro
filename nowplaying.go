@@ -107,7 +107,7 @@ func (a *app) loadRelated() {
 		return
 	}
 	r.videoID, r.items, r.err = id, nil, ""
-	client := a.client()
+	client := a.ytClient()
 	startTask(a, &r.load, panelTimeout, func(ctx context.Context) (*youtube.BrowseResult, error) {
 		return client.GetRelated(ctx, id)
 	}, func(result *youtube.BrowseResult, err error) {
@@ -168,7 +168,7 @@ func (a *app) nowPlayingView(c *ui.Context) {
 		})
 		ui.Row(c).Grow(1).MinHeight(0).Padding(0, pageGutter, pageGutter).Gap(32).AlignItems(ui.Stretch).Children(func() {
 			if wide || !a.nowPlaying.queueOnly {
-				a.nowPlayingMain(c, h)
+				a.nowPlayingMain(c, h, wide)
 			}
 			if wide || a.nowPlaying.queueOnly {
 				a.sidePanel(c, wide, false)
@@ -179,10 +179,13 @@ func (a *app) nowPlayingView(c *ui.Context) {
 
 // nowPlayingMain is the artwork, the name, the scrubber and the controls:
 // stacked in a tall window, side by side in a short one.
-func (a *app) nowPlayingMain(c *ui.Context, windowHeight float32) {
+func (a *app) nowPlayingMain(c *ui.Context, windowHeight float32, wide bool) {
 	controls := func() {
 		ui.Row(c).Gap(8).AlignItems(ui.Center).Children(func() {
 			a.trackLine(c, m3.HeadlineSmall, m3.TitleMedium).Grow(1)
+			// The marks of the providers that hold the track, to see where it
+			// plays from and to switch.
+			a.sourceBadges(c, a.current)
 			a.likeButton(c)
 		})
 		a.scrubber(c)
@@ -202,7 +205,14 @@ func (a *app) nowPlayingMain(c *ui.Context, windowHeight float32) {
 		return
 	}
 	art := min(max(windowHeight-420, 300), 440)
-	ui.Column(c).Grow(1).MinWidth(0).Center().Gap(20).Children(func() {
+	column := ui.Column(c).Grow(1).MinWidth(0).Center().Gap(20)
+	if wide {
+		// Beside the side panel the artwork takes a share of the width that
+		// never goes below its own, and the panel takes the larger share, so
+		// a wide window gives the lyrics room instead of empty space.
+		column.Grow(2).Basis(0).MinWidth(art)
+	}
+	column.Children(func() {
 		a.nowPlayingArtwork(c, 640, art, m3.ExtraLargeInc+8)
 		ui.Column(c).Width(art).Gap(14).Children(controls)
 	})
@@ -244,7 +254,7 @@ func (a *app) sidePanel(c *ui.Context, wide, compactQueue bool) {
 		card.Padding(8, 0, 0)
 	}
 	if wide {
-		card.Width(480).Shrink(0)
+		card.Grow(3).Basis(0).MinWidth(480).MinHeight(0)
 	} else {
 		card.Grow(1).MinWidth(0).MinHeight(0)
 	}
@@ -321,7 +331,7 @@ func (a *app) queueSourceLine(c *ui.Context, compact bool) {
 	}
 	ui.Row(c).Gap(6).AlignItems(ui.Center).Children(func() {
 		m3.Text(c, role, "Playing from").Shrink(0).TextColor(sc.OnSurfaceVariant)
-		m3.EmphasizedText(c, role, a.queue.source).Grow(1).MinWidth(0).SingleLine()
+		m3.EmphasizedText(c, role, a.queue.source).Grow(1).MinWidth(0).SingleLine().Tooltip(a.queue.source)
 	})
 }
 
@@ -448,8 +458,8 @@ func (a *app) queueView(c *ui.Context, compact bool) {
 	// Rows drag to a new place in the queue; the divider between chosen and
 	// generated tracks is not draggable itself.
 	list.Reorder = a.moveQueue
-	if a.nowPlaying.queueFollow != a.current.VideoID {
-		a.nowPlaying.queueFollow = a.current.VideoID
+	if a.nowPlaying.queueFollow != a.current.Key() {
+		a.nowPlaying.queueFollow = a.current.Key()
 		list.ScrollTo(q.rowOf(q.index), ui.Start)
 	}
 	listBottomPadding := float32(16)
@@ -471,7 +481,7 @@ func (a *app) queueView(c *ui.Context, compact bool) {
 			})
 			return
 		}
-		a.songRow(c, q.at(index), q.items, songOptions{directQueue: true, source: q.source, list: "queue", position: index, compact: compact})
+		a.songRow(c, q.at(index), q.items, songOptions{directQueue: true, source: q.source, list: "queue", position: index, compact: compact, doublePress: true})
 	}).Grow(1).Padding(0, 8, listBottomPadding).FocusRing(false)
 	if index, ok := q.trackAt(a.nowPlaying.queueSelectionCursor); ok {
 		if view.Submitted() {
@@ -508,7 +518,7 @@ func (a *app) relatedView(c *ui.Context) {
 			return items[i].Title
 		}
 		ui.List(c, list, len(items), func(i int) {
-			a.songRow(c, items[i], items, songOptions{directQueue: true, source: "Related", list: "related", position: i})
+			a.songRow(c, items[i], items, songOptions{directQueue: true, source: "Related", list: "related", position: i, doublePress: true})
 		}).Grow(1).Padding(0, 8, 16)
 	}
 }

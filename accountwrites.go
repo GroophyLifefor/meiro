@@ -22,13 +22,13 @@ import (
 // account is in use: its pages say their own.
 func (a *app) writeBehind(key string, write func(ctx context.Context, client *youtube.Client) error, done func(err error)) {
 	a.writing[key] = true
-	client := a.client()
+	client := a.ytClient()
 	spawn(a, func() error {
 		ctx, cancel := context.WithTimeout(context.Background(), writeTimeout)
 		defer cancel()
 		return write(ctx, client)
 	}, func(err error) {
-		if a.client() != client {
+		if a.ytClient() != client {
 			return
 		}
 		delete(a.writing, key)

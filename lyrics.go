@@ -42,14 +42,14 @@ type loadedLyrics struct {
 // loadLyrics fetches the lyrics of the current track, once.
 func (a *app) loadLyrics() {
 	l := &a.nowPlaying.lyrics
-	id := a.current.VideoID
+	id := a.current.Key()
 	if id == "" || l.videoID == id {
 		return
 	}
 	l.videoID, l.text, l.footer, l.err, l.synced, l.followed = id, "", "", "", nil, -1
 	a.nowPlaying.lyricsScroll.Y = 0
 	l.centerPending, l.settled = false, false
-	client, item, total := a.client(), a.current, a.total
+	client, item, total := a.ytClient(), a.current, a.total
 	fetch := a.lyricsSource
 	startTask(a, &l.load, panelTimeout, func(ctx context.Context) (loadedLyrics, error) {
 		return findLyrics(ctx, fetch, client, item, total)
@@ -74,13 +74,17 @@ func (a *app) loadLyrics() {
 func findLyrics(ctx context.Context, fetch lyricsSource, client *youtube.Client, item youtube.MusicItem, total time.Duration) (loadedLyrics, error) {
 	var found, plain loadedLyrics
 	var lookupErr error
-	if lyrics, err := client.GetLyrics(ctx, item.VideoID); err == nil {
-		plain = loadedLyrics{text: strings.TrimSpace(lyrics.Description), footer: lyrics.Footer}
-		for _, line := range lyrics.Timed {
-			found.synced = append(found.synced, lrclib.Line{At: line.Start, Text: line.Text})
+	// YouTube Music's timed lyrics are asked for by video ID; a provider that
+	// carries none, as SoundCloud, goes straight to LRCLIB.
+	if item.VideoID != "" {
+		if lyrics, err := client.GetLyrics(ctx, item.VideoID); err == nil {
+			plain = loadedLyrics{text: strings.TrimSpace(lyrics.Description), footer: lyrics.Footer}
+			for _, line := range lyrics.Timed {
+				found.synced = append(found.synced, lrclib.Line{At: line.Start, Text: line.Text})
+			}
+		} else if ctx.Err() != nil {
+			return found, ctx.Err()
 		}
-	} else if ctx.Err() != nil {
-		return found, ctx.Err()
 	}
 	// Where the lyrics came from: what YouTube Music says of them, or itself.
 	found.footer = cmp.Or(plain.footer, "Source: YouTube Music")

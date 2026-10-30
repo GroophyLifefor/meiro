@@ -11,6 +11,7 @@ import (
 	"github.com/elianiva/meiro/internal/audio"
 	"github.com/elianiva/meiro/internal/lru"
 	"github.com/elianiva/meiro/internal/playstate"
+	"github.com/elianiva/meiro/media"
 	"github.com/elianiva/meiro/youtube"
 )
 
@@ -47,6 +48,13 @@ type playback struct {
 	// off and was found again; the count ends when the track plays on.
 	recoveries    int
 	recoveredFrom time.Duration
+	// triedSources are the providers the current track's audio has already
+	// been looked for in, so a failure moves on to the next one it is held by
+	// and never comes back to one that failed.
+	triedSources map[media.Source]bool
+	// fallbackMsg is the message a fallback will show once the other provider
+	// actually starts, so a source that fails in turn announces nothing.
+	fallbackMsg string
 
 	// stream finds the current track's audio; it is busy from the moment a
 	// track is chosen until its audio is found.
@@ -101,9 +109,11 @@ func (a *app) play(item youtube.MusicItem, tracks []youtube.MusicItem) {
 // playFrom starts an item from a queue, and remembers the context used to
 // ask YouTube Music for the generated queue that follows it.
 func (a *app) playFrom(item youtube.MusicItem, tracks []youtube.MusicItem, index int, options youtube.UpNextOptions, source string) {
-	if item.VideoID == "" {
+	if item.Key() == "" {
 		return
 	}
+	item = a.withDefaultSource(item)
+	tracks = a.withDefaultSources(tracks)
 	a.clearQueueSelection()
 	a.queue.replace(item, tracks, index, source)
 	clear(a.scrobble.queued) // the queue they were added to is gone
@@ -111,7 +121,7 @@ func (a *app) playFrom(item youtube.MusicItem, tracks []youtube.MusicItem, index
 	a.learnCredits(item)
 	options.VideoID = item.VideoID
 	a.resetUpNext(options)
-	if a.loading() && a.current.VideoID == item.VideoID {
+	if a.loading() && a.current.Key() == item.Key() {
 		a.ensureUpNext()
 		return // this track is already on its way
 	}
@@ -143,7 +153,7 @@ func (a *app) startNext(item youtube.MusicItem) {
 // maxSkips tracks were passed over already or nothing follows. Then the
 // track stays where it is, with the reason it failed.
 func (a *app) skipUnplayable(item youtube.MusicItem) {
-	if a.current.VideoID != item.VideoID || a.skipped >= maxSkips {
+	if a.current.Key() != item.Key() || a.skipped >= maxSkips {
 		return
 	}
 	next, ok := a.queue.next(a.settings.AutoPlay, a.repeat)
@@ -159,6 +169,9 @@ func (a *app) skipUnplayable(item youtube.MusicItem) {
 // startTrack is start without ending a run of skipped tracks. automatic says
 // the queue chose item, rather than the listener.
 func (a *app) startTrack(item youtube.MusicItem, automatic bool) {
+	// A track chosen afresh gets every provider it is held by tried again.
+	a.triedSources = nil
+	a.fallbackMsg = ""
 	startAt, changed := a.enterTrack(item, automatic)
 	// The old stream is stopped by the work that finds the new one: stopping
 	// kills ffmpeg and waits for the audio device, which is not for the main
@@ -167,21 +180,34 @@ func (a *app) startTrack(item youtube.MusicItem, automatic bool) {
 	a.afterEnter(item, changed)
 }
 
+// replayFromSource starts the current track again from the source it now
+// names, holding where it was, without clearing the providers already tried
+// for it, which a fallback relies on.
+func (a *app) replayFromSource(item youtube.MusicItem) {
+	a.resumeID = item.Key()
+	startAt, changed := a.enterTrack(item, false)
+	a.streamAudio(item, startAt, changed)
+	a.afterEnter(item, changed)
+}
+
 // enterTrack makes item the current track, and says where in it to start and
 // whether it is another track than the one before.
 func (a *app) enterTrack(item youtube.MusicItem, automatic bool) (time.Duration, bool) {
 	a.recoveries = 0
-	changed := a.current.VideoID != item.VideoID
+	changed := a.current.Key() != item.Key()
 	if changed {
 		a.finishEpisodeProgress(false)
 		a.leaveEpisode()
+		// Another track gets every provider it is held by tried again.
+		a.triedSources = nil
+		a.fallbackMsg = ""
 	}
 	a.current = item
 	a.total = parseDuration(item.Duration)
 	a.loudness, a.loudnessOK = 0, false
 	startAt := time.Duration(0)
 	switch {
-	case a.resumeID == item.VideoID:
+	case a.resumeID == item.Key():
 		startAt = time.Duration(a.scrub * float64(time.Second))
 	case item.IsEpisode():
 		startAt = a.takeEpisode(item.VideoID)
@@ -206,6 +232,8 @@ func (a *app) afterEnter(item youtube.MusicItem, changed bool) {
 	a.ensureUpNext()
 	a.loadPanel()
 	if changed {
+		a.findOtherSource(item)
+		a.autoLink(item)
 		if a.settings.NotifyTrack {
 			a.notifyTrack(item)
 		} else {
@@ -230,7 +258,7 @@ func (a *app) notifyTrack(item youtube.MusicItem) {
 	startTask(a, &a.notificationArtwork, 8*time.Second, func(ctx context.Context) ([]byte, error) {
 		return a.thumbs.NotificationIcon(ctx, item.Thumbnail)
 	}, func(icon []byte, err error) {
-		if a.current.VideoID != item.VideoID {
+		if a.current.Key() != item.Key() {
 			return
 		}
 		if err != nil {
@@ -248,17 +276,17 @@ func (a *app) loading() bool { return a.stream.busy() || a.player.Buffering() }
 // enqueue adds a track to the chosen queue without changing the current
 // track. Chosen tracks stay ahead of auto-play recommendations.
 func (a *app) enqueue(item youtube.MusicItem, playNext bool) {
-	if item.VideoID == "" {
+	if item.Key() == "" {
 		return
 	}
-	if a.current.VideoID == "" || a.queue.len() == 0 {
+	if a.current.Key() == "" || a.queue.len() == 0 {
 		a.playFrom(item, nil, 0, youtube.UpNextOptions{}, "Queue")
 		a.notice = "Playing " + item.Title
 		return
 	}
 	a.queue.insert(item, playNext, a.settings.AutoPlay)
 	a.clearQueueSelection()
-	a.rememberQueued(item.VideoID)
+	a.rememberQueued(item.Key())
 	a.learnCredits(item)
 	if playNext {
 		a.notice = item.Title + " will play next"
@@ -365,7 +393,7 @@ func (a *app) playVideoID(id string) {
 		return
 	}
 	for i, item := range a.page.playable {
-		if item.VideoID == id {
+		if item.Key() == id {
 			a.playFrom(item, a.page.playable, i, youtube.UpNextOptions{}, a.queue.source)
 			return
 		}
@@ -456,6 +484,9 @@ func (a *app) poll() {
 // trackEnded moves on when a track finishes: it repeats, or plays the next
 // one, or stops at the end of the queue.
 func (a *app) trackEnded() {
+	// The play is over and heard to its end: file it before the next one
+	// starts.
+	a.finishPlayRecord(true)
 	if a.repeat == repeatTrack {
 		a.startNext(a.current)
 		return
@@ -544,7 +575,7 @@ func (a *app) togglePlay() {
 		return // the track is already on its way
 	}
 	if a.playErr != "" || !a.player.Active() {
-		if a.current.VideoID != "" {
+		if a.current.Key() != "" {
 			a.start(a.current)
 		}
 		return
@@ -563,7 +594,7 @@ func (a *app) resume() {
 		return
 	}
 	if a.playErr != "" || !a.player.Active() || a.player.Ended() {
-		if a.current.VideoID != "" {
+		if a.current.Key() != "" {
 			a.start(a.current)
 		}
 	} else {
@@ -631,13 +662,55 @@ func (a *app) cycleRepeat() {
 	a.syncSystemMedia()
 }
 
-// setAudioCacheLimit changes the number of recently played audio files kept
-// locally, evicting old files at once when the limit goes down.
-func (a *app) setAudioCacheLimit(limit int) {
-	a.settings.CacheSongs = audio.ValidLimit(limit)
-	a.cacheSongsText = strconv.Itoa(a.settings.CacheSongs)
-	cache, count := a.currentAudioCache(), a.settings.CacheSongs
-	a.run(func() { cache.SetLimit(count) })
+// doublePress is how soon after a press on the playing track a second one makes
+// a double press.
+const doublePress = 500 * time.Millisecond
+
+// pressPlaying answers a press on the track that is already playing. A single
+// press does nothing, so it does not start the track over; a second press on it
+// within doublePress pauses it, or plays it again when it is paused. A double
+// press on a track that is not playing yet starts it with the first press and
+// reaches here only for the second, which is a single press of the playing
+// track: it does not pause what it just started.
+func (a *app) pressPlaying(item youtube.MusicItem) {
+	now := time.Now()
+	if a.lastPress.key == item.Key() && now.Sub(a.lastPress.at) < doublePress {
+		a.lastPress = pressedTrack{}
+		a.togglePlay()
+		return
+	}
+	a.lastPress = pressedTrack{key: item.Key(), at: now}
+}
+
+// pressedTwice records a press on a track that is not playing and says whether
+// it is the second of a double press on that track.
+func (a *app) pressedTwice(item youtube.MusicItem) bool {
+	now := time.Now()
+	if a.lastPress.key == item.Key() && now.Sub(a.lastPress.at) < doublePress {
+		a.lastPress = pressedTrack{}
+		return true
+	}
+	a.lastPress = pressedTrack{key: item.Key(), at: now}
+	return false
+}
+
+// pressedTrack is the playing track a press last landed on, and when.
+type pressedTrack struct {
+	key string
+	at  time.Time
+}
+
+// setYouTubeCacheMB changes how much YouTube Music audio the cache keeps, in
+// megabytes, evicting old files at once when it goes down. Zero turns the
+// cache off.
+func (a *app) setYouTubeCacheMB(mb int) {
+	a.settings.YouTubeCacheMB = max(mb, 0)
+	a.youtubeCacheMBText = strconv.Itoa(a.settings.YouTubeCacheMB)
+	cache, limits := a.currentAudioCache(), cacheLimits(a.settings.YouTubeCacheMB)
+	a.run(func() {
+		cache.SetLimit(limits.Count)
+		cache.SetBytesLimit(limits.Bytes)
+	})
 	a.saveSettings()
 }
 

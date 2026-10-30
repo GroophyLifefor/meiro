@@ -132,9 +132,15 @@ func (a *app) onNavigate() {
 	// belongs to the visit, not the page. A page kept from before rebuilds
 	// its rows, since the search is part of the rows' key.
 	a.detailFilter, a.detailSearchOpen, a.detailSearchHadFocus, a.detailSort, a.detailSortOpen = "", false, false, playlistSort{}, false
+	// A playlist page opens at its row of lists, not on the list left open.
+	// The page itself keeps the list a new one just made, so it stays open.
+	if r, _ := a.route(); r.id != routeLibraries {
+		a.libSelected = ""
+	}
 	a.closeSettingsSearch()
 	a.pageLoad.stop()
 	a.pageMore.stop()
+	a.mbArtist.load.stop()
 	a.nowPlaying.open, a.nowPlaying.closing = false, false
 	location := a.router.Location()
 	r, id := a.route()
@@ -191,7 +197,7 @@ func (a *app) openTarget(target youtube.Target, heading detail) {
 // loadPage loads the page shown with its route's loader. The client is the
 // one in use when the load began, since the app's own may change meanwhile.
 func (a *app) loadPage(r *route, id string) {
-	client := a.client()
+	client := a.ytClient()
 	path := a.path()
 	// The result goes to the page that asked for it, wherever the router
 	// has moved since.
@@ -426,7 +432,7 @@ func (a *app) loadMore() {
 	}
 	p := a.page
 	p.rowsDirty = true
-	client := a.client()
+	client := a.ytClient()
 	startTask(a, &a.pageMore, moreTimeout, func(ctx context.Context) (moreItems, error) {
 		if searching {
 			result, err := client.ContinueSearch(ctx, token)
@@ -521,7 +527,7 @@ func (a *app) reloadPage() {
 // activate opens what an item is: a song plays from its place in tracks,
 // and the others open their page.
 func (a *app) activate(item youtube.MusicItem, tracks []youtube.MusicItem) {
-	a.activateAt(item, tracks, indexOf(tracks, item.VideoID))
+	a.activateAt(item, tracks, indexOf(tracks, item.Key()))
 }
 
 func (a *app) activateAt(item youtube.MusicItem, tracks []youtube.MusicItem, index int) {
@@ -538,9 +544,9 @@ func (a *app) activateAt(item youtube.MusicItem, tracks []youtube.MusicItem, ind
 }
 
 // indexOf is the place of a track among tracks, or -1.
-func indexOf(tracks []youtube.MusicItem, videoID string) int {
+func indexOf(tracks []youtube.MusicItem, key string) int {
 	for i := range tracks {
-		if tracks[i].VideoID == videoID {
+		if tracks[i].Key() == key {
 			return i
 		}
 	}

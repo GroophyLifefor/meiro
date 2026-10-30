@@ -3,9 +3,38 @@ package main
 import (
 	"time"
 
+	"github.com/egoist/mygo"
 	"github.com/egoist/mygo/ui"
 	"github.com/elianiva/meiro/m3"
 )
+
+// mygoThemeSource is the mode Meiro shows as MyGo's appearance, which the
+// desktop's own chrome follows: the window buttons on a framed-less window,
+// and the native menus.
+func mygoThemeSource(m m3.Mode) mygo.ThemeSource {
+	switch m {
+	case m3.Light:
+		return mygo.ThemeLight
+	case m3.Dark:
+		return mygo.ThemeDark
+	case m3.System:
+		return mygo.ThemeSystem
+	default:
+		return mygo.ThemeSystem
+	}
+}
+
+// applyAppearance tells MyGo the appearance Meiro is set to. On Linux the
+// window buttons of a frameless window are drawn by the desktop, which takes
+// their colours from GTK's appearance, so without this they stay on the
+// system's and vanish on a light window. Without a desktop, as in tests,
+// there is nothing to tell.
+func (a *app) applyAppearance() {
+	if a.desktop == nil {
+		return
+	}
+	mygo.Theme.SetSource(mygoThemeSource(a.settings.Theme(uiFont).Mode))
+}
 
 // themeState is the theme being shown. A change of colours glides from one
 // scheme to the next rather than cutting.

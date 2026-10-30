@@ -7,10 +7,8 @@ import (
 	"io"
 	"math"
 	"net/http"
-	"net/url"
 	"os"
 	"path/filepath"
-	"runtime"
 	"slices"
 	"strconv"
 	"strings"
@@ -19,10 +17,12 @@ import (
 
 	"github.com/egoist/mygo/ui"
 
+	"github.com/elianiva/meiro/internal/audio"
 	"github.com/elianiva/meiro/internal/cookies"
 	"github.com/elianiva/meiro/internal/history"
 	"github.com/elianiva/meiro/internal/settings"
 	"github.com/elianiva/meiro/m3"
+	"github.com/elianiva/meiro/media"
 	"github.com/elianiva/meiro/youtube"
 )
 
@@ -173,7 +173,9 @@ func assertSearchInputKeepsBoundsOnFocus(t *testing.T, tt *ui.Tester, label stri
 }
 
 func TestExpandedNavigationMetricsAndFullWidthSelection(t *testing.T) {
-	a := newTestApp(t)
+	// Library is offered only to a signed-in user.
+	resetFakes()
+	a := signedInApp(t)
 	tt := ui.NewTester(a.view, 1280, 720)
 	if err := tt.Click("Expand navigation"); err != nil {
 		t.Fatal(err)
@@ -226,7 +228,9 @@ func TestExpandedNavigationMetricsAndFullWidthSelection(t *testing.T) {
 }
 
 func TestNavigationRailAndPageAnimateTogether(t *testing.T) {
-	a := newTestApp(t)
+	// Library is offered only to a signed-in user.
+	resetFakes()
+	a := signedInApp(t)
 	tt := ui.NewTester(a.view, 1280, 720)
 	menu, ok := tt.Find("Expand navigation")
 	if !ok {
@@ -704,6 +708,152 @@ func TestSearchFlow(t *testing.T) {
 	tt.Frame()
 	if !strings.HasPrefix(a.path(), "/artist/UCyorushika") {
 		t.Fatalf("choosing an item opened %q", a.path())
+	}
+}
+
+// The provider preference order defaults to YouTube Music first and
+// SoundCloud second; moveProvider swaps two sources and keeps the new order,
+// and the order always names every known source exactly once.
+func TestProviderPreferenceOrderMoves(t *testing.T) {
+	a := newTestApp(t)
+	want := []media.Source{media.SourceYTM, media.SourceSoundCloud}
+	if got := a.providerOrder(); !slices.Equal(got, want) {
+		t.Fatalf("default order = %v, want %v", got, want)
+	}
+	// A settings file that predates the order leaves it empty, and the default
+	// order comes back.
+	a.settings.ProviderOrder = nil
+	if got := a.providerOrder(); !slices.Equal(got, want) {
+		t.Fatalf("empty order = %v, want %v", got, want)
+	}
+	a.moveProvider(0, 1)
+	if got := a.settings.ProviderOrder; !slices.Equal(got, []string{"soundcloud", "ytm"}) {
+		t.Fatalf("after moving the first down = %v", got)
+	}
+	if got := a.providerOrder(); got[0] != media.SourceSoundCloud {
+		t.Fatalf("the order did not follow the setting: %v", got)
+	}
+	// Moving at an end does nothing.
+	a.moveProvider(0, -1)
+	if got := a.settings.ProviderOrder; !slices.Equal(got, []string{"soundcloud", "ytm"}) {
+		t.Fatalf("moving at the top changed the order: %v", got)
+	}
+}
+
+// Settings has a Preferred provider card that lists the sources in the order
+// Meiro prefers them. Its arrows move a row one place, the ends' arrows do
+// nothing, and the order is kept in settings.json.
+func TestSettingsPreferredProviderMovesAndKeeps(t *testing.T) {
+	a := newTestApp(t)
+	a.saver.Path = filepath.Join(t.TempDir(), "settings.json")
+	a.router.Push("/settings")
+	tt := ui.NewTester(a.view, 1000, 900)
+
+	if err := tt.Click("Search settings"); err != nil {
+		t.Fatal(err)
+	}
+	tt.Type("preferred provider")
+	tt.Frame()
+	for _, want := range []string{"Music sources", "Preferred provider", "YouTube Music", "SoundCloud"} {
+		if !tt.HasText(want) {
+			t.Fatalf("the Preferred provider card does not show %q: %q", want, tt.Texts())
+		}
+	}
+
+	// The top row cannot move up and the bottom row cannot move down.
+	if err := tt.Click("Move YouTube Music up"); err != nil {
+		t.Fatal(err)
+	}
+	tt.Frame()
+	if err := tt.Click("Move SoundCloud down"); err != nil {
+		t.Fatal(err)
+	}
+	tt.Frame()
+	if got := a.providerOrder(); !slices.Equal(got, []media.Source{media.SourceYTM, media.SourceSoundCloud}) {
+		t.Fatalf("a disabled arrow changed the order: %v", got)
+	}
+
+	// Moving the first source down puts SoundCloud first.
+	if err := tt.Click("Move YouTube Music down"); err != nil {
+		t.Fatal(err)
+	}
+	tt.Frame()
+	if got := a.providerOrder(); got[0] != media.SourceSoundCloud {
+		t.Fatalf("the order did not follow the click: %v", got)
+	}
+	a.saver.Wait()
+	if got := settings.Load(a.saver.Path).ProviderOrder; !slices.Equal(got, []string{"soundcloud", "ytm"}) {
+		t.Fatalf("the saved order = %v, want soundcloud first", got)
+	}
+}
+
+// A search asks both providers and shows what arrives. A song both hold is one
+// row carrying both sources; a song only one holds keeps a row of its own.
+func TestUnifiedSearchMergesProviders(t *testing.T) {
+	resetFakes()
+	a := newTestApp(t)
+	a.router.Push("/search")
+	tt := ui.NewTester(a.view, 1000, 700)
+
+	if err := tt.Click(searchPlaceholder); err != nil {
+		t.Fatal(err)
+	}
+	tt.Type("shared")
+	tt.Key(0, ui.KeyEnter)
+	tt.Frame()
+	if len(a.search.items) != 3 {
+		t.Fatalf("results = %d, want 3: %+v", len(a.search.items), a.search.items)
+	}
+	cloud := a.search.items[0]
+	if cloud.Title != "Cloud Song" || len(cloud.Sources) != 2 {
+		t.Fatalf("the shared song = %+v", cloud)
+	}
+	if !cloud.HasSource(media.SourceYTM) || !cloud.HasSource(media.SourceSoundCloud) {
+		t.Fatalf("the shared song does not carry both sources: %+v", cloud.Sources)
+	}
+	if got := a.search.items[2].Title; got != "Sky Tune" {
+		t.Fatalf("the SoundCloud-only song = %q, want Sky Tune", got)
+	}
+	// The merged song is one row on screen, not two: one row offers its menu.
+	if count := strings.Count(strings.Join(tt.Texts(), "\n"), "More options for Cloud Song"); count != 1 {
+		t.Fatalf("Cloud Song is shown %d times, want one row: %q", count, tt.Texts())
+	}
+	if targets := soundcloudTargets(); len(targets) == 0 || !strings.HasPrefix(targets[len(targets)-1], "scsearch") {
+		t.Fatalf("SoundCloud was not searched: %v", targets)
+	}
+}
+
+// A SoundCloud track found by the unified search plays the page URL it
+// carries, through the SoundCloud resolver.
+func TestSoundCloudTrackFromUnifiedSearchPlays(t *testing.T) {
+	resetFakes()
+	a, r := tonesApp(t, 3)
+	a.soundcloudStreams = audio.NewURLs(r.resolve)
+	a.router.Push("/search")
+	tt := ui.NewTester(a.view, 1000, 700)
+	tt.Frame()
+	if err := tt.Click(searchPlaceholder); err != nil {
+		t.Fatal(err)
+	}
+	tt.Type("cloud")
+	tt.Key(0, ui.KeyEnter)
+	tt.Frame()
+	if !tt.HasText("Cloud Song") || !tt.HasText("Sky Tune") {
+		t.Fatalf("the SoundCloud search showed no results: %q", tt.Texts())
+	}
+	if targets := soundcloudTargets(); len(targets) == 0 || !strings.HasPrefix(targets[len(targets)-1], "scsearch") {
+		t.Fatalf("SoundCloud was not searched: %v", targets)
+	}
+	const page = "https://soundcloud.com/cloud-voice/cloud-song"
+	if err := tt.Click("Cloud Song"); err != nil {
+		t.Fatal(err)
+	}
+	tt.Frame()
+	if a.current.Key() != page {
+		t.Fatalf("the SoundCloud track is %q, want %q", a.current.Key(), page)
+	}
+	if !r.asked(page) {
+		t.Fatalf("the resolver was not asked for %q: %v", page, r.ids)
 	}
 }
 
@@ -1269,10 +1419,13 @@ func TestAPlaylistPageCanBeSearched(t *testing.T) {
 	}
 
 	// A matching song plays from its own place in the whole playlist.
-	if err := tt.Click("Ameiro Two"); err != nil {
-		t.Fatal(err)
+	// A playlist's songs start on a double press, so one press only marks it.
+	for range 2 {
+		if err := tt.Click("Ameiro Two"); err != nil {
+			t.Fatal(err)
+		}
+		tt.Frame()
 	}
-	tt.Frame()
 	for range 2 {
 		tt.Frame()
 	}
@@ -1346,7 +1499,8 @@ func TestSettingsPersistAcrossRestarts(t *testing.T) {
 	a := newTestApp(t)
 	a.saver.Path = path
 	a.router.Push("/settings")
-	tt := ui.NewTester(a.view, 1000, 900)
+	// Tall enough for the two account cards above Appearance.
+	tt := ui.NewTester(a.view, 1000, 1500)
 	if err := tt.Click("Dark"); err != nil {
 		t.Fatal(err)
 	}
@@ -1535,7 +1689,7 @@ func TestClearHistoryFromSettings(t *testing.T) {
 		t.Fatalf("saved %d plays, want 2", len(got))
 	}
 	a.router.Push("/settings")
-	tt := ui.NewTester(a.view, 1000, 4400)
+	tt := ui.NewTester(a.view, 1000, 8000)
 	tt.Frame()
 	if !tt.HasText("2 plays are kept on this device") {
 		t.Fatalf("settings do not count the plays: %q", tt.Texts())
@@ -1590,40 +1744,6 @@ func TestClearHistoryWhileItLoads(t *testing.T) {
 	}
 }
 
-// Report a problem opens the issue form with the versions filled in, and
-// never carries the account.
-func TestReportProblemOpensPrefilledIssue(t *testing.T) {
-	a := signedInApp(t)
-	var opened []string
-	a.openURL = func(link string) error { opened = append(opened, link); return nil }
-	a.router.Push("/settings")
-	tt := ui.NewTester(a.view, 1000, 5400)
-	tt.Frame()
-
-	if err := tt.Click("Report a problem"); err != nil {
-		t.Fatal(err)
-	}
-	if len(opened) != 1 {
-		t.Fatalf("opened %d links, want 1", len(opened))
-	}
-	u, err := url.Parse(opened[0])
-	if err != nil || u.Host != "github.com" || u.Path != "/elianiva/meiro/issues/new" {
-		t.Fatalf("unexpected link %s (%v)", opened[0], err)
-	}
-	if strings.Contains(opened[0], "SAPISID") {
-		t.Error("the link carries the session cookie")
-	}
-	q := u.Query()
-	if q.Get("template") != "bug_report.yml" || !strings.HasPrefix(q.Get("os-version"), runtime.GOOS+" ") {
-		t.Errorf("form fields = %v", q)
-	}
-	for _, want := range []string{"yt-dlp: ", "ffmpeg: "} {
-		if !strings.Contains(q.Get("tools"), want) {
-			t.Errorf("tools lack %q: %q", want, q.Get("tools"))
-		}
-	}
-}
-
 // rejectingMusic answers every request the way YouTube answers a session it
 // no longer accepts.
 type rejectingMusic struct{}
@@ -1658,7 +1778,7 @@ func TestRejectedSessionAsksToSignInAgain(t *testing.T) {
 	if a.signedIn() {
 		t.Fatal("a rejected session is still in use")
 	}
-	if !tt.HasText("Your session expired") || !tt.HasText("Sign in again to see your songs, albums and playlists.") {
+	if !tt.HasText("Your YouTube Music session expired") || !tt.HasText("Sign in to YouTube Music again to see your songs, albums and playlists.") {
 		t.Fatalf("the library does not ask to sign in again: %q", tt.Texts())
 	}
 	if err := tt.Click("Sign in"); err != nil {
@@ -2028,5 +2148,31 @@ func TestTheCurrentTabPutsThePlayerAway(t *testing.T) {
 	}
 	if after, _ := a.route(); after.nav != routeHome {
 		t.Errorf("the tab moved the page to %q", after.title)
+	}
+}
+
+// In a playlist a single press on a song that is not playing does nothing, and
+// a double press starts it.
+func TestAPlaylistSongStartsOnADoublePress(t *testing.T) {
+	a, _ := playbackApp(t)
+	a.router.Push("/playlist/VLPL_songs")
+	tt := ui.NewTester(a.view, 1000, 700)
+	for i := 0; i < 20 && len(a.page.playable) == 0; i++ {
+		tt.Frame()
+	}
+	tt.Frame()
+	if err := tt.Click("Ameiro Two"); err != nil {
+		t.Fatal(err)
+	}
+	tt.Frame()
+	if a.current.VideoID != "" || len(a.queue.items) != 0 {
+		t.Fatalf("one press played %q", a.current.VideoID)
+	}
+	if err := tt.Click("Ameiro Two"); err != nil {
+		t.Fatal(err)
+	}
+	tt.Frame()
+	if len(a.queue.items) == 0 {
+		t.Error("a double press did not start the song")
 	}
 }

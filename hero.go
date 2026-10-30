@@ -5,6 +5,7 @@ import (
 
 	"github.com/egoist/mygo/ui"
 	"github.com/elianiva/meiro/m3"
+	"github.com/elianiva/meiro/media"
 	"github.com/elianiva/meiro/youtube"
 )
 
@@ -41,7 +42,12 @@ func (a *app) hero(c *ui.Context) {
 		m3.Elevation(c, art, 2)
 		ui.Column(c).Grow(1).MinWidth(0).Gap(6).Children(func() {
 			if label := heroLabel(r.target); label != "" {
-				m3.EmphasizedText(c, m3.LabelLarge, strings.ToUpper(label)).LetterSpacing(1.2).TextColor(sc.Primary)
+				// The kind, then the mark of the provider the page is read
+				// from, with room between them.
+				ui.Row(c).Gap(10).AlignItems(ui.Center).Children(func() {
+					m3.EmphasizedText(c, m3.LabelLarge, strings.ToUpper(label)).LetterSpacing(1.2).TextColor(sc.Primary)
+					sourceMark(c, media.SourceYTM)
+				})
 			}
 			m3.EmphasizedText(c, titleRole, d.title).MaxLines(2).TextColor(sc.OnSurface)
 			if d.subtitle != "" {

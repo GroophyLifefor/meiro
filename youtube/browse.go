@@ -8,31 +8,9 @@ import (
 	"slices"
 	"strings"
 	"sync"
-)
 
-// BrowseResult represents a Music browse page such as an artist, album,
-// playlist, home feed, explore page, library, or account settings.
-type BrowseResult struct {
-	// Title and Thumbnail are the page's own heading, the name and picture it
-	// puts over its content, as an artist's does.
-	Title     string `json:"title,omitempty"`
-	Thumbnail string `json:"thumbnail,omitempty"`
-	// Description is what a podcast show says of itself, on one line.
-	Description       string         `json:"description,omitempty"`
-	Items             []MusicItem    `json:"items"`
-	Sections          []MusicSection `json:"sections,omitempty"`
-	ContinuationToken string         `json:"continuationToken,omitempty"`
-	// Library is the save button of an album's or a playlist's header: whether
-	// the page is in the library, and what to write to change it. Its ID is
-	// empty for a page that offers none.
-	Library LibraryState `json:"-"`
-	// Subscription is the subscribe button of an artist's header: whether the
-	// account follows the artist, and the channel to write. Its ChannelID is
-	// empty for a page that offers none.
-	Subscription Subscription `json:"-"`
-	// QueuePlaylistID is the playlist panel's ID, used to continue radio queues.
-	QueuePlaylistID string `json:"queuePlaylistId,omitempty"`
-}
+	"github.com/elianiva/meiro/media"
+)
 
 // pageHeading reads the heading an artist, album or playlist puts over its
 // content: the first header renderer with a name, and the picture in it. The
@@ -59,18 +37,6 @@ func pageHeading(root any) (title, thumbnail string) {
 	return "", ""
 }
 
-// MusicSection is a shelf or grid in a browse response. A continuation response
-// without an owning shelf is represented as a synthetic section with an empty
-// Title and its continuation renderer as Kind. ContinuationToken can be passed
-// to ContinueBrowse to load more items in that section.
-
-type MusicSection struct {
-	Title             string      `json:"title,omitempty"`
-	Kind              string      `json:"kind"`
-	Items             []MusicItem `json:"items"`
-	ContinuationToken string      `json:"continuationToken,omitempty"`
-}
-
 func (c *Client) GetHomeFeed(ctx context.Context) (*BrowseResult, error) {
 	return c.browse(ctx, "FEmusic_home")
 }
@@ -95,7 +61,7 @@ func (c *Client) StreamLibrary(ctx context.Context, progress func(*BrowseResult)
 		return nil, err
 	}
 	if progress != nil && (result.ContinuationToken != "" || slices.ContainsFunc(result.Sections, func(s MusicSection) bool { return s.ContinuationToken != "" })) {
-		progress(result.snapshot())
+		progress(snapshot(result))
 	}
 	if err := c.drainBrowse(ctx, result, "library", progress); err != nil {
 		return result, err
@@ -106,7 +72,7 @@ func (c *Client) StreamLibrary(ctx context.Context, progress func(*BrowseResult)
 // snapshot copies what a later page could still change: the lists of items
 // and sections, though not the items themselves, which only ever grow at their
 // end.
-func (r *BrowseResult) snapshot() *BrowseResult {
+func snapshot(r *BrowseResult) *BrowseResult {
 	copied := *r
 	copied.Items = slices.Clip(r.Items)
 	copied.Sections = slices.Clone(r.Sections)
@@ -175,7 +141,7 @@ func (c *Client) drainBrowse(ctx context.Context, result *BrowseResult, label st
 			return fmt.Errorf("youtube: %s exceeded 1000 continuation pages", label)
 		}
 		if progress != nil && len(queue) > 0 {
-			progress(result.snapshot())
+			progress(snapshot(result))
 		}
 	}
 	result.ContinuationToken = ""
@@ -248,7 +214,7 @@ func (c *Client) GetPlaylist(ctx context.Context, playlistID string) (*BrowseRes
 // shelf. The page's continuation reads the next of them, as ContinuePodcast
 // does.
 func (c *Client) GetPodcast(ctx context.Context, showID string) (*BrowseResult, error) {
-	if !isPodcastID(showID) {
+	if !media.IsPodcastID(showID) {
 		return nil, fmt.Errorf("youtube: invalid podcast ID %q", showID)
 	}
 	raw, err := c.execute(ctx, "browse", map[string]any{"browseId": showID})

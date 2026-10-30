@@ -64,6 +64,7 @@ func SearchBar(c *ui.Context, spec SearchSpec) (SearchResult, ui.Element) {
 	if spec.MaxWidth > 0 {
 		bar.MaxWidth(spec.MaxWidth)
 	}
+	var input ui.Element
 	bar.Children(func() {
 		if spec.Dismiss {
 			if IconButton(c, IconButtonSpec{Icon: IconArrowBack, Label: "Close the search", Size: ExtraSmall32, Key: "dismiss"}).Clicked() {
@@ -72,7 +73,7 @@ func SearchBar(c *ui.Context, spec SearchSpec) (SearchResult, ui.Element) {
 		} else {
 			ui.Icon(c, IconSearch).FontSize(24).TextColor(sc.OnSurfaceVariant)
 		}
-		input := ui.TextInputBase(c.Key("input"), spec.Value).Placeholder(spec.Placeholder).Label(spec.Placeholder).
+		input = ui.TextInputBase(c.Key("input"), spec.Value).Placeholder(spec.Placeholder).Label(spec.Placeholder).
 			Grow(1).MinWidth(0).FontSize(16).TextColor(sc.OnSurface).Padding(0, spec.TrailingPadding, 0, 0).FocusRing(false)
 		if spec.Focus != nil {
 			input.Bind(spec.Focus)
@@ -90,6 +91,12 @@ func SearchBar(c *ui.Context, spec SearchSpec) (SearchResult, ui.Element) {
 			}
 		}
 	})
+	// The field is only as tall as its text, so a press on the rest of the
+	// bar, its padding and the space around the text, lands on the bar. It
+	// focuses the field, as a press on the text does.
+	if bar.Clicked() {
+		input.Focus()
+	}
 	result.Focused = bar.FocusWithin()
 	return result, bar
 }

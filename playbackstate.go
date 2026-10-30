@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/elianiva/meiro/internal/playstate"
+	"github.com/elianiva/meiro/media"
 	"github.com/elianiva/meiro/youtube"
 )
 
@@ -47,7 +48,7 @@ type queueMark struct {
 func (q *queue) mark() queueMark {
 	h := fnv.New64a()
 	for _, item := range q.items {
-		_, _ = h.Write([]byte(item.VideoID))
+		_, _ = h.Write([]byte(item.Key()))
 		_, _ = h.Write([]byte{0})
 	}
 	return queueMark{h.Sum64(), q.index, q.recStart, q.playNext, q.source}
@@ -65,11 +66,17 @@ func (q *queue) state(position time.Duration) playstate.State {
 func (q *queue) restore(s playstate.State) {
 	*q = newQueue()
 	q.items = slices.Clone(s.Items)
+	// A queue saved before items named a source was all YouTube Music.
+	for i := range q.items {
+		if q.items[i].Source == "" {
+			q.items[i].Source = media.SourceYTM
+		}
+	}
 	q.index, q.recStart, q.playNext, q.source = s.Index, s.RecStart, s.PlayNext, s.Source
 	q.regenerate()
 	for i := len(q.items) - 1; i > q.index; i-- {
 		item := q.items[i]
-		if _, generated := q.generated[item.VideoID]; generated && item.Kind == youtube.KindVideo {
+		if _, generated := q.generated[item.Key()]; generated && item.Kind == youtube.KindVideo {
 			q.remove(i)
 		}
 	}
@@ -92,7 +99,7 @@ func (a *app) restorePlayback(path string) {
 	if a.total > 0 && position >= a.total-restoreEndGuard {
 		position = 0
 	}
-	a.scrub, a.resumeID = position.Seconds(), item.VideoID
+	a.scrub, a.resumeID = position.Seconds(), item.Key()
 	a.resetUpNext(youtube.UpNextOptions{VideoID: item.VideoID})
 	a.playSave.last, a.playSave.lastAt, a.playSave.saved = a.queue.mark(), position, true
 }
@@ -102,7 +109,7 @@ func (a *app) playbackPosition() time.Duration {
 	switch {
 	case a.player.Active():
 		return a.player.Position()
-	case a.resumeID != "" && a.resumeID == a.current.VideoID:
+	case a.resumeID != "" && a.resumeID == a.current.Key():
 		return time.Duration(a.scrub * float64(time.Second))
 	}
 	return 0
@@ -116,7 +123,7 @@ func (a *app) persistPlayback() { a.savePlayback(positionStep) }
 // by step or more. A step of 0 saves any change, as at exit, where the last
 // seconds of listening are worth keeping.
 func (a *app) savePlayback(step time.Duration) {
-	if a.current.VideoID == "" || a.queue.len() == 0 {
+	if a.current.Key() == "" || a.queue.len() == 0 {
 		return
 	}
 	s := &a.playSave

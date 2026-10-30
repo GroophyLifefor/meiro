@@ -8,23 +8,6 @@ import (
 	"strings"
 )
 
-// LikeStatus is whether the signed-in account has liked a track, as YouTube's
-// like buttons name it. It is a byte, since every item of every page carries
-// one.
-type LikeStatus uint8
-
-const (
-	// LikeUnknown is a track whose page did not say.
-	LikeUnknown LikeStatus = iota
-	// Liked is a track the account has given a thumbs-up.
-	Liked
-	// Indifferent is a track the account has rated neither way.
-	Indifferent
-	// Disliked is a track the account has given a thumbs-down. Meiro reads it
-	// but does not write it.
-	Disliked
-)
-
 // parseLikeStatus reads the name YouTube's like button gives a status.
 func parseLikeStatus(name string) LikeStatus {
 	switch name {

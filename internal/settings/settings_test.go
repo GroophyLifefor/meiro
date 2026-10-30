@@ -26,11 +26,11 @@ func TestWriterKeepsTheLastStateAndLoadRepairsIt(t *testing.T) {
 
 	// A file with values out of range comes back with the defaults for them,
 	// and a field it lacks takes its default.
-	if err := os.WriteFile(path, []byte(`{"volume":500,"seed":"red","cacheSongs":-1}`), 0o600); err != nil {
+	if err := os.WriteFile(path, []byte(`{"volume":500,"seed":"red","youtubeCacheMB":-1}`), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	got, want := Load(path), Defaults()
-	if got.Volume != want.Volume || got.Seed != want.Seed || got.CacheSongs != want.CacheSongs || got.TrayMark != want.TrayMark || !got.AutoPlay {
+	if got.Volume != want.Volume || got.Seed != want.Seed || got.YouTubeCacheMB != want.YouTubeCacheMB || got.TrayMark != want.TrayMark || !got.AutoPlay {
 		t.Errorf("repaired %+v", got)
 	}
 	if err := os.WriteFile(path, []byte(`{"trayMark":"unexpected"}`), 0o600); err != nil {
@@ -81,5 +81,30 @@ func TestRememberKeepsRecentSearchesUniqueAndBounded(t *testing.T) {
 	s.Forget("i")
 	if s.Recent[0] != "h" {
 		t.Errorf("forget left %v", s.Recent)
+	}
+}
+
+// A file from before the caches shared a measure becomes sizes: a YouTube Music
+// cache that kept songs takes the default size, one that was off stays off,
+// and a SoundCloud cache switched off is a size of zero.
+func TestOlderCacheSettingsBecomeSizes(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "settings.json")
+	for _, tc := range []struct {
+		name, file     string
+		wantYT, wantSC int
+	}{
+		{"songs on", `{"cacheSongs":25,"soundCloudCache":true,"soundCloudCacheMB":256}`, DefaultCacheMB, 256},
+		{"songs off", `{"cacheSongs":0}`, 0, DefaultCacheMB},
+		{"soundcloud off", `{"soundCloudCache":false,"soundCloudCacheMB":256}`, DefaultCacheMB, 0},
+		{"new sizes win", `{"cacheSongs":0,"youtubeCacheMB":300,"soundCloudCacheMB":0}`, 300, 0},
+		{"nothing written", `{}`, DefaultCacheMB, DefaultCacheMB},
+	} {
+		if err := os.WriteFile(path, []byte(tc.file), 0o600); err != nil {
+			t.Fatal(err)
+		}
+		got := Load(path)
+		if got.YouTubeCacheMB != tc.wantYT || got.SoundCloudCacheMB != tc.wantSC {
+			t.Errorf("%s: youtube %d MB, soundcloud %d MB; want %d and %d", tc.name, got.YouTubeCacheMB, got.SoundCloudCacheMB, tc.wantYT, tc.wantSC)
+		}
 	}
 }

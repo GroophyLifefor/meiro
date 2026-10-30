@@ -1,6 +1,10 @@
 package youtube
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/elianiva/meiro/media"
+)
 
 // cardArtistBrowseID reads the artist a card's subtitle names. navigationID
 // cannot: it would return the mix queue of the card's menu entries first.
@@ -94,9 +98,9 @@ func bylineCredits(byline any) (artists []string, album string) {
 			id, _ = browse.get("browseId").(string)
 		}
 		switch {
-		case isArtistID(id):
+		case media.IsArtistID(id):
 			artists = append(artists, text)
-		case isAlbumID(id) && album == "":
+		case media.IsAlbumID(id) && album == "":
 			album = text
 		}
 	}

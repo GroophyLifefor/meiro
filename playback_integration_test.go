@@ -21,8 +21,10 @@ import (
 	"github.com/egoist/mygo/ui"
 
 	"github.com/elianiva/meiro/internal/audio"
+	"github.com/elianiva/meiro/internal/downloads"
 	"github.com/elianiva/meiro/internal/playstate"
 	"github.com/elianiva/meiro/m3"
+	"github.com/elianiva/meiro/media"
 	"github.com/elianiva/meiro/youtube"
 )
 
@@ -713,6 +715,28 @@ func TestAutoPlayCompletesWhenNoRecommendationsAreReturned(t *testing.T) {
 	}
 }
 
+// The audio cache key is qualified by source, so a YouTube video ID and a
+// SoundCloud page URL that read alike never name the same cached file.
+func TestAudioCacheKeyDistinguishesSources(t *testing.T) {
+	const same = "collide"
+	ytm := youtube.MusicItem{Source: media.SourceYTM, VideoID: same}
+	sc := youtube.MusicItem{Source: media.SourceSoundCloud, URL: same}
+	if streamKey(ytm) != same || streamKey(sc) != same {
+		t.Fatalf("stream keys = %q, %q; want both %q", streamKey(ytm), streamKey(sc), same)
+	}
+	if audioKey(ytm) == audioKey(sc) {
+		t.Fatalf("audio keys collide: %q", audioKey(ytm))
+	}
+	if audioKey(ytm) != "ytm:"+same || audioKey(sc) != "soundcloud:"+same {
+		t.Errorf("audio keys = %q, %q", audioKey(ytm), audioKey(sc))
+	}
+	// An item saved before sources existed still reads as YouTube Music.
+	old := youtube.MusicItem{VideoID: same}
+	if audioKey(old) != audioKey(ytm) {
+		t.Errorf("an item with no source = %q, want %q", audioKey(old), audioKey(ytm))
+	}
+}
+
 // A queue played the way the app runs it: real ffmpeg decoding real audio,
 // the ticker's poll moving on from each track to the next.
 func TestPlayingATrackThroughToTheEnd(t *testing.T) {
@@ -848,10 +872,11 @@ func TestACachedTrackPlaysWithoutResolving(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer cache.Close()
-	cache.Add("three", media.URL+"/three")
+	key := audioKey(youtube.MusicItem{VideoID: "three"})
+	cache.Add(key, media.URL+"/three")
 	deadline := time.Now().Add(5 * time.Second)
 	for {
-		if _, ok := cache.Get("three"); ok {
+		if _, ok := cache.Get(key); ok {
 			break
 		}
 		if time.Now().After(deadline) {
@@ -1695,9 +1720,10 @@ func TestTheWindowTitleNamesTheTrackPlaying(t *testing.T) {
 	}
 }
 
-// Clicking the playing track in the queue pauses it, and clicking it again
-// resumes it, rather than starting it over. Another track still plays.
-func TestClickingThePlayingQueueRowTogglesPlayback(t *testing.T) {
+// A single click on the playing track in the queue does nothing, so it does not
+// start over; a double click pauses it, and another resumes it. Another track
+// still plays on a click.
+func TestDoubleClickingThePlayingQueueRowTogglesPlayback(t *testing.T) {
 	a, _ := tonesApp(t, 600)
 	items := tracks("a", "b")
 	a.play(items[0], items)
@@ -1717,15 +1743,250 @@ func TestClickingThePlayingQueueRowTogglesPlayback(t *testing.T) {
 	}
 	rowA := func() { tt.ClickAt(next.X+next.W/2, next.Y+next.H/2-rowHeight) }
 	rowA()
-	if !a.player.Paused() {
-		t.Fatal("clicking the playing row did not pause")
-	}
-	rowA()
 	if !a.player.Playing() || a.current.VideoID != "a" {
-		t.Fatalf("clicking again did not resume: playing %v, current %q", a.player.Playing(), a.current.VideoID)
+		t.Fatalf("a single click on the playing row changed playback: playing %v, current %q", a.player.Playing(), a.current.VideoID)
+	}
+	time.Sleep(doublePress + 50*time.Millisecond)
+	rowA()
+	rowA()
+	tt.Frame()
+	if !a.player.Paused() {
+		t.Fatal("a double click on the playing row did not pause")
+	}
+	time.Sleep(doublePress + 50*time.Millisecond)
+	rowA()
+	rowA()
+	tt.Frame()
+	if !a.player.Playing() || a.current.VideoID != "a" {
+		t.Fatalf("a double click again did not resume: playing %v, current %q", a.player.Playing(), a.current.VideoID)
+	}
+	// Another track of the queue does not start on one click either.
+	time.Sleep(doublePress + 50*time.Millisecond)
+	if err := tt.Click("Track b"); err != nil {
+		t.Fatal(err)
+	}
+	tt.Frame()
+	if a.current.VideoID != "a" {
+		t.Fatalf("a single click on a queued track started %q", a.current.VideoID)
 	}
 	if err := tt.Click("Track b"); err != nil {
 		t.Fatal(err)
 	}
 	pollUntil(t, a, "b to play", func() bool { return a.current.VideoID == "b" && a.player.Playing() })
+}
+
+// mergedTrack is a song two providers hold: YouTube Music's copy carries the
+// video ID the queue keys it by, SoundCloud's the page URL it resolves by.
+func mergedTrack() youtube.MusicItem {
+	return youtube.MusicItem{
+		VideoID: "vid-shared", Title: "Shared Song", Artist: "Cloud Artist", Kind: media.KindTrack, Duration: "3:00",
+		Sources: []media.SourceRef{
+			{Source: media.SourceYTM, ID: "vid-shared"},
+			{Source: media.SourceSoundCloud, URL: "https://soundcloud.com/cloud-voice/shared-song"},
+		},
+	}
+}
+
+// A song two providers hold plays from the source the default picks: the
+// provider it is downloaded from, and otherwise the first of the preference
+// order, and the queue keeps the source it will play from.
+func TestMergedTrackDefaultsToTheDownloadedSource(t *testing.T) {
+	a, r := tonesApp(t, 1)
+	a.soundcloudStreams = audio.NewURLs(r.resolve)
+	merged := mergedTrack()
+	if source, ok := a.sourceFor(merged); !ok || source != media.SourceYTM {
+		t.Fatalf("default source = %q, %v; want YouTube Music", source, ok)
+	}
+	// A download from SoundCloud makes that the default, ahead of the order.
+	if err := a.downloads.Add(downloads.Item{Source: media.SourceSoundCloud, Key: merged.Sources[1].URL, URL: merged.Sources[1].URL, Title: merged.Title}); err != nil {
+		t.Fatal(err)
+	}
+	if source, ok := a.sourceFor(merged); !ok || source != media.SourceSoundCloud {
+		t.Fatalf("downloaded default source = %q, %v; want SoundCloud", source, ok)
+	}
+	a.playFrom(merged, []youtube.MusicItem{merged}, 0, youtube.UpNextOptions{}, "Test")
+	if a.current.Source != media.SourceSoundCloud || a.queue.current().Source != media.SourceSoundCloud {
+		t.Fatalf("playing kept current %q queue %q, want SoundCloud", a.current.Source, a.queue.current().Source)
+	}
+	if !r.asked(merged.Sources[1].URL) {
+		t.Fatalf("the SoundCloud resolver was not asked: %v", r.ids)
+	}
+	// With no download, the preference order decides: SoundCloud first.
+	plain := mergedTrack()
+	if _, _, err := a.downloads.Remove(media.SourceSoundCloud, plain.Sources[1].URL); err != nil {
+		t.Fatal(err)
+	}
+	a.settings.ProviderOrder = []string{"soundcloud", "ytm"}
+	if source, ok := a.sourceFor(plain); !ok || source != media.SourceSoundCloud {
+		t.Fatalf("order default source = %q, %v; want SoundCloud", source, ok)
+	}
+}
+
+// Clicking the mark of the other provider on a merged row switches where the
+// song plays from, and the row says so. Playing it then queues the track from
+// the source chosen.
+func TestChoosingASourceSwitchesWhereItPlays(t *testing.T) {
+	resetFakes()
+	a, r := tonesApp(t, 1)
+	a.soundcloudStreams = audio.NewURLs(r.resolve)
+	a.router.Push("/search")
+	tt := ui.NewTester(a.view, 1000, 700)
+	tt.Frame()
+	if err := tt.Click(searchPlaceholder); err != nil {
+		t.Fatal(err)
+	}
+	tt.Type("shared")
+	tt.Key(0, ui.KeyEnter)
+	tt.Frame()
+	if len(a.search.items) < 1 || len(a.search.items[0].Sources) != 2 {
+		t.Fatalf("the shared song was not found: %+v", a.search.items)
+	}
+	const page = "https://soundcloud.com/cloud-voice/cloud-song"
+	if err := tt.Click("Play from SoundCloud"); err != nil {
+		t.Fatal(err)
+	}
+	tt.Frame()
+	if got := a.search.items[0].Source; got != media.SourceSoundCloud {
+		t.Fatalf("the row kept source %q, want SoundCloud", got)
+	}
+	// The mark that is filled says which source plays; the row writes nothing.
+	if tt.HasText("playing: SoundCloud") {
+		t.Fatalf("the row spells out which source plays: %q", tt.Texts())
+	}
+	if err := tt.Click("Cloud Song"); err != nil {
+		t.Fatal(err)
+	}
+	tt.Frame()
+	if a.current.Source != media.SourceSoundCloud || a.queue.current().Source != media.SourceSoundCloud {
+		t.Fatalf("playing kept current %q queue %q, want SoundCloud", a.current.Source, a.queue.current().Source)
+	}
+	if !r.asked(page) {
+		t.Fatalf("the SoundCloud resolver was not asked for %q: %v", page, r.ids)
+	}
+}
+
+// Switching the source of the track that is playing says so for two seconds,
+// from the player bar and from the full player alike, and the track plays on
+// from the other provider.
+func TestSwitchingThePlayingTrackAnnouncesIt(t *testing.T) {
+	a, r := tonesApp(t, 1)
+	a.soundcloudStreams = audio.NewURLs(r.resolve)
+	merged := mergedTrack()
+	a.playFrom(merged, []youtube.MusicItem{merged}, 0, youtube.UpNextOptions{}, "Test")
+	if a.current.Source != media.SourceYTM {
+		t.Fatalf("the shared track started from %q, want YouTube Music", a.current.Source)
+	}
+	tt := ui.NewTester(a.view, 1000, 700)
+	tt.Frame()
+	if err := tt.Click("Play from SoundCloud"); err != nil {
+		t.Fatal(err)
+	}
+	tt.Frame()
+	if a.current.Source != media.SourceSoundCloud {
+		t.Fatalf("after the switch the track plays from %q, want SoundCloud", a.current.Source)
+	}
+	// The shell turns the notice into a toast and clears it, so the toast is
+	// what to look for.
+	if !tt.HasText("Continuing on SoundCloud") {
+		t.Errorf("the switch was not announced: %q", tt.Texts())
+	}
+
+	// The full player offers the same marks.
+	a.nowPlaying.open, a.nowPlaying.closing = true, false
+	a.loadPanel()
+	tt.Frame()
+	tt.Frame()
+	if _, ok := tt.Find("Play from YouTube Music"); !ok {
+		t.Errorf("the full player has no mark to go back to YouTube Music: %q", tt.Texts())
+	}
+}
+
+// When the source a track is on fails to resolve, the other provider that
+// holds it is tried, the queue follows it, and a short message says so.
+func TestAFailedSourceFallsBackToTheOtherProvider(t *testing.T) {
+	a, r := tonesApp(t, 1)
+	a.soundcloudStreams = audio.NewURLs(r.resolve)
+	merged := mergedTrack()
+	r.err[merged.VideoID] = errors.New("Video unavailable")
+	a.playFrom(merged, []youtube.MusicItem{merged}, 0, youtube.UpNextOptions{}, "Test")
+	const page = "https://soundcloud.com/cloud-voice/shared-song"
+	if a.current.Source != media.SourceSoundCloud || a.queue.current().Source != media.SourceSoundCloud {
+		t.Fatalf("fallback left current %q queue %q, want SoundCloud", a.current.Source, a.queue.current().Source)
+	}
+	if !r.asked(page) {
+		t.Fatalf("the SoundCloud resolver was not asked for %q: %v", page, r.ids)
+	}
+	if a.notice != "YouTube Music failed, playing from SoundCloud" || a.noticeTimeout != fallbackNotice {
+		t.Fatalf("notice = %q, timeout %v; want the fallback message for %v", a.notice, a.noticeTimeout, fallbackNotice)
+	}
+	pollUntil(t, a, "the fallback to play", func() bool { return a.player.Playing() })
+}
+
+// When every provider that holds a track fails, the track keeps the failure:
+// the last error is shown and no fallback message is.
+func TestWhenEverySourceFailsTheErrorShows(t *testing.T) {
+	a, r := tonesApp(t, 1)
+	a.soundcloudStreams = audio.NewURLs(r.resolve)
+	merged := mergedTrack()
+	failed := errors.New("Video unavailable")
+	r.err[merged.VideoID] = failed
+	r.err[merged.Sources[1].URL] = failed
+	a.playFrom(merged, []youtube.MusicItem{merged}, 0, youtube.UpNextOptions{}, "Test")
+	if a.rawPlayErr == "" || a.playErr == "" {
+		t.Fatalf("no failure was recorded: raw %q, shown %q", a.rawPlayErr, a.playErr)
+	}
+	if a.noticeTimeout != 0 || strings.Contains(a.notice, "playing from") {
+		t.Fatalf("a fallback was announced when every source failed: %q", a.notice)
+	}
+}
+
+// A press on the track that is playing does nothing, so it does not start over,
+// and a double press pauses it.
+func TestPressingThePlayingTrack(t *testing.T) {
+	resetFakes()
+	// Long enough that the track does not end while the test waits.
+	a, r := tonesApp(t, 600)
+	a.router.Push("/album/MPREb_test")
+	tt := ui.NewTester(a.view, 1000, 700)
+	tt.Frame()
+	if err := tt.Click("Album Track One"); err != nil {
+		t.Fatal(err)
+	}
+	pollUntil(t, a, "the track to play", func() bool { return a.player.Playing() })
+	resolves := func() int {
+		r.mu.Lock()
+		defer r.mu.Unlock()
+		return len(r.ids)
+	}
+	started := resolves()
+
+	// A single press on the playing track changes nothing.
+	if err := tt.Click("Album Track One"); err != nil {
+		t.Fatal(err)
+	}
+	tt.Frame()
+	if got := resolves(); got != started || !a.player.Playing() {
+		t.Fatalf("a single press restarted or stopped the track: %d resolves (was %d), playing %v", got, started, a.player.Playing())
+	}
+
+	// Presses more than a double press apart are two single ones.
+	time.Sleep(doublePress + 50*time.Millisecond)
+	a.pressPlaying(a.current)
+	if !a.player.Playing() {
+		t.Fatal("a lone press paused the track")
+	}
+	time.Sleep(doublePress + 50*time.Millisecond)
+	row, ok := tt.Find("Album Track One")
+	if !ok {
+		t.Fatalf("the track row is gone: %q", tt.Texts())
+	}
+	tt.ClickAt(row.X+row.W/2, row.Y+row.H/2)
+	tt.ClickAt(row.X+row.W/2, row.Y+row.H/2)
+	tt.Frame()
+	if a.player.Playing() {
+		t.Error("a double press on the playing track did not pause it")
+	}
+	if got := resolves(); got != started {
+		t.Errorf("the track was resolved again: %d, was %d", got, started)
+	}
 }

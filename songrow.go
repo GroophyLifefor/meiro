@@ -29,6 +29,15 @@ type songOptions struct {
 	source      string
 	// compact fits queue rows in the tray mini player.
 	compact bool
+	// doublePress makes a song that is not playing start only on a double
+	// press, as the rows of a playlist do, so a stray press does not change
+	// the song.
+	doublePress bool
+	// note is a muted line under the subtitle, such as when and where a play
+	// of the listening history happened. A row with one is taller.
+	note string
+	// dim fades the whole row, for a play the stats do not count.
+	dim bool
 }
 
 // songKey identifies a row of a song in its list, for the element tree and
@@ -47,7 +56,7 @@ func (a *app) playingRow(item youtube.MusicItem, o songOptions) bool {
 	if o.list == "queue" {
 		return o.position == a.queue.index
 	}
-	return item.VideoID == a.current.VideoID
+	return item.Key() == a.current.Key()
 }
 
 // songRow shows a song, an album, an artist or a playlist as a row: artwork,
@@ -72,11 +81,16 @@ func (a *app) songRow(c *ui.Context, item youtube.MusicItem, queue []youtube.Mus
 		titleRole, subtitleRole = m3.TitleSmall, m3.BodySmall
 	case described:
 		height, artSize, gap, artPixels = 120, 96, 16, 256
+	case o.note != "":
+		height = 80
 	}
 	row := ui.Row(c.Key(key))
 	row.Height(height).Shrink(0).Padding(padding, 8).Gap(4).AlignItems(ui.Center).Radius(m3.Large)
 	if o.inset {
 		row.Margin(0, pageGutter-8)
+	}
+	if o.dim {
+		row.Opacity(0.55)
 	}
 	container := ui.Transparent
 	if playing {
@@ -84,6 +98,7 @@ func (a *app) songRow(c *ui.Context, item youtube.MusicItem, queue []youtube.Mus
 	}
 	var main, menuButton, menuAnchor ui.Element
 	hasAnchor := false
+	sourceSwitched := false
 	row.Children(func() {
 		main = ui.ButtonBase(c.Key(key + "-activate")).FocusRing(false)
 		hovered := row.Hovered()
@@ -141,7 +156,7 @@ func (a *app) songRow(c *ui.Context, item youtube.MusicItem, queue []youtube.Mus
 				})
 			}
 			ui.Column(c).Grow(1).MinWidth(0).Gap(0).Children(func() {
-				title := m3.Text(c, titleRole, item.Title).SingleLine().TextColor(titleColour)
+				title := m3.Text(c, titleRole, item.Title).SingleLine().Tooltip(item.Title).TextColor(titleColour)
 				if playing {
 					title.FontWeight(600)
 				}
@@ -149,15 +164,35 @@ func (a *app) songRow(c *ui.Context, item youtube.MusicItem, queue []youtube.Mus
 					m3.Text(c, m3.BodyMedium, item.Description).MaxLines(2).TextColor(subColour).Padding(2, 0)
 				}
 				if item.Subtitle != "" {
-					m3.Text(c, subtitleRole, item.Subtitle).SingleLine().TextColor(subColour)
+					m3.Text(c, subtitleRole, item.Subtitle).SingleLine().Tooltip(item.Subtitle).TextColor(subColour)
+				}
+				if o.note != "" {
+					m3.Text(c, m3.BodySmall, o.note).SingleLine().Tooltip(o.note).TextColor(subColour).FontFeatures("tnum")
 				}
 			})
+			// Every song says what its MusicBrainz link is, and offers to make
+			// one, wherever it is shown. The small queue of the mini player has
+			// no room for it.
+			if isSong && !o.compact {
+				if a.linkControls(c, item) {
+					sourceSwitched = true
+				}
+			}
+			if source, ok := a.sourceFor(item); ok && isPreview(item, source) {
+				previewChip(c)
+			}
 			switch {
 			case item.Duration != "":
 				m3.Text(c, m3.BodyMedium, item.Duration).SingleLine().Width(48).TextAlign(ui.End).
 					TextColor(subColour).Shrink(0).FontFeatures("tnum")
 			case !isSong:
 				ui.Icon(c, m3.IconChevronRight).FontSize(24).TextColor(sc.OnSurfaceVariant)
+			}
+			// A track more than one source holds shows a mark for each of
+			// them, so the row says where it can play from and lets the
+			// listener switch between them.
+			if a.sourceBadges(c, item) {
+				sourceSwitched = true
 			}
 			// A menu the pointer opened points at the pointer; one the menu
 			// button opened points at the button.
@@ -194,7 +229,7 @@ func (a *app) songRow(c *ui.Context, item youtube.MusicItem, queue []youtube.Mus
 			a.cardMenu(c, anchor, key, item, queue)
 		}
 	}
-	if main.Clicked() {
+	if main.Clicked() && !sourceSwitched {
 		if o.list == "queue" {
 			mods := main.ClickModifiers()
 			if mods&(ui.Cmd|ui.Shift) != 0 {
@@ -202,16 +237,19 @@ func (a *app) songRow(c *ui.Context, item youtube.MusicItem, queue []youtube.Mus
 				return
 			}
 			a.clearQueueSelection()
-			if playing {
-				a.togglePlay()
-				return
-			}
+		}
+		if playing && isSong {
+			a.pressPlaying(item)
+			return
+		}
+		if o.doublePress && isSong && !a.pressedTwice(item) {
+			return
 		}
 		switch {
 		case o.directQueue:
 			index := o.track
 			if index < 0 {
-				index = indexOf(queue, item.VideoID)
+				index = indexOf(queue, item.Key())
 			}
 			a.playFrom(item, queue, max(index, 0), youtube.UpNextOptions{}, o.source)
 		case o.track >= 0:

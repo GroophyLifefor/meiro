@@ -8,7 +8,10 @@ import (
 
 	"github.com/egoist/mygo/ui"
 
+	"github.com/elianiva/meiro/internal/audio"
+	"github.com/elianiva/meiro/internal/match"
 	"github.com/elianiva/meiro/m3"
+	"github.com/elianiva/meiro/media"
 	"github.com/elianiva/meiro/youtube"
 )
 
@@ -17,8 +20,11 @@ const (
 	// Music for what it offers, and suggestTimeout bounds one such request.
 	suggestDelay   = 180 * time.Millisecond
 	suggestTimeout = 5 * time.Second
-	// searchTimeout bounds a search.
-	searchTimeout = time.Minute
+	// searchTimeout bounds one provider's search. The two providers are asked
+	// together and not waited on together: whichever answers first is shown
+	// while the other is still out, and one that does not answer in time is
+	// left out of the results.
+	searchTimeout = 7 * time.Second
 	// suggestQueries and suggestItems bound what the panel under the search
 	// bar lists, as YouTube Music's own panel does.
 	suggestQueries = 6
@@ -26,6 +32,14 @@ const (
 	// searchPlaceholder names what a search finds.
 	searchPlaceholder = "Search songs, albums, artists, podcasts"
 )
+
+// providerSearch is one provider's answer to a search out, and whether it has
+// arrived.
+type providerSearch struct {
+	items []youtube.MusicItem
+	done  bool
+	err   error
+}
 
 // searchState is the search page. Typing only edits query; a search runs when
 // the user submits it, and submitted is what the results are for.
@@ -40,8 +54,16 @@ type searchState struct {
 	// order. The one that clears them all has no parameters.
 	filters []youtube.SearchFilter
 	// top is the card the results lead with, if they have one.
-	top  youtube.MusicItem
-	load task
+	top youtube.MusicItem
+	// ytm and sc are the two searches out for the query, one per provider,
+	// and ytmLoad and scLoad are those requests in flight. They answer
+	// independently, so the results can show one provider's tracks before the
+	// other has answered.
+	ytm, sc         providerSearch
+	ytmLoad, scLoad task
+	// note is a line shown over the results, as "From this device" for a
+	// search that fell back to what the app holds locally.
+	note string
 	// suggestions are what YouTube Music offers for the text being typed:
 	// the completed queries, and the items it already matches. suggestOpen
 	// hides them again once one is chosen, until typing resumes.
@@ -52,42 +74,303 @@ type searchState struct {
 
 // runSearch searches for query with the filter given. It is the only way a
 // search starts: typing in the field never does. An empty query clears the
-// page.
+// page. Every source in the preference order is searched, together.
 func (a *app) runSearch(query, params string) {
 	query = strings.TrimSpace(query)
 	a.cancelSuggestions()
 	// A "show more" in flight belongs to the results being replaced.
 	a.pageMore.stop()
 	s := &a.search
-	s.load.stop()
+	a.stopSearches()
 	if query == "" {
 		s.query, s.submitted, s.params, s.pageState = "", "", "", pageState{}
 		s.filters, s.top = nil, youtube.MusicItem{}
+		s.ytm, s.sc, s.note = providerSearch{}, providerSearch{}, ""
+		a.loadArtists("")
 		a.page.rowsDirty = true
 		return
 	}
 	s.query, s.submitted, s.params = query, query, params
+	// The MusicBrainz artist section follows the same query as the results,
+	// and loads beside them.
+	a.loadArtists(query)
 	// The filters of the search being replaced stay until the answer carries
 	// its own: the row of chips holds its place while the results load, and
 	// the filter chosen shows as chosen at once.
 	a.settings.Remember(query)
 	a.saveSettings()
 	s.pageState = pageState{loading: true}
+	s.ytm, s.sc, s.note = providerSearch{}, providerSearch{}, ""
 	a.page.rowsDirty = true
 	a.list.ScrollTo(0, ui.Start)
-	client := a.client()
-	startTask(a, &s.load, searchTimeout, func(ctx context.Context) (*youtube.SearchResult, error) {
-		return client.Search(ctx, query, youtube.SearchOptions{Params: params})
+	a.searchProviders(query, params)
+}
+
+// stopSearches drops both searches in flight, so a new query's results are
+// not folded together with the ones being replaced.
+func (a *app) stopSearches() {
+	a.search.ytmLoad.stop()
+	a.search.scLoad.stop()
+}
+
+// searchProviders asks every source for the query, together. Each answer is
+// shown as it arrives; the one that fails is simply left out, and when both
+// fail the results come from what this device holds.
+func (a *app) searchProviders(query, params string) {
+	s := &a.search
+	yt, sc := a.ytClient(), a.soundcloudClient()
+	startTask(a, &s.ytmLoad, searchTimeout, func(ctx context.Context) (*youtube.SearchResult, error) {
+		return yt.Search(ctx, query, youtube.SearchOptions{Params: params})
 	}, func(result *youtube.SearchResult, err error) {
-		a.page.rowsDirty = true
-		s.loading = false
-		if err != nil {
-			s.err, s.offline = failure(err)
+		s.ytm.done, s.ytm.err = true, err
+		if result != nil {
+			s.ytm.items = result.Items
+			s.filters, s.top, s.more = result.Filters, result.TopResult, result.ContinuationToken
+		}
+		a.applySearchResults()
+	})
+	if !a.soundCloudWanted(params) {
+		// A filter to albums, playlists, artists or the like names things
+		// SoundCloud's search does not tell apart, so it adds nothing.
+		s.scLoad.stop()
+		s.sc.done, s.sc.err = true, nil
+		a.applySearchResults()
+		return
+	}
+	startTask(a, &s.scLoad, searchTimeout, func(ctx context.Context) (*youtube.SearchResult, error) {
+		return sc.Search(ctx, query, youtube.SearchOptions{Params: params})
+	}, func(result *youtube.SearchResult, err error) {
+		s.sc.done, s.sc.err = true, err
+		if result != nil {
+			s.sc.items = result.Items
+		}
+		a.applySearchResults()
+	})
+}
+
+// soundCloudWanted says whether SoundCloud is asked for a search with the
+// filter params: one with none is, and one narrowed to songs or videos, which
+// are the tracks it has.
+func (a *app) soundCloudWanted(params string) bool {
+	if params == "" {
+		return true
+	}
+	for _, filter := range a.search.filters {
+		if filter.Params == params {
+			label := strings.ToLower(strings.TrimSpace(filter.Label))
+			return label == "songs" || label == "videos"
+		}
+	}
+	return false
+}
+
+// applySearchResults folds the providers' answers into the rows. Whichever
+// answered is shown at once, and while the other is still out the page says
+// the rest is on its way. When both are out of reach the results come from
+// what this device holds.
+func (a *app) applySearchResults() {
+	s := &a.search
+	a.page.rowsDirty = true
+	ytm, sc := s.ytm, s.sc
+	if !ytm.done && !sc.done {
+		return
+	}
+	if ytm.done && sc.done && ytm.err != nil && sc.err != nil {
+		a.localSearch(s.submitted)
+		return
+	}
+	s.items = mergeProviders(ytm.items, sc.items)
+	s.loading, s.err, s.offline, s.note = false, "", false, ""
+	s.partial = !ytm.done || !sc.done
+}
+
+// mergeProviders folds two providers' search results into one list. A track
+// YouTube Music returned keeps its place and gains a SoundCloud reference when
+// a SoundCloud track is the same recording; a SoundCloud track that matches
+// nothing is a row of its own, put among the YouTube Music rows (see
+// interleave) so it is seen without scrolling past all of them. Titles,
+// artists and artwork stay YouTube Music's, which are the cleaner ones. A
+// track the app cannot be sure of is left as two rows.
+func mergeProviders(ytm, sc []youtube.MusicItem) []youtube.MusicItem {
+	if len(sc) == 0 {
+		return ytm
+	}
+	if len(ytm) == 0 {
+		return sc
+	}
+	merged := make([]youtube.MusicItem, len(ytm))
+	copy(merged, ytm)
+	matched := make([]bool, len(merged))
+	var own []youtube.MusicItem
+	for _, track := range sc {
+		if !track.IsTrack() {
+			continue
+		}
+		index := matchingTrack(merged, matched, track)
+		if index < 0 {
+			own = append(own, track)
+			continue
+		}
+		matched[index] = true
+		merged[index] = addSourceRef(merged[index], track)
+	}
+	return interleave(merged, own, soundCloudEvery)
+}
+
+// soundCloudEvery is how many YouTube Music rows come before each row of a
+// SoundCloud track that YouTube Music does not have.
+const soundCloudEvery = 3
+
+// interleave puts one of extra after every `every` rows of items, in order, and
+// the ones left over after the last row. Appending them all at the end would
+// leave them below every row YouTube Music returned, and its pages go on, so
+// the listener would never reach them.
+func interleave(items, extra []youtube.MusicItem, every int) []youtube.MusicItem {
+	if len(extra) == 0 {
+		return items
+	}
+	out := make([]youtube.MusicItem, 0, len(items)+len(extra))
+	for i, item := range items {
+		out = append(out, item)
+		if (i+1)%every == 0 && len(extra) > 0 {
+			out = append(out, extra[0])
+			extra = extra[1:]
+		}
+	}
+	return append(out, extra...)
+}
+
+// matchingTrack is the first unmatched song of items that is the same
+// recording as track, or -1.
+func matchingTrack(items []youtube.MusicItem, matched []bool, track youtube.MusicItem) int {
+	other := matchTrack(track)
+	for i := range items {
+		if matched[i] || !items[i].IsTrack() {
+			continue
+		}
+		if match.Match(matchTrack(items[i]), other) == match.Matched {
+			return i
+		}
+	}
+	return -1
+}
+
+// matchTrack is what the matcher compares of an item: its title, the artist
+// its byline names (or the first part of its subtitle), and its length.
+func matchTrack(item youtube.MusicItem) match.Track {
+	artist := item.Artist
+	if artist == "" {
+		artist, _, _ = strings.Cut(item.Subtitle, " • ")
+	}
+	return match.Track{Title: item.Title, Artist: artist, Duration: parseDuration(item.Duration)}
+}
+
+// addSourceRef folds another provider's copy of a track into item: item keeps
+// its own fields and gains the source the copy came from. It is a no-op when
+// item already has that source.
+func addSourceRef(item, other youtube.MusicItem) youtube.MusicItem {
+	ref, ok := other.FirstRef()
+	if !ok {
+		return item
+	}
+	if _, exists := item.RefFor(ref.Source); exists {
+		return item
+	}
+	if len(item.Sources) == 0 {
+		if own, ok := item.FirstRef(); ok {
+			item.Sources = []media.SourceRef{own}
+		}
+	}
+	item.Sources = append(item.Sources, ref)
+	// A track that two providers hold plays from whichever the default
+	// chooses, not from the parse's own provider, so its Source is left for
+	// the default to name.
+	item.Source = ""
+	return item
+}
+
+// localSearch fills the results from what this device holds: the tracks the
+// user downloaded, and the tracks the playback caches kept. It runs when both
+// providers are out of reach, so a search still finds music without a
+// network. The results carry a note saying where they came from.
+func (a *app) localSearch(query string) {
+	s := &a.search
+	s.items = filterLocal(a.localItems(), query)
+	s.loading, s.partial, s.err, s.offline = false, false, "", false
+	s.filters, s.top, s.more = nil, youtube.MusicItem{}, ""
+	s.note = "From this device"
+	a.page.rowsDirty = true
+}
+
+// localItems is every track this device holds, from the downloads and the
+// audio caches, as the search results show them.
+func (a *app) localItems() []youtube.MusicItem {
+	items := make([]youtube.MusicItem, 0, 16)
+	seen := make(map[string]bool)
+	add := func(item youtube.MusicItem) {
+		ref, ok := item.FirstRef()
+		if !ok {
 			return
 		}
-		s.items, s.more = result.Items, result.ContinuationToken
-		s.filters, s.top = result.Filters, result.TopResult
-	})
+		key := string(ref.Source) + "\x00" + ref.ID + "\x00" + ref.URL
+		if seen[key] {
+			return
+		}
+		seen[key] = true
+		if ref, ok := item.FirstRef(); ok {
+			item.Sources = []media.SourceRef{ref}
+		}
+		items = append(items, item)
+	}
+	for _, rec := range a.downloads.List() {
+		add(downloadMusicItem(rec))
+	}
+	for _, source := range a.providerOrder() {
+		cache := a.cacheFor(source)
+		if cache == nil {
+			continue
+		}
+		for _, meta := range cache.Meta() {
+			add(cachedMusicItem(source, meta))
+		}
+	}
+	return items
+}
+
+// cachedMusicItem builds the track a cache metadata entry plays.
+func cachedMusicItem(source media.Source, meta audio.TrackMeta) youtube.MusicItem {
+	item := youtube.MusicItem{
+		Source:   source,
+		Title:    meta.Title,
+		Subtitle: meta.Artist,
+		Artist:   meta.Artist,
+		Kind:     media.KindTrack,
+		Duration: meta.Duration,
+	}
+	if source == media.SourceSoundCloud {
+		item.URL = meta.Key
+	} else {
+		item.VideoID = meta.Key
+	}
+	return item
+}
+
+// filterLocal keeps the local tracks whose title or artist holds the query,
+// compared in lower case.
+func filterLocal(items []youtube.MusicItem, query string) []youtube.MusicItem {
+	needle := strings.ToLower(strings.TrimSpace(query))
+	if needle == "" {
+		return items
+	}
+	out := make([]youtube.MusicItem, 0, len(items))
+	for _, item := range items {
+		if strings.Contains(strings.ToLower(item.Title), needle) ||
+			strings.Contains(strings.ToLower(item.Artist), needle) ||
+			strings.Contains(strings.ToLower(item.Subtitle), needle) {
+			out = append(out, item)
+		}
+	}
+	return out
 }
 
 // runSearchFrom runs a search from wherever the user is: submitting the search
@@ -221,7 +504,7 @@ func (a *app) suggestionRow(c *ui.Context, query string) {
 		Background(m3.StateFill(ui.Transparent, sc.OnSurface, row.Hovered(), row.Pressed(), row.FocusVisible()))
 	row.Children(func() {
 		ui.Icon(c, m3.IconSearch).FontSize(20).TextColor(sc.OnSurfaceVariant)
-		m3.Text(c, m3.BodyLarge, query).Grow(1).MinWidth(0).SingleLine().TextColor(sc.OnSurface)
+		m3.Text(c, m3.BodyLarge, query).Grow(1).MinWidth(0).SingleLine().Tooltip(query).TextColor(sc.OnSurface)
 	})
 	if row.Clicked() {
 		// The panel hangs under the field every page searches from, so a
@@ -246,9 +529,9 @@ func (a *app) suggestionItem(c *ui.Context, item youtube.MusicItem, tracks []you
 	row.Children(func() {
 		a.art(c, item.Thumbnail, 128, 40, artRadius(item, m3.Small))
 		ui.Column(c).Grow(1).MinWidth(0).Children(func() {
-			m3.Text(c, m3.BodyLarge, item.Title).SingleLine().TextColor(sc.OnSurface)
+			m3.Text(c, m3.BodyLarge, item.Title).SingleLine().Tooltip(item.Title).TextColor(sc.OnSurface)
 			if item.Subtitle != "" {
-				m3.Text(c, m3.BodySmall, item.Subtitle).SingleLine().TextColor(sc.OnSurfaceVariant)
+				m3.Text(c, m3.BodySmall, item.Subtitle).SingleLine().Tooltip(item.Subtitle).TextColor(sc.OnSurfaceVariant)
 			}
 		})
 		// A menu the pointer opened points at the pointer, in the row's own
@@ -286,6 +569,10 @@ func (a *app) searchPage(c *ui.Context) {
 		if a.search.submitted == "" {
 			a.searchLanding(c)
 			return
+		}
+		if a.search.note != "" {
+			sc := m3.Of(c).Scheme
+			m3.Text(c, m3.LabelMedium, a.search.note).Padding(4, pageGutter, 4).TextColor(sc.OnSurfaceVariant)
 		}
 		a.pageList(c)
 	})
@@ -342,7 +629,7 @@ func (a *app) searchLanding(c *ui.Context) {
 			removed := false
 			row.Children(func() {
 				ui.Icon(c, m3.IconHistory).FontSize(24).TextColor(sc.OnSurfaceVariant)
-				m3.Text(c, m3.BodyLarge, query).Grow(1).SingleLine().TextColor(sc.OnSurface)
+				m3.Text(c, m3.BodyLarge, query).Grow(1).SingleLine().Tooltip(query).TextColor(sc.OnSurface)
 				if m3.IconButton(c, m3.IconButtonSpec{Icon: m3.IconClose, Label: "Remove " + query, Size: m3.ExtraSmall32, Key: "forget-" + query}).Clicked() {
 					removed = true
 				}
@@ -400,7 +687,7 @@ func (a *app) topResult(c *ui.Context, item youtube.MusicItem) {
 		ui.Column(c).Grow(1).MinWidth(0).Gap(6).Children(func() {
 			m3.EmphasizedText(c, m3.HeadlineSmall, item.Title).MaxLines(2).TextColor(sc.OnSurface)
 			if item.Subtitle != "" {
-				m3.Text(c, m3.BodyMedium, item.Subtitle).SingleLine().TextColor(sc.OnSurfaceVariant)
+				m3.Text(c, m3.BodyMedium, item.Subtitle).SingleLine().Tooltip(item.Subtitle).TextColor(sc.OnSurfaceVariant)
 			}
 			switch target.Kind {
 			case youtube.TargetTrack:

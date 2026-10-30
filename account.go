@@ -317,7 +317,7 @@ func (a *app) endSession(reason string) {
 
 // sessionExpiredNotice is what the user is told when YouTube stops accepting
 // their session and the browser it came from cannot replace it.
-const sessionExpiredNotice = "Your session expired. Sign in again."
+const sessionExpiredNotice = "Your YouTube Music session expired. Sign in again."
 
 // expireSession ends a session YouTube no longer accepts, and makes the pages
 // that need an account ask the user to sign in again.

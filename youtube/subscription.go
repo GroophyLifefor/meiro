@@ -6,16 +6,6 @@ import (
 	"strings"
 )
 
-// Subscription is whether the signed-in account follows an artist, and the
-// channel the write names. ChannelID is empty for what the page offers no
-// button for: an artist seen signed out, or a page that is not an artist's.
-type Subscription struct {
-	// ChannelID is the channel of the artist. It is read from the page's
-	// button: the browse ID an artist page is opened with can differ from it.
-	ChannelID  string
-	Subscribed bool
-}
-
 // Subscribe follows an artist, with subscription/subscribe and the artist's
 // channel, as YouTube Music's own artist page does.
 func (c *Client) Subscribe(ctx context.Context, channelID string) error {

@@ -28,6 +28,63 @@ func TestSummarizeCountsTheRangeOnly(t *testing.T) {
 	}
 }
 
+func TestCountsTheRule(t *testing.T) {
+	for _, tc := range []struct {
+		name            string
+		playedMS, durMS int64
+		want            bool
+	}{
+		{"thirty seconds", 30000, 0, true},
+		{"half a short track", 20000, 40000, true},
+		{"short of half and of thirty", 10000, 40000, false},
+		{"just under thirty with no length", 29999, 0, false},
+		{"exactly half", 90000, 180000, true},
+		{"no length and little heard", 5000, 0, false},
+	} {
+		if got := Counts(tc.playedMS, tc.durMS); got != tc.want {
+			t.Errorf("%s: Counts(%d, %d) = %t, want %t", tc.name, tc.playedMS, tc.durMS, got, tc.want)
+		}
+	}
+}
+
+// A play that does not meet the rule is recorded but not counted, while one
+// recorded before timing existed still counts.
+func TestSummarizeAppliesTheCountingRule(t *testing.T) {
+	now := time.Date(2026, 3, 10, 15, 0, 0, 0, time.UTC)
+	entries := []Entry{
+		{VideoID: "short", EventID: "e1", PlayedMS: 5000, DurationMS: 180000, PlayedAt: now},
+		{VideoID: "enough", EventID: "e2", PlayedMS: 30000, DurationMS: 180000, PlayedAt: now},
+		{VideoID: "legacy", PlayedAt: now}, // written before plays carried timing
+	}
+	s := Summarize(entries, now, 7)
+	if s.Plays != 2 {
+		t.Fatalf("plays = %d, want the qualifying play and the legacy one", s.Plays)
+	}
+}
+
+func TestWatchCountsOnlyMovingPositions(t *testing.T) {
+	base := time.Date(2026, 3, 1, 12, 0, 0, 0, time.UTC)
+	var w Watch
+	w.Observe(base, 0)
+	w.Observe(base.Add(time.Second), time.Second) // playing
+	w.Observe(base.Add(2*time.Second), 2*time.Second)
+	if got := w.Listened(); got != 2*time.Second {
+		t.Errorf("listened = %v, want 2s", got)
+	}
+	// A seek forward is not listening.
+	w.Observe(base.Add(3*time.Second), time.Minute)
+	if got := w.Listened(); got != 2*time.Second {
+		t.Errorf("a seek counted as listening: %v", got)
+	}
+	// A pause, broken and resumed at the same place, adds only what plays.
+	w.Break()
+	w.Observe(base.Add(time.Hour), time.Minute)
+	w.Observe(base.Add(time.Hour+time.Second), time.Minute+time.Second)
+	if got := w.Listened(); got != 3*time.Second {
+		t.Errorf("listened after a pause = %v, want 3s", got)
+	}
+}
+
 func TestAppendCapsAndWriteReadsBack(t *testing.T) {
 	var h []Entry
 	for i := range MaxEntries + 3 {
@@ -112,5 +169,41 @@ func BenchmarkSummarize(b *testing.B) {
 	b.ReportAllocs()
 	for b.Loop() {
 		Summarize(h, now, 30)
+	}
+}
+
+// Plays from elsewhere join the history in the order they happened, a play it
+// already holds is not added again, and the latest MaxEntries are kept.
+func TestMergeAddsPlaysOnceAndInOrder(t *testing.T) {
+	at := time.Date(2026, 3, 10, 12, 0, 0, 0, time.UTC)
+	own := []Entry{
+		{VideoID: "old", PlayedAt: at.Add(-time.Hour)}, // before plays had ids
+		{VideoID: "a", EventID: "e1", PlayedAt: at},
+		{VideoID: "c", EventID: "e3", PlayedAt: at.Add(2 * time.Hour)},
+	}
+	incoming := []Entry{
+		{VideoID: "a", EventID: "e1", PlayedAt: at}, // this device's own play, back from the server
+		{VideoID: "b", EventID: "e2", Device: "phone", PlayedAt: at.Add(time.Hour)},
+		{VideoID: "b", EventID: "e2", Device: "phone", PlayedAt: at.Add(time.Hour)},
+	}
+	got, added := Merge(own, incoming)
+	if added != 1 || len(got) != 4 {
+		t.Fatalf("added %d, history %+v", added, got)
+	}
+	for i, want := range []string{"old", "a", "b", "c"} {
+		if got[i].VideoID != want {
+			t.Errorf("place %d = %q, want %q", i, got[i].VideoID, want)
+		}
+	}
+	if again, added := Merge(got, incoming); added != 0 || len(again) != 4 {
+		t.Errorf("merging twice added %d", added)
+	}
+
+	var many []Entry
+	for i := range MaxEntries + 5 {
+		many = append(many, Entry{VideoID: fmt.Sprint(i), EventID: fmt.Sprint("e", i), PlayedAt: at.Add(time.Duration(i) * time.Minute)})
+	}
+	if got, _ := Merge(nil, many); len(got) != MaxEntries || got[0].VideoID != "5" {
+		t.Errorf("kept %d starting at %q, want the latest %d", len(got), got[0].VideoID, MaxEntries)
 	}
 }

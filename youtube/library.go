@@ -6,26 +6,6 @@ import (
 	"strings"
 )
 
-// InLibrary is what the item's menu said of the album or the playlist, or the
-// zero state when it said nothing.
-func (item MusicItem) InLibrary() LibraryState {
-	if item.Library == nil {
-		return LibraryState{}
-	}
-	return *item.Library
-}
-
-// LibraryState is whether an album or a playlist is in the account's library,
-// and what to write to change it. ID is empty for what the page offers no way
-// to save: a playlist the account made, a mix, or anything seen signed out.
-type LibraryState struct {
-	// ID is the playlist the write names. For an album it is the album's audio
-	// playlist (OLAK5uy_…), not its browse ID, which is why it is read from
-	// the page rather than derived.
-	ID    string
-	Saved bool
-}
-
 // AddToLibrary saves an album or a playlist to the account's library. YouTube
 // Music keeps a saved playlist as a like of it, so this is the call that
 // likes a track, aimed at a playlist: like/like with the playlist as the

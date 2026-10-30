@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"path/filepath"
 	"runtime"
 	"slices"
@@ -14,6 +15,7 @@ import (
 	"github.com/elianiva/meiro/internal/keymap"
 	"github.com/elianiva/meiro/internal/settings"
 	"github.com/elianiva/meiro/m3"
+	"github.com/elianiva/meiro/media"
 	"github.com/elianiva/meiro/player"
 )
 
@@ -52,25 +54,33 @@ type settingsSearchState struct {
 // answer the same question sit under one heading.
 var settingsRows = []settingsRow{
 	{key: "h-account", heading: "Account"},
-	{key: "account", search: "sign in profile account session", card: (*app).accountCard},
+	{key: "meiro-account", search: "meiro account sync server dashboard sign in email password sending plays playlists downloads", card: (*app).meiroAccountCard},
+	{key: "account", search: "youtube music account sign in profile session channel optional", card: (*app).youtubeAccountCard},
 	{key: "lastfm", search: "last.fm scrobbling music service", card: (*app).lastFMCard},
 
 	{key: "h-look", heading: "Appearance and sound"},
 	{key: "appearance", search: "theme appearance system light dark colour color colours colors violet indigo blue sky teal green lime amber orange red rose orchid hue palette tonal spot vibrant expressive neutral monochrome artwork dynamic", card: (*app).appearanceCard},
 	{key: "sound", search: "sound audio normalize loudness equaliser volume", card: (*app).soundCard},
 
+	{key: "h-sources", heading: "Music sources"},
+	{key: "recommendations", search: "recommendations suggestions daily mix discover explore new artists taste queue", card: (*app).recommendationsCard},
+	{key: "preferred-provider", search: "preferred provider source sources music source order ytm youtube music soundcloud", card: (*app).preferredProviderCard},
+
 	{key: "h-system", heading: "System"},
 	{key: "desktop", search: "desktop linux notifications discord rich presence activity status tray icon wordmark o mark low key subtle", card: (*app).desktopCard},
 	{key: "keyboard", search: "keyboard shortcuts keys", card: (*app).keyboardCard},
 
 	{key: "h-data", heading: "Storage and privacy"},
-	{key: "cache", search: "storage cache playback downloads", card: (*app).playbackCacheCard},
+	{key: "cache", search: "storage cache youtube music ytm playback downloads size megabytes", card: (*app).youtubeCacheCard},
+	{key: "soundcloud-cache", search: "storage cache soundcloud offline downloads size megabytes", card: (*app).soundcloudCacheCard},
+	{key: "cache-folder", search: "storage cache folder location directory", card: (*app).cacheFolderCard},
+	{key: "metadata-cache", search: "storage cache musicbrainz listenbrainz metadata artists songs searches answers clear", card: (*app).metadataCacheCard},
 	{key: "history", search: "privacy history listening plays", card: (*app).historyCard},
 
 	{key: "h-about", heading: "About and support"},
+	{key: "about", search: "about credits author fork murat kirazkaya", card: (*app).aboutCard},
 	{key: "updates", search: "about updates version", card: (*app).updatesCard},
 	{key: "tools", search: "support tools", card: (*app).toolsCard},
-	{key: "report", search: "support report problem bug", card: (*app).reportCard},
 	{key: "logs", search: "logs folder diagnostics", card: (*app).logsCard},
 }
 
@@ -187,11 +197,22 @@ func (a *app) settingsPage(c *ui.Context) {
 
 // settingsCard is a tonal card that holds one group of settings.
 func (a *app) settingsCard(c *ui.Context, title string, icon *ui.SVG, build func()) {
+	a.badgedSettingsCard(c, title, "", icon, build)
+}
+
+// badgedSettingsCard is settingsCard with a small tag after the title, such as
+// "optional", when badge is not empty.
+func (a *app) badgedSettingsCard(c *ui.Context, title, badge string, icon *ui.SVG, build func()) {
 	sc := m3.Of(c).Scheme
 	ui.Column(c).Padding(24).Gap(22).Radius(m3.ExtraLarge).Background(sc.SurfaceContainerLow).Children(func() {
 		ui.Row(c).Gap(12).AlignItems(ui.Center).Children(func() {
 			ui.Icon(c, icon).FontSize(24).TextColor(sc.Primary)
 			m3.EmphasizedText(c, m3.TitleLarge, title)
+			if badge != "" {
+				ui.Row(c).Padding(4, 10, 4).Radius(m3.Full).Background(sc.SurfaceContainerHighest).Children(func() {
+					m3.Text(c, m3.LabelMedium, badge).TextColor(sc.OnSurfaceVariant)
+				})
+			}
 		})
 		build()
 	})
@@ -217,8 +238,13 @@ func (a *app) appearanceCard(c *ui.Context) {
 			settingLabel(c, "Theme", "Follow the desktop, or stay light or dark.").Grow(1)
 			mode := int(th.Mode)
 			if m3.ButtonGroup(c, "mode", &mode, []string{"System", "Light", "Dark"}, nil) {
-				a.settings.SetMode(m3.Modes()[mode])
+				chosen := m3.Modes()[mode]
+				a.settings.SetMode(chosen)
 				a.saveSettings()
+				// The desktop draws the window buttons, so it is told the
+				// appearance Meiro is set to, or they turn invisible on a
+				// window whose colour is not the desktop's.
+				a.applyAppearance()
 			}
 		})
 
@@ -295,37 +321,160 @@ func (a *app) appearanceCard(c *ui.Context) {
 	})
 }
 
-// playbackCacheCard controls the number of recently played songs kept on
-// disk for replay without another network stream.
-func (a *app) playbackCacheCard(c *ui.Context) {
+// preferredProviderCard orders the sources the app searches and plays. The
+// first source is preferred for a song more than one holds, and a source that
+// fails falls through to the next. A downloaded song plays from the source it
+// is kept from whatever the order, which the note under the rows says.
+func (a *app) preferredProviderCard(c *ui.Context) {
 	sc := m3.Of(c).Scheme
-	a.settingsCard(c, "Playback cache", m3.IconFolder, func() {
-		ui.Column(c).Gap(12).Children(func() {
-			settingLabel(c, "Keep recent songs", "Enter any non-negative whole number and press Enter to apply. Set 0 to turn the cache off. Older songs are removed first; each is kept in the format YouTube serves it, in a private Meiro cache folder.")
-			ui.Row(c).Gap(12).AlignItems(ui.Center).Children(func() {
-				input := ui.TextInputBase(c.Key("audio-cache-limit"), &a.cacheSongsText).
-					Width(128).Height(48).Shrink(0).Padding(12).Radius(m3.Medium).Background(sc.SurfaceContainerHigh).
-					TextColor(sc.OnSurface).FontSize(16).Label("Songs to cache").Placeholder("10")
-				m3.Text(c, m3.BodyMedium, "songs").Width(48).Shrink(0).TextColor(sc.OnSurfaceVariant)
-				if input.Submitted() {
-					if limit, err := strconv.Atoi(strings.TrimSpace(a.cacheSongsText)); err == nil && limit >= 0 {
-						a.setAudioCacheLimit(limit)
-						a.cacheLimitError = ""
-					} else {
-						a.cacheLimitError = "Enter a whole number of 0 or more."
+	order := a.providerOrder()
+	a.settingsCard(c, "Preferred provider", m3.IconMusicNote, func() {
+		ui.Column(c).Gap(8).Children(func() {
+			for i, source := range order {
+				name := sourceLabel(string(source))
+				ui.Row(c).Key("provider-" + string(source)).Gap(12).AlignItems(ui.Center).Children(func() {
+					ui.Icon(c, sourceIcon(source)).FontSize(22).TextColor(sourceColour(source))
+					m3.EmphasizedText(c, m3.TitleMedium, name).Grow(1)
+					if m3.IconButton(c, m3.IconButtonSpec{
+						Icon: m3.IconExpandLess, Label: "Move " + name + " up", Kind: m3.StandardIcon,
+						Size: m3.Small40, Key: "provider-up-" + string(source), Disabled: i == 0,
+					}).Clicked() {
+						a.moveProvider(i, -1)
 					}
-				}
-			})
-			if a.cacheLimitError != "" {
-				m3.Text(c, m3.BodyMedium, a.cacheLimitError).TextColor(sc.Error)
+					if m3.IconButton(c, m3.IconButtonSpec{
+						Icon: m3.IconExpandMore, Label: "Move " + name + " down", Kind: m3.StandardIcon,
+						Size: m3.Small40, Key: "provider-down-" + string(source), Disabled: i == len(order)-1,
+					}).Clicked() {
+						a.moveProvider(i, 1)
+					}
+				})
 			}
-			settingLabel(c, "Cache folder", "Meiro creates a private ‘Meiro Audio Cache’ folder inside this location. Changing folders removes the songs Meiro cached in the old one.")
+		})
+		m3.Text(c, m3.BodyMedium, "Playback order: a downloaded file first, then this order. If a provider fails, the next one is tried.").TextColor(sc.OnSurfaceVariant)
+	})
+}
+
+// cacheCardSpec is what one provider's cache card says and does. Both
+// providers' cards are drawn from it, so they read and behave alike.
+type cacheCardSpec struct {
+	title, intro, clearLabel string
+	// key tells the cards' fields apart.
+	key string
+	// text is the size the field holds, and err why a value it held was not
+	// accepted.
+	text, err *string
+	// mb is the size in force, and setMB applies a new one.
+	mb    int
+	setMB func(int)
+	// cache is the cache the card reports on, nil while it is off.
+	cache *audio.Cache
+	clear func()
+}
+
+// cacheCard draws a provider's audio cache: its size in megabytes, where zero
+// turns it off, how full it is, and a button that clears it. A downloaded
+// track is never touched by it.
+func (a *app) cacheCard(c *ui.Context, spec cacheCardSpec) {
+	sc := m3.Of(c).Scheme
+	a.settingsCard(c, spec.title, m3.IconFolder, func() {
+		m3.Text(c, m3.BodyMedium, spec.intro).TextColor(sc.OnSurfaceVariant)
+		ui.Row(c).Gap(12).AlignItems(ui.Center).Children(func() {
+			settingLabel(c, "Size limit", "Enter a whole number of megabytes and press Enter to apply. Set 0 to turn the cache off. Older songs are removed first.").Grow(1)
+			input := ui.TextInputBase(c.Key(spec.key+"-cache-mb"), spec.text).
+				Width(128).Height(48).Shrink(0).Padding(12).Radius(m3.Medium).Background(sc.SurfaceContainerHigh).
+				TextColor(sc.OnSurface).FontSize(16).Label("Megabytes").Placeholder("512")
+			m3.Text(c, m3.BodyMedium, "MB").Width(48).Shrink(0).TextColor(sc.OnSurfaceVariant)
+			if input.Submitted() {
+				if mb, err := strconv.Atoi(strings.TrimSpace(*spec.text)); err == nil && mb >= 0 {
+					spec.setMB(mb)
+					*spec.err = ""
+				} else {
+					*spec.err = "Enter a whole number of 0 or more."
+				}
+			}
+		})
+		if *spec.err != "" {
+			m3.Text(c, m3.BodyMedium, *spec.err).TextColor(sc.Error)
+		}
+		a.cacheFullness(c, spec)
+		ui.Row(c).Gap(12).AlignItems(ui.Center).Children(func() {
+			settingLabel(c, "Clear the cache", "Delete the songs kept on disk. Downloaded tracks are not touched.").Grow(1)
+			if m3.Button(c, m3.ButtonSpec{Label: spec.clearLabel, Kind: m3.Outlined, Key: spec.key + "-cache-clear", Disabled: spec.cache == nil}).Clicked() {
+				spec.clear()
+			}
+		})
+	})
+}
+
+// cacheFullness shows how much of its size a cache uses: a bar, and in words
+// the megabytes used of the limit and how many songs they are.
+func (a *app) cacheFullness(c *ui.Context, spec cacheCardSpec) {
+	sc := m3.Of(c).Scheme
+	used, tracks := spec.cache.Usage()
+	text := "Off"
+	permille := 0
+	if spec.mb > 0 {
+		limit := int64(spec.mb) << 20
+		text = fmt.Sprintf("%s of %d MB · %s", formatMegabytes(used), spec.mb, songCount(tracks))
+		permille = int(min(used*1000/limit, 1000))
+	}
+	ui.Column(c).Gap(6).Children(func() {
+		settingLabel(c, "Fullness", "")
+		ui.Row(c).Height(6).FillWidth().Radius(m3.Full).Background(sc.OutlineVariant).Children(func() {
+			if permille > 0 {
+				ui.Box(c).Grow(float32(permille)).Basis(0).Height(6).Radius(m3.Full).Background(sc.Primary)
+			}
+			if permille < 1000 {
+				ui.Box(c).Grow(float32(1000 - permille)).Basis(0).Height(6)
+			}
+		})
+		m3.Text(c, m3.BodySmall, text).TextColor(sc.OnSurfaceVariant)
+	})
+}
+
+// formatMegabytes writes a size in bytes as megabytes, with a decimal below
+// ten of them.
+func formatMegabytes(bytes int64) string {
+	mb := float64(bytes) / (1 << 20)
+	if mb < 10 {
+		return fmt.Sprintf("%.1f MB", mb)
+	}
+	return fmt.Sprintf("%.0f MB", mb)
+}
+
+// songCount names how many songs a cache holds.
+func songCount(n int) string {
+	if n == 1 {
+		return "1 song"
+	}
+	return strconv.Itoa(n) + " songs"
+}
+
+// youtubeCacheCard is the YouTube Music audio cache.
+func (a *app) youtubeCacheCard(c *ui.Context) {
+	a.cacheCard(c, cacheCardSpec{
+		title: "YouTube Music cache", key: "youtube",
+		intro:      "Keeps recently played YouTube Music audio on disk so it replays without another network stream. Each song is kept in the format YouTube serves it.",
+		clearLabel: "Clear YouTube Music cache",
+		text:       &a.youtubeCacheMBText, err: &a.youtubeCacheError,
+		mb: a.settings.YouTubeCacheMB, setMB: a.setYouTubeCacheMB,
+		cache: a.currentAudioCache(), clear: a.clearAudioCache,
+	})
+}
+
+// cacheFolderCard is the folder both caches are kept in. Each provider's cache
+// has a folder of its own inside it.
+func (a *app) cacheFolderCard(c *ui.Context) {
+	sc := m3.Of(c).Scheme
+	a.settingsCard(c, "Cache folder", m3.IconFolder, func() {
+		ui.Column(c).Gap(12).Children(func() {
+			settingLabel(c, "Folder", "Meiro creates a private folder for each provider inside this location. Changing folders removes the songs Meiro cached in the old one.")
 			ui.Row(c).Gap(12).AlignItems(ui.Center).Children(func() {
 				location := a.cacheDirectoryText
 				if location == "" {
 					location = "Default app cache folder"
 				}
-				m3.Text(c, m3.BodyMedium, location).TextColor(sc.OnSurfaceVariant).MinWidth(0).Grow(1).SingleLine()
+				m3.Text(c, m3.BodyMedium, location).TextColor(sc.OnSurfaceVariant).MinWidth(0).Grow(1).SingleLine().Tooltip(location)
 				if m3.IconButton(c, m3.IconButtonSpec{Icon: m3.IconFolder, Label: "Choose cache folder", Kind: m3.OutlinedIcon, Size: m3.Small40, Key: "audio-cache-folder"}).Clicked() {
 					a.chooseAudioCacheDirectory()
 				}
@@ -335,6 +484,58 @@ func (a *app) playbackCacheCard(c *ui.Context) {
 			}
 		})
 	})
+}
+
+// clearAudioCache deletes the songs the playback cache keeps, leaving the one
+// playing where it is and never touching a downloaded track.
+func (a *app) clearAudioCache() {
+	cache := a.currentAudioCache()
+	if cache == nil {
+		return
+	}
+	keep := ""
+	if a.current.Key() != "" {
+		keep = audioKey(a.current)
+	}
+	a.run(func() { cache.Clear(keep) })
+	a.notice = "Cleared the YouTube Music cache"
+}
+
+// soundcloudCacheCard is the SoundCloud audio cache. It is kept apart from the
+// YouTube Music cache, so the two never fill or clear together.
+func (a *app) soundcloudCacheCard(c *ui.Context) {
+	a.cacheCard(c, cacheCardSpec{
+		title: "SoundCloud cache", key: "soundcloud",
+		intro:      "Keeps recently played SoundCloud audio on disk so it replays without another network stream. It is kept apart from the YouTube Music cache.",
+		clearLabel: "Clear SoundCloud cache",
+		text:       &a.soundcloudCacheMBText, err: &a.soundcloudCacheError,
+		mb: a.settings.SoundCloudCacheMB, setMB: a.setSoundCloudCacheMB,
+		cache: a.currentSoundCloudCache(), clear: a.clearSoundCloudCache,
+	})
+}
+
+// setSoundCloudCacheMB changes how much SoundCloud audio the cache keeps, and
+// reopens it so the new size applies at once. Zero turns the cache off.
+func (a *app) setSoundCloudCacheMB(mb int) {
+	a.settings.SoundCloudCacheMB = max(mb, 0)
+	a.soundcloudCacheMBText = strconv.Itoa(a.settings.SoundCloudCacheMB)
+	a.saveSettings()
+	a.openSoundCloudCache()
+}
+
+// clearSoundCloudCache deletes the songs the SoundCloud cache keeps, leaving
+// the one playing where it is and never touching a downloaded track.
+func (a *app) clearSoundCloudCache() {
+	cache := a.currentSoundCloudCache()
+	if cache == nil {
+		return
+	}
+	keep := ""
+	if a.current.Key() != "" && resolveSource(a.current) == media.SourceSoundCloud {
+		keep = audioKey(a.current)
+	}
+	a.run(func() { cache.Clear(keep) })
+	a.notice = "Cleared the SoundCloud cache"
 }
 
 // soundCard holds the equaliser's bands. Slider changes update the player as
@@ -481,16 +682,19 @@ func (a *app) styleTile(c *ui.Context, style m3.Style) bool {
 	return b.Clicked()
 }
 
-func (a *app) accountCard(c *ui.Context) {
+// youtubeAccountCard is the YouTube Music provider's account: optional, and
+// needed only to read its library, likes and recap. Search and playback work
+// without it. The channel the account acts as is chosen here.
+func (a *app) youtubeAccountCard(c *ui.Context) {
 	sc := m3.Of(c).Scheme
-	a.settingsCard(c, "Account", m3.IconPerson, func() {
+	a.badgedSettingsCard(c, "YouTube Music account", "optional", m3.IconMusicNote, func() {
 		ui.Row(c).Gap(16).AlignItems(ui.Center).Children(func() {
 			if current := a.account.session; current != nil {
 				a.avatar(c, current.name(), current.details.Thumbnail, 128, 56)
 				ui.Column(c).Gap(2).Grow(1).MinWidth(0).Children(func() {
-					m3.EmphasizedText(c, m3.TitleMedium, current.name()).SingleLine()
+					m3.EmphasizedText(c, m3.TitleMedium, current.name()).SingleLine().Tooltip(current.name())
 					if current.details.Email != "" {
-						m3.Text(c, m3.BodyMedium, current.details.Email).SingleLine().TextColor(sc.OnSurfaceVariant)
+						m3.Text(c, m3.BodyMedium, current.details.Email).SingleLine().Tooltip(current.details.Email).TextColor(sc.OnSurfaceVariant)
 					}
 				})
 				if m3.Button(c, m3.ButtonSpec{Label: "Sign out", Icon: m3.IconLogout, Kind: m3.Tonal, Size: m3.Medium56, Key: "sign-out"}).Clicked() {
@@ -498,11 +702,16 @@ func (a *app) accountCard(c *ui.Context) {
 				}
 				return
 			}
-			settingLabel(c, "Not signed in", "Sign in to see your library. Browsing and playing work without it.").Grow(1)
+			settingLabel(c, "Not signed in", "Needed only to read your YouTube Music library, likes and recap. Search and playback work without it.").Grow(1)
 			if m3.Button(c, m3.ButtonSpec{Label: "Sign in", Icon: m3.IconLogin, Size: m3.Medium56, Key: "sign-in"}).Clicked() {
 				a.openSignIn()
 			}
 		})
+		if current := a.account.session; current != nil {
+			ui.Column(c).Gap(2).Children(func() {
+				a.channelItems(c, current)
+			})
+		}
 		if s := &a.account.signIn; s.err != "" && !s.open {
 			m3.Text(c, m3.BodyMedium, s.err).TextColor(sc.Error).MaxLines(3)
 		}
@@ -518,7 +727,7 @@ func (a *app) chooseAudioCacheDirectory() {
 	if current == "" {
 		current = defaultRoot
 	}
-	limit, parent := a.settings.CacheSongs, a.desktop.window()
+	limits, parent := cacheLimits(a.settings.YouTubeCacheMB), a.desktop.window()
 	type chosen struct {
 		root  string
 		cache *audio.Cache
@@ -542,7 +751,7 @@ func (a *app) chooseAudioCacheDirectory() {
 		if filepath.Clean(root) == filepath.Clean(current) {
 			return chosen{root: root}
 		}
-		cache, root, err := audio.Open(root, limit)
+		cache, root, err := audio.OpenLimits(root, limits)
 		if err != nil {
 			return chosen{err: "Could not use that folder: " + err.Error()}
 		}
@@ -556,7 +765,6 @@ func (a *app) chooseAudioCacheDirectory() {
 			return // the picker was cancelled
 		}
 		if c.cache != nil {
-			c.cache.SetLimit(a.settings.CacheSongs)
 			if previous := a.replaceAudioCache(c.cache); previous != nil {
 				a.run(func() {
 					previous.Close()
@@ -572,6 +780,11 @@ func (a *app) chooseAudioCacheDirectory() {
 			a.settings.CacheDirectory = ""
 		}
 		a.cacheDirectoryText, a.cacheDirError = c.root, ""
+		if c.cache != nil {
+			// SoundCloud's cache is kept beside the YouTube Music one, so it
+			// moves with it.
+			a.openSoundCloudCache()
+		}
 		a.saveSettings()
 	})
 }

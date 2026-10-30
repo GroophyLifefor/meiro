@@ -47,7 +47,16 @@ type RailSpec struct {
 	// TopInset keeps the rail clear of the window controls of a window with
 	// a hidden title bar, and lets the band they sit in drag the window.
 	TopInset float32
+	// Logo is the app's picture, shown at the top of the rail on the line of
+	// the icons, with the app's name beside it when the rail is expanded. A
+	// nil Logo leaves the top as it was.
+	Logo *ui.Bitmap
+	// Name is the app's name beside the logo.
+	Name string
 }
+
+// logoSize is the side of the logo at the top of the rail.
+const logoSize = 40
 
 // RailEvent is what the user did to a rail this frame.
 type RailEvent struct {
@@ -87,6 +96,14 @@ func Rail(c *ui.Context, spec RailSpec) RailEvent {
 		menu.Margin(-reachBy, -reachBy, -reachBy, RailCollapsed/2-MinTarget/2)
 		if menu.Clicked() {
 			event.Toggle = true
+		}
+		if spec.Logo != nil {
+			ui.Row(c).Margin(8, 0, 0, RailCollapsed/2-logoSize/2).Gap(12).AlignItems(ui.Center).Shrink(0).Children(func() {
+				ui.Image(c, spec.Logo).Size(logoSize, logoSize).Fit(ui.Contain).Shrink(0)
+				if expanded && spec.Name != "" {
+					EmphasizedText(c, TitleLarge, spec.Name).SingleLine().TextColor(sc.OnSurface)
+				}
+			})
 		}
 		ui.Box(c).Height(16)
 		for _, item := range spec.Items {

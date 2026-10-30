@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"runtime"
+	"slices"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -20,7 +21,9 @@ import (
 	"github.com/elianiva/meiro/internal/lrclib"
 	"github.com/elianiva/meiro/internal/proc"
 	"github.com/elianiva/meiro/internal/report"
+	"github.com/elianiva/meiro/musicbrainz"
 	"github.com/elianiva/meiro/player"
+	"github.com/elianiva/meiro/soundcloud"
 	"github.com/elianiva/meiro/youtube"
 )
 
@@ -154,6 +157,10 @@ func (fakeMusic) RoundTrip(request *http.Request) (*http.Response, error) {
 		searches.Add(1)
 		searchAsked.Store(asked)
 		reply = searchEpisodeResponse
+	case strings.Contains(asked, `"query":"shared"`):
+		searches.Add(1)
+		searchAsked.Store(asked)
+		reply = searchSharedResponse
 	case strings.Contains(asked, "yor mixed"):
 		reply = searchMixedResponse
 	case strings.Contains(asked, `"query"`):
@@ -227,10 +234,129 @@ func newTestApp(t testing.TB) *app {
 		return report.Info{App: version, OS: runtime.GOOS, Arch: runtime.GOARCH, YtDlp: "2026.01.01", FFmpeg: "7.1"}
 	}
 	a.lyricsSource = func(context.Context, lrclib.Query) (*lrclib.Lyrics, error) { return nil, nil }
+	// Reading or playing SoundCloud must not run the real yt-dlp either.
+	a.soundcloud = soundcloud.New(soundcloud.Options{Runner: fakeSoundCloudRunner})
+	a.soundcloudStreams = audio.NewURLs(func(context.Context, string) (string, time.Duration, error) {
+		return "", 0, errors.New("no network in tests")
+	})
 	a.account.newClient = newFakeClient
 	a.account.public = newFakeClient(nil)
+	// Artist and recording lookups are answered from a fake, so a test reads
+	// MusicBrainz and ListenBrainz without a network.
+	a.mb = &fakeMetadata{}
 	return a
 }
+
+// fakeMetadata answers the metadata client without a network. A test sets the
+// answers it needs and leaves the rest empty.
+type fakeMetadata struct {
+	artists    []musicbrainz.Artist
+	popularity map[string]musicbrainz.Popularity
+	recordings map[string][]musicbrainz.Recording
+	links      map[string][]musicbrainz.Link
+	urls       map[string][]musicbrainz.RecordingRef
+	isrcs      map[string][]musicbrainz.RecordingRef
+	// found answers a recording search by title.
+	found map[string][]musicbrainz.RecordingMatch
+	// cache is what the fake says is kept on disk, and similar answers a
+	// similar-artists lookup by MBID.
+	cache   []musicbrainz.CacheEntry
+	similar map[string][]musicbrainz.SimilarArtist
+	// err, when set, is what every lookup answers with.
+	err error
+
+	mu         sync.Mutex
+	searches   int
+	linksAsked []string
+}
+
+func (f *fakeMetadata) SearchArtists(_ context.Context, _ string) ([]musicbrainz.Artist, error) {
+	f.mu.Lock()
+	f.searches++
+	f.mu.Unlock()
+	if f.err != nil {
+		return nil, f.err
+	}
+	return f.artists, nil
+}
+
+func (f *fakeMetadata) ArtistPopularity(_ context.Context, _ []string) (map[string]musicbrainz.Popularity, error) {
+	if f.err != nil {
+		return nil, f.err
+	}
+	if f.popularity != nil {
+		return f.popularity, nil
+	}
+	return map[string]musicbrainz.Popularity{}, nil
+}
+
+func (f *fakeMetadata) TopRecordings(_ context.Context, artistMBID string) ([]musicbrainz.Recording, error) {
+	if f.err != nil {
+		return nil, f.err
+	}
+	return f.recordings[artistMBID], nil
+}
+
+func (f *fakeMetadata) RecordingLinks(_ context.Context, recordingMBID string) ([]musicbrainz.Link, error) {
+	f.mu.Lock()
+	f.linksAsked = append(f.linksAsked, recordingMBID)
+	f.mu.Unlock()
+	if f.err != nil {
+		return nil, f.err
+	}
+	return f.links[recordingMBID], nil
+}
+
+func (f *fakeMetadata) LookupURL(_ context.Context, resource string) ([]musicbrainz.RecordingRef, error) {
+	if f.err != nil {
+		return nil, f.err
+	}
+	return f.urls[resource], nil
+}
+
+func (f *fakeMetadata) LookupISRC(_ context.Context, isrc string) ([]musicbrainz.RecordingRef, error) {
+	if f.err != nil {
+		return nil, f.err
+	}
+	return f.isrcs[isrc], nil
+}
+
+func (f *fakeMetadata) SearchRecordings(_ context.Context, title, _ string) ([]musicbrainz.RecordingMatch, error) {
+	if f.err != nil {
+		return nil, f.err
+	}
+	return f.found[title], nil
+}
+
+func (f *fakeMetadata) SimilarArtists(_ context.Context, mbid string) ([]musicbrainz.SimilarArtist, error) {
+	if f.err != nil {
+		return nil, f.err
+	}
+	return f.similar[mbid], nil
+}
+
+func (f *fakeMetadata) CacheEntries() []musicbrainz.CacheEntry {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	return append([]musicbrainz.CacheEntry(nil), f.cache...)
+}
+
+func (f *fakeMetadata) RemoveCacheEntry(id string) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.cache = slices.DeleteFunc(f.cache, func(e musicbrainz.CacheEntry) bool { return e.ID == id })
+	return nil
+}
+
+func (f *fakeMetadata) ClearCache() error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.cache = nil
+	return nil
+}
+
+// fakeMB is the fake metadata client an app was built with.
+func fakeMB(a *app) *fakeMetadata { return a.mb.(*fakeMetadata) }
 
 // newFakeClient is a YouTube client answered by fakeMusic.
 func newFakeClient(auth *youtube.CookieAuth) *youtube.Client {
@@ -385,12 +511,54 @@ func resetFakes() {
 	refuseWrites.Store(false)
 	duplicateWrites.Store(false)
 	fakeLikeState.Store("")
+	soundcloudMu.Lock()
+	soundcloudAsked = nil
+	soundcloudMu.Unlock()
 	fakeLibrary.Clear()
 	fakeLibrary.Store("PLhype", true)
 	fakeLibrary.Store("PLcar", true)
 }
 
 func init() { resetFakes() }
+
+// soundcloudAsked is what the fake SoundCloud client has been asked to read,
+// by the target it was handed: a search, a page URL, or empty.
+var (
+	soundcloudMu    sync.Mutex
+	soundcloudAsked []string
+)
+
+// fakeSoundCloudRunner answers SoundCloud's yt-dlp runs, so a test reading
+// SoundCloud needs no network. It records the target it was handed.
+func fakeSoundCloudRunner(_ context.Context, args ...string) ([]byte, error) {
+	target := ""
+	for _, arg := range args {
+		if strings.HasPrefix(arg, "scsearch") || strings.HasPrefix(arg, "https://soundcloud.com") {
+			target = arg
+		}
+	}
+	soundcloudMu.Lock()
+	soundcloudAsked = append(soundcloudAsked, target)
+	soundcloudMu.Unlock()
+	if strings.HasPrefix(target, "scsearch") {
+		return []byte(soundcloudSearchResponse), nil
+	}
+	return []byte(`{"title":"","entries":[]}`), nil
+}
+
+// soundcloudTargets is what the fake SoundCloud client was asked to read.
+func soundcloudTargets() []string {
+	soundcloudMu.Lock()
+	defer soundcloudMu.Unlock()
+	return slices.Clone(soundcloudAsked)
+}
+
+// soundcloudSearchResponse is what the fake SoundCloud returns for a search:
+// two tracks, each with the page URL its items carry.
+const soundcloudSearchResponse = `{"title":"SoundCloud Search","entries":[
+	{"id":"111","title":"Cloud Song","uploader":"Cloud Artist","webpage_url":"https://soundcloud.com/cloud-voice/cloud-song","duration":180.0},
+	{"id":"222","title":"Sky Tune","uploader":"Cloud Artist","webpage_url":"https://soundcloud.com/cloud-voice/sky-tune","duration":200.0}
+]}`
 
 func fakeSaved(id string) bool {
 	saved, _ := fakeLibrary.Load(id)
@@ -484,6 +652,20 @@ const searchEpisodeResponse = `{"contents":{"musicCardShelfRenderer":{
 	"subtitle":{"runs":[{"text":"Episode"},{"text":" • "},{"text":"18h ago"},{"text":" • "},{"text":"*Luna"}]},
 	"thumbnail":{"musicThumbnailRenderer":{"thumbnail":{"thumbnails":[{"url":"https://img.test/find-me"}]}}}
 }}}`
+
+// searchSharedResponse is a search whose first song, "Cloud Song", is the same
+// recording as the first track the fake SoundCloud returns, and whose second
+// song only YouTube Music has.
+const searchSharedResponse = `{"contents":{"tabbedSearchResultsRenderer":{"tabs":[{"tabRenderer":{"content":{"sectionListRenderer":{"contents":[
+	{"musicShelfRenderer":{"contents":[
+		{"musicResponsiveListItemRenderer":{"playlistItemData":{"videoId":"vid-cloud"},"flexColumns":[
+			{"musicResponsiveListItemFlexColumnRenderer":{"text":{"runs":[{"text":"Cloud Song"}]}}},
+			{"musicResponsiveListItemFlexColumnRenderer":{"text":{"runs":[{"text":"Cloud Artist"},{"text":" • "},{"text":"3:00"}]}}}]}},
+		{"musicResponsiveListItemRenderer":{"playlistItemData":{"videoId":"vid-only"},"flexColumns":[
+			{"musicResponsiveListItemFlexColumnRenderer":{"text":{"runs":[{"text":"Only Here"}]}}},
+			{"musicResponsiveListItemFlexColumnRenderer":{"text":{"runs":[{"text":"Someone"},{"text":" • "},{"text":"2:20"}]}}}]}}
+	]}}
+]}}}}]}}}`
 
 // searchMixedResponse is a search that found one of everything: a top result,
 // and a row each for an album, an artist, a playlist and a song.

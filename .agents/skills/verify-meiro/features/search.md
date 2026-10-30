@@ -33,6 +33,9 @@ Preconditions:
 - **Next page.** Mirror `TestSearchLoadsTheNextPageItself`. `searchesMore.Load()` becomes `1` with no click.
 - **Menu.** `tt.RightClick("Suggested Song")` and `tt.Menu()` lists the item actions.
 - **Episode result.** `TestSearchEpisodeTopResultPlays` searches for `play episode result`, clicks **Play**, and checks that the resolver receives `UZ83quirqLA` from the episode page ID `MPEDUZ83quirqLA`.
+- **SoundCloud.** Verified by `TestSoundCloudTrackFromUnifiedSearchPlays`. Every search runs against both sources, so the fake SoundCloud runner answers an `scsearch` target without any source being chosen. `Cloud Song` and `Sky Tune` show beside YouTube Music's results, and choosing `Cloud Song` sets `a.current.Key()` to its page URL and asks the SoundCloud resolver for that URL. SoundCloud results carry no continuation, so no next page is offered.
+- **Both sources at once.** Verified by `TestUnifiedSearchMergesProviders`. Searching `shared` returns a song both the fake YouTube and the fake SoundCloud hold (`Cloud Song`) plus songs only one holds. The shared song is one row carrying both source marks; the sources only one holds keep a row each. `TestMergeProvidersMergesSameRecordingAndKeepsOthers` covers the pure merge, including a song whose artist disagrees, which is left as two rows.
+- **No network.** Verified by the search subtests of `states_test.go`. When both sources are out of reach the results come from the device (`TestLocalSearchFindsDownloadsAndCache` covers the downloads and the audio-cache metadata), the page says `From this device`, and there is no error or Retry.
 
 ## Gotchas
 

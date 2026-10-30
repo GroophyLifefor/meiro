@@ -16,6 +16,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -24,6 +25,7 @@ import (
 	"time"
 
 	"github.com/egoist/mygo"
+	"github.com/egoist/mygo/plugins/updater"
 	"github.com/egoist/mygo/plugins/updater/native"
 	"github.com/egoist/mygo/ui"
 
@@ -31,10 +33,14 @@ import (
 	"github.com/elianiva/meiro/internal/audio"
 	"github.com/elianiva/meiro/internal/cookies"
 	"github.com/elianiva/meiro/internal/diskcache"
+	"github.com/elianiva/meiro/internal/downloads"
+	"github.com/elianiva/meiro/internal/library"
+	"github.com/elianiva/meiro/internal/mblinks"
 	"github.com/elianiva/meiro/internal/memprof"
 	"github.com/elianiva/meiro/internal/proc"
 	"github.com/elianiva/meiro/internal/report"
 	"github.com/elianiva/meiro/internal/settings"
+	"github.com/elianiva/meiro/musicbrainz"
 	"github.com/elianiva/meiro/player"
 	"github.com/elianiva/meiro/systemmedia"
 )
@@ -54,9 +60,10 @@ func main() {
 		return
 	}
 	logsDir, closeLog := openLog()
-	// Signed auto-updates with the updater's native window: in builds made
-	// without update signing it stays idle and says so when asked.
-	mygo.Use(native.Plugin)
+	// Signed updates with the updater's native window, checked for only when
+	// the user asks in Settings: in builds made without update signing it
+	// stays idle and says so when asked.
+	mygo.Use(native.New(updater.Options{DisableAutomaticChecks: true}))
 	a := newApp()
 	a.logsDir = logsDir
 	mygo.App.WhenReady(func() {
@@ -71,6 +78,10 @@ func main() {
 			TitleBarStyle: mygo.TitleBarHidden,
 			Content:       ui.View(a.frame),
 		})}
+		// Start in the appearance the user saved, so the desktop's window
+		// buttons match the window rather than the desktop's own theme.
+		a.applyAppearance()
+		a.applyWindowIcon()
 		controls := a.systemMediaControls()
 		controls.Window = a.desktop.win.NativeHandle()
 		session, err := systemmedia.New(controls)
@@ -85,6 +96,7 @@ func main() {
 		// starts only once the window is there.
 		a.restoreAccount()
 		a.loadScrobbleSession()
+		a.loadSyncToken()
 		a.loadHistory()
 		a.startTicker()
 		a.every(persistInterval, func() { a.update(a.persistPlayback) })
@@ -93,6 +105,11 @@ func main() {
 		a.every(30*time.Second, debug.FreeOSMemory)
 		a.watchSession()
 		a.every(flushInterval, func() { a.update(a.flushScrobbles) })
+		a.every(syncInterval, func() { a.update(a.syncNow) })
+		a.every(syncInterval, func() { a.update(a.pullChanges) })
+		a.every(syncInterval, func() { a.update(a.pullEvents) })
+		a.every(recommendEvery, func() { a.update(a.recommendTick) })
+		time.AfterFunc(recommendStartDelay, func() { a.update(a.recommendTick) })
 		a.desktop.win.OnClosed(a.stopTicking)
 	})
 	err := mygo.App.Run()
@@ -164,18 +181,46 @@ func (a *app) setup() {
 		a.settings = settings.Load(a.saver.Path)
 		a.account.creds.store = &cookies.FileStore{Path: filepath.Join(directory, "cookie.txt")}
 		a.historyPath = filepath.Join(directory, "history.json")
+		a.libraries = library.New(filepath.Join(directory, "libraries.json"))
+		a.links = mblinks.Open(filepath.Join(directory, "mb-links.json"))
+		a.recs.cache = openRelatedCache(filepath.Join(directory, "recommendations-cache.json"))
+		a.importListLinks()
+		a.downloads = downloads.New(filepath.Join(directory, "downloads.json"), filepath.Join(directory, "downloads"))
 		a.restorePlayback(filepath.Join(directory, "playback.json"))
 		a.openScrobbler(filepath.Join(directory, "lastfm-session.txt"), filepath.Join(directory, "lastfm-pending.json"))
+		a.openSync(filepath.Join(directory, "sync-outbox.json"), filepath.Join(directory, "sync-token.txt"))
 		a.openCredits(filepath.Join(directory, "credits.json"))
 	} else {
 		a.account.signIn.err = err.Error()
 	}
-	a.cacheSongsText = strconv.Itoa(a.settings.CacheSongs)
+	a.youtubeCacheMBText = strconv.Itoa(a.settings.YouTubeCacheMB)
+	a.soundcloudCacheMBText = strconv.Itoa(a.settings.SoundCloudCacheMB)
 	a.volume = a.settings.Volume
 	a.player.SetVolume(a.volume / 100)
 	a.loadEQ()
 	a.openAudioCache()
+	a.openSoundCloudCache()
 	a.openArtworkCache()
+	a.openMetadata()
+}
+
+// recommendEvery is how often the app checks whether the day's recommendations
+// are made, and recommendStartDelay how long after launch it first looks, so
+// the work waits until the app is up and the first page is shown.
+const (
+	recommendEvery      = time.Hour
+	recommendStartDelay = 45 * time.Second
+)
+
+// openMetadata opens the client that reads MusicBrainz and ListenBrainz, with
+// its answers kept under the app's cache folder. Without a cache folder the
+// client still works, it just fetches every time.
+func (a *app) openMetadata() {
+	opts := musicbrainz.Options{}
+	if root, err := mygo.App.Path(mygo.PathCache); err == nil {
+		opts.CacheDir = filepath.Join(root, "Meiro Metadata Cache")
+	}
+	a.mb = musicbrainz.New(opts)
 }
 
 // artworkCacheLimit is how much downloaded artwork is kept on disk.
@@ -215,11 +260,11 @@ func (a *app) openAudioCache() {
 		root = defaultRoot
 	}
 	a.cacheDirectoryText = root
-	cache, canonical, err := audio.Open(root, a.settings.CacheSongs)
+	cache, canonical, err := audio.OpenLimits(root, cacheLimits(a.settings.YouTubeCacheMB))
 	if err != nil && root != defaultRoot {
 		log.Printf("setting up audio cache at %q: %v; using the default location", root, err)
 		a.cacheDirError = "The saved folder is unavailable. Using the default cache location."
-		cache, canonical, err = audio.Open(defaultRoot, a.settings.CacheSongs)
+		cache, canonical, err = audio.OpenLimits(defaultRoot, cacheLimits(a.settings.YouTubeCacheMB))
 	}
 	if err != nil {
 		log.Printf("setting up audio cache: %v", err)
@@ -229,16 +274,74 @@ func (a *app) openAudioCache() {
 	a.replaceAudioCache(cache)
 }
 
+// cacheLimits is what a cache keeps for a size in megabytes: no bound on the
+// number of tracks, only on their size, and nothing at all for a size of zero.
+func cacheLimits(mb int) audio.Limits {
+	if mb <= 0 {
+		return audio.Limits{}
+	}
+	return audio.Limits{Count: math.MaxInt, Bytes: int64(mb) << 20}
+}
+
+// cacheRoot is the folder both providers' caches are kept in, each in a folder
+// of its own inside it: the one the settings name, or the app's cache folder.
+func (a *app) cacheRoot() (string, error) {
+	if a.cacheDirectoryText != "" {
+		return a.cacheDirectoryText, nil
+	}
+	return mygo.App.Path(mygo.PathCache)
+}
+
+// openSoundCloudCache opens SoundCloud's own audio cache, in a folder that
+// never mixes with the YouTube Music cache but sits beside it, bounded by the
+// size the settings say. A size of zero removes the cache playback would use.
+func (a *app) openSoundCloudCache() {
+	if a.settings.SoundCloudCacheMB <= 0 {
+		if previous := a.replaceSoundCloudCache(nil); previous != nil {
+			a.run(func() {
+				previous.Close()
+				previous.Purge()
+			})
+		}
+		return
+	}
+	root, err := a.cacheRoot()
+	if err != nil {
+		log.Printf("finding the SoundCloud cache directory: %v", err)
+		return
+	}
+	scRoot := filepath.Join(root, "Meiro SoundCloud Cache")
+	if err := os.MkdirAll(scRoot, 0o700); err != nil {
+		log.Printf("setting up SoundCloud cache folder: %v", err)
+		return
+	}
+	cache, _, err := audio.OpenLimits(scRoot, cacheLimits(a.settings.SoundCloudCacheMB))
+	if err != nil {
+		log.Printf("setting up SoundCloud cache: %v", err)
+		return
+	}
+	if previous := a.replaceSoundCloudCache(cache); previous != nil {
+		a.run(func() {
+			previous.Close()
+			if previous.Dir() != cache.Dir() {
+				previous.Purge()
+			}
+		})
+	}
+}
+
 // shutdown flushes the settings, then closes what belongs to the app.
 func (a *app) shutdown() {
 	a.notificationArtwork.stop()
 	a.finishEpisodeProgress(true)
+	a.finishPlayRecord(false)
 	a.savePlayback(0)
 	a.saver.Wait()
 	a.historyWriter.Wait()
 	a.playSave.writer.Wait()
 	a.scrobble.outbox.Wait()
 	a.scrobble.credits.Wait()
+	a.sync.outbox.Wait()
 	a.desktop.close()
 	if a.discord != nil {
 		a.discord.Close()

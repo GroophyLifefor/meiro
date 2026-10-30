@@ -52,7 +52,7 @@ func TestSortPlaylistSections(t *testing.T) {
 	if len(got) != len(sections) || got[0].Title != sections[0].Title || got[0].Kind != sections[0].Kind || got[0].ContinuationToken != sections[0].ContinuationToken || got[1].Title != sections[1].Title {
 		t.Fatalf("section metadata changed: %#v", got)
 	}
-	if got[0].Items[1] != items[1] || got[0].Items[1].Target().Kind != youtube.TargetAlbum {
+	if got[0].Items[1].BrowseID != items[1].BrowseID || got[0].Items[1].Target().Kind != youtube.TargetAlbum {
 		t.Fatalf("non-track item moved or disappeared: %#v", got[0].Items)
 	}
 	if got[1].Items[0].VideoID != "later" {
@@ -61,10 +61,25 @@ func TestSortPlaylistSections(t *testing.T) {
 	// The reversed original order keeps the headings and the non-track items
 	// where they were; TestSortPlaylistSectionsReversesTheWholePlaylist covers
 	// the order the tracks end up in.
-	if got := sortPlaylistSections(sections, playlistSort{desc: true}); got[0].Items[1] != items[1] || got[0].Title != sections[0].Title || got[1].Title != sections[1].Title {
+	if got := sortPlaylistSections(sections, playlistSort{desc: true}); got[0].Items[1].BrowseID != items[1].BrowseID || got[0].Title != sections[0].Title || got[1].Title != sections[1].Title {
 		t.Fatalf("the reversed original order moved a heading or a non-track item: %#v", got)
 	}
-	if got := sortPlaylistSections(sections, playlistSort{}); !slices.Equal(got[0].Items, items) {
+	if got := sortPlaylistSections(sections, playlistSort{}); !sameTracks(got[0].Items, items) {
 		t.Fatalf("original order changed: %v", got[0].Items)
 	}
+}
+
+// sameTracks reports whether two lists hold the same items, in the same
+// order. Items are compared by their provider IDs, since an item holds a
+// slice of sources and is no longer comparable.
+func sameTracks(a, b []youtube.MusicItem) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i].VideoID != b[i].VideoID || a[i].BrowseID != b[i].BrowseID {
+			return false
+		}
+	}
+	return true
 }

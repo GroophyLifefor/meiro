@@ -1,0 +1,23 @@
+load("@rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "soundcloud",
+    srcs = [
+        "client.go",
+        "parse.go",
+        "unsupported.go",
+    ],
+    importpath = "github.com/elianiva/meiro/soundcloud",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//internal/proc",
+        "//media",
+    ],
+)
+
+go_test(
+    name = "soundcloud_test",
+    srcs = ["soundcloud_test.go"],
+    embed = [":soundcloud"],
+    deps = ["//media"],
+)

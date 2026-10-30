@@ -1,0 +1,23 @@
+load("@rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "musicbrainz",
+    srcs = [
+        "cache.go",
+        "cacheinfo.go",
+        "musicbrainz.go",
+        "ratelimit.go",
+    ],
+    importpath = "github.com/elianiva/meiro/musicbrainz",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "musicbrainz_test",
+    srcs = [
+        "cache_test.go",
+        "musicbrainz_test.go",
+        "ratelimit_test.go",
+    ],
+    embed = [":musicbrainz"],
+)

@@ -122,8 +122,8 @@ func scrobbleTrack(item youtube.MusicItem) lastfm.Track {
 // nothing of whether it plays.
 func (a *app) beginListen(item youtube.MusicItem, automatic bool) {
 	s := &a.scrobble
-	_, queued := s.queued[item.VideoID]
-	delete(s.queued, item.VideoID)
+	_, queued := s.queued[item.Key()]
+	delete(s.queued, item.Key())
 	if !a.scrobbling() {
 		s.listen = nil
 		return
@@ -143,7 +143,7 @@ func (a *app) beginListen(item youtube.MusicItem, automatic bool) {
 // withKnownCredits is item with the artist and album it was seen with
 // elsewhere, if it was.
 func (a *app) withKnownCredits(item youtube.MusicItem) youtube.MusicItem {
-	if known, ok := a.scrobble.credits.Get(item.VideoID); ok {
+	if known, ok := a.scrobble.credits.Get(item.Key()); ok {
 		item.Artist, item.Album = known.Artist, known.Album
 	}
 	return item
@@ -159,7 +159,7 @@ func (a *app) learnCredits(items ...youtube.MusicItem) {
 	}
 	for _, item := range items {
 		if item.Artist != "" {
-			a.scrobble.credits.Put(item.VideoID, credits.Credits{Artist: item.Artist, Album: item.Album})
+			a.scrobble.credits.Put(item.Key(), credits.Credits{Artist: item.Artist, Album: item.Album})
 		}
 	}
 	// What was just learned may be about the track being followed.
@@ -182,7 +182,7 @@ func (a *app) lookupCredits(item youtube.MusicItem) {
 		log.Printf("last.fm: not following video_id=%s: it has no title or no video", id)
 		return
 	}
-	client := a.client()
+	client := a.ytClient()
 	startTask(a, &a.scrobble.lookup, scrobbleCallTimeout, func(ctx context.Context) (youtube.MusicItem, error) {
 		result, err := client.GetUpNext(ctx, youtube.UpNextOptions{VideoID: id})
 		if err != nil {
@@ -213,7 +213,7 @@ func (a *app) lookupCredits(item youtube.MusicItem) {
 // scrobbling begins in the middle of it: connecting, or resuming. What is
 // heard from here on counts, and what came before does not.
 func (a *app) followCurrent() {
-	if a.current.VideoID != "" && a.player.Active() {
+	if a.current.Key() != "" && a.player.Active() {
 		a.beginListen(a.current, false)
 	}
 }
@@ -222,21 +222,25 @@ func (a *app) followCurrent() {
 func (a *app) rememberQueued(id string) { a.scrobble.queued[id] = struct{}{} }
 
 // observeListen takes a sample of the track playing. It runs on each poll
-// while the player plays.
+// while the player plays: the history's count of the play is always fed, and
+// Last.fm's play only while one is connected.
 func (a *app) observeListen() {
 	s := &a.scrobble
-	l := s.listen
-	if l == nil {
-		return
-	}
 	// A track still being found, a stream still opening and a decode being
 	// moved to another position are not listening, whatever the player
 	// reports meanwhile.
 	if a.stream.busy() || a.seeking.busy() || a.scrubbing || a.player.Buffering() {
-		l.Break()
+		a.breakRecord()
+		if s.listen != nil {
+			s.listen.Break()
+		}
 		return
 	}
-	a.observe(s.now(), a.player.Position(), a.total)
+	at, position := s.now(), a.player.Position()
+	a.observeRecord(at, position)
+	if s.listen != nil {
+		a.observe(at, position, a.total)
+	}
 }
 
 // observe feeds the play being followed a sample of the track playing, and

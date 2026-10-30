@@ -24,6 +24,7 @@ const (
 	rowError                    // the page failed
 	rowEmpty                    // the page has nothing on it
 	rowStreaming                // the rest of the page is still loading
+	rowArtists                  // the MusicBrainz artists a search matched, which scroll with its results
 )
 
 // row is one line of a page's list.
@@ -59,7 +60,7 @@ func (r row) key() any {
 		return strconv.Itoa(int(r.kind)) + ":" + r.shelf + "#" + strconv.Itoa(r.position)
 	case rowCards, rowColumns, rowHeading:
 		return strconv.Itoa(int(r.kind)) + ":" + r.shelf
-	case rowHero, rowMore, rowLoading, rowError, rowEmpty, rowStreaming, rowSimilar:
+	case rowHero, rowMore, rowLoading, rowError, rowEmpty, rowStreaming, rowSimilar, rowArtists:
 	}
 	return strconv.Itoa(int(r.kind)) + ":" + r.title
 }
@@ -99,10 +100,16 @@ type rowsKey struct {
 	// columns is how many cards a line of the page's grid holds; it is zero
 	// on a page without one.
 	columns int
-	// submitted is the search the rows show the results of, and top the card
-	// those results lead with.
+	// submitted is the search the rows show the results of, and top names the
+	// card those results lead with. The card itself is passed to buildRows;
+	// only its identity is part of the key, since an item is not comparable.
 	submitted string
-	top       youtube.MusicItem
+	top       string
+	// artists is how many MusicBrainz artists the search shows above its
+	// results, and artistsErr says the section tells that they are out of
+	// reach; either one gives the list a row for the section.
+	artists    int
+	artistsErr bool
 	// filter is the playlist search the rows show the matches of.
 	filter string
 	sort   playlistSort
@@ -113,6 +120,14 @@ type rowsKey struct {
 func (a *app) syncRows() {
 	r, _ := a.route()
 	s := a.pageState()
+	// Home leads with the day's Daily mix, when there is one.
+	if r.id == routeHome {
+		if mix, ok := a.dailyMixSection(); ok {
+			withMix := *s
+			withMix.sections = append([]youtube.MusicSection{mix}, s.sections...)
+			s = &withMix
+		}
+	}
 	key := rowsKey{
 		path: a.path(), detail: a.page.detail,
 		loading: s.loading, partial: s.partial, err: s.err, offline: s.offline, more: s.more, moreErr: s.moreErr,
@@ -121,7 +136,15 @@ func (a *app) syncRows() {
 		columns: a.gridColumns(r),
 	}
 	if r.id == routeSearch {
-		key.submitted, key.top = a.search.submitted, a.search.top
+		key.submitted, key.top = a.search.submitted, a.search.top.Key()
+		key.artists, key.artistsErr = a.artistRowsShown()
+	}
+	// The card the results lead with is passed to buildRows rather than kept
+	// in the key: an item holds a slice and is no longer comparable. Only a
+	// search has one.
+	var top youtube.MusicItem
+	if r.id == routeSearch {
+		top = a.search.top
 	}
 	if r.id == routePlaylist {
 		// Playlist-local controls are not page data, so the key carries them:
@@ -131,7 +154,7 @@ func (a *app) syncRows() {
 	if a.page.rows == nil || a.page.rowsDirty || key != a.page.rowsKey {
 		a.page.rowsKey, a.page.rowsDirty = key, false
 		// Each page owns its rows alone, so the new ones reuse their memory.
-		a.page.rows, a.page.playable = buildRows(a.page.rows[:0], a.page.playable[:0], r, s, a.page.detail, key.top, key)
+		a.page.rows, a.page.playable = buildRows(a.page.rows[:0], a.page.playable[:0], r, s, a.page.detail, top, key)
 	}
 }
 
@@ -156,6 +179,11 @@ func shelfShape(sections []youtube.MusicSection) uint64 {
 func buildRows(rows []row, playable []youtube.MusicItem, r *route, s *pageState, heading detail, top youtube.MusicItem, key rowsKey) ([]row, []youtube.MusicItem) {
 	if r.isDetail() {
 		rows = append(rows, row{kind: rowHero, title: heading.title, track: -1})
+	}
+	// The artists a search matched are the list's first row, so they scroll
+	// away with the results instead of holding a share of the page.
+	if r.id == routeSearch && (key.artists > 0 || key.artistsErr) {
+		rows = append(rows, row{kind: rowArtists, track: -1})
 	}
 	switch {
 	case s.loading:

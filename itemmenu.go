@@ -5,6 +5,7 @@ import (
 
 	"github.com/egoist/mygo/ui"
 	"github.com/elianiva/meiro/m3"
+	"github.com/elianiva/meiro/media"
 	"github.com/elianiva/meiro/youtube"
 )
 
@@ -108,6 +109,10 @@ func (a *app) cardMenu(c *ui.Context, anchor ui.Element, key string, item youtub
 			a.startRadio(item, key)
 			close()
 		}
+		if (target.Kind == youtube.TargetAlbum || target.Kind == youtube.TargetPlaylist) && m3.MenuItem(c, "Duplicate as Meiro playlist", m3.IconAdd).Clicked() {
+			a.duplicateCollection(item, key)
+			close()
+		}
 		if target.ID != "" && m3.MenuItem(c, "Copy link", m3.IconCopy).Clicked() {
 			c.WriteClipboard(youtube.BrowseURL(target.ID))
 			c.Toast("Link copied")
@@ -152,8 +157,28 @@ func (a *app) songMenu(c *ui.Context, anchor ui.Element, key string, item youtub
 				close()
 			}
 		}
-		if m3.MenuItem(c, "Start radio", m3.IconShuffle).Clicked() {
+		if resolveSource(item) == media.SourceYTM && m3.MenuItem(c, "Start radio", m3.IconShuffle).Clicked() {
 			a.startRadio(item, key)
+			close()
+		}
+		if item.IsTrack() && item.Key() != "" {
+			switch {
+			case a.isDownloaded(item):
+				if m3.MenuItem(c, "Remove download", m3.IconDelete).Clicked() {
+					a.removeDownloadItem(item)
+					close()
+				}
+			case a.downloadStatusOf(item).status == downloadRunning:
+				m3.MenuItem(c, "Downloading...", m3.IconFolder)
+			default:
+				if m3.MenuItem(c, "Download", m3.IconFolder).Clicked() {
+					a.startDownload(item)
+					close()
+				}
+			}
+		}
+		if item.IsTrack() && m3.MenuItem(c, "Add to library", m3.IconAdd).Clicked() {
+			a.openLibraryPicker(item)
 			close()
 		}
 		if item.VideoID != "" && m3.MenuItem(c, "Add to playlist", m3.IconLibrary).Clicked() {
@@ -164,12 +189,28 @@ func (a *app) songMenu(c *ui.Context, anchor ui.Element, key string, item youtub
 			a.removeFromPlaylist(playlistID, item)
 			close()
 		}
-		if m3.MenuItem(c, "Copy link", m3.IconCopy).Clicked() {
-			c.WriteClipboard(youtube.WatchURL(item.VideoID))
+		if id, ok := libraryListID(o.list); ok && m3.MenuItem(c, "Remove from playlist", m3.IconRemove).Clicked() {
+			a.removeFromLibrary(id, item.Key())
+			close()
+		}
+		if link := itemLink(item); link != "" && m3.MenuItem(c, "Copy link", m3.IconCopy).Clicked() {
+			c.WriteClipboard(link)
 			c.Toast("Link copied")
 			close()
 		}
 	})
+}
+
+// itemLink is the public link to a track: its provider page, which SoundCloud
+// carries in URL, or its YouTube Music watch page when it has a video ID.
+func itemLink(item youtube.MusicItem) string {
+	if item.Source == media.SourceSoundCloud && item.URL != "" {
+		return item.URL
+	}
+	if item.VideoID == "" {
+		return ""
+	}
+	return youtube.WatchURL(item.VideoID)
 }
 
 // queueMenuItems are the edits a row of the queue offers for the track at a
@@ -224,6 +265,10 @@ func (a *app) heroMenu(c *ui.Context, anchor ui.Element) {
 				a.shufflePage()
 				close()
 			}
+		}
+		if (r.target == youtube.TargetAlbum || r.target == youtube.TargetPlaylist) && len(a.page.playable) > 0 && m3.MenuItem(c, "Duplicate as Meiro playlist", m3.IconAdd).Clicked() {
+			a.duplicatePage()
+			close()
 		}
 		if id != "" && m3.MenuItem(c, "Copy link", m3.IconCopy).Clicked() {
 			c.WriteClipboard(youtube.BrowseURL(id))
