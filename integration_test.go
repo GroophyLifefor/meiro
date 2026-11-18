@@ -1125,7 +1125,7 @@ func TestTheHeroMenuOpensAgainAfterItCloses(t *testing.T) {
 	tt := open(a, "/playlist/VLPL_songs")
 	tt.Frame()
 	for round := range 2 {
-		if err := tt.RightClick("More options for "); err != nil {
+		if err := tt.RightClick("Artwork menu for "); err != nil {
 			t.Fatal(err)
 		}
 		tt.Frame()

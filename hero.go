@@ -31,12 +31,12 @@ func (a *app) hero(c *ui.Context) {
 	// right-click. The catcher is an attached, transparent button over the
 	// picture: attached, it leaves the layout to the artwork it covers.
 	var art, catcher ui.Element
-	var menuAnchor ui.Element
+	var menuAnchor, moreButton ui.Element
 	hasAnchor := false
 	ui.Row(c).Padding(8, pageGutter, 28).Gap(gap).AlignItems(ui.End).Gradient(wash, sc.Surface, 180).Children(func() {
 		art = a.art(c, d.art, 448, artSize, artRadius, func() {
 			catcher = ui.ButtonBase(c.Key("hero-art")).Size(artSize, artSize).Attach(ui.AnchorTopLeft, ui.AnchorTopLeft).
-				Radius(artRadius).Background(ui.Transparent).Label("More options for " + d.title)
+				Radius(artRadius).Background(ui.Transparent).Label("Artwork menu for " + d.title)
 			menuAnchor, hasAnchor = a.menu.pointerAnchor(c, "hero")
 		})
 		m3.Elevation(c, art, 2)
@@ -77,9 +77,21 @@ func (a *app) hero(c *ui.Context) {
 					// opens into the bar.
 					a.playlistSearch(c)
 				}
+				if r.target == youtube.TargetAlbum || r.target == youtube.TargetPlaylist {
+					// The artwork opens the same menu, but nobody looks
+					// there for it: a button at the end of the row does.
+					moreButton = m3.IconButton(c, m3.IconButtonSpec{
+						Icon: m3.IconMore, Label: "More options for " + d.title,
+						Kind: m3.StandardIcon, Size: buttons, Key: "hero-more",
+						Container: sc.SurfaceContainerHigh,
+					})
+				}
 			})
 		})
 	})
+	if moreButton.Clicked() {
+		a.menu.show("hero", false, 0, 0)
+	}
 	if catcher.RightClicked() {
 		x, y, _ := catcher.PointerPosition()
 		a.menu.show("hero", true, x, y)
@@ -88,7 +100,13 @@ func (a *app) hero(c *ui.Context) {
 		a.menu.show("hero", false, 0, 0)
 	}
 	if a.menu.owns("hero") {
-		a.heroMenu(c, a.menu.anchor(art, menuAnchor, hasAnchor))
+		// The menu points at the button where the page has one, and at the
+		// artwork otherwise.
+		button := art
+		if r.target == youtube.TargetAlbum || r.target == youtube.TargetPlaylist {
+			button = moreButton
+		}
+		a.heroMenu(c, a.menu.anchor(button, menuAnchor, hasAnchor))
 	}
 }
 

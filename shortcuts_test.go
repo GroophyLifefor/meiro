@@ -346,7 +346,7 @@ func TestKeyboardOpensTheCoverMenu(t *testing.T) {
 	a.router.Push("/album/MPREb_test")
 	tt := ui.NewTester(a.view, 1000, 700)
 	tt.Frame()
-	tabTo(t, tt, "More options for Deep Focus")
+	tabTo(t, tt, "Artwork menu for Deep Focus")
 	tt.Key(0, ui.KeyEnter)
 	if !a.menu.open || !tt.Focused("Start radio") {
 		t.Fatal("Enter on the cover did not open its menu")

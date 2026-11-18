@@ -121,7 +121,14 @@ func (a *app) startRadio(item youtube.MusicItem, key string) {
 // an item names and hands its tracks to then, keeping a second press on the
 // same card from reading it again.
 func (a *app) withCollectionTracks(item youtube.MusicItem, key string, then func([]youtube.MusicItem)) {
-	target := item.Target()
+	a.withTracksOf(item.Target(), item.Title, item.Thumbnail, key, then)
+}
+
+// withTracksOf is withCollectionTracks for a collection named by its target,
+// as the page open names its own: title is what an error calls it, and art is
+// the cover its tracks fall back to. A playlist is read to its end, so then
+// gets every song and not only the first page of them.
+func (a *app) withTracksOf(target youtube.Target, title, art, key string, then func([]youtube.MusicItem)) {
 	if target.Kind != youtube.TargetAlbum && target.Kind != youtube.TargetPlaylist && target.Kind != youtube.TargetArtist {
 		return
 	}
@@ -140,17 +147,36 @@ func (a *app) withCollectionTracks(item youtube.MusicItem, key string, then func
 			// The guard above leaves the playlist of the kinds that are not
 			// its own.
 		}
-		// The first page of a playlist holds the playlist itself. Draining
-		// it reads on into the shelf of suggestions beside it, which never
-		// ends, and long outlasts the read: the page reads it the same way.
-		return client.GetPlaylist(ctx, target.ID)
+		result, err := client.GetPlaylist(ctx, target.ID)
+		if err != nil {
+			return nil, err
+		}
+		// The first page of a playlist holds only its first songs. The rest
+		// is read the way the page reads it: on to the shelf of suggestions
+		// beside it, which never ends and so is not followed.
+		if result.ContinuationToken == "" {
+			return result, nil
+		}
+		rest, err := readPlaylistRest(ctx, result.ContinuationToken, client.ContinueBrowse)
+		if err != nil {
+			return nil, err
+		}
+		switch {
+		case len(rest.items) == 0:
+		case len(result.Sections) > 0:
+			last := &result.Sections[len(result.Sections)-1]
+			last.Items = append(last.Items, rest.items...)
+		default:
+			result.Items = append(result.Items, rest.items...)
+		}
+		return result, nil
 	}, func(result *youtube.BrowseResult, err error) {
 		a.openingKey = ""
 		if err != nil {
-			a.notice = "Could not open “" + item.Title + "”: " + firstLine(err.Error())
+			a.notice = "Could not open “" + title + "”: " + firstLine(err.Error())
 			return
 		}
-		songs := tracksOf(result, item.Thumbnail)
+		songs := tracksOf(result, art)
 		if len(songs) == 0 {
 			return
 		}

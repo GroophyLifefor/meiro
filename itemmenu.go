@@ -248,13 +248,14 @@ func (a *app) queueMenuItems(c *ui.Context, index int, close func()) {
 
 // heroMenu offers what YouTube Music's menu on the artwork of an album, a
 // playlist or an artist does: start its radio, shuffle it, or copy the page's
-// link.
+// link; and what Meiro adds to an album or a playlist: copying it into a
+// playlist of its own, and downloading it.
 func (a *app) heroMenu(c *ui.Context, anchor ui.Element) {
 	if !a.menu.owns("hero") {
 		return
 	}
 	r, id := a.route()
-	m3.Menu(c, anchor, &a.menu.open, 232, func() {
+	m3.Menu(c, anchor, &a.menu.open, 288, func() {
 		close := func() { a.menu.close() }
 		if r.target != youtube.TargetPodcast {
 			if m3.MenuItem(c, "Start radio", m3.IconShuffle).Clicked() {
@@ -269,6 +270,16 @@ func (a *app) heroMenu(c *ui.Context, anchor ui.Element) {
 		if (r.target == youtube.TargetAlbum || r.target == youtube.TargetPlaylist) && len(a.page.playable) > 0 && m3.MenuItem(c, "Duplicate as Meiro playlist", m3.IconAdd).Clicked() {
 			a.duplicatePage()
 			close()
+		}
+		if r.target == youtube.TargetAlbum || r.target == youtube.TargetPlaylist {
+			label := "Download playlist"
+			if r.target == youtube.TargetAlbum {
+				label = "Download album"
+			}
+			if len(a.page.playable) > 0 && m3.MenuItem(c, label, m3.IconDownload).Clicked() {
+				a.downloadPage()
+				close()
+			}
 		}
 		if id != "" && m3.MenuItem(c, "Copy link", m3.IconCopy).Clicked() {
 			c.WriteClipboard(youtube.BrowseURL(id))

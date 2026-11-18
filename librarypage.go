@@ -117,9 +117,48 @@ func (a *app) duplicateCollection(item youtube.MusicItem, key string) {
 }
 
 // duplicatePage makes a Meiro playlist of the album or the playlist the page
-// shows.
+// shows. The page may hold only the start of a long playlist, so the whole of
+// it is read first, as a card's copy reads its own.
 func (a *app) duplicatePage() {
-	a.duplicateAsMeiro(a.page.detail.title, a.page.detail.art, a.page.playable)
+	title, art := a.page.detail.title, a.page.detail.art
+	a.notice = "Reading “" + title + "” to copy it"
+	a.withPageTracks("hero-duplicate", func(songs []youtube.MusicItem) {
+		a.duplicateAsMeiro(title, art, songs)
+	})
+}
+
+// downloadPage downloads every song of the album or the playlist the page
+// shows, read to its end like a copy is.
+func (a *app) downloadPage() {
+	title := a.page.detail.title
+	a.notice = "Reading “" + title + "” to download it"
+	a.withPageTracks("hero-download", func(songs []youtube.MusicItem) {
+		a.downloadCollection(title, songs)
+	})
+}
+
+// withPageTracks reads every track of the album or the playlist the page shows
+// and hands them to then. Any other page reads nothing.
+func (a *app) withPageTracks(key string, then func([]youtube.MusicItem)) {
+	r, id := a.route()
+	if id == "" || (r.target != youtube.TargetAlbum && r.target != youtube.TargetPlaylist) {
+		return
+	}
+	d := a.page.detail
+	a.withTracksOf(youtube.Target{Kind: r.target, ID: id}, d.title, d.art, key, then)
+}
+
+// downloadLibrary downloads every song of one of the app's own playlists.
+func (a *app) downloadLibrary(id string) {
+	lib, ok := a.libraries.Get(id)
+	if !ok {
+		return
+	}
+	songs := make([]youtube.MusicItem, 0, len(lib.Items))
+	for _, item := range lib.Items {
+		songs = append(songs, musicItem(item))
+	}
+	a.downloadCollection(lib.Name, songs)
 }
 
 // duplicateAsMeiro puts a copy of songs in a new playlist of the app's own,
@@ -357,7 +396,7 @@ func (a *app) libraryList(c *ui.Context) {
 }
 
 // libraryRow is one list: its name and how many tracks it holds, and the menu
-// that renames or deletes it.
+// that renames, downloads or deletes it.
 func (a *app) libraryRow(c *ui.Context, lib library.Library) {
 	sc := m3.Of(c).Scheme
 	key := "library-" + lib.ID
@@ -399,6 +438,10 @@ func (a *app) libraryRow(c *ui.Context, lib library.Library) {
 				a.openLibraryName(lib.ID, lib.Name)
 				a.menu.close()
 			}
+			if len(lib.Items) > 0 && m3.MenuItem(c, "Download playlist", m3.IconDownload).Clicked() {
+				a.downloadLibrary(lib.ID)
+				a.menu.close()
+			}
 			if m3.MenuItem(c, "Delete playlist", m3.IconDelete).Clicked() {
 				a.askDeleteLibrary(lib.ID, lib.Name)
 				a.menu.close()
@@ -419,7 +462,7 @@ func (a *app) libraryRow(c *ui.Context, lib library.Library) {
 func (a *app) libraryDetail(c *ui.Context, lib library.Library) {
 	sc := m3.Of(c).Scheme
 	back := false
-	play := false
+	play, download := false, false
 	ui.Row(c).Gap(8).AlignItems(ui.Center).Padding(4, pageGutter).Children(func() {
 		if m3.IconButton(c, m3.IconButtonSpec{Icon: m3.IconArrowBack, Label: "Back to playlists", Key: "library-back"}).Clicked() {
 			back = true
@@ -434,6 +477,9 @@ func (a *app) libraryDetail(c *ui.Context, lib library.Library) {
 			m3.EmphasizedText(c, m3.HeadlineSmall, lib.Name).SingleLine().TextColor(sc.OnSurface).Tooltip(lib.Name)
 			m3.Text(c, m3.BodyMedium, listSummary(lib.Items)).TextColor(sc.OnSurfaceVariant)
 		})
+		if len(lib.Items) > 0 && m3.IconButton(c, m3.IconButtonSpec{Icon: m3.IconDownload, Label: "Download playlist", Key: "download-library"}).Clicked() {
+			download = true
+		}
 		if len(lib.Items) > 0 && m3.Button(c, m3.ButtonSpec{Label: "Play", Icon: m3.IconPlay, Kind: m3.Filled, Key: "play-library"}).Clicked() {
 			play = true
 		}
@@ -444,6 +490,9 @@ func (a *app) libraryDetail(c *ui.Context, lib library.Library) {
 	}
 	if play {
 		a.playLibrary(lib.ID)
+	}
+	if download {
+		a.downloadLibrary(lib.ID)
 	}
 	if len(lib.Items) == 0 {
 		a.message(c, m3.IconMusicNote, "This playlist is empty", "Add songs to it from any track's menu.", "", nil)
