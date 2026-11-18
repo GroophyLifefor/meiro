@@ -1,6 +1,7 @@
 package sync
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -22,6 +23,28 @@ const MaxBatch = 200
 // go first once it fills.
 const MaxEvents = 5000
 
+// MaxRefused caps the refused batches kept for a look; the oldest go first once
+// it fills.
+const MaxRefused = 50
+
+// Refused is a batch the server turned down as malformed, taken out of the
+// queue so the batches behind it can go. It is kept, with why and when, rather
+// than dropped without a trace.
+type Refused struct {
+	// Kind is what the batch held: "events", "libraries", "library items",
+	// "downloads" or "links".
+	Kind string `json:"kind"`
+	// Status is the server's answer and Error its own message, or the text of
+	// the failure when it gave none.
+	Status int    `json:"status"`
+	Error  string `json:"error"`
+	// Count is how many records the batch held, and Batch the batch as it was
+	// sent.
+	Count int             `json:"count"`
+	Batch json.RawMessage `json:"batch,omitempty"`
+	At    time.Time       `json:"at"`
+}
+
 // outboxFile is what an outbox writes to disk.
 type outboxFile struct {
 	Events       []Event        `json:"events"`
@@ -29,6 +52,7 @@ type outboxFile struct {
 	LibraryItems []LibraryItems `json:"libraryItems"`
 	Downloads    []Download     `json:"downloads"`
 	Links        Links          `json:"links"`
+	Refused      []Refused      `json:"refused,omitempty"`
 }
 
 // clone copies the file so a write can marshal it without holding the lock,
@@ -38,6 +62,7 @@ func (f outboxFile) clone() outboxFile {
 		Events:    slices.Clone(f.Events),
 		Libraries: slices.Clone(f.Libraries),
 		Downloads: slices.Clone(f.Downloads),
+		Refused:   slices.Clone(f.Refused),
 		Links: Links{
 			Songs:      slices.Clone(f.Links.Songs),
 			Artists:    slices.Clone(f.Links.Artists),
@@ -213,16 +238,37 @@ func libraryIDs(libraries []Library) []string {
 	return ids
 }
 
+// refusedStatus says the server turned down the batch itself, as malformed,
+// and not the sender: a 400 or a 422. A 401 is not one, as the session ended
+// and the batch is sound, and neither is any other answer, which stops the
+// push and keeps the batch.
+func refusedStatus(err error) (*APIError, bool) {
+	var api *APIError
+	if errors.As(err, &api) && (api.Status == http.StatusBadRequest || api.Status == http.StatusUnprocessableEntity) {
+		return api, true
+	}
+	return nil, false
+}
+
 // Push sends everything that waits, in batches, oldest first. A batch the
-// server answers 200 to is taken out of the queue; anything else stops the
-// push and stays, so the next try sends it again. It returns how many records
-// were taken this time.
+// server answers 200 to is taken out of the queue. A batch it refuses as
+// malformed (400 or 422) would be refused again every time and hold up all
+// that follows it, so it is moved to the outbox's refused list and the push
+// goes on. Any other failure, a 401 included, stops the push and everything
+// stays, so the next try sends it again. It returns how many records were
+// taken this time.
 func Push(ctx context.Context, c *Client, o *Outbox) (int, error) {
 	snap := o.snapshot()
 	sent := 0
 
 	for _, batch := range chunks(snap.libraries, MaxBatch) {
-		if _, err := c.PushLibraries(ctx, batch); err != nil {
+		_, err := c.PushLibraries(ctx, batch)
+		if api, ok := refusedStatus(err); ok {
+			o.refuse("libraries", len(batch), batch, api)
+			o.removeLibraries(libraryIDs(batch))
+			continue
+		}
+		if err != nil {
 			return sent, err
 		}
 		o.removeLibraries(libraryIDs(batch))
@@ -231,7 +277,8 @@ func Push(ctx context.Context, c *Client, o *Outbox) (int, error) {
 
 	for _, group := range snap.items {
 		for _, batch := range chunks(group.Items, MaxBatch) {
-			_, err := c.PushLibraryItems(ctx, LibraryItems{LibraryID: group.LibraryID, Items: batch})
+			payload := LibraryItems{LibraryID: group.LibraryID, Items: batch}
+			_, err := c.PushLibraryItems(ctx, payload)
 			var api *APIError
 			if errors.As(err, &api) && api.Status == http.StatusNotFound {
 				// The server does not know the library, or has it deleted,
@@ -242,6 +289,11 @@ func Push(ctx context.Context, c *Client, o *Outbox) (int, error) {
 				o.dropLibraryItems(group.LibraryID)
 				break
 			}
+			if api, ok := refusedStatus(err); ok {
+				o.refuse("library items", len(batch), payload, api)
+				o.removeLibraryItems(group.LibraryID, batch)
+				continue
+			}
 			if err != nil {
 				return sent, err
 			}
@@ -251,7 +303,13 @@ func Push(ctx context.Context, c *Client, o *Outbox) (int, error) {
 	}
 
 	for _, batch := range chunks(snap.downloads, MaxBatch) {
-		if _, err := c.PushDownloads(ctx, batch); err != nil {
+		_, err := c.PushDownloads(ctx, batch)
+		if api, ok := refusedStatus(err); ok {
+			o.refuse("downloads", len(batch), batch, api)
+			o.removeDownloads(batch)
+			continue
+		}
+		if err != nil {
 			return sent, err
 		}
 		o.removeDownloads(batch)
@@ -259,7 +317,13 @@ func Push(ctx context.Context, c *Client, o *Outbox) (int, error) {
 	}
 
 	for _, batch := range linkBatches(snap.links) {
-		if err := c.PushLinks(ctx, batch); err != nil {
+		err := c.PushLinks(ctx, batch)
+		if api, ok := refusedStatus(err); ok {
+			o.refuse("links", batch.Len(), batch, api)
+			o.removeLinks(batch)
+			continue
+		}
+		if err != nil {
 			return sent, err
 		}
 		o.removeLinks(batch)
@@ -268,6 +332,11 @@ func Push(ctx context.Context, c *Client, o *Outbox) (int, error) {
 
 	for _, batch := range chunks(snap.events, MaxBatch) {
 		accepted, duplicates, err := c.PushEvents(ctx, batch)
+		if api, ok := refusedStatus(err); ok {
+			o.refuse("events", len(batch), batch, api)
+			o.removeEvents(eventIDs(batch))
+			continue
+		}
 		if err != nil {
 			return sent, err
 		}
@@ -280,6 +349,49 @@ func Push(ctx context.Context, c *Client, o *Outbox) (int, error) {
 		sent += len(batch)
 	}
 	return sent, nil
+}
+
+func eventIDs(events []Event) []string {
+	ids := make([]string, len(events))
+	for i, e := range events {
+		ids[i] = e.ClientEventID
+	}
+	return ids
+}
+
+// refuse keeps a batch the server turned down, with its answer and the time,
+// and logs it. The same batch refused again replaces its earlier entry, so a
+// list that is queued afresh on every sync does not fill the list with one
+// refusal; the oldest entries go once MaxRefused is passed.
+func (o *Outbox) refuse(kind string, count int, batch any, api *APIError) {
+	data, err := json.Marshal(batch)
+	if err != nil {
+		data = nil
+	}
+	reason := api.Message
+	if reason == "" {
+		reason = api.Error()
+	}
+	log.Printf("sync: the server refused %d %s (%d), set aside: %s", count, kind, api.Status, reason)
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	o.file.Refused = slices.DeleteFunc(o.file.Refused, func(r Refused) bool {
+		return r.Kind == kind && data != nil && bytes.Equal(r.Batch, data)
+	})
+	o.file.Refused = append(o.file.Refused, Refused{
+		Kind: kind, Status: api.Status, Error: reason, Count: count, Batch: data, At: time.Now(),
+	})
+	if over := len(o.file.Refused) - MaxRefused; over > 0 {
+		o.file.Refused = slices.Delete(o.file.Refused, 0, over)
+	}
+	o.changedLocked()
+}
+
+// Refused returns the batches the server refused, oldest first.
+func (o *Outbox) Refused() []Refused {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	return slices.Clone(o.file.Refused)
 }
 
 func chunks[T any](items []T, size int) [][]T {

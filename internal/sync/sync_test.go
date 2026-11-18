@@ -3,6 +3,7 @@ package sync
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -28,14 +29,20 @@ type fakeServer struct {
 	links       []Links
 	afterLinks  func()
 	serverLinks Links
+	// refuse, when set, picks the status of a request by its path and body;
+	// zero lets the request through.
+	refuse func(path string, body []byte) int
 }
 
 func (f *fakeServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	body, _ := io.ReadAll(r.Body)
 	f.mu.Lock()
 	f.requests++
-	status := f.status
+	status, refuse := f.status, f.refuse
 	f.mu.Unlock()
+	if status == 0 && refuse != nil {
+		status = refuse(r.URL.Path, body)
+	}
 
 	if status != 0 && status != http.StatusOK {
 		w.WriteHeader(status)
@@ -104,17 +111,27 @@ func sampleEvent(id string) Event {
 	}
 }
 
+// openOutbox opens the outbox at path and has the test wait for its background
+// saves before its temp dir is removed, as one still writing would fail the
+// removal.
+func openOutbox(t *testing.T, path string) *Outbox {
+	t.Helper()
+	o := Open(path)
+	t.Cleanup(o.Wait)
+	return o
+}
+
 // A play kept in the outbox is still there after a restart.
 func TestOutboxSurvivesARestart(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "outbox.json")
-	o := Open(path)
+	o := openOutbox(t, path)
 	o.AddEvent(sampleEvent("a"))
 	o.Wait()
 	if o.EventCount() != 1 {
 		t.Fatalf("pending = %d, want 1", o.EventCount())
 	}
 
-	again := Open(path)
+	again := openOutbox(t, path)
 	if again.EventCount() != 1 || again.snapshot().events[0].ClientEventID != "a" {
 		t.Fatalf("after reopening: %+v", again.snapshot().events)
 	}
@@ -124,7 +141,7 @@ func TestOutboxSurvivesARestart(t *testing.T) {
 // them.
 func TestARefusedPushKeepsTheQueueAndATakenOneClearsIt(t *testing.T) {
 	f := &fakeServer{status: http.StatusInternalServerError}
-	o := Open(filepath.Join(t.TempDir(), "outbox.json"))
+	o := openOutbox(t, filepath.Join(t.TempDir(), "outbox.json"))
 	o.AddEvent(sampleEvent("a"))
 	o.AddEvent(sampleEvent("b"))
 
@@ -150,7 +167,7 @@ func TestARefusedPushKeepsTheQueueAndATakenOneClearsIt(t *testing.T) {
 // over the limit.
 func TestALargeQueueGoesOutInBatches(t *testing.T) {
 	f := &fakeServer{}
-	o := Open(filepath.Join(t.TempDir(), "outbox.json"))
+	o := openOutbox(t, filepath.Join(t.TempDir(), "outbox.json"))
 	const total = MaxBatch*5 + 1
 	for i := range total {
 		o.AddEvent(sampleEvent(strconv.Itoa(i)))
@@ -241,7 +258,7 @@ func TestRetryable(t *testing.T) {
 // its way stays for the next push.
 func TestLinksGoOutAndANewerChangeStays(t *testing.T) {
 	f := &fakeServer{}
-	o := Open(filepath.Join(t.TempDir(), "outbox.json"))
+	o := openOutbox(t, filepath.Join(t.TempDir(), "outbox.json"))
 	t0 := time.Unix(1_700_000_000, 0)
 	var songs []SongLink
 	for i := range MaxBatch + 5 {
@@ -308,5 +325,153 @@ func TestFetchLinks(t *testing.T) {
 	refused := &fakeServer{status: http.StatusUnauthorized}
 	if _, err := refused.client(t).FetchLinks(context.Background()); err == nil {
 		t.Error("a refused read did not fail")
+	}
+}
+
+// queueOneOfEach files a record of every kind the outbox carries, all of them
+// sound.
+func queueOneOfEach(o *Outbox) {
+	t0 := time.Unix(1_700_000_000, 0)
+	o.AddLibraries([]Library{{ID: "l1", Kind: "custom", Name: "Road trip", UpdatedAt: t0}})
+	o.AddLibraryItems("l1", []LibraryItem{{Track: TrackFor(media.SourceYTM, "v1", "", "One", "A", 0), UpdatedAt: t0}})
+	o.SetDownloads([]Download{{Track: TrackFor(media.SourceYTM, "v1", "", "One", "A", 0), Device: "laptop", UpdatedAt: t0}})
+	o.AddLinks(Links{Songs: []SongLink{{Provider: "ytm", ProviderTrackID: "v1", State: "matched", MBID: "r", UpdatedAt: t0}}})
+	o.AddEvent(sampleEvent("a"))
+}
+
+// A batch the server refuses as malformed is set aside with its answer, and the
+// batches behind it still go, whichever kind it is and whether the server
+// says 400 or 422.
+func TestARefusedBatchIsSetAsideAndTheRestGoesOut(t *testing.T) {
+	for _, tc := range []struct {
+		kind, suffix string
+		status       int
+	}{
+		{"libraries", "/sync/libraries", http.StatusBadRequest},
+		{"library items", "/sync/library_items", http.StatusUnprocessableEntity},
+		{"downloads", "/sync/downloads", http.StatusBadRequest},
+		{"links", "/sync/links", http.StatusUnprocessableEntity},
+		{"events", "/sync/events", http.StatusBadRequest},
+	} {
+		t.Run(tc.kind, func(t *testing.T) {
+			f := &fakeServer{refuse: func(path string, _ []byte) int {
+				if strings.HasSuffix(path, tc.suffix) {
+					return tc.status
+				}
+				return 0
+			}}
+			path := filepath.Join(t.TempDir(), "outbox.json")
+			o := openOutbox(t, path)
+			queueOneOfEach(o)
+
+			n, err := Push(context.Background(), f.client(t), o)
+			if err != nil {
+				t.Fatalf("a refused batch stopped the push: %v", err)
+			}
+			if n != 4 {
+				t.Errorf("sent %d records, want the 4 that were not refused", n)
+			}
+			if o.Pending() != 0 {
+				t.Errorf("%d records still pending: the refused batch holds up the queue", o.Pending())
+			}
+			refused := o.Refused()
+			if len(refused) != 1 {
+				t.Fatalf("refused = %+v, want the one batch", refused)
+			}
+			got := refused[0]
+			if got.Kind != tc.kind || got.Status != tc.status || got.Error != "boom" || got.Count != 1 || got.At.IsZero() || len(got.Batch) == 0 {
+				t.Errorf("refused entry = %+v", got)
+			}
+
+			// It is kept in the file with the rest of the outbox.
+			o.Wait()
+			if again := Open(path).Refused(); len(again) != 1 || again[0].Kind != tc.kind {
+				t.Errorf("after reopening: %+v", again)
+			}
+		})
+	}
+}
+
+// A refused batch among many is the only one lost: the batches before and after
+// it go out, and the next push has nothing left to resend.
+func TestARefusedBatchDoesNotHoldBackTheBatchesAfterIt(t *testing.T) {
+	f := &fakeServer{refuse: func(path string, body []byte) int {
+		if strings.HasSuffix(path, "/sync/events") && strings.Contains(string(body), `"client_event_id":"bad"`) {
+			return http.StatusBadRequest
+		}
+		return 0
+	}}
+	o := openOutbox(t, filepath.Join(t.TempDir(), "outbox.json"))
+	o.AddEvent(sampleEvent("bad"))
+	for i := range MaxBatch*2 + 1 {
+		o.AddEvent(sampleEvent("ok" + strconv.Itoa(i)))
+	}
+	n, err := Push(context.Background(), f.client(t), o)
+	if err != nil || n != MaxBatch+2 {
+		t.Fatalf("push = %d, %v, want %d and no error", n, err, MaxBatch+2)
+	}
+	if o.EventCount() != 0 || len(o.Refused()) != 1 || o.Refused()[0].Count != MaxBatch {
+		t.Errorf("pending %d, refused %+v", o.EventCount(), o.Refused())
+	}
+	f.mu.Lock()
+	before := f.requests
+	f.mu.Unlock()
+	if n, err := Push(context.Background(), f.client(t), o); err != nil || n != 0 {
+		t.Errorf("second push = %d, %v", n, err)
+	}
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if f.requests != before {
+		t.Errorf("the refused batch was sent again: %d requests", f.requests-before)
+	}
+}
+
+// A 401 says the session ended, not that the batch is wrong: the push stops and
+// every record stays, with nothing set aside. So does any other answer that is
+// not a 400 or 422.
+func TestAnExpiredSessionKeepsEverythingAndSetsNothingAside(t *testing.T) {
+	for _, status := range []int{http.StatusUnauthorized, http.StatusForbidden, http.StatusInternalServerError} {
+		f := &fakeServer{status: status}
+		o := openOutbox(t, filepath.Join(t.TempDir(), "outbox.json"))
+		queueOneOfEach(o)
+		before := o.Pending()
+
+		_, err := Push(context.Background(), f.client(t), o)
+		var api *APIError
+		if !errors.As(err, &api) || api.Status != status {
+			t.Fatalf("status %d: push error = %v", status, err)
+		}
+		if o.Pending() != before || len(o.Refused()) != 0 {
+			t.Errorf("status %d: pending %d of %d, refused %+v", status, o.Pending(), before, o.Refused())
+		}
+	}
+}
+
+// The refused list keeps the latest MaxRefused batches, and a batch refused
+// again takes the place of its earlier entry instead of adding one.
+func TestTheRefusedListIsCappedAndDoesNotRepeat(t *testing.T) {
+	f := &fakeServer{status: 0, refuse: func(string, []byte) int { return http.StatusBadRequest }}
+	o := openOutbox(t, filepath.Join(t.TempDir(), "outbox.json"))
+	client := f.client(t)
+	for i := range MaxRefused + 10 {
+		o.AddEvent(sampleEvent("e" + strconv.Itoa(i)))
+		if _, err := Push(context.Background(), client, o); err != nil {
+			t.Fatal(err)
+		}
+	}
+	refused := o.Refused()
+	if len(refused) != MaxRefused {
+		t.Fatalf("%d refused batches kept, want %d", len(refused), MaxRefused)
+	}
+	if !strings.Contains(string(refused[0].Batch), `"e10"`) || !strings.Contains(string(refused[len(refused)-1].Batch), `"e59"`) {
+		t.Errorf("the list does not hold the latest batches: first %s", refused[0].Batch)
+	}
+
+	o.AddEvent(sampleEvent("e59"))
+	if _, err := Push(context.Background(), client, o); err != nil {
+		t.Fatal(err)
+	}
+	if got := o.Refused(); len(got) != MaxRefused {
+		t.Errorf("the same batch refused again was added a second time: %d", len(got))
 	}
 }
