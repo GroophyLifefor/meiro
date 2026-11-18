@@ -48,6 +48,9 @@ var (
 	// subscribeWrites counts the subscription writes, refused the same way.
 	subscribeWrites atomic.Int32
 	refuseWrites    atomic.Bool
+	// longRestRefused makes the fake refuse the rest of the long playlist, so
+	// a page keeps only the start of it.
+	longRestRefused atomic.Bool
 	// duplicateWrites makes the fake answer an add to a playlist the way
 	// YouTube answers one for a song the playlist holds already.
 	duplicateWrites atomic.Bool
@@ -116,12 +119,19 @@ func (fakeMusic) RoundTrip(request *http.Request) (*http.Response, error) {
 	case strings.Contains(asked, `"continuation":"home-more"`):
 		homeMoreRequests.Add(1)
 		reply = homeMoreResponse
+	case strings.Contains(asked, `"continuation":"long-more"`):
+		reply = longPlaylistRestResponse()
+		if longRestRefused.Load() {
+			reply, status = rejectedResponse, http.StatusBadRequest
+		}
 	case strings.Contains(asked, `"continuation":"playlist-more"`):
 		reply = playlistSuggestionsResponse
 	case strings.Contains(asked, "FEmusic_listening_review"):
 		reply = recapResponse
 	case strings.Contains(asked, "VLPL_video"):
 		reply = playlistPage()
+	case strings.Contains(asked, "VLPL_long"):
+		reply = longPlaylistResponse()
 	case strings.Contains(asked, "VLPL_songs"):
 		reply = playlistSongsResponse
 	case strings.Contains(asked, "MPREb_test"):
@@ -241,6 +251,10 @@ func newTestApp(t testing.TB) *app {
 	})
 	a.account.newClient = newFakeClient
 	a.account.public = newFakeClient(nil)
+	// A failed resolve asks whether the network is out of reach, which dials
+	// the music service: tests say it is there, and the ones that drive the
+	// offline path set it offline themselves.
+	a.networkOnline = func() bool { return true }
 	// Artist and recording lookups are answered from a fake, so a test reads
 	// MusicBrainz and ListenBrainz without a network.
 	a.mb = &fakeMetadata{}
@@ -488,6 +502,28 @@ const playlistSongsResponse = `{"contents":{"playlistVideoListRenderer":{"conten
 ]}},
 "continuations":[{"nextContinuationData":{"continuation":"playlist-more"}}]}`
 
+// longPlaylistResponse is the first page of a long playlist: two songs, and
+// the continuation that holds the rest.
+func longPlaylistResponse() string {
+	return `{"header":{"musicResponsiveHeaderRenderer":{"title":{"runs":[{"text":"Long Mix"}]}}},
+"contents":{"playlistVideoListRenderer":{"contents":[` + longSong("long-one", "Long One") + `,` + longSong("long-two", "Long Two") + `]}},
+"continuations":[{"nextContinuationData":{"continuation":"long-more"}}]}`
+}
+
+// longPlaylistRestResponse is the rest of the long playlist: its last two
+// songs, with no continuation after them.
+func longPlaylistRestResponse() string {
+	return `{"continuationContents":{"musicPlaylistShelfContinuation":{"contents":[` +
+		longSong("long-three", "Long Three") + `,` + longSong("long-four", "Long Four") + `]}}}`
+}
+
+// longSong is the renderer of one song of the long playlist.
+func longSong(id, title string) string {
+	return `{"musicResponsiveListItemRenderer":{"playlistItemData":{"videoId":"` + id + `"},"flexColumns":[
+	{"musicResponsiveListItemFlexColumnRenderer":{"text":{"runs":[{"text":"` + title + `"}]}}},
+	{"musicResponsiveListItemFlexColumnRenderer":{"text":{"runs":[{"text":"Nova"},{"text":" • "},{"text":"3:00"}]}}}]}}`
+}
+
 // The playlists the fake's pages offer to save. An album is saved as its audio
 // playlist, which is not its browse ID.
 const (
@@ -509,6 +545,7 @@ func resetFakes() {
 	subscribeWrites.Store(0)
 	homeMoreRequests.Store(0)
 	refuseWrites.Store(false)
+	longRestRefused.Store(false)
 	duplicateWrites.Store(false)
 	fakeLikeState.Store("")
 	soundcloudMu.Lock()

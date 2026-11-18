@@ -3,9 +3,11 @@ package audio
 import (
 	"bytes"
 	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync/atomic"
 	"testing"
@@ -202,5 +204,40 @@ func TestURLsShareOneResolve(t *testing.T) {
 	_, _, _ = urls.Get(context.Background(), "bad")
 	if calls.Load() != 3 {
 		t.Errorf("a failed resolve was remembered: %d resolves", calls.Load())
+	}
+}
+
+// Save keeps a stream in the container it arrives in, needs no ffmpeg, and
+// refuses an HLS playlist without leaving a file behind.
+func TestSaveKeepsTheContainerAndRefusesPlaylists(t *testing.T) {
+	media := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/playlist":
+			w.Header().Set("Content-Type", "application/x-mpegURL")
+			_, _ = w.Write([]byte("#EXTM3U\n"))
+		default:
+			w.Header().Set("Content-Type", "audio/webm; codecs=opus")
+			_, _ = w.Write([]byte("opus in webm"))
+		}
+	}))
+	defer media.Close()
+	dir := t.TempDir()
+
+	ext, err := Save(context.Background(), media.Client(), media.URL+"/song", filepath.Join(dir, "song"))
+	if err != nil || ext != ".webm" {
+		t.Fatalf("Save = %q, %v; want .webm", ext, err)
+	}
+	if data, _ := os.ReadFile(filepath.Join(dir, "song.webm")); string(data) != "opus in webm" {
+		t.Errorf("saved bytes = %q", data)
+	}
+
+	for _, url := range []string{media.URL + "/playlist", media.URL + "/hls/index.m3u8?sig=1"} {
+		if _, err := Save(context.Background(), media.Client(), url, filepath.Join(dir, "hls")); !errors.Is(err, ErrPlaylistStream) {
+			t.Errorf("Save(%s) error = %v, want ErrPlaylistStream", url, err)
+		}
+	}
+	entries, _ := os.ReadDir(dir)
+	if len(entries) != 1 {
+		t.Errorf("the folder holds %d entries after the refusals, want only song.webm", len(entries))
 	}
 }

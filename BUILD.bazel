@@ -272,6 +272,7 @@ go_test(
         "playback_integration_test.go",
         "playbackstate_test.go",
         "playlist_sort_test.go",
+        "playlistactions_test.go",
         "queue_test.go",
         "recommendations_test.go",
         "routes_test.go",

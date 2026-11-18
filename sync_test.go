@@ -260,6 +260,77 @@ func TestLinksAreNotSentWhenSignedOut(t *testing.T) {
 	}
 }
 
+// A removed download is sent to the server as deleted, at the time it was
+// removed and from this device, and goes on being told until the server
+// has it; a download that is kept is still sent as live.
+func TestARemovedDownloadIsDeletedOnTheServer(t *testing.T) {
+	server := newServerState()
+	srv := httptest.NewServer(server)
+	t.Cleanup(srv.Close)
+	a := signedInTo(t, srv.URL)
+	a.device = "laptop"
+	for _, key := range []string{"keep", "gone"} {
+		if err := a.downloads.Add(downloads.Item{Source: media.SourceYTM, Key: key, Title: "Song " + key, Artist: "A", DownloadedAt: time.Now().Add(-time.Hour)}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	syncBoth(t, a)
+	server.mu.Lock()
+	for _, d := range server.downloads {
+		if d.Deleted {
+			t.Errorf("a kept download was sent as deleted: %+v", d)
+		}
+	}
+	sentBefore := len(server.downloads)
+	server.mu.Unlock()
+	if sentBefore != 2 {
+		t.Fatalf("the server was sent %d downloads, want 2", sentBefore)
+	}
+
+	rec, _ := a.downloads.Get(media.SourceYTM, "gone")
+	before := time.Now()
+	a.removeDownload(rec)
+	syncBoth(t, a)
+
+	server.mu.Lock()
+	defer server.mu.Unlock()
+	var deleted []meirosync.Download
+	for _, d := range server.downloads[sentBefore:] {
+		if d.Deleted {
+			deleted = append(deleted, d)
+		}
+	}
+	if len(deleted) != 1 {
+		t.Fatalf("the server was told of %d removals: %+v", len(deleted), server.downloads[sentBefore:])
+	}
+	got := deleted[0]
+	if got.Track.Provider != "ytm" || got.Track.ProviderTrackID != "gone" || got.Device != "laptop" || got.UpdatedAt.Before(before) {
+		t.Errorf("the removal was sent as %+v", got)
+	}
+}
+
+// The snapshot carries a removal for ninety days and not longer, and a
+// download made again is live and not also a removal.
+func TestTheSnapshotCarriesRemovedDownloads(t *testing.T) {
+	a := newTestApp(t)
+	a.device = "laptop"
+	if err := a.downloads.Add(downloads.Item{Source: media.SourceSoundCloud, Key: "https://soundcloud.com/x/y", URL: "https://soundcloud.com/x/y", Title: "Cloud"}); err != nil {
+		t.Fatal(err)
+	}
+	a.removeDownload(downloads.Item{Source: media.SourceSoundCloud, Key: "https://soundcloud.com/x/y", Title: "Cloud"})
+	snap := a.syncSnapshot()
+	if len(snap.downloads) != 1 || !snap.downloads[0].Deleted || snap.downloads[0].Track.Provider != "soundcloud" || snap.downloads[0].Track.ProviderTrackID != "https://soundcloud.com/x/y" {
+		t.Fatalf("snapshot downloads = %+v", snap.downloads)
+	}
+	if err := a.downloads.Add(downloads.Item{Source: media.SourceSoundCloud, Key: "https://soundcloud.com/x/y", URL: "https://soundcloud.com/x/y", Title: "Cloud"}); err != nil {
+		t.Fatal(err)
+	}
+	snap = a.syncSnapshot()
+	if len(snap.downloads) != 1 || snap.downloads[0].Deleted {
+		t.Errorf("a download made again is still sent as deleted: %+v", snap.downloads)
+	}
+}
+
 // signedOutServer answers every call of the session with 401, as a server does
 // once the token has run out, except a sign in, which it takes while it is
 // told to, and passes the rest to the server behind it.

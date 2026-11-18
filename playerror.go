@@ -42,6 +42,10 @@ var playErrorRules = []struct {
 		"YouTube did not offer audio for this track. Try again later, or update Meiro.",
 	},
 	{
+		[]string{"cannot be saved as a download"},
+		"This track streams in segments, which Meiro cannot download yet.",
+	},
+	{
 		[]string{"offline: this track is not downloaded"},
 		"You are offline and this track is not downloaded, so it cannot play.",
 	},

@@ -229,6 +229,12 @@ type app struct {
 	// the state of each download shown, by its source-qualified audio key.
 	downloads      *downloads.Store
 	downloadStates map[string]downloadState
+	// downloadQueue holds the downloads waiting for a place, and
+	// downloadsRunning counts the ones in flight, which stay at or under
+	// maxDownloads. downloadAudio fetches one track's audio; tests replace it.
+	downloadQueue    []queuedDownload
+	downloadsRunning int
+	downloadAudio    func(ctx context.Context, streams *audio.URLs, key, base string) (ext string, size int64, err error)
 	// networkOnline reports whether the network can be reached; tests replace
 	// it so an offline path can be driven without one.
 	networkOnline func() bool
@@ -284,6 +290,8 @@ func newApp() *app {
 		links:         mblinks.Open(""),
 		downloads:     downloads.New("", ""),
 		networkOnline: networkOnline,
+
+		downloadAudio: fetchTrackAudio,
 	}
 	a.scrobble = newScrobbler()
 	a.sync = newSyncer()

@@ -1,15 +1,23 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
+	"encoding/binary"
 	"encoding/hex"
 	"errors"
+	"net/http"
+	"net/http/httptest"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/egoist/mygo/ui"
 
 	"github.com/elianiva/meiro/internal/audio"
 	"github.com/elianiva/meiro/internal/downloads"
@@ -200,5 +208,286 @@ func TestSoundCloudCacheIsSeparate(t *testing.T) {
 	defer sc.Close()
 	if ytm.Dir() == sc.Dir() || ytmRoot == scRoot {
 		t.Fatalf("the two caches share a folder: %q and %q", ytm.Dir(), sc.Dir())
+	}
+}
+
+// tinyWAV is a tenth of a second of silence as a WAV file, small enough to
+// build in a test and real enough for ffmpeg to decode.
+func tinyWAV() []byte {
+	const rate, samples = 8000, 800
+	var b bytes.Buffer
+	b.WriteString("RIFF")
+	_ = binary.Write(&b, binary.LittleEndian, uint32(36+samples*2))
+	b.WriteString("WAVEfmt ")
+	_ = binary.Write(&b, binary.LittleEndian, struct {
+		Size             uint32
+		Format, Channels uint16
+		Rate, ByteRate   uint32
+		Align, Bits      uint16
+	}{16, 1, 1, rate, rate * 2, 2, 16})
+	b.WriteString("data")
+	_ = binary.Write(&b, binary.LittleEndian, uint32(samples*2))
+	b.Write(make([]byte, samples*2))
+	return b.Bytes()
+}
+
+// A download keeps the audio in the container the server sent it in, without
+// ffmpeg writing anything: the ffmpeg a release ships has no muxer, so any
+// call to it with an output format would fail there.
+func TestDownloadSavesTheStreamWithoutFFmpeg(t *testing.T) {
+	wav := tinyWAV()
+	media := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "audio/wav")
+		http.ServeContent(w, r, "track.wav", time.Time{}, bytes.NewReader(wav))
+	}))
+	defer media.Close()
+
+	a := newTestApp(t)
+	store := newDownloadStore(t)
+	a.downloads = store
+	a.streams = audio.NewURLs(func(context.Context, string) (string, time.Duration, error) {
+		return media.URL + "/track", 0, nil
+	})
+	// An ffmpeg that writes down every call it gets leads PATH, so a download
+	// that reached for one would leave a trace.
+	bin := t.TempDir()
+	calls := filepath.Join(bin, "calls")
+	script := "#!/bin/sh\necho \"$@\" >> '" + calls + "'\nexit 1\n"
+	if err := os.WriteFile(filepath.Join(bin, "ffmpeg"), []byte(script), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", bin+string(os.PathListSeparator)+os.Getenv("PATH"))
+
+	item := downloadTestItem("vid-wav")
+	a.startDownload(item)
+
+	rec, ok := store.Get(resolveSource(item), streamKey(item))
+	if !ok || a.downloadStatusOf(item).status != downloadDone {
+		t.Fatalf("the download did not finish: state %+v, kept %v", a.downloadStatusOf(item), ok)
+	}
+	path, _ := store.File(rec.Source, rec.Key)
+	if got, err := os.ReadFile(path); err != nil || !bytes.Equal(got, wav) {
+		t.Fatalf("the stored file differs from what the server sent: %v", err)
+	}
+	if filepath.Ext(path) != ".wav" || rec.SizeBytes != int64(len(wav)) {
+		t.Errorf("stored as %s with size %d, want .wav and %d", filepath.Base(path), rec.SizeBytes, len(wav))
+	}
+	if _, err := os.Stat(calls); !errors.Is(err, os.ErrNotExist) {
+		t.Errorf("the download ran ffmpeg:\n%s", mustRead(calls))
+	}
+	found, err := findAudio(context.Background(), a.streams, item, nil, store, func() bool { return false })
+	if err != nil || !found.fromDownload || found.url != path {
+		t.Fatalf("playback does not find the download: url=%q fromDownload=%v err=%v", found.url, found.fromDownload, err)
+	}
+}
+
+// A stored download decodes with a real ffmpeg, when the machine has one.
+func TestDownloadedFileDecodes(t *testing.T) {
+	ffmpeg, err := exec.LookPath("ffmpeg")
+	if err != nil {
+		t.Skip("ffmpeg is not installed")
+	}
+	media := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "audio/wav")
+		_, _ = w.Write(tinyWAV())
+	}))
+	defer media.Close()
+	base := filepath.Join(t.TempDir(), "store", "track")
+	ext, size, err := fetchDownload(context.Background(), media.Client(), media.URL, base)
+	if err != nil || ext != ".wav" || size != int64(len(tinyWAV())) {
+		t.Fatalf("fetchDownload = %q, %d, %v", ext, size, err)
+	}
+	if out, err := exec.Command(ffmpeg, "-v", "error", "-i", base+ext, "-f", "null", "-").CombinedOutput(); err != nil {
+		t.Fatalf("ffmpeg cannot decode the download: %v\n%s", err, out)
+	}
+}
+
+// A stream that comes as an HLS playlist fails with a reason the listener can
+// read, and leaves nothing behind.
+func TestDownloadOfASegmentedStreamSaysSo(t *testing.T) {
+	a := newTestApp(t)
+	store := newDownloadStore(t)
+	a.downloads = store
+	media := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/vnd.apple.mpegurl")
+		_, _ = w.Write([]byte("#EXTM3U\n#EXT-X-ENDLIST\n"))
+	}))
+	defer media.Close()
+	a.streams = audio.NewURLs(func(context.Context, string) (string, time.Duration, error) {
+		return media.URL + "/playlist", 0, nil
+	})
+	item := downloadTestItem("vid-hls")
+	a.startDownload(item)
+
+	st := a.downloadStatusOf(item)
+	if st.status != downloadFailed || !strings.Contains(a.notice, "cannot download yet") {
+		t.Errorf("state %+v, notice %q; want a failure that says the stream cannot be downloaded", st, a.notice)
+	}
+	if strings.Contains(a.notice, "matroska") || strings.Contains(a.notice, "ffmpeg") {
+		t.Errorf("notice = %q", a.notice)
+	}
+	entries, _ := os.ReadDir(store.Dir())
+	if len(entries) != 0 {
+		t.Errorf("the store holds %d leftovers", len(entries))
+	}
+}
+
+func mustRead(path string) string {
+	data, _ := os.ReadFile(path)
+	return string(data)
+}
+
+// failDownloads asks for the tracks and has every one of them fail, so they
+// are listed as failed.
+func failDownloads(t *testing.T, a *app, ids ...string) {
+	t.Helper()
+	a.downloadAudio = func(context.Context, *audio.URLs, string, string) (string, int64, error) {
+		return "", 0, errors.New("server returned 500")
+	}
+	for _, id := range ids {
+		a.startDownload(downloadTestItem(id))
+	}
+	for _, id := range ids {
+		if st := a.downloadStatusOf(downloadTestItem(id)); st.status != downloadFailed {
+			t.Fatalf("%s is %v, want failed", id, st.status)
+		}
+	}
+}
+
+// openDownloads opens the Downloads page and draws it.
+func openDownloads(a *app) *ui.Tester {
+	a.router.Push("/downloads")
+	tt := ui.NewTester(a.view, 1000, 700)
+	tt.Frame()
+	return tt
+}
+
+// A failed download shows Retry on its row, and pressing it queues that song
+// again and no other.
+func TestRetryRequeuesOneFailedDownload(t *testing.T) {
+	a, fake := downloadingApp(t)
+	failDownloads(t, a, "f1", "f2")
+	a.downloadAudio = fake.fetch
+	tt := openDownloads(a)
+	for _, want := range []string{"Retry download of Track f1", "Retry download of Track f2", "Retry all"} {
+		if !tt.HasText(want) && !hasLabel(tt, want) {
+			t.Fatalf("the page does not offer %q: %q", want, tt.Texts())
+		}
+	}
+
+	if err := tt.Click("Retry download of Track f2"); err != nil {
+		t.Fatal(err)
+	}
+	tt.Frame()
+	if got, want := fake.asked(), []string{"f2"}; !slices.Equal(got, want) {
+		t.Fatalf("retried %v, want %v", got, want)
+	}
+	if !a.isDownloaded(downloadTestItem("f2")) || a.isDownloaded(downloadTestItem("f1")) {
+		t.Errorf("f2 kept %v, f1 kept %v; want true and false", a.isDownloaded(downloadTestItem("f2")), a.isDownloaded(downloadTestItem("f1")))
+	}
+	if hasLabel(tt, "Retry download of Track f2") || !hasLabel(tt, "Retry download of Track f1") {
+		t.Errorf("after the retry the page shows %q", tt.Texts())
+	}
+}
+
+// Retry all queues every failed download again, through the queue that runs
+// two at a time, and the button goes once nothing has failed.
+func TestRetryAllRequeuesEveryFailedDownload(t *testing.T) {
+	a, fake := downloadingApp(t)
+	failDownloads(t, a, "f1", "f2", "f3")
+	a.downloadAudio = fake.fetch
+	var inFlight []func()
+	a.run = func(work func()) { inFlight = append(inFlight, work) }
+	tt := openDownloads(a)
+
+	if err := tt.Click("Retry all"); err != nil {
+		t.Fatal(err)
+	}
+	if a.downloadsRunning != 2 || len(a.downloadQueue) != 1 || len(inFlight) != 2 {
+		t.Fatalf("running %d, queued %d, in flight %d; want 2, 1, 2", a.downloadsRunning, len(a.downloadQueue), len(inFlight))
+	}
+	tt.Frame()
+	if hasLabel(tt, "Retry all") || !tt.HasText("Waiting to download") {
+		t.Errorf("a retry in progress still offers Retry all: %q", tt.Texts())
+	}
+	for len(inFlight) > 0 {
+		work := inFlight[0]
+		inFlight = inFlight[1:]
+		work()
+	}
+	if got, want := fake.asked(), []string{"f1", "f2", "f3"}; !slices.Equal(got, want) {
+		t.Errorf("retried %v, want %v", got, want)
+	}
+	tt.Frame()
+	if hasLabel(tt, "Retry all") || tt.HasText("failed") {
+		t.Errorf("the header stays with nothing failed: %q", tt.Texts())
+	}
+	for _, id := range []string{"f1", "f2", "f3"} {
+		if !a.isDownloaded(downloadTestItem(id)) {
+			t.Errorf("%s was not kept", id)
+		}
+	}
+}
+
+// With no failed download the page has no Retry at all.
+func TestNoRetryWithoutAFailedDownload(t *testing.T) {
+	a, _ := downloadingApp(t)
+	keepDownloaded(t, a, "k1")
+	tt := openDownloads(a)
+	if hasLabel(tt, "Retry all") || tt.HasText("Retry") {
+		t.Errorf("Retry is offered with nothing failed: %q", tt.Texts())
+	}
+}
+
+// hasLabel reports whether an element is labelled s exactly.
+func hasLabel(tt *ui.Tester, s string) bool {
+	_, ok := tt.Find(s)
+	return ok
+}
+
+// A song kept as a download shows a Downloaded mark in its row beside the
+// MusicBrainz state, and the link still works; one that is not kept shows none.
+func TestDownloadedSongRowShowsTheMark(t *testing.T) {
+	a, _ := downloadingApp(t)
+	tt := loadedPage(a, "/playlist/VLPL_long")
+	if tt.HasText("Downloaded") {
+		t.Fatalf("a row says Downloaded with nothing downloaded: %q", tt.Texts())
+	}
+	rows := len(a.page.playable)
+	keepDownloaded(t, a, "long-one")
+	tt.Frame()
+	marks := 0
+	for _, text := range tt.Texts() {
+		if text == "Downloaded" {
+			marks++
+		}
+	}
+	if marks != 1 || rows < 2 {
+		t.Errorf("%d rows say Downloaded among %d, want exactly 1: %q", marks, rows, tt.Texts())
+	}
+	if !tt.HasText("unknown") || !hasLabel(tt, "Link to MusicBrainz") {
+		t.Errorf("the MusicBrainz chip or link button is gone from a downloaded row: %q", tt.Texts())
+	}
+	if err := tt.Click("Link to MusicBrainz"); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// A failed row stays inside the page, its Retry lined up with the header's
+// Retry all rather than running past the card's edge.
+func TestFailedDownloadRowsStayInsideThePage(t *testing.T) {
+	a, _ := downloadingApp(t)
+	failDownloads(t, a, "f1")
+	tt := openDownloads(a)
+	all, ok := tt.Find("Retry all")
+	if !ok {
+		t.Fatalf("no Retry all: %q", tt.Texts())
+	}
+	one, ok := tt.Find("Retry")
+	if !ok {
+		t.Fatalf("no Retry on the failed row: %q", tt.Texts())
+	}
+	if one.X+one.W > all.X+all.W+1 {
+		t.Errorf("the row's Retry ends at %.0f, past Retry all at %.0f", one.X+one.W, all.X+all.W)
 	}
 }

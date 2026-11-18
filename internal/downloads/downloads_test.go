@@ -1,6 +1,7 @@
 package downloads
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -82,5 +83,99 @@ func TestPathIsStable(t *testing.T) {
 	}
 	if _, err := os.Stat(dir); err != nil {
 		t.Errorf("the store directory is missing: %v", err)
+	}
+}
+
+// A removed download is kept as a removal to tell the server, named as the
+// server knew the track, and survives a restart. Downloading the track again
+// cancels it.
+func TestARemovalIsKeptUntilTheTrackIsDownloadedAgain(t *testing.T) {
+	index := filepath.Join(t.TempDir(), "downloads.json")
+	store := New(index, t.TempDir())
+	cloud := media.SourceRef{Source: media.SourceSoundCloud, URL: "https://soundcloud.com/x/cloud"}
+	for _, item := range []Item{
+		{Source: media.SourceYTM, Key: "vid-1", Title: "One", Artist: "A"},
+		{Source: media.SourceSoundCloud, Key: "https://soundcloud.com/x/y", URL: "https://soundcloud.com/x/y", Title: "Two"},
+		// Kept from YouTube Music, played from SoundCloud now.
+		{Source: media.SourceYTM, Key: "vid-3", Title: "Three", Sources: []media.SourceRef{{Source: media.SourceYTM, ID: "vid-3"}, cloud}, Active: media.SourceSoundCloud},
+	} {
+		if err := store.Add(item); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if len(store.Removed()) != 0 {
+		t.Fatalf("removals before any removal: %+v", store.Removed())
+	}
+
+	before := time.Now()
+	for _, gone := range []Item{
+		{Source: media.SourceYTM, Key: "vid-1"},
+		{Source: media.SourceSoundCloud, Key: "https://soundcloud.com/x/y"},
+		{Source: media.SourceYTM, Key: "vid-3"},
+	} {
+		if _, ok, err := store.Remove(gone.Source, gone.Key); err != nil || !ok {
+			t.Fatalf("removing %s: %v %v", gone.Key, ok, err)
+		}
+	}
+	// Removing what is not there tells nothing.
+	if _, ok, _ := store.Remove(media.SourceYTM, "nope"); ok || len(store.Removed()) != 3 {
+		t.Errorf("a removal of nothing was kept: %+v", store.Removed())
+	}
+
+	again := New(index, t.TempDir()).Removed()
+	if len(again) != 3 {
+		t.Fatalf("after a restart: %+v", again)
+	}
+	want := []struct {
+		source media.Source
+		key    string
+	}{
+		{media.SourceYTM, "vid-1"},
+		{media.SourceSoundCloud, "https://soundcloud.com/x/y"},
+		{media.SourceSoundCloud, "https://soundcloud.com/x/cloud"},
+	}
+	for i, w := range want {
+		got := again[i]
+		if got.Source != w.source || got.Key != w.key || got.RemovedAt.Before(before) {
+			t.Errorf("removal %d = %+v, want %s %s removed after %v", i, got, w.source, w.key, before)
+		}
+	}
+	if again[0].Title != "One" || again[1].URL != "https://soundcloud.com/x/y" {
+		t.Errorf("the removals lost what names the track: %+v", again)
+	}
+
+	// The track downloaded again is no longer a removal.
+	if err := store.Add(Item{Source: media.SourceYTM, Key: "vid-1", Title: "One"}); err != nil {
+		t.Fatal(err)
+	}
+	if got := store.Removed(); len(got) != 2 || got[0].Key == "vid-1" {
+		t.Errorf("a track downloaded again is still a removal: %+v", got)
+	}
+}
+
+// A removal is forgotten after 90 days, whether it is read from the index or
+// goes stale while the app runs.
+func TestARemovalIsForgottenAfterNinetyDays(t *testing.T) {
+	index := filepath.Join(t.TempDir(), "downloads.json")
+	now := time.Now()
+	data := fmt.Sprintf(`{"items":[],"removed":[`+
+		`{"source":"ytm","key":"old","removedAt":%q},`+
+		`{"source":"ytm","key":"recent","removedAt":%q}]}`,
+		now.Add(-91*24*time.Hour).Format(time.RFC3339), now.Add(-89*24*time.Hour).Format(time.RFC3339))
+	if err := os.WriteFile(index, []byte(data), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	store := New(index, t.TempDir())
+	got := store.Removed()
+	if len(got) != 1 || got[0].Key != "recent" {
+		t.Fatalf("removals = %+v, want only the recent one", got)
+	}
+
+	// One that goes stale after the store was opened goes too.
+	store.mu.Lock()
+	store.removed[0].RemovedAt = now.Add(-91 * 24 * time.Hour)
+	store.mu.Unlock()
+	if got := store.Removed(); len(got) != 0 {
+		t.Errorf("a stale removal was kept: %+v", got)
 	}
 }

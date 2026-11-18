@@ -170,10 +170,11 @@ func (a *app) songRow(c *ui.Context, item youtube.MusicItem, queue []youtube.Mus
 					m3.Text(c, m3.BodySmall, o.note).SingleLine().Tooltip(o.note).TextColor(subColour).FontFeatures("tnum")
 				}
 			})
-			// Every song says what its MusicBrainz link is, and offers to make
-			// one, wherever it is shown. The small queue of the mini player has
-			// no room for it.
+			// Every song says whether it is kept as a download, and what its
+			// MusicBrainz link is, and offers to make one, wherever it is
+			// shown. The small queue of the mini player has no room for them.
 			if isSong && !o.compact {
+				a.downloadedMark(c, item)
 				if a.linkControls(c, item) {
 					sourceSwitched = true
 				}

@@ -12,6 +12,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"slices"
@@ -573,6 +574,62 @@ func downloadURL(ctx context.Context, client *http.Client, streamURL, cacheDir s
 	return path, nil
 }
 
+// ErrPlaylistStream is what a stream that arrives as an HLS playlist of
+// segments reports. Copying it into one file takes a muxer, which the ffmpeg
+// the app ships does not have, so it is refused instead of saved as a manifest
+// nothing can play.
+var ErrPlaylistStream = errors.New("this stream is delivered in segments and cannot be saved as a download")
+
+// isPlaylistStream reports whether streamURL or the media type it was served
+// as names an HLS playlist.
+func isPlaylistStream(streamURL, contentType string) bool {
+	if parsed, err := url.Parse(streamURL); err == nil && strings.HasSuffix(strings.ToLower(parsed.Path), ".m3u8") {
+		return true
+	}
+	mediaType, _, _ := strings.Cut(contentType, ";")
+	switch strings.ToLower(strings.TrimSpace(mediaType)) {
+	case "application/vnd.apple.mpegurl", "application/x-mpegurl", "audio/mpegurl", "audio/x-mpegurl":
+		return true
+	}
+	return false
+}
+
+// Save copies the audio stream at streamURL into a file named base plus the
+// extension its media type calls for, and returns that extension. The stream
+// is kept in the container it arrives in, with no ffmpeg and no muxer, the way
+// the cache keeps it; the player reads it back by its contents. The file
+// appears only when every byte has arrived. A stream that arrives as an HLS
+// playlist fails with ErrPlaylistStream.
+func Save(ctx context.Context, client *http.Client, streamURL, base string) (string, error) {
+	if strings.TrimSpace(streamURL) == "" {
+		return "", errors.New("no resolved audio URL to download")
+	}
+	if strings.TrimSpace(base) == "" {
+		return "", errors.New("no place to keep the download")
+	}
+	if isPlaylistStream(streamURL, "") {
+		return "", ErrPlaylistStream
+	}
+	dir := filepath.Dir(base)
+	if err := os.MkdirAll(dir, 0o700); err != nil {
+		return "", err
+	}
+	tempDir, err := os.MkdirTemp(dir, ".download-*")
+	if err != nil {
+		return "", err
+	}
+	defer func() { _ = os.RemoveAll(tempDir) }()
+	temp, err := downloadRanges(ctx, client, streamURL, filepath.Join(tempDir, "audio"))
+	if err != nil {
+		return "", err
+	}
+	ext := filepath.Ext(temp)
+	if err := os.Rename(temp, base+ext); err != nil {
+		return "", err
+	}
+	return ext, nil
+}
+
 // downloadRange is how many bytes of a stream one request asks for. YouTube
 // serves one request for a whole long file, such as a podcast episode, at
 // about twice the speed it plays, and bounded ranges at full speed.
@@ -602,6 +659,9 @@ func downloadRanges(ctx context.Context, client *http.Client, streamURL, base st
 	}
 	if err := file.Close(); err != nil {
 		return "", fmt.Errorf("download audio: %w", err)
+	}
+	if isPlaylistStream(streamURL, contentType) {
+		return "", ErrPlaylistStream
 	}
 	path := base + audioURLExtension(contentType)
 	if err := os.Rename(base, path); err != nil {

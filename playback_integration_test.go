@@ -297,6 +297,21 @@ func TestAnUnplayableTrackShowsAReadableReason(t *testing.T) {
 	}
 }
 
+// A track that fails to resolve while the network is out of reach, and was
+// never downloaded, says so instead of blaming the provider.
+func TestAnUnplayableTrackSaysItIsOfflineWhenTheNetworkIsOut(t *testing.T) {
+	a, r := playbackApp(t)
+	a.networkOnline = func() bool { return false }
+	r.err["bad"] = errors.New("yt-dlp could not resolve the audio: something new")
+	tt := ui.NewTester(a.view, 1000, 700)
+	a.play(tracks("bad")[0], nil)
+	tt.Frame()
+	want := "You are offline and this track is not downloaded, so it cannot play."
+	if a.playErr != want {
+		t.Errorf("playErr = %q, want %q", a.playErr, want)
+	}
+}
+
 func TestAnUnplayableTrackIsSkipped(t *testing.T) {
 	a, r := playbackApp(t)
 	r.err["b"] = errors.New("Video unavailable")

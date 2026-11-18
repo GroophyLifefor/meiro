@@ -442,7 +442,7 @@ func formatMegabytes(bytes int64) string {
 	return fmt.Sprintf("%.0f MB", mb)
 }
 
-// songCount names how many songs a cache holds.
+// songCount names how many songs a cache holds, or a download starts.
 func songCount(n int) string {
 	if n == 1 {
 		return "1 song"

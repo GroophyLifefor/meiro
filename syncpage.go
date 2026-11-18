@@ -279,6 +279,16 @@ func (a *app) syncSnapshot() syncSnapshot {
 			UpdatedAt:      updated,
 		})
 	}
+	// A download taken out is sent as deleted, at the time it was taken out,
+	// or the server would keep it for good.
+	for _, gone := range a.downloads.Removed() {
+		snap.downloads = append(snap.downloads, meirosync.Download{
+			Track:     meirosync.TrackFor(gone.Source, gone.Key, gone.URL, gone.Title, gone.Artist, 0),
+			Device:    a.device,
+			UpdatedAt: gone.RemovedAt,
+			Deleted:   true,
+		})
+	}
 	return snap
 }
 

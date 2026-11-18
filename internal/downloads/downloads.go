@@ -49,9 +49,29 @@ type Item struct {
 	Active media.Source `json:"active,omitempty"`
 }
 
+// Tombstone is a download that was removed, kept so the removal can be told to
+// the server: a download that is only missing from the next push is not one
+// the server would know to forget. It names the track as the server knew it,
+// by the provider and key the track played from when it went.
+type Tombstone struct {
+	Source media.Source `json:"source,omitempty"`
+	Key    string       `json:"key"`
+	URL    string       `json:"url,omitempty"`
+	Title  string       `json:"title,omitempty"`
+	Artist string       `json:"artist,omitempty"`
+	// RemovedAt is when the download went.
+	RemovedAt time.Time `json:"removedAt"`
+}
+
+// tombstoneLife is how long a removal is remembered. A device that has not
+// reached the server for longer than this may leave a removed download on it,
+// which is the price of a file that does not grow without end.
+const tombstoneLife = 90 * 24 * time.Hour
+
 // file is what a store writes to disk.
 type file struct {
-	Items []Item `json:"items"`
+	Items   []Item      `json:"items"`
+	Removed []Tombstone `json:"removed,omitempty"`
 }
 
 // Store keeps the downloaded tracks in one JSON index beside their audio
@@ -61,8 +81,9 @@ type Store struct {
 	indexPath string
 	dir       string
 
-	mu    sync.Mutex
-	items []Item
+	mu      sync.Mutex
+	items   []Item
+	removed []Tombstone
 }
 
 // New reads the index kept at indexPath, with the audio files in dir. A
@@ -93,7 +114,14 @@ func (s *Store) load() {
 		log.Printf("downloads in %s are not readable, starting empty: %v", s.indexPath, err)
 		return
 	}
-	s.items = f.Items
+	s.items, s.removed = f.Items, f.Removed
+	s.prune(time.Now())
+}
+
+// prune lets go of the removals older than tombstoneLife. It has no lock of
+// its own: its callers hold s.mu, or have the store to themselves.
+func (s *Store) prune(now time.Time) {
+	s.removed = slices.DeleteFunc(s.removed, func(t Tombstone) bool { return now.Sub(t.RemovedAt) > tombstoneLife })
 }
 
 // Dir is the directory the downloaded audio files live in.
@@ -105,7 +133,7 @@ func (s *Store) save() error {
 	if s.indexPath == "" {
 		return nil
 	}
-	data, err := json.MarshalIndent(file{Items: s.items}, "", "  ")
+	data, err := json.MarshalIndent(file{Items: s.items, Removed: s.removed}, "", "  ")
 	if err != nil {
 		return err
 	}
@@ -181,6 +209,9 @@ func (s *Store) Add(item Item) error {
 	} else {
 		s.items = append(s.items, item)
 	}
+	// A track downloaded again is no longer a removal to tell.
+	ref := item.tombstone(time.Time{})
+	s.removed = slices.DeleteFunc(s.removed, func(t Tombstone) bool { return t.Source == ref.Source && t.Key == ref.Key })
 	return s.save()
 }
 
@@ -195,7 +226,57 @@ func (s *Store) Remove(source media.Source, key string) (Item, bool, error) {
 	}
 	removed := s.items[i]
 	s.items = slices.Delete(s.items, i, i+1)
+	s.remember(removed.tombstone(time.Now()))
 	return removed, true, s.save()
+}
+
+// Removed returns the downloads taken out that the server has yet to hear of,
+// oldest first. A removal is forgotten after 90 days.
+func (s *Store) Removed() []Tombstone {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.prune(time.Now())
+	out := slices.Clone(s.removed)
+	slices.SortStableFunc(out, func(a, b Tombstone) int { return a.RemovedAt.Compare(b.RemovedAt) })
+	return out
+}
+
+// remember keeps a removal, replacing an earlier one of the same track. A
+// track with no key was never sent, so there is nothing to tell. It has no
+// lock of its own: its callers hold s.mu.
+func (s *Store) remember(t Tombstone) {
+	if t.Key == "" {
+		return
+	}
+	s.prune(t.RemovedAt)
+	s.removed = slices.DeleteFunc(s.removed, func(held Tombstone) bool { return held.Source == t.Source && held.Key == t.Key })
+	s.removed = append(s.removed, t)
+}
+
+// tombstone is the removal of the download as the server knows it, made at a
+// moment: by the provider the track played from, which is the active one when
+// the track was switched to another that holds it, and by that provider's key,
+// or the page URL for SoundCloud.
+func (i Item) tombstone(at time.Time) Tombstone {
+	source, key, url := i.Source, i.Key, i.URL
+	if source == "" {
+		source = media.SourceYTM
+	}
+	active := i.Active
+	if active == "" {
+		active = source
+	}
+	if j := slices.IndexFunc(i.Sources, func(ref media.SourceRef) bool { return ref.Source == active }); j >= 0 {
+		ref := i.Sources[j]
+		source, key, url = ref.Source, ref.ID, ref.URL
+	}
+	if source == media.SourceSoundCloud {
+		if url == "" {
+			url = key
+		}
+		key = url
+	}
+	return Tombstone{Source: source, Key: key, URL: url, Title: i.Title, Artist: i.Artist, RemovedAt: at}
 }
 
 // SetActive makes active the provider a kept track plays from now, without

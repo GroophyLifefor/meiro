@@ -44,6 +44,8 @@ type serverState struct {
 	// goes back, not even after a clearing.
 	playSeq int64
 	offline bool
+	// downloads are the downloads the account was sent, in the order they came.
+	downloads []meirosync.Download
 }
 
 type serverRecord[T any] struct {
@@ -106,6 +108,13 @@ func (s *serverState) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			s.seq++
 			s.items[key] = &serverRecord[meirosync.ChangedItem]{value: meirosync.ChangedItem{LibraryID: body.LibraryID, LibraryItem: item}, seq: s.seq}
 		}
+		_, _ = w.Write([]byte(`{"accepted":[]}`))
+	case strings.HasSuffix(r.URL.Path, "/sync/downloads"):
+		var body struct {
+			Downloads []meirosync.Download `json:"downloads"`
+		}
+		_ = json.NewDecoder(r.Body).Decode(&body)
+		s.downloads = append(s.downloads, body.Downloads...)
 		_, _ = w.Write([]byte(`{"accepted":[]}`))
 	case strings.HasSuffix(r.URL.Path, "/sync/changes"):
 		since, _ := strconv.ParseInt(r.URL.Query().Get("since"), 10, 64)
