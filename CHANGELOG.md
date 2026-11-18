@@ -6,8 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.4.15] - 2026-10-30
+
 ### Added
 
+- **Retry and Retry all on the Downloads page.** A download that failed shows a Retry button on its row, and the page shows Retry all above the list while any has failed. A retry waits its turn with the other downloads, two at a time.
+- **A green mark on songs you have downloaded.** Every song row, in a playlist, a search, Up next, the home shelves and the history, shows a green check before the MusicBrainz mark when the song is kept as a download.
+- **A More options button on playlist and album pages.** The buttons under the title end with More options, which opens the menu the artwork already had: Start radio, Shuffle play, Duplicate as Meiro playlist, Download playlist or Download album, and Copy link. Duplicate as Meiro playlist now copies the whole playlist or album, not only the songs the page had loaded so far, and a card's copy of a long playlist reads it to its end too.
+- **Download a whole playlist.** Download playlist (Download album on an album) in that menu, a download button on the page of a Meiro playlist and Download playlist in the menu of its row on the Playlists page download every song that is not downloaded yet, and say how many they started, or that all of them already are. Episodes are left out. Two songs download at a time and the rest wait, shown on the Downloads page as waiting; a single song's Download waits its turn the same way.
+- **Daily mix reasons show on every device.** The reason under each song of the Daily mix ("because you play ...") used to stay on the device that made the mix. Now it travels with the song to your server, so the mix on your other devices says why too.
+- **History rows show the cover.** Each play in the listening history keeps its song's cover, sends it to your server and reads it back from your other devices, so the rows of the history page show the picture instead of a blank.
+- **Clearing the history clears it on every device.** With a Meiro account signed in, Clear history in Settings removes your plays from the server and, with the next sync, from your other devices; a device that was offline with older plays cannot bring them back. If the server cannot be reached the clearing waits and is sent with the next sync. Signed out, it clears this computer only, and the card says which.
 - **A Listening history page.** Settings > Listening history has Open, and the stats page has History: every play, newest first and day by day under Today, Yesterday and the date, each day saying how many plays and about how many minutes. Under each song is when it began, on which device and how much was heard, "heard to the end", "2:05 of 4:18" or "skipped at 0:12". Chips narrow it to the plays that count, the ones skipped, or one device, and a skipped play is faded: it stays in the list, but the stats and the recommendations do not count it. A press on a song does not start it, a double press does, as in a playlist.
 - **One Daily mix for your whole account.** Each device used to make a Daily mix of its own, so two devices made two. Now the mix is one playlist: the first device to make today's fills it, the others get it with the next sync and do not make another, and it still teaches Meiro nothing. A Daily mix made before this one is replaced by the shared one.
 - **Plays from every device count.** What you play on your other devices, read back from your server when you sign in, when the app starts, after each send and every five minutes, now counts in the stats and in what Meiro recommends, as if you had played it here. A play that comes back from the server is not counted twice, and the plays of other devices are not sent again.
@@ -57,7 +66,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
+- **Downloads failed in the packaged app.** Every download ended with "Requested output format 'matroska' is not known", because the ffmpeg that ships with Meiro cannot write files. A download now saves the audio as the music service sends it, the way the playback cache does, and plays back as before. A SoundCloud track that arrives in segments cannot be saved yet, and says so.
 - **The window buttons stay visible in the light appearance.** On Linux the minimise, maximise and close buttons are drawn by the desktop's own toolkit, which followed the system appearance instead of the one Meiro was set to, so they turned invisible on a light window. Meiro now tells the toolkit which appearance to use whenever it changes, and at launch.
+- **An expired session asks you to sign in again.** Your server's sign-in lasts 30 days. When it runs out, the Meiro account card now says "Your session ended. Sign in again to keep syncing." with the email already filled in, instead of blaming your password. What waited to be sent is kept, and signing in to the same account carries on where it stopped.
+- **A sync the server refuses no longer holds up the rest.** When the server turned down one batch as malformed, that batch was sent first on every try and nothing after it ever went out. Now it is set aside, with the server's answer, and the rest goes on.
+- **Removed downloads are removed on the server too.** A download you removed stayed on your server for good. Now the removal is sent with the next sync.
 
 ## [0.4.14] - 2026-10-28
 
