@@ -192,6 +192,9 @@ type app struct {
 	// historyDiscard drops the plays the read in flight brings: the user
 	// cleared the history while it was being read.
 	historyDiscard bool
+	// historyDropThrough is the time the history was cleared at on another
+	// device while it was being read: the read's plays up to it are dropped.
+	historyDropThrough time.Time
 	// confirmClearHistory is set once the user has asked to clear the history,
 	// until they confirm or keep it.
 	confirmClearHistory bool

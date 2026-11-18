@@ -32,6 +32,7 @@ func (a *app) recordHistory(item youtube.MusicItem) string {
 		Artist:     artist,
 		Source:     string(resolveSource(item)),
 		DurationMS: int64(parseDuration(item.Duration) / time.Millisecond),
+		Thumbnail:  item.Thumbnail,
 		Device:     a.device,
 		EventID:    meirosync.NewID(),
 		PlayedAt:   time.Now(),
@@ -112,9 +113,11 @@ func (a *app) queueEvent(e history.Entry) {
 	if a.sync.outbox == nil || e.EventID == "" {
 		return
 	}
+	track := meirosync.TrackFor(media.Source(e.Source), e.VideoID, "", e.Title, e.Artist, e.DurationMS)
+	track.Thumbnail = e.Thumbnail
 	a.sync.outbox.AddEvent(meirosync.Event{
 		ClientEventID: e.EventID,
-		Track:         meirosync.TrackFor(media.Source(e.Source), e.VideoID, "", e.Title, e.Artist, e.DurationMS),
+		Track:         track,
 		PlayedMS:      e.PlayedMS,
 		DurationMS:    e.DurationMS,
 		Completed:     e.Completed,
@@ -138,6 +141,14 @@ func (a *app) loadHistory() {
 			entries, pending, a.historyDiscard = nil, true, false
 		}
 		a.history, _ = history.Merge(entries, a.history)
+		if !a.historyDropThrough.IsZero() {
+			// The history was cleared, on another device, while this read
+			// was on its way: what it brought from before is gone.
+			var dropped int
+			a.history, dropped = history.DropThrough(a.history, a.historyDropThrough)
+			a.historyDropThrough = time.Time{}
+			pending = pending || dropped > 0
+		}
 		a.historyLoaded, a.historyLoading = true, false
 		if pending {
 			a.saveHistory()
@@ -154,9 +165,22 @@ func (a *app) saveHistory() {
 	a.historyWriter.Save(a.historyPath, a.history)
 }
 
-// clearHistory forgets every play, on disk too.
+// clearHistory forgets every play, on disk too. When an account is signed in
+// it is the account's history that is cleared, on every device: the plays that
+// wait to be sent are let go, and the server is told, now or, when it cannot
+// be reached, with the next sync.
 func (a *app) clearHistory() {
+	clearedAt := time.Now()
 	a.history = nil
+	a.stats.valid, a.historyPlays.valid = false, false
+	if a.sync.outbox != nil {
+		a.sync.outbox.DropEventsThrough(clearedAt)
+	}
+	if a.settings.SyncEmail != "" {
+		a.settings.HistoryClearPending = clearedAt
+		a.saveSettings()
+		a.syncNow()
+	}
 	if !a.historyLoaded {
 		// The read that is on its way would bring the old plays back: it
 		// drops them and writes the empty history instead.
@@ -165,6 +189,25 @@ func (a *app) clearHistory() {
 		return
 	}
 	a.saveHistory()
+}
+
+// dropHistoryThrough removes the plays that happened at or before at, the time
+// the account's history was cleared at from some device, and says whether any
+// went. A history still being read is trimmed when the read ends.
+func (a *app) dropHistoryThrough(at time.Time) bool {
+	if !a.historyLoaded {
+		if at.After(a.historyDropThrough) {
+			a.historyDropThrough = at
+		}
+	}
+	var n int
+	a.history, n = history.DropThrough(a.history, at)
+	a.stats.valid, a.historyPlays.valid = false, false
+	if n == 0 {
+		return false
+	}
+	a.saveHistory()
+	return true
 }
 
 // statsMemo holds the summary the stats page last built, and what it was built

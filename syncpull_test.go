@@ -35,6 +35,15 @@ type serverState struct {
 	// seq, and askedPlays the since values the reads of them came with.
 	plays      []meirosync.PlayedEvent
 	askedPlays []int64
+	// clearedAt is when the account's history was last cleared, nil if never,
+	// and clears how many times it was; offline makes every request fail with
+	// a 503, as a server out of reach does.
+	clearedAt *time.Time
+	clears    int
+	// playSeq is the last seq given to a play; like the real server's it never
+	// goes back, not even after a clearing.
+	playSeq int64
+	offline bool
 }
 
 type serverRecord[T any] struct {
@@ -54,6 +63,11 @@ func (s *serverState) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	w.Header().Set("Content-Type", "application/json")
+	if s.offline {
+		w.WriteHeader(http.StatusServiceUnavailable)
+		_, _ = w.Write([]byte(`{"error":"down"}`))
+		return
+	}
 	switch {
 	case strings.HasSuffix(r.URL.Path, "/sync/libraries"):
 		var body struct {
@@ -86,7 +100,7 @@ func (s *serverState) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			if held != nil && item.UpdatedAt.Before(held.value.UpdatedAt) {
 				continue
 			}
-			if held != nil && held.value.Position == item.Position && held.value.Deleted == item.Deleted && held.value.UpdatedAt.Equal(item.UpdatedAt) && held.value.Track == item.Track {
+			if held != nil && held.value.Position == item.Position && held.value.Deleted == item.Deleted && held.value.UpdatedAt.Equal(item.UpdatedAt) && held.value.Track == item.Track && held.value.Note == item.Note {
 				continue
 			}
 			s.seq++
@@ -109,18 +123,28 @@ func (s *serverState) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			Duplicates []string `json:"duplicates"`
 		}{[]string{}, []string{}}
 		for _, e := range body.Events {
+			if s.clearedAt != nil && !e.PlayedAt.After(*s.clearedAt) {
+				// Taken, so the device lets it go, but not kept.
+				out.Accepted = append(out.Accepted, e.ClientEventID)
+				continue
+			}
 			if slices.ContainsFunc(s.plays, func(held meirosync.PlayedEvent) bool { return held.ClientEventID == e.ClientEventID }) {
 				out.Duplicates = append(out.Duplicates, e.ClientEventID)
 				continue
 			}
-			s.plays = append(s.plays, meirosync.PlayedEvent{Event: e, Seq: int64(len(s.plays) + 1)})
+			s.plays = append(s.plays, meirosync.PlayedEvent{Event: e, Seq: s.nextPlaySeq()})
 			out.Accepted = append(out.Accepted, e.ClientEventID)
 		}
 		_ = json.NewEncoder(w).Encode(out)
+	case strings.HasSuffix(r.URL.Path, "/api/v1/events") && r.Method == http.MethodDelete:
+		now := time.Now()
+		s.plays, s.clearedAt = nil, &now
+		s.clears++
+		_ = json.NewEncoder(w).Encode(map[string]time.Time{"cleared_at": now})
 	case strings.HasSuffix(r.URL.Path, "/api/v1/events"):
 		since, _ := strconv.ParseInt(r.URL.Query().Get("since"), 10, 64)
 		s.askedPlays = append(s.askedPlays, since)
-		out := meirosync.Plays{Events: []meirosync.PlayedEvent{}, Next: since}
+		out := meirosync.Plays{Events: []meirosync.PlayedEvent{}, Next: since, ClearedAt: s.clearedAt}
 		for _, e := range s.plays {
 			if e.Seq > since {
 				out.Events = append(out.Events, e)
@@ -871,4 +895,12 @@ func TestAnOldDailyMixMovesToTheSharedList(t *testing.T) {
 	if lib, _ := server.library(meirosync.DailyMixID()); lib.Deleted || lib.Name != "Daily mix" {
 		t.Errorf("the shared Daily mix on the server = %+v", lib)
 	}
+}
+
+// nextPlaySeq gives the next place in the order of plays; a test that sets
+// plays by hand sets them past it.
+func (s *serverState) nextPlaySeq() int64 {
+	s.playSeq = max(s.playSeq, int64(len(s.plays)))
+	s.playSeq++
+	return s.playSeq
 }

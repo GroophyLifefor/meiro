@@ -2,6 +2,8 @@ package sync
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -90,5 +92,56 @@ func TestDailyMixIDIsFixed(t *testing.T) {
 	first, second := DailyMixID(), DailyMixID()
 	if first != second || len(first) != 36 || first == LibraryID("daily-mix") {
 		t.Errorf("daily mix id = %q then %q", first, second)
+	}
+}
+
+func TestClearEventsAndFeedClearedAt(t *testing.T) {
+	cleared := "2026-10-30T10:00:00.123456789Z"
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("Authorization") != "Bearer tok" {
+			t.Errorf("authorization = %q", r.Header.Get("Authorization"))
+		}
+		switch {
+		case r.Method == http.MethodDelete && r.URL.Path == "/api/v1/events":
+			fmt.Fprintf(w, `{"cleared_at":%q}`, cleared)
+		case r.Method == http.MethodGet && r.URL.Path == "/api/v1/events":
+			fmt.Fprintf(w, `{"events":[],"next":0,"more":false,"cleared_at":%q}`, cleared)
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	t.Cleanup(srv.Close)
+	c := &Client{BaseURL: srv.URL, Token: "tok"}
+
+	at, err := c.ClearEvents(context.Background())
+	if err != nil || at.UTC().Format(time.RFC3339Nano) != cleared {
+		t.Fatalf("ClearEvents = %v, %v", at, err)
+	}
+	plays, err := c.FetchAllEvents(context.Background(), 0)
+	if err != nil || plays.ClearedAt == nil || !plays.ClearedAt.Equal(at) {
+		t.Fatalf("FetchAllEvents = %+v, %v", plays, err)
+	}
+}
+
+func TestClearEventsReportsRefusals(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, `{"error":"no"}`, http.StatusMethodNotAllowed)
+	}))
+	t.Cleanup(srv.Close)
+	_, err := (&Client{BaseURL: srv.URL}).ClearEvents(context.Background())
+	var api *APIError
+	if !errors.As(err, &api) || api.Status != http.StatusMethodNotAllowed {
+		t.Fatalf("err = %v", err)
+	}
+}
+
+func TestOutboxDropEventsThrough(t *testing.T) {
+	o := Open("")
+	base := time.Date(2026, 10, 30, 10, 0, 0, 0, time.UTC)
+	for i, id := range []string{"a", "b", "c"} {
+		o.AddEvent(Event{ClientEventID: id, PlayedAt: base.Add(time.Duration(i) * time.Minute)})
+	}
+	if n := o.DropEventsThrough(base.Add(time.Minute)); n != 2 || o.EventCount() != 1 {
+		t.Fatalf("dropped %d, %d left", n, o.EventCount())
 	}
 }

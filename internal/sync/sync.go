@@ -85,8 +85,12 @@ type Library struct {
 
 // LibraryItem is one track of a list, with the place it holds.
 type LibraryItem struct {
-	Track     Track     `json:"track"`
-	Position  int       `json:"position"`
+	Track    Track `json:"track"`
+	Position int   `json:"position"`
+	// Note is the line a track carries with it, such as the reason the Daily
+	// mix chose it. It is part of the track's record, so the later record
+	// wins with it.
+	Note      string    `json:"note,omitempty"`
 	UpdatedAt time.Time `json:"updated_at"`
 	Deleted   bool      `json:"deleted,omitempty"`
 }
@@ -201,6 +205,31 @@ func (c *Client) get(ctx context.Context, path string, out any) error {
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
 		return apiError(resp)
+	}
+	return json.NewDecoder(resp.Body).Decode(out)
+}
+
+// delete sends a DELETE and decodes the JSON answer into out. A non-200 is an
+// APIError.
+func (c *Client) delete(ctx context.Context, path string, out any) error {
+	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, c.url(path), nil)
+	if err != nil {
+		return err
+	}
+	if c.Token != "" {
+		req.Header.Set("Authorization", "Bearer "+c.Token)
+	}
+	resp, err := c.http().Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return apiError(resp)
+	}
+	if out == nil {
+		_, _ = io.Copy(io.Discard, resp.Body)
+		return nil
 	}
 	return json.NewDecoder(resp.Body).Decode(out)
 }

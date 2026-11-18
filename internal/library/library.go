@@ -656,6 +656,11 @@ func (s *Store) ApplyRemoteItems(id string, changes []RemoteItem) (int, error) {
 			if held.AlbumThumbnail == "" {
 				held.AlbumThumbnail = remote.AlbumThumbnail
 			}
+			// A newer record carries the reason it was chosen; one that
+			// carries none keeps the reason held.
+			if remote.Why != "" {
+				held.Why = remote.Why
+			}
 			changed++
 		default:
 			source, ref := remote.ActiveRef()

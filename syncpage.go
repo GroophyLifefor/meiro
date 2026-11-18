@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -39,6 +40,9 @@ const (
 	// syncInterval is how often records that wait are tried again while the
 	// app runs.
 	syncInterval = 5 * time.Minute
+	// sessionEndedMessage is what the card says once the server no longer
+	// takes the session token.
+	sessionEndedMessage = "Your session ended. Sign in again to keep syncing."
 )
 
 // syncer is the app's connection to the Meiro server: the session token, the
@@ -72,6 +76,10 @@ type syncer struct {
 
 	// err is why signing in or syncing last failed, for the card.
 	err string
+	// expired says the server stopped taking the session token: the account is
+	// still the one the settings name, with its records and cursors kept, but
+	// nothing is sent or read until it is signed in again.
+	expired bool
 	// email and password are what the sign in form holds; the password is
 	// never saved.
 	email, password string
@@ -104,6 +112,11 @@ func (a *app) loadSyncToken() {
 	}, func(token string, err error) {
 		if err != nil {
 			log.Printf("sync: reading the saved session: %v", err)
+			if errors.Is(err, meirosync.ErrNoToken) {
+				// The session was ended, here or on an earlier run, and no
+				// token is left to try.
+				a.markSessionEnded()
+			}
 			return
 		}
 		s.token = token
@@ -124,25 +137,51 @@ func (a *app) syncNow() {
 	}
 	client := &meirosync.Client{BaseURL: a.settings.SyncURL, Token: s.token}
 	outbox, snapshot, sleep := s.outbox, a.syncSnapshot(), a.sleep
-	startTask(a, &s.push, noTimeout, func(ctx context.Context) (int, error) {
-		snapshot.queue(outbox)
-		delivered := 0
-		for tries := 1; ; tries++ {
-			n, err := meirosync.Push(ctx, client, outbox)
-			delivered += n
-			if err == nil {
-				return delivered, nil
-			}
-			if ctx.Err() != nil || !meirosync.Retryable(err) || tries >= syncAttempts {
-				return delivered, err
-			}
-			if sleep(ctx, meirosync.Backoff(tries)) != nil {
-				return delivered, ctx.Err()
+	clearPending := a.settings.HistoryClearPending
+	startTask(a, &s.push, noTimeout, func(ctx context.Context) (pushed, error) {
+		var out pushed
+		if !clearPending.IsZero() {
+			// A clearing of the history that has not reached the server goes
+			// first, so the plays the push brings are judged against it. If it
+			// fails it stays pending and the rest still goes.
+			if at, err := client.ClearEvents(ctx); err != nil {
+				log.Printf("sync: clearing the history on the server: %v", err)
+				if sessionEnded(err) {
+					return out, err
+				}
+			} else {
+				out.cleared, out.clearedAt = true, at
 			}
 		}
-	}, func(delivered int, err error) {
+		snapshot.queue(outbox)
+		for tries := 1; ; tries++ {
+			n, err := meirosync.Push(ctx, client, outbox)
+			out.delivered += n
+			if err == nil {
+				return out, nil
+			}
+			if ctx.Err() != nil || !meirosync.Retryable(err) || tries >= syncAttempts {
+				return out, err
+			}
+			if sleep(ctx, meirosync.Backoff(tries)) != nil {
+				return out, ctx.Err()
+			}
+		}
+	}, func(out pushed, err error) {
+		if out.cleared {
+			// The server has forgotten the plays up to the time it gives. A
+			// clearing made again meanwhile is newer and still waits.
+			if !a.settings.HistoryClearPending.After(clearPending) {
+				a.settings.HistoryClearPending = time.Time{}
+			}
+			a.settings.HistoryClearedAt = out.clearedAt
+			a.saveSettings()
+		}
 		if err != nil {
 			log.Printf("sync: %v", err)
+			if a.endSyncSession(err) {
+				return
+			}
 			s.err = syncMessage(err)
 			return
 		}
@@ -158,6 +197,14 @@ func (a *app) syncNow() {
 		a.pullChanges()
 		a.pullEvents()
 	})
+}
+
+// pushed is what one delivery did: how many records the server took, and
+// whether it also took word of a cleared history, with the time it cleared at.
+type pushed struct {
+	delivered int
+	cleared   bool
+	clearedAt time.Time
 }
 
 // syncTrack is the server's reference to a track, named by the source the
@@ -194,7 +241,7 @@ func (a *app) syncSnapshot() syncSnapshot {
 		for i, item := range lib.Items {
 			track := syncTrack(musicItem(item), item.Title, item.Artist, item.DurationMS)
 			track.Thumbnail, track.AlbumThumbnail = item.Thumbnail, item.AlbumThumbnail
-			items = append(items, meirosync.LibraryItem{Track: track, Position: i, UpdatedAt: item.UpdatedAt})
+			items = append(items, meirosync.LibraryItem{Track: track, Position: i, Note: item.Why, UpdatedAt: item.UpdatedAt})
 		}
 		// A track taken out is sent as deleted, at the time it was taken out,
 		// or the server would keep it and send it back to every device.
@@ -279,7 +326,12 @@ func (a *app) signInSync() {
 			s.err = syncMessage(err)
 			return
 		}
-		s.token, s.err, s.password = token, "", ""
+		if previous := a.settings.SyncEmail; previous != "" && !strings.EqualFold(previous, email) {
+			// The account that ended its session left a clearing that never
+			// reached its server; it must not clear this one.
+			a.settings.HistoryClearPending, a.settings.HistoryClearedAt = time.Time{}, time.Time{}
+		}
+		s.token, s.err, s.password, s.expired = token, "", "", false
 		s.urlText = url
 		a.settings.SyncURL, a.settings.SyncEmail, a.settings.SyncEnabled = url, email, true
 		a.saveSettings()
@@ -303,7 +355,10 @@ func (a *app) signOutSync() {
 	s.pullAgain = false
 	s.events.stop()
 	s.pullEventsAgain = false
-	s.token, s.err = "", ""
+	// A clearing that never reached the server belongs to the account just
+	// left; it must not clear whichever account signs in next.
+	a.settings.HistoryClearPending, a.settings.HistoryClearedAt = time.Time{}, time.Time{}
+	s.token, s.err, s.expired = "", "", false
 	a.settings.SyncEmail, a.settings.SyncEnabled = "", false
 	a.settings.SyncCursor, a.settings.SyncCursorURL, a.settings.SyncCursorEmail = 0, "", ""
 	a.settings.EventCursor, a.settings.EventCursorURL, a.settings.EventCursorEmail = 0, "", ""
@@ -319,6 +374,59 @@ func (a *app) signOutSync() {
 			log.Printf("sync: removing the saved session: %v", err)
 		}
 	})
+}
+
+// sessionEnded says the server no longer takes the session token: a 401 from
+// any call made with it. The server's tokens last 30 days and are not
+// refreshed, so this is how a session ends.
+func sessionEnded(err error) bool {
+	var api *meirosync.APIError
+	return errors.As(err, &api) && api.Status == http.StatusUnauthorized
+}
+
+// endSyncSession handles a failed call made with the session token and says
+// whether it was the session ending. If so, syncing stops until the account is
+// signed in again: the token is forgotten and its file removed, as in
+// signOutSync, but the email and server stay, so the form is filled in, and so
+// do the records that wait and the cursors, so signing in to the same account
+// resumes where it left off.
+func (a *app) endSyncSession(err error) bool {
+	s := &a.sync
+	if !sessionEnded(err) || (s.token == "" && !s.expired) {
+		return false
+	}
+	if s.expired {
+		return true
+	}
+	log.Printf("sync: the server no longer takes the session, waiting for a new sign in")
+	s.push.stop()
+	s.pull.stop()
+	s.changes.stop()
+	s.pullAgain = false
+	s.events.stop()
+	s.pullEventsAgain = false
+	s.token = ""
+	a.markSessionEnded()
+	store := s.tokens
+	spawn(a, func() error {
+		if store.Path == "" {
+			return nil
+		}
+		return store.Delete()
+	}, func(err error) {
+		if err != nil {
+			log.Printf("sync: removing the saved session: %v", err)
+		}
+	})
+	return true
+}
+
+// markSessionEnded puts the card in the state of an account whose session
+// ended, with the form filled in for it.
+func (a *app) markSessionEnded() {
+	s := &a.sync
+	s.expired, s.err, s.password = true, "", ""
+	s.email = a.settings.SyncEmail
 }
 
 // setSyncURL keeps the server address the form holds.
@@ -349,7 +457,10 @@ func (a *app) meiroAccountCard(c *ui.Context) {
 	sc := m3.Of(c).Scheme
 	a.settingsCard(c, "Meiro account", m3.IconPerson, func() {
 		m3.Text(c, m3.BodyMedium, "Your main account. What you play, your playlists and your downloads are sent to your Meiro server. Your playlists are kept in step both ways, so a change on another device reaches this one, and the plays of your other devices count here too; downloads are only sent.").TextColor(sc.OnSurfaceVariant)
-		signedIn := a.settings.SyncEmail != ""
+		signedIn := a.settings.SyncEmail != "" && !s.expired
+		if s.expired {
+			m3.Text(c, m3.BodyMedium, sessionEndedMessage).TextColor(sc.Error).MaxLines(3)
+		}
 		if signedIn {
 			a.syncAccount(c)
 		}
@@ -549,6 +660,7 @@ func (a *app) pullLinks() {
 	}, func(links meirosync.Links, err error) {
 		if err != nil {
 			log.Printf("sync: reading the links: %v", err)
+			a.endSyncSession(err)
 			return
 		}
 		took, err := a.links.Merge(linksIn(links))

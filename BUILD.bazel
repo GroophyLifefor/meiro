@@ -282,6 +282,7 @@ go_test(
         "states_test.go",
         "subscription_test.go",
         "sync_test.go",
+        "syncclear_test.go",
         "syncpull_test.go",
         "theme_test.go",
         "zoom_test.go",

@@ -138,6 +138,13 @@ type Settings struct {
 	EventCursor      int64  `json:"eventCursor,omitempty"`
 	EventCursorURL   string `json:"eventCursorUrl,omitempty"`
 	EventCursorEmail string `json:"eventCursorEmail,omitempty"`
+	// HistoryClearedAt is the time of the newest clearing of the history, on
+	// any device, that this device has applied to its own history.
+	HistoryClearedAt time.Time `json:"historyClearedAt,omitempty"`
+	// HistoryClearPending is when the history was cleared here while signed in
+	// and the server has not been told yet; it is sent with the next sync. It
+	// is empty when nothing waits.
+	HistoryClearPending time.Time `json:"historyClearPending,omitempty"`
 	// SyncTwoWay says this device has begun reading lists back from the server.
 	// An install that synced before it could read has it unset, and its first
 	// read takes this device's lists as the truth.

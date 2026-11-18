@@ -2,8 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"testing"
@@ -254,5 +257,179 @@ func TestLinksAreNotSentWhenSignedOut(t *testing.T) {
 	}
 	if s, ok := a.linkOf(song); !ok || s.MBID != "rec" {
 		t.Errorf("the link was not kept on the device: %+v %v", s, ok)
+	}
+}
+
+// signedOutServer answers every call of the session with 401, as a server does
+// once the token has run out, except a sign in, which it takes while it is
+// told to, and passes the rest to the server behind it.
+type signedOutServer struct {
+	mu       sync.Mutex
+	ended    bool
+	requests int
+	behind   http.Handler
+}
+
+func (s *signedOutServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	s.mu.Lock()
+	ended := s.ended
+	if !strings.HasSuffix(r.URL.Path, "/auth/login") {
+		s.requests++
+	}
+	s.mu.Unlock()
+	switch {
+	case strings.HasSuffix(r.URL.Path, "/auth/login"):
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"token":"NEW"}`))
+	case ended:
+		w.WriteHeader(http.StatusUnauthorized)
+		_, _ = w.Write([]byte(`{"error":"token expired"}`))
+	default:
+		s.behind.ServeHTTP(w, r)
+	}
+}
+
+func (s *signedOutServer) asked() int {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.requests
+}
+
+// Whichever call the server answers with 401, the session is over: syncing
+// stops, the token is gone from memory and disk, and the account, its server,
+// its cursors and the records that wait are all kept.
+func TestA401EndsTheSessionAndKeepsEverything(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		call func(a *app)
+	}{
+		{"push", func(a *app) { a.syncNow() }},
+		{"changes", func(a *app) { a.pullChanges() }},
+		{"events", func(a *app) { a.pullEvents() }},
+		{"links", func(a *app) { a.pullLinks() }},
+		{"clearing", func(a *app) {
+			// Nothing waits to be pushed, so only the clearing can find out.
+			a.sync.outbox = meirosync.Open("")
+			a.settings.HistoryClearPending = time.Now()
+			a.syncNow()
+		}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			server := &signedOutServer{ended: true, behind: newServerState()}
+			a := signedInToServer(t, server)
+			a.historyLoaded = true
+			tokenPath := filepath.Join(t.TempDir(), "sync-token.txt")
+			a.sync.tokens = meirosync.TokenStore{Path: tokenPath}
+			if err := a.sync.tokens.Save("TOKEN"); err != nil {
+				t.Fatal(err)
+			}
+			a.settings.SyncCursor, a.settings.SyncCursorURL, a.settings.SyncCursorEmail = 7, a.settings.SyncURL, a.settings.SyncEmail
+			a.settings.EventCursor, a.settings.EventCursorURL, a.settings.EventCursorEmail = 9, a.settings.SyncURL, a.settings.SyncEmail
+			playAt(a, "p1", time.Now().Add(-time.Hour))
+			tc.call(a)
+			settled(t, a)
+			pollUntil(t, a, "the token to be removed", func() bool {
+				_, err := os.Stat(tokenPath)
+				return errors.Is(err, os.ErrNotExist)
+			})
+
+			s := &a.sync
+			if s.token != "" || !s.expired {
+				t.Errorf("token %q, expired %t: the session did not end", s.token, s.expired)
+			}
+			if a.settings.SyncEmail != "me@example.com" || a.settings.SyncURL == "" || s.email != "me@example.com" {
+				t.Errorf("the account was not kept: settings %q %q, form %q", a.settings.SyncEmail, a.settings.SyncURL, s.email)
+			}
+			if a.settings.SyncCursor != 7 || a.settings.EventCursor != 9 || a.settings.SyncCursorEmail == "" {
+				t.Errorf("the cursors were lost: %d %d", a.settings.SyncCursor, a.settings.EventCursor)
+			}
+			if tc.name != "clearing" && a.sync.outbox.EventCount() != 1 {
+				t.Errorf("the queued play was lost: %d", a.sync.outbox.EventCount())
+			}
+			if !a.settings.SyncEnabled {
+				t.Error("syncing was switched off")
+			}
+			if tc.name == "clearing" && a.settings.HistoryClearPending.IsZero() {
+				t.Error("the clearing that waits was lost")
+			}
+
+			// Nothing is tried again until the account signs in.
+			asked := server.asked()
+			a.syncNow()
+			a.pullChanges()
+			a.pullEvents()
+			a.pullLinks()
+			settled(t, a)
+			if got := server.asked(); got != asked {
+				t.Errorf("%d requests went out after the session ended", got-asked)
+			}
+		})
+	}
+}
+
+// The card tells the user the session ended and offers the sign in form with
+// the email filled in; signing in again to the same account sends what waited
+// and reads on from the cursor it had.
+func TestSigningInAgainResumesWhereTheSessionEnded(t *testing.T) {
+	state := newServerState()
+	server := &signedOutServer{ended: true, behind: state}
+	a := signedInToServer(t, server)
+	a.historyLoaded = true
+	a.sync.tokens = meirosync.TokenStore{Path: filepath.Join(t.TempDir(), "sync-token.txt")}
+	a.settings.SyncCursor, a.settings.SyncCursorURL, a.settings.SyncCursorEmail = 4, a.settings.SyncURL, a.settings.SyncEmail
+	a.settings.SyncTwoWay = true
+	playAt(a, "p1", time.Now().Add(-time.Hour))
+	a.syncNow()
+	settled(t, a)
+
+	a.router.Push("/settings")
+	tt := ui.NewTester(a.view, 1000, 8000)
+	tt.Frame()
+	for _, want := range []string{"Your session ended. Sign in again to keep syncing.", "Sign in to sync", "Email", "Password"} {
+		if !tt.HasText(want) {
+			t.Errorf("the card does not show %q: %q", want, tt.Texts())
+		}
+	}
+	if tt.HasText("Sign out") || tt.HasText("Sync now") {
+		t.Errorf("the card still offers the signed in controls: %q", tt.Texts())
+	}
+
+	server.mu.Lock()
+	server.ended = false
+	server.mu.Unlock()
+	a.sync.password = "secret"
+	a.signInSync()
+	settled(t, a)
+	if a.sync.token != "NEW" || a.sync.expired {
+		t.Fatalf("token %q, expired %t after signing in again", a.sync.token, a.sync.expired)
+	}
+	tt.Frame()
+	if tt.HasText("Your session ended") {
+		t.Errorf("the card still says the session ended: %q", tt.Texts())
+	}
+	if ids := serverPlayIDs(state); len(ids) != 1 || ids[0] != "p1" {
+		t.Errorf("the play that waited was not sent: %v", ids)
+	}
+	state.mu.Lock()
+	defer state.mu.Unlock()
+	if len(state.asked) == 0 || state.asked[0] != 4 {
+		t.Errorf("the changes were read from %v, want from the cursor 4", state.asked)
+	}
+}
+
+// A refused sign in is not an ended session: the message is about the password.
+func TestAWrongPasswordIsNotAnEndedSession(t *testing.T) {
+	a := newTestApp(t)
+	a.run = func(work func()) { work() }
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusUnauthorized)
+	}))
+	t.Cleanup(srv.Close)
+	a.settings.SyncURL = srv.URL
+	a.sync.email, a.sync.password = "me@example.com", "wrong"
+	a.signInSync()
+	settled(t, a)
+	if a.sync.expired || a.sync.err != "The server did not accept the email and password." {
+		t.Errorf("expired %t, err %q", a.sync.expired, a.sync.err)
 	}
 }

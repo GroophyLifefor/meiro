@@ -15,8 +15,13 @@ func (a *app) historyCard(c *ui.Context) {
 	a.settingsCard(c, "Listening history", m3.IconHistory, func() {
 		ui.Row(c).Gap(16).AlignItems(ui.Center).Children(func() {
 			body := fmt.Sprintf("%d plays are kept on this device, for the stats. Meiro keeps the latest %d.", len(a.history), history.MaxEntries)
-			if len(a.history) == 0 {
+			switch {
+			case len(a.history) == 0:
 				body = "No plays are kept on this device."
+			case a.settings.SyncEmail != "":
+				body += " Clearing removes the plays from every device signed in to your Meiro account."
+			default:
+				body += " Clearing removes them from this computer only."
 			}
 			settingLabel(c, "Plays", body).Grow(1)
 			switch {

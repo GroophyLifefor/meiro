@@ -39,6 +39,9 @@ type Entry struct {
 	Completed bool `json:"completed,omitempty"`
 	// Device is the machine the play happened on.
 	Device string `json:"device,omitempty"`
+	// Thumbnail is the picture of the song, as an address, so a row of the
+	// history can show a cover. It is empty for a play with none.
+	Thumbnail string `json:"thumbnail,omitempty"`
 	// EventID is the play's own stable ID, generated once. It is what the
 	// server deduplicates by, so a play sent twice counts once. It is empty
 	// for a play recorded before timing existed.
@@ -106,6 +109,14 @@ func Merge(entries, incoming []Entry) ([]Entry, int) {
 		entries = slices.Delete(entries, 0, len(entries)-MaxEntries)
 	}
 	return entries, added
+}
+
+// DropThrough removes the plays that happened at or before at, as the history
+// was cleared then, in place, and returns the rest and how many went.
+func DropThrough(entries []Entry, at time.Time) ([]Entry, int) {
+	before := len(entries)
+	entries = slices.DeleteFunc(entries, func(e Entry) bool { return !e.PlayedAt.After(at) })
+	return entries, before - len(entries)
 }
 
 // Read reads a history file. A missing or unreadable file is an empty

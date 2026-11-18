@@ -54,6 +54,7 @@ func (a *app) pullChanges() {
 		s.pullAgain = false
 		if err != nil {
 			log.Printf("sync: reading the changes: %v", err)
+			a.endSyncSession(err)
 			return
 		}
 		changed, queued := a.mergeChanges(changes, migrate)
@@ -92,9 +93,9 @@ func (a *app) pullEvents() {
 	// The plays are folded into the history, which must be read first.
 	a.loadHistory()
 	url, email := a.settings.SyncURL, a.settings.SyncEmail
-	since := a.settings.EventCursor
+	since, applied := a.settings.EventCursor, a.settings.HistoryClearedAt
 	if a.settings.EventCursorURL != url || a.settings.EventCursorEmail != email {
-		since = 0
+		since, applied = 0, time.Time{}
 	}
 	client := &meirosync.Client{BaseURL: url, Token: s.token}
 	startTask(a, &s.events, noTimeout, func(ctx context.Context) (meirosync.Plays, error) {
@@ -104,9 +105,21 @@ func (a *app) pullEvents() {
 		s.pullEventsAgain = false
 		if err != nil {
 			log.Printf("sync: reading the plays: %v", err)
+			a.endSyncSession(err)
 			return
 		}
-		a.mergeEvents(plays.Events)
+		changed := a.mergeEvents(plays.Events)
+		// A clearing newer than the last this device applied, made on any
+		// device, takes away the plays up to it. It comes after the merge,
+		// since the answer may hold plays from before the clearing.
+		a.settings.HistoryClearedAt = applied
+		if cleared := plays.ClearedAt; cleared != nil && cleared.After(applied) {
+			changed = a.dropHistoryThrough(*cleared) || changed
+			a.settings.HistoryClearedAt = *cleared
+		}
+		if changed {
+			a.stats.valid, a.historyPlays.valid = false, false
+		}
 		a.settings.EventCursor, a.settings.EventCursorURL, a.settings.EventCursorEmail = plays.Next, url, email
 		a.saveSettings()
 		if again {
@@ -135,8 +148,14 @@ func (a *app) mergeEvents(events []meirosync.PlayedEvent) bool {
 			PlayedMS:   e.PlayedMS,
 			DurationMS: e.DurationMS,
 			Completed:  e.Completed,
+			Thumbnail:  e.Track.Thumbnail,
 			PlayedAt:   e.PlayedAt.Local(),
 		})
+	}
+	// While a clearing waits to be sent, the server still holds the plays it
+	// will forget: they are not brought back.
+	if pending := a.settings.HistoryClearPending; !pending.IsZero() {
+		incoming, _ = history.DropThrough(incoming, pending)
 	}
 	merged, added := history.Merge(a.history, incoming)
 	a.history = merged
@@ -177,6 +196,7 @@ func remoteItem(change meirosync.ChangedItem) (library.Item, bool) {
 		State:          library.Unknown,
 		Thumbnail:      track.Thumbnail,
 		AlbumThumbnail: track.AlbumThumbnail,
+		Why:            change.Note,
 		AddedAt:        change.UpdatedAt,
 		UpdatedAt:      change.UpdatedAt,
 	}

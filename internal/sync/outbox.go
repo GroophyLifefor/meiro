@@ -129,6 +129,20 @@ func (o *Outbox) AddEvent(e Event) {
 	o.changedLocked()
 }
 
+// DropEventsThrough forgets the waiting plays that happened at or before at,
+// as the history they belong to has been cleared, and returns how many went.
+func (o *Outbox) DropEventsThrough(at time.Time) int {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	before := len(o.file.Events)
+	o.file.Events = slices.DeleteFunc(o.file.Events, func(e Event) bool { return !e.PlayedAt.After(at) })
+	n := before - len(o.file.Events)
+	if n > 0 {
+		o.changedLocked()
+	}
+	return n
+}
+
 // AddLibraries keeps libraries to send, keyed by their ID, so pushing the same
 // list again does not queue it twice. A list already waiting is replaced by the
 // one given unless the waiting one is the later record, and one that waits for

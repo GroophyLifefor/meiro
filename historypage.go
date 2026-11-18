@@ -183,7 +183,7 @@ func historyItem(e history.Entry) youtube.MusicItem {
 	}
 	return musicItem(library.Item{
 		Source: media.Source(e.Source), Key: e.VideoID, URL: e.VideoID,
-		Title: title, Artist: e.Artist, DurationMS: e.DurationMS,
+		Title: title, Artist: e.Artist, DurationMS: e.DurationMS, Thumbnail: e.Thumbnail,
 	})
 }
 

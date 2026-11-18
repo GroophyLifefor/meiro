@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/url"
 	"strconv"
+	"time"
 )
 
 // MaxPlays is how many plays the server gives in one answer to a read of the
@@ -22,10 +23,29 @@ type PlayedEvent struct {
 // Plays is what the server holds of an account's plays after a point in its
 // order. Next is where to read on from, and More says the server has more to
 // give than fit in one answer.
+//
+// ClearedAt is when the account's history was last cleared, from any device,
+// or nil when it never was: every play at or before it is gone from the server
+// and is to go from the devices too.
 type Plays struct {
-	Events []PlayedEvent `json:"events"`
-	Next   int64         `json:"next"`
-	More   bool          `json:"more"`
+	Events    []PlayedEvent `json:"events"`
+	Next      int64         `json:"next"`
+	More      bool          `json:"more"`
+	ClearedAt *time.Time    `json:"cleared_at,omitempty"`
+}
+
+// ClearEvents asks the server to forget every play of the account, and returns
+// the time it forgot them at. A play pushed later whose time is not after that
+// is taken but not kept, so a device that was offline cannot bring the cleared
+// plays back.
+func (c *Client) ClearEvents(ctx context.Context) (time.Time, error) {
+	var out struct {
+		ClearedAt time.Time `json:"cleared_at"`
+	}
+	if err := c.delete(ctx, "/api/v1/events", &out); err != nil {
+		return time.Time{}, err
+	}
+	return out.ClearedAt, nil
 }
 
 // FetchEvents reads one answer of the plays stored after since, in the
@@ -53,6 +73,8 @@ func (c *Client) FetchAllEvents(ctx context.Context, since int64) (Plays, error)
 			return Plays{}, err
 		}
 		all.Events = append(all.Events, page.Events...)
+		// The last answer is the newest word on when the history was cleared.
+		all.ClearedAt = page.ClearedAt
 		if !page.More {
 			all.Next = max(all.Next, page.Next)
 			return all, nil
