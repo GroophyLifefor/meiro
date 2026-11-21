@@ -728,6 +728,36 @@ class SyncEngine(
     }
 
     /**
+     * A play starts (`recordHistory`): it is in the history, with no time heard yet, from the moment audio starts.
+     * The event goes to the server only when the play ends ([finishPlay]).
+     */
+    fun beginPlay(e: HistoryEntry) {
+        if (e.eventId.isEmpty()) return
+        lock.withLock {
+            history = History.append(history, e)
+            saveHistory()
+        }
+    }
+
+    /**
+     * A play ends (`finishPlayRecord`): the history entry gets how long it was heard and whether it reached the end
+     * (`completed`), and the play is filed with the sync. Returns the finished entry, or null if the history no
+     * longer holds it (it was cleared meanwhile).
+     */
+    fun finishPlay(eventId: String, playedMs: Long, completed: Boolean): HistoryEntry? {
+        val entry = lock.withLock {
+            val i = history.indexOfLast { it.eventId == eventId }
+            if (i < 0) return null
+            val done = history[i].copy(playedMs = playedMs, completed = completed)
+            history = history.toMutableList().also { it[i] = done }
+            saveHistory()
+            done
+        }
+        queueEvent(entry)
+        return entry
+    }
+
+    /**
      * Forgets every play, on disk too. When an account is signed in it is the account's history that is cleared, on
      * every device: the plays that wait to be sent are let go, and the server is told, now or, when it cannot be
      * reached, with the next sync (`clearHistory`).

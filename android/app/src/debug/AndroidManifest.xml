@@ -10,10 +10,11 @@
         <service
             android:name=".spike.PlaybackService"
             android:exported="true"
-            android:foregroundServiceType="mediaPlayback">
-            <intent-filter>
-                <action android:name="androidx.media3.session.MediaSessionService" />
-            </intent-filter>
-        </service>
+            android:foregroundServiceType="mediaPlayback" />
+        <!-- adb entry for the real playback service, see DebugPlayActivity.kt -->
+        <activity
+            android:name=".debug.DebugPlayActivity"
+            android:exported="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
     </application>
 </manifest>

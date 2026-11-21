@@ -27,8 +27,8 @@ echo "== 1/5 unit tests"
 # M2a: the sync engine's tests (JVM, MockWebServer, Room under Robolectric) are part of this step. The live tests
 # (tools/live-sync.sh) are excluded here: MEIRO_LIVE_URL must be unset or Gradle would run only those.
 unset MEIRO_LIVE_URL
-if gw :app:cleanTestDebugUnitTest :app:testDebugUnitTest --tests 'com.muratkirazkaya.meiro.YtdlpTest' --tests 'com.muratkirazkaya.meiro.sync.*' --tests 'com.muratkirazkaya.meiro.data.*' >"$OUT/unit.log"; then
-  step "unit tests (YtdlpTest + sync/data engine tests)" PASS
+if gw :app:cleanTestDebugUnitTest :app:testDebugUnitTest --tests 'com.muratkirazkaya.meiro.YtdlpTest' --tests 'com.muratkirazkaya.meiro.sync.*' --tests 'com.muratkirazkaya.meiro.data.*' --tests 'com.muratkirazkaya.meiro.playback.*' >"$OUT/unit.log"; then
+  step "unit tests (YtdlpTest + sync/data/playback engine tests)" PASS
 else tail -20 "$OUT/unit.log"; step "unit tests" FAIL "see $OUT/unit.log"; fi
 
 echo "== 2/5 Roborazzi render + mock comparison"

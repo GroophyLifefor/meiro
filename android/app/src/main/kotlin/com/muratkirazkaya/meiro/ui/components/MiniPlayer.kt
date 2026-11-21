@@ -28,8 +28,24 @@ import com.muratkirazkaya.meiro.ui.theme.Meiro
 import com.muratkirazkaya.meiro.ui.theme.MeiroShapes
 import com.muratkirazkaya.meiro.ui.theme.MeiroType
 
-/** Placeholder content until playback exists (M3): the mock's now-playing sample. */
-data class MiniState(val title: String, val artist: String, val hue: Int, val activeIsYtm: Boolean, val progress: Float)
+/**
+ * What the mini player shows. [SampleMini] is the mock's now-playing sample (screenshot tests); in the app it comes
+ * from the playback state ([com.muratkirazkaya.meiro.playback.PlayerUi]).
+ */
+data class MiniState(
+    val title: String, val artist: String, val hue: Int, val activeIsYtm: Boolean, val progress: Float,
+    val playing: Boolean = true,
+)
+
+/** The mini player's state for what plays. The cover is the mock's gradient placeholder, its hue taken from the track. */
+fun com.muratkirazkaya.meiro.playback.PlayerUi.toMini() = MiniState(
+    title = item.title.ifEmpty { item.key },
+    artist = item.artist,
+    hue = Math.floorMod(item.key.hashCode(), 360),
+    activeIsYtm = item.provider() != com.muratkirazkaya.meiro.data.Source.SOUNDCLOUD,
+    progress = progress,
+    playing = playing,
+)
 
 val SampleMini = MiniState("Bu Kalp Seni Unutur mu", "Fikret Kızılok", 10, true, 0.38f)
 
@@ -39,7 +55,7 @@ fun coverBrush(hue: Int, spread: Int = 50) = Brush.linearGradient(
 )
 
 @Composable
-fun MiniPlayer(state: MiniState, modifier: Modifier = Modifier) {
+fun MiniPlayer(state: MiniState, modifier: Modifier = Modifier, onPlayPause: () -> Unit = {}, onNext: () -> Unit = {}) {
     val c = Meiro.colors
     Box(
         modifier.fillMaxWidth().height(64.dp).inv("mini", bg = c.surfaceContainerHigh, radiusDp = 16f)
@@ -69,8 +85,8 @@ fun MiniPlayer(state: MiniState, modifier: Modifier = Modifier) {
                     MText(state.artist, MeiroType.MiniArtist, c.onSurfaceVariant, "mini.artist.label", maxLines = 1)
                 }
             }
-            IconButton("mini.playBtn", "mini.play.icon", MeiroIcons.Pause, c.onSurface)
-            IconButton("mini.nextBtn", "mini.next.icon", MeiroIcons.Next, c.onSurface)
+            IconButton("mini.playBtn", "mini.play.icon", if (state.playing) MeiroIcons.Pause else MeiroIcons.Play, c.onSurface, onPlayPause)
+            IconButton("mini.nextBtn", "mini.next.icon", MeiroIcons.Next, c.onSurface, onNext)
         }
         Box(
             Modifier.align(Alignment.BottomStart).fillMaxWidth().padding(horizontal = 12.dp).height(2.dp)

@@ -23,7 +23,10 @@ import com.muratkirazkaya.meiro.AppContainer
 import com.muratkirazkaya.meiro.MeiroApplication
 import com.muratkirazkaya.meiro.Session
 import com.muratkirazkaya.meiro.sync.SESSION_ENDED_MESSAGE
-import com.muratkirazkaya.meiro.ui.components.SampleMini
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.platform.LocalContext
+import com.muratkirazkaya.meiro.playback.PlaybackHost
+import com.muratkirazkaya.meiro.ui.components.toMini
 import com.muratkirazkaya.meiro.ui.components.Tab
 import com.muratkirazkaya.meiro.ui.screens.LibraryEmptyScreen
 import com.muratkirazkaya.meiro.ui.screens.MeiroShell
@@ -98,6 +101,8 @@ private fun SignInRoute(c: AppContainer, session: Session, bars: SystemBars, onS
 private fun MainShell(bars: SystemBars) {
     val nav = rememberNavController()
     val entry by nav.currentBackStackEntryAsState()
+    val ctx = LocalContext.current
+    val playing by PlaybackHost.ui.collectAsState()
     val selected = Tab.entries.firstOrNull { it.route == entry?.destination?.route } ?: Tab.Home
     MeiroShell(
         selected = selected,
@@ -109,7 +114,9 @@ private fun MainShell(bars: SystemBars) {
             }
         },
         bars = bars,
-        mini = SampleMini,
+        mini = playing?.toMini(),
+        onPlayPause = { PlaybackHost.togglePlay(ctx) },
+        onNext = { PlaybackHost.next(ctx) },
     ) {
         NavHost(nav, startDestination = Tab.Home.route) {
             composable(Tab.Home.route) { PlaceholderScreen("Meiro") }

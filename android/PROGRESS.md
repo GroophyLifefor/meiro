@@ -29,7 +29,7 @@ Toolchain (in the home directory, no sudo): JDK 21 at
 | A3b | Spike: yt-dlp resolve and Media3 playback | done 2026-11-21 (emulator only) | `spike-results.txt`; resolve 3.4 s and READY 1.5 s after tap, re-run by the lead agent |
 | M1 | App skeleton: theme from tokens, Google Sans, bottom bar, screen-vs-mock comparison, `check.sh` | done 2026-11-21 (screen `empty` only) | `./android/check.sh` prints PASS; side-by-side in `android/build/check/empty/`, emulator shots `android/build/check/emulator-{light,dark}.png`; negative tests: 2dp shift and the mock's 56px "+" (CONTAINMENT rule, also in `tools/mockref`) made it FAIL; now elements 34/34 matched, 0 mismatches, max bbox delta 1.00px, light+dark; pixel mismatch 2.5% (reported, not a gate) |
 | M2 | Meiro sign-in, local store, sync engine (contract tests against server fixtures) | done 2026-11-21 (M2a engine, M2b sign-in UI + wiring) | M2b: screen `signin` 15/15 elements matched, 0 missing/extra, max bbox delta 1.00px, light+dark (`check.sh`; a 2dp shift made it FAIL); real flow on the emulator against the local dev server in `android/build/check/m2b/` (sign-in error snack, sign-in, shell, relaunch signed in, 401 back to sign-in), Room rows and logcat lines in the M2b report. `./gradlew :app:testDebugUnitTest` 124 pass; `./check.sh` PASS. Code: `data/`, `sync/`, `AppContainer.kt`, `ui/screens/SignInScreen.kt`. Deviations for the owner: see the M2b report |
-| M3 | Playback: queue, Media3 session, lock screen, URL cache, pre-resolve | not started | |
+| M3 | Playback: queue, Media3 session, lock screen, URL cache, pre-resolve | M3a done 2026-11-21 (engine, service, mini player; no list screens yet) | Emulator, real flow (`android/build/check/m3/`): `ytm:dQw4w9WgXcQ` plays 4.7 s after the request (resolve 3.5 s, visionos), `dumpsys media_session` PLAYING with advancing position; next to `ytm:fJ9rUzIMcZQ` 0.68 s (URL pre-resolved in 2.2 s while the first played, log `cache hit=true`); next to `sc:` (HLS) 0.44 s; home + 20 s still PLAYING, service foreground (type mediaPlayback), notification in `notification-shade-{light,dark}.png`; media key next/prev/pause/play via `cmd media_session dispatch`; preload hands track 2 to the player 19 s before the end and it takes over gaplessly; real HTTP 403 (damaged URL) and Wi-Fi off both re-resolve and resume at the same position; a finished play is in Room history (completed=1, played 66840 ms) and in the outbox; signed in to the local dev server the two plays reached `play_events` with the same ids and values (throwaway user deleted). `./gradlew :app:testDebugUnitTest` 162 pass (38 new: queue, URL cache, error messages, Watch, recording); `./check.sh` PASS (mini player is in the `empty` element comparison, 34/34). Code: `playback/`, `ui/components/MiniPlayer.kt`; debug entry `debug/DebugPlayActivity` |
 | M4 | Home, Search, Library, playlist, album, artist screens | not started | |
 | M5 | Downloads, audio cache, cover cache, offline | not started | |
 | M6 | History, Daily mix, stats, settings, MusicBrainz linking | not started | |
@@ -55,6 +55,15 @@ Toolchain (in the home directory, no sudo): JDK 21 at
   - "Hesapsız devam et" is not remembered, so a guest sees sign-in on every
     start.
   - After Back hides the keyboard, the password field keeps its focused look.
+
+## Open items from M3a
+
+- Mini player: no cover images yet (the mock's gradient placeholder, hue from the track key), no error surface (a track that cannot play is skipped, up to 3, and the reason is only in logcat and `PlayerUi.error`), tapping does nothing (full player is later).
+- A play that is running when the process is killed (swipe away, force stop) is never filed (no `finish`): its history row stays at 0 ms and no event is queued. The desktop has the same hole on a crash; a phone is killed more often. Needs a decision (save progress every N s?).
+- yt-dlp is updated in the app once a day before the first resolve (the shipped copy returned `client=ANDROID` URLs that answered 403 for some videos); no manual update or "update yt-dlp" message yet.
+- Not built (later milestones): audio cache and downloads in `findAudio`, up-next generation (`autoPlay` is off, the queue ends where the chosen tracks end), shuffle/repeat buttons (queue logic is ported and tested), queue persistence across process death, Last.fm, loudness, episodes, source fallback (`nextSource`), `networkOnline` offline error.
+- `POST_NOTIFICATIONS` is asked once, by the system dialog, when something first plays.
+- Debug builds only: `DebugPlayActivity` (`--es items "ytm:<id>|title|artist|m:ss,sc:<url>"`, `--es action next|prev|pause|toggle|seek|break`); the spike service lost its intent filter so only the real service answers the media session action.
 
 ## Open items from M2a/M2b
 

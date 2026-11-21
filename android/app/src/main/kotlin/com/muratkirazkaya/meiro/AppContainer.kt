@@ -19,6 +19,10 @@ import com.muratkirazkaya.meiro.sync.LinksStore
 import com.muratkirazkaya.meiro.sync.Outbox
 import com.muratkirazkaya.meiro.sync.SyncEngine
 import com.muratkirazkaya.meiro.sync.SyncLog
+import com.muratkirazkaya.meiro.data.HistoryEntry
+import com.muratkirazkaya.meiro.data.History
+import com.muratkirazkaya.meiro.playback.PlayStore
+import java.util.concurrent.Executors
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
@@ -48,6 +52,31 @@ class AppContainer(private val context: Context) {
             SyncScheduler.schedule(context)
         }
     }
+
+    private val playWriter = Executors.newSingleThreadExecutor { r -> Thread(r, "meiro-plays") }
+    private val playStore = object : PlayStore {
+        // The history is written to Room, which must not happen on the main thread; one writer keeps the order.
+        override fun begin(entry: HistoryEntry) {
+            playWriter.execute {
+                engine.beginPlay(entry)
+                Log.i(TAG, "play: begin event=${entry.eventId} ${entry.source}:${entry.videoId} duration=${entry.durationMs} ms")
+            }
+        }
+
+        override fun finish(eventId: String, playedMs: Long, completed: Boolean) {
+            playWriter.execute {
+                val e = engine.finishPlay(eventId, playedMs, completed)
+                Log.i(
+                    TAG,
+                    "play: finish event=$eventId played=$playedMs ms completed=$completed " +
+                        (if (e == null) "(not in the history any more)" else "counted=${History.counted(e)} queued, outbox=${engine.outbox.eventCount()}"),
+                )
+            }
+        }
+    }
+
+    /** Where the playback engine files plays: the history and the sync outbox (`recordHistory`, `queueEvent`). */
+    fun playStore(): PlayStore = playStore
 
     fun session(): Session {
         val s = engine.settings
