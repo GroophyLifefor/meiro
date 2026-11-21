@@ -88,6 +88,12 @@ object MeiroType {
     val SectionTitle = MeiroText(20f, 500, 26f, Ls)
     val SheetTitle = MeiroText(20f, 500, 26f, Ls)
     val SnackAction = MeiroText(BodyFontSizeSp, 600, BodyLineHeightSp, Ls)
+    // Search: `.h-sec .more` 13/500, `.chips .chip` 13, the row `.chip` 12, `.tile b` 14/500/18 and `.tile span` 12/16.
+    val SectionAction = MeiroText(13f, 500, BodyLineHeightSp, 0f)
+    val ChipLabel = MeiroText(13f, 400, BodyLineHeightSp, 0f)
+    val ChipSmall = MeiroText(12f, 400, BodyLineHeightSp, Ls)
+    val TileTitle = MeiroText(14f, 500, 18f, Ls)
+    val TileMeta = MeiroText(12f, 400, 16f, Ls)
 }
 
 object MeiroShapes {

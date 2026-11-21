@@ -32,6 +32,8 @@ import com.muratkirazkaya.meiro.ui.screens.LibraryEmptyScreen
 import com.muratkirazkaya.meiro.ui.screens.LibraryScreen
 import com.muratkirazkaya.meiro.ui.screens.NewListSheet
 import com.muratkirazkaya.meiro.ui.screens.PlaylistScreen
+import com.muratkirazkaya.meiro.ui.screens.SearchActions
+import com.muratkirazkaya.meiro.ui.screens.SearchScreen
 import com.muratkirazkaya.meiro.ui.components.Snack
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Alignment
@@ -137,7 +139,7 @@ private fun MainShell(c: AppContainer, bars: SystemBars) {
         ) {
             NavHost(nav, startDestination = Tab.Home.route) {
                 composable(Tab.Home.route) { PlaceholderScreen("Meiro") }
-                composable(Tab.Search.route) { PlaceholderScreen("Ara") }
+                composable(Tab.Search.route) { SearchRoute(c) }
                 composable(Tab.Library.route) { LibraryRoute(c, onOpen = { nav.navigate("playlist/$it") }, onNew = openSheet) }
                 composable(Tab.Downloads.route) { PlaceholderScreen("İndirilenler") }
                 composable(PLAYLIST_ROUTE) { e ->
@@ -167,6 +169,37 @@ private fun LibraryRoute(c: AppContainer, onOpen: (String) -> Unit, onNew: () ->
     val version by c.libraries.version.collectAsState()
     val rows = remember(version) { c.libraries.list().map { it.toRow() } }
     if (rows.isEmpty()) LibraryEmptyScreen(onNew) else LibraryScreen(rows, onOpen, onNew)
+}
+
+@Composable
+private fun SearchRoute(c: AppContainer) {
+    val ctx = LocalContext.current
+    val ctl = c.search
+    val s by ctl.state.collectAsState()
+    val now by PlaybackHost.ui.collectAsState()
+    val linksVersion by c.libraries.version.collectAsState()
+    val playingKey = now?.item?.key
+    val ui = remember(s, playingKey, linksVersion) {
+        SearchMapping.toUi(s, { src, id -> c.links.song(src, id)?.state }, playingKey)
+    }
+    SearchScreen(
+        ui, playing = now?.playing == true,
+        actions = SearchActions(
+            onQuery = ctl::setField,
+            onSubmit = { ctl.submit() },
+            onClear = ctl::clear,
+            onRecent = { ctl.submit(it) },
+            onForget = ctl::forget,
+            onClearRecent = ctl::clearRecent,
+            onChip = ctl::selectChip,
+            onProvider = ctl::toggleProvider,
+            onSong = { i ->
+                val items = SearchMapping.songs(ctl.state.value)
+                with(SearchMapping) { PlaybackHost.playQueue(ctx, items.map { it.toQItem() }, i, "search: ${s.submitted}") }
+            },
+            onEnd = ctl::loadMore,
+        ),
+    )
 }
 
 @Composable

@@ -110,9 +110,9 @@ fun MiniPlayer(state: MiniState, modifier: Modifier = Modifier, onPlayPause: () 
 
 /** The mock's 48dp circular icon button around a 24dp glyph. */
 @Composable
-fun IconButton(key: String, iconKey: String, icon: androidx.compose.ui.graphics.vector.ImageVector, tint: Color, onClick: () -> Unit = {}) {
+fun IconButton(key: String, iconKey: String, icon: androidx.compose.ui.graphics.vector.ImageVector, tint: Color, onClick: () -> Unit = {}, iconSize: Int = 24) {
     Box(
         Modifier.size(48.dp).inv(key, radiusDp = 24f).clip(CircleShape).clickableNoIndication(onClick),
         Alignment.Center,
-    ) { MIcon(icon, tint, iconKey) }
+    ) { MIcon(icon, tint, iconKey, size = iconSize) }
 }

@@ -23,6 +23,22 @@ import com.muratkirazkaya.meiro.data.HistoryEntry
 import com.muratkirazkaya.meiro.data.History
 import com.muratkirazkaya.meiro.playback.PlayStore
 import java.util.concurrent.Executors
+import com.muratkirazkaya.meiro.data.Source
+import com.muratkirazkaya.meiro.playback.YtdlpSetup
+import com.muratkirazkaya.meiro.playback.clockText
+import com.muratkirazkaya.meiro.search.PrefsRecentStore
+import com.muratkirazkaya.meiro.search.SearchController
+import com.muratkirazkaya.meiro.search.SearchProviders
+import com.muratkirazkaya.meiro.search.SoundCloudSearch
+import com.muratkirazkaya.meiro.youtube.MusicItem
+import com.muratkirazkaya.meiro.youtube.SearchResult
+import com.muratkirazkaya.meiro.youtube.YtmClient
+import com.yausername.youtubedl_android.YoutubeDL
+import com.yausername.youtubedl_android.YoutubeDLRequest
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.runInterruptible
+import java.util.concurrent.atomic.AtomicLong
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
@@ -75,6 +91,24 @@ class AppContainer(private val context: Context) {
             }
         }
     }
+
+    /** The search page's state and its two providers; it lives as long as the process, so a tab switch keeps it. */
+    val search: SearchController by lazy {
+        SearchController(
+            CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate),
+            AppSearchProviders(context),
+            PrefsRecentStore(context),
+            localItems = { localTracks() },
+            log = { Log.i(SEARCH_TAG, it) },
+        )
+    }
+
+    /** The tracks this device holds for a search without a network: until downloads and the audio cache exist (M5), the tracks of the stored lists. */
+    private fun localTracks(): List<MusicItem> = libraries.list().flatMap { it.items }.map { i ->
+        val (src, key) = i.activeRef()
+        if (src == Source.SOUNDCLOUD) MusicItem(source = Source.SOUNDCLOUD, url = key, title = i.title, subtitle = i.artist, artist = i.artist, artists = i.artist, duration = if (i.durationMs > 0) clockText(i.durationMs) else "", thumbnail = i.thumbnail)
+        else MusicItem(source = Source.YTM, videoId = key, id = key, title = i.title, subtitle = i.artist, artist = i.artist, artists = i.artist, duration = if (i.durationMs > 0) clockText(i.durationMs) else "", thumbnail = i.thumbnail)
+    }.distinctBy { it.key() }
 
     /** Where the playback engine files plays: the history and the sync outbox (`recordHistory`, `queueEvent`). */
     fun playStore(): PlayStore = playStore
@@ -134,6 +168,7 @@ class AppContainer(private val context: Context) {
 
     companion object {
         const val TAG = "MeiroSync"
+        const val SEARCH_TAG = "MeiroSearch"
 
         /** The server field takes a bare host as the mock shows it; anything with a scheme is kept. */
         fun normalizeServer(s: String): String {
@@ -166,5 +201,31 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
     override suspend fun doWork(): Result {
         (applicationContext as MeiroApplication).container().sync("worker")
         return Result.success()
+    }
+}
+
+/** The real providers: the anonymous YouTube Music client, and SoundCloud through the bundled yt-dlp (`scsearch50:`). */
+class AppSearchProviders(private val context: Context) : SearchProviders {
+    private val ytm = YtmClient()
+    private val pids = AtomicLong()
+
+    override suspend fun ytm(query: String, params: String): SearchResult = ytm.search(query, params)
+    override suspend fun ytmMore(token: String): SearchResult = ytm.continueSearch(token)
+
+    override suspend fun soundCloud(query: String): List<MusicItem> {
+        YtdlpSetup.ensure(context) { Log.i(AppContainer.SEARCH_TAG, it) }
+        val pid = "scsearch-${pids.incrementAndGet()}"
+        // youtubedl-android passes --no-cache-dir; a cache lets yt-dlp keep SoundCloud's client id instead of reading
+        // soundcloud.com and its scripts again on every search (two requests fewer each time).
+        val cache = java.io.File(context.cacheDir, "yt-dlp").apply { mkdirs() }
+        val req = YoutubeDLRequest(emptyList()).apply { addCommands(listOf("--cache-dir", cache.path) + SoundCloudSearch.args(query)) }
+        val out = try {
+            // Interruptible, so the 7 s search timeout really ends it; the yt-dlp process is ended with it.
+            runInterruptible(Dispatchers.IO) { YoutubeDL.getInstance().execute(req, pid, null).out }
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            YoutubeDL.getInstance().destroyProcessById(pid)
+            throw e
+        }
+        return SoundCloudSearch.parse(out)
     }
 }

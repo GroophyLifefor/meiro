@@ -56,9 +56,10 @@ import com.muratkirazkaya.meiro.ui.theme.MeiroType
 data class CoverSpec(val url: String? = null, val hue: Int = 0, val spread: Int = 50)
 
 @Composable
-fun Cover(spec: CoverSpec, radius: Dp, key: String, modifier: Modifier = Modifier, content: @Composable () -> Unit = {}) {
+fun Cover(spec: CoverSpec, radius: Dp, key: String?, modifier: Modifier = Modifier, content: @Composable androidx.compose.foundation.layout.BoxScope.() -> Unit = {}) {
     val shape = RoundedCornerShape(radius)
-    Box(modifier.inv(key, radiusDp = radius.value).clip(shape).background(coverBrush(spec.hue, spec.spread))) {
+    // A null key draws a cover the mock's inventory does not list (the art of a shelf tile).
+    Box(modifier.then(if (key != null) Modifier.inv(key, radiusDp = radius.value) else Modifier).clip(shape).background(coverBrush(spec.hue, spec.spread))) {
         if (!spec.url.isNullOrBlank()) {
             val ctx = LocalContext.current
             val request = remember(spec.url) {
@@ -80,8 +81,8 @@ fun SourceLogo(key: String, source: Provider, dim: Boolean) {
 
 enum class Provider { Ytm, Sc, Meiro }
 
-/** What the library list shows for one list. [meta] is the line under the name (the logo is added). */
-data class ListRowData(val id: String, val name: String, val meta: String, val cover: CoverSpec)
+/** What the library list shows for one list. [meta] is the line under the name (the [logo] is added before it). */
+data class ListRowData(val id: String, val name: String, val meta: String, val cover: CoverSpec, val logo: Provider = Provider.Meiro)
 
 /** The mock's `listRow`: 48dp cover (8dp radius), name, Meiro logo and meta line, a (for now inert) ⋮ button. */
 @Composable
@@ -96,7 +97,7 @@ fun ListRow(p: String, row: ListRowData, onClick: () -> Unit, modifier: Modifier
         Column(Modifier.weight(1f)) {
             MText(row.name, MeiroType.ListTitle, c.onSurface, "$p.title", Modifier.fillMaxWidth(), maxLines = 1)
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-                SourceLogo("$p.logo", Provider.Meiro, false)
+                SourceLogo("$p.logo", row.logo, false)
                 MText(row.meta, MeiroType.ListMeta, c.onSurfaceVariant, "$p.meta", Modifier.weight(1f, fill = false), maxLines = 1)
             }
         }
@@ -118,6 +119,8 @@ data class SongRowData(
     val downloaded: Boolean = false,
     val link: LinkBadge = LinkBadge.None,
     val now: Boolean = false,
+    /** SoundCloud gives only a 30 s preview of the track (the mock's "önizleme" chip). */
+    val preview: Boolean = false,
 )
 
 /**
@@ -149,6 +152,7 @@ fun SongRow(p: String, row: SongRowData, playing: Boolean, onClick: () -> Unit, 
                 MText(row.subtitle, MeiroType.ListMeta, c.onSurfaceVariant, "$p.meta", Modifier.weight(1f, fill = false), maxLines = 1)
             }
         }
+        if (row.preview) PreviewChip("$p.preview")
         if (row.link != LinkBadge.None) LinkButton(p, row.link == LinkBadge.Other)
         IconButton("$p.moreBtn", "$p.more.icon", MeiroIcons.More, c.onSurfaceVariant)
     }
@@ -156,7 +160,7 @@ fun SongRow(p: String, row: SongRowData, playing: Boolean, onClick: () -> Unit, 
 
 /** The mock's `.linkbtn`: 32dp circle, 1dp outline (dashed and 70% for `other`), an 18dp link glyph. Inert for now. */
 @Composable
-private fun LinkButton(p: String, other: Boolean) {
+internal fun LinkButton(p: String, other: Boolean) {
     val c = Meiro.colors
     val outline = c.outline
     val dashed = Modifier.drawBehind {
@@ -172,6 +176,18 @@ private fun LinkButton(p: String, other: Boolean) {
             .clip(CircleShape).clickableNoIndication {},
         Alignment.Center,
     ) { MIcon(MeiroIcons.Link, c.onSurfaceVariant, "$p.link.icon", size = 18) }
+}
+
+/** The mock's `.chip` "önizleme" beside a track SoundCloud only previews: 24dp, 1dp outline-variant border, 8dp radius, 12px text. */
+@Composable
+private fun PreviewChip(key: String) {
+    val c = Meiro.colors
+    val shape = RoundedCornerShape(8.dp)
+    Box(
+        // 10dp padding plus the 1dp border CSS adds outside it.
+        Modifier.height(24.dp).inv(key, radiusDp = 8f).border(1.dp, c.outlineVariant, shape).padding(horizontal = 11.dp),
+        Alignment.Center,
+    ) { MText("önizleme", MeiroType.ChipSmall, c.onSurfaceVariant, "$key.label", maxLines = 1) }
 }
 
 /** The mock's `.eq`: 45% black over the cover, three 3dp white bars that grow and shrink (6..16dp, 1 s, 0.2 s apart). */

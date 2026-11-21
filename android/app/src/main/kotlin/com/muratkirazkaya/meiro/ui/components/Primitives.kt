@@ -36,6 +36,8 @@ fun MText(
     modifier: Modifier = Modifier,
     maxLines: Int = Int.MAX_VALUE,
     textAlign: TextAlign = TextAlign.Unspecified,
+    /** The text may end in an ellipsis (`text-overflow: ellipsis`, or a `-webkit-line-clamp` over [maxLines] lines). */
+    ellipsis: Boolean = maxLines == 1,
 ) {
     var overflow by remember { mutableStateOf(false) }
     BasicText(
@@ -43,11 +45,11 @@ fun MText(
         modifier = modifier.testTag(key).semantics {
             invText = InvText(style, color)
             invOverflow = overflow
-            invSingleLine = maxLines == 1
+            invSingleLine = ellipsis
         }.then(if (style.tightLine) Modifier.cssLineBox(style.lineHeightSp) else Modifier),
         style = style.toStyle(color).copy(textAlign = textAlign),
         maxLines = maxLines,
-        overflow = if (maxLines == 1) TextOverflow.Ellipsis else TextOverflow.Clip,
+        overflow = if (ellipsis) TextOverflow.Ellipsis else TextOverflow.Clip,
         onTextLayout = { overflow = it.hasVisualOverflow },
     )
 }
