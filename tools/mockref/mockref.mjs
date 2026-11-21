@@ -11,8 +11,11 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.resolve(here, '../..');
-const mockDir = path.join(repo, 'docs/android/mock');
-const mockFile = path.join(mockDir, 'index.html');
+// --mock FILE --out DIR: render another copy of the mock and write all outputs to DIR (negative tests).
+const argv = process.argv.slice(2);
+const argOf = n => argv.includes(n) ? argv[argv.indexOf(n) + 1] : null;
+const mockDir = argOf('--out') ? path.resolve(argOf('--out')) : path.join(repo, 'docs/android/mock');
+const mockFile = argOf('--mock') ? path.resolve(argOf('--mock')) : path.join(mockDir, 'index.html');
 const refDir = path.join(mockDir, 'ref');
 const invDir = path.join(mockDir, 'inventory');
 const fontFile = path.join(repo, 'fonts/GoogleSans.ttf');
@@ -247,6 +250,37 @@ function analyze(theme) {
       if (!(pc && pc.by === vi.clip.by)) {
         const byBox = vi.clip.by === box;
         find(byBox ? 'outside-screen' : 'clipped-by-ancestor', byBox ? 'element bbox extends beyond phone screen' : 'element rect partly outside an overflow:hidden/clip ancestor (topmost element only)', el, { axis: vi.clip.axis, delta: r2(vi.clip.amount), detail: { clippedBy: pathOf(vi.clip.by), bbox: rel(rect) } });
+      }
+    }
+
+    /* ---------- audit (e): containment ---------- */
+    // A visible element must lie inside every ancestor that visually encloses it (control, background,
+    // border, overflow hidden/clip) within 0.5px. Exclusions (by design): the phone box itself; walking
+    // stops at a scroll container (content scrolls); offscreen elements; abs/fixed elements with a
+    // negative inset (badges, ripples) are skipped and their descendants are only measured up to them.
+    if (el !== box && !vi.offscreen) {
+      let stop = false;
+      const exclAbs = e => { const c = CS(e); return (c.position === 'absolute' || c.position === 'fixed') && ['top', 'right', 'bottom', 'left'].some(k => px(c[k]) < 0); };
+      if (exclAbs(el)) stop = true;
+      for (let a = el.parentElement; a && a !== box && !stop; a = a.parentElement) {
+        const acs = CS(a);
+        if (isScroll(acs.overflowX) || isScroll(acs.overflowY)) break;
+        const aControl = ['button', 'input', 'textarea', 'select', 'a', 'label'].includes(a.tagName.toLowerCase()) || !!a.getAttribute('role');
+        const aSurface = hasAlpha(acs.backgroundColor) || (px(acs.borderTopWidth) > 0 && hasAlpha(acs.borderTopColor)) || isClip(acs.overflowX) || isClip(acs.overflowY);
+        if ((aControl || aSurface) && acs.display !== 'contents' && acs.display !== 'inline') {
+          const ar = a.getBoundingClientRect();
+          if (ar.width > 0 && ar.height > 0) {
+            const ov = { left: ar.left - rect.left, top: ar.top - rect.top, right: rect.right - ar.right, bottom: rect.bottom - ar.bottom };
+            const worst = Object.entries(ov).sort((x, y) => y[1] - x[1])[0];
+            if (worst[1] > 0.5) {
+              const pi = visMap.get(el.parentElement);
+              const parentSame = el.parentElement !== a && pi && (() => { const pr = pi.rect; return (ar.left - pr.left > 0.5 || ar.top - pr.top > 0.5 || pr.right - ar.right > 0.5 || pr.bottom - ar.bottom > 0.5); })();
+              if (!parentSame) find('containment', 'element bbox extends beyond bbox of an enclosing control/background/border/overflow-clip ancestor by >0.5px', el, { axis: (worst[0] === 'left' || worst[0] === 'right') ? 'x' : 'y', delta: r2(worst[1]), detail: { side: worst[0], enclosedBy: pathOf(a), elementBox: rel(rect), ancestorBox: rel(ar), overflowBySide: Object.fromEntries(Object.entries(ov).map(([k, v]) => [k, r2(v)])) } });
+              break;
+            }
+          }
+        }
+        if (exclAbs(a)) break;
       }
     }
 
