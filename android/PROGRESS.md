@@ -35,6 +35,28 @@ Toolchain (in the home directory, no sudo): JDK 21 at
 | M6 | History, Daily mix, stats, settings, MusicBrainz linking | not started | |
 | M7 | All 28 screens compared with the mock, run on Murat's phone | not started | |
 
+## Waiting for Murat
+
+- **Prod deploy of meiro-server** (`461cc41`): fixes a hole where any account
+  could change another account's library by sending its id. Prod still runs
+  the old code. Deploys need Murat's go-ahead.
+- **Daily mix with more than one account:** the Daily mix id is the same for
+  every account (`DeriveID` of a fixed name), and `libraries.id` is the
+  primary key, so only the first account on a server can keep its Daily mix.
+  After `461cc41` other accounts can no longer overwrite it; their own Daily
+  mix simply does not reach the server. A fix needs a per-account id (desktop
+  and phone together, plus moving the existing row) and is a design call.
+
+## Open items from M2a
+
+- The engine has run on the JVM and Robolectric only, not on the emulator.
+- `EncryptedTokenStore` never ran (needs the Keystore).
+- No debug network config yet, so a debug build cannot reach a local
+  `http://` server.
+- WorkManager scheduling (the 5-minute sync) is not built.
+- Each play rewrites the history table (5000 rows took 235 ms on the JVM);
+  measure on a phone.
+
 ## Open items from the spike
 
 - Not run on a real arm64 phone yet.
