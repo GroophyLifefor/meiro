@@ -46,6 +46,15 @@ Toolchain (in the home directory, no sudo): JDK 21 at
   After `461cc41` other accounts can no longer overwrite it; their own Daily
   mix simply does not reach the server. A fix needs a per-account id (desktop
   and phone together, plus moving the existing row) and is a design call.
+- **Sign-in screen, things the mock does not show** (built the minimal way
+  for now):
+  - Errors use the mock's snack with the engine's English text ("The server
+    did not accept the email and password.", "Your session ended. Sign in
+    again to keep syncing.") in an otherwise Turkish UI.
+  - No busy state while signing in; taps are ignored meanwhile.
+  - "Hesapsız devam et" is not remembered, so a guest sees sign-in on every
+    start.
+  - After Back hides the keyboard, the password field keeps its focused look.
 
 ## Open items from M2a/M2b
 
