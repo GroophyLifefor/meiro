@@ -37,9 +37,13 @@ Toolchain (in the home directory, no sudo): JDK 21 at
 
 ## Waiting for Murat
 
-- **Prod deploy of meiro-server** (`461cc41`): fixes a hole where any account
-  could change another account's library by sending its id. Prod still runs
-  the old code. Deploys need Murat's go-ahead.
+- **meiro-server `461cc41` on prod** (fixes a hole where any account could
+  change another account's library by sending its id): prod (Coolify)
+  auto-deploys every push to `main`; `bca896a` was live a minute after its
+  push (checked in the prod CSS), so `461cc41` should be too. Not checked by
+  behaviour on prod (that needs two prod accounts), and the desktop app has
+  not synced with prod since. Murat allowed server deploys on 2026-11-21 as
+  long as the desktop app keeps working.
 - **Daily mix with more than one account:** the Daily mix id is the same for
   every account (`DeriveID` of a fixed name), and `libraries.id` is the
   primary key, so only the first account on a server can keep its Daily mix.
