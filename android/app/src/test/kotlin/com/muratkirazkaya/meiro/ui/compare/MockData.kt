@@ -35,7 +35,8 @@ class InvEl(val json: JSONObject, val theme: String, shiftY: Double = 0.0) {
     val y = json.getJSONObject("bbox").getDouble("y") - (if (scrolls) shiftY else 0.0)
     val w = json.getJSONObject("bbox").getDouble("w")
     val h = json.getJSONObject("bbox").getDouble("h")
-    val offscreen = if (scrolls) (y < 100.0 || y + h > 672.0) else json.optBoolean("offscreen")
+    // Scrolled vertically, an element of a horizontal shelf that lies right of the screen stays off screen.
+    val offscreen = if (scrolls) (y < 100.0 || y + h > 672.0 || x < 0.0 || x + w > 370.0) else json.optBoolean("offscreen")
     val occluded = json.optBoolean("occluded", false)
     val clipped = json.optBoolean("clipped")
     private val st = json.getJSONObject("style")
