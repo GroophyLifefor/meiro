@@ -37,7 +37,7 @@ fun MeiroTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable 
 /** Google Sans (variable, 100-1000) at the weights the mock uses. */
 @OptIn(androidx.compose.ui.text.ExperimentalTextApi::class)
 val GoogleSans = FontFamily(
-    listOf(400, 500, 600).map { w ->
+    listOf(400, 500, 600, 700).map { w ->
         Font(R.font.google_sans, FontWeight(w), variationSettings = FontVariation.Settings(FontVariation.weight(w)))
     },
 )
@@ -73,6 +73,13 @@ object MeiroType {
     val MiniTitle = MeiroText(14f, 500, BodyLineHeightSp, Ls)
     val MiniArtist = MeiroText(12f, 400, BodyLineHeightSp, Ls)
     val NavLabel = MeiroText(12f, 500, BodyLineHeightSp, 0f)
+    // Sign-in (`.welcome`): logo 34/700 in a 20px line, h1 30/38, 16px input, 12px label and note.
+    val SignInLogo = MeiroText(34f, 700, BodyLineHeightSp, Ls, tightLine = true)
+    val SignInTitle = MeiroText(30f, 500, 38f, Ls)
+    val Body = MeiroText(BodyFontSizeSp, 400, BodyLineHeightSp, Ls)
+    val FieldLabel = MeiroText(12f, 400, BodyLineHeightSp, Ls)
+    val FieldInput = MeiroText(16f, 400, BodyLineHeightSp, 0f)
+    val SnackAction = MeiroText(BodyFontSizeSp, 600, BodyLineHeightSp, Ls)
 }
 
 object MeiroShapes {

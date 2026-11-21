@@ -28,7 +28,7 @@ Toolchain (in the home directory, no sudo): JDK 21 at
 | A3a | Toolchain | done 2026-11-21 | `./gradlew :app:assembleDebug` builds; emulator boots with KVM |
 | A3b | Spike: yt-dlp resolve and Media3 playback | done 2026-11-21 (emulator only) | `spike-results.txt`; resolve 3.4 s and READY 1.5 s after tap, re-run by the lead agent |
 | M1 | App skeleton: theme from tokens, Google Sans, bottom bar, screen-vs-mock comparison, `check.sh` | done 2026-11-21 (screen `empty` only) | `./android/check.sh` prints PASS; side-by-side in `android/build/check/empty/`, emulator shots `android/build/check/emulator-{light,dark}.png`; negative tests: 2dp shift and the mock's 56px "+" (CONTAINMENT rule, also in `tools/mockref`) made it FAIL; now elements 34/34 matched, 0 mismatches, max bbox delta 1.00px, light+dark; pixel mismatch 2.5% (reported, not a gate) |
-| M2 | Meiro sign-in, local store, sync engine (contract tests against server fixtures) | M2a done 2026-11-21 (engine, no UI); M2b sign-in UI not started | `./gradlew :app:testDebugUnitTest` 122 tests pass; `tools/live-sync.sh` two engines vs local dev server 10/10 scenarios; `tools/cross-check.sh` PASS (desktop Go client reads what the phone wrote and the reverse); `./check.sh` PASS. Code: `data/` (stores, Room), `sync/` (client, outbox, engine). Details in the M2a report |
+| M2 | Meiro sign-in, local store, sync engine (contract tests against server fixtures) | done 2026-11-21 (M2a engine, M2b sign-in UI + wiring) | M2b: screen `signin` 15/15 elements matched, 0 missing/extra, max bbox delta 1.00px, light+dark (`check.sh`; a 2dp shift made it FAIL); real flow on the emulator against the local dev server in `android/build/check/m2b/` (sign-in error snack, sign-in, shell, relaunch signed in, 401 back to sign-in), Room rows and logcat lines in the M2b report. `./gradlew :app:testDebugUnitTest` 124 pass; `./check.sh` PASS. Code: `data/`, `sync/`, `AppContainer.kt`, `ui/screens/SignInScreen.kt`. Deviations for the owner: see the M2b report |
 | M3 | Playback: queue, Media3 session, lock screen, URL cache, pre-resolve | not started | |
 | M4 | Home, Search, Library, playlist, album, artist screens | not started | |
 | M5 | Downloads, audio cache, cover cache, offline | not started | |
@@ -47,15 +47,11 @@ Toolchain (in the home directory, no sudo): JDK 21 at
   mix simply does not reach the server. A fix needs a per-account id (desktop
   and phone together, plus moving the existing row) and is a design call.
 
-## Open items from M2a
+## Open items from M2a/M2b
 
-- The engine has run on the JVM and Robolectric only, not on the emulator.
-- `EncryptedTokenStore` never ran (needs the Keystore).
-- No debug network config yet, so a debug build cannot reach a local
-  `http://` server.
-- WorkManager scheduling (the 5-minute sync) is not built.
-- Each play rewrites the history table (5000 rows took 235 ms on the JVM);
-  measure on a phone.
+- Periodic sync is WorkManager (15 min, the Android minimum; the desktop uses 5) plus a sync on start/foreground and after sign-in; run only on the emulator.
+- Each play rewrites the history table (5000 rows took 235 ms on the JVM); measure on a phone.
+- Sign-in errors and the "session ended" notice use the mock's snack with the engine's English messages (the mock has no error state on `signin`).
 
 ## Open items from the spike
 

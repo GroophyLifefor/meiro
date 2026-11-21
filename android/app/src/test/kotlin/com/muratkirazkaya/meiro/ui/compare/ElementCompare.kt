@@ -142,7 +142,7 @@ object ElementCompare {
             if ('y' in c.axes) { val d = abs(cb.center.y - pb.center.y); if (d > ALIGN_TOL) fails += "CENTER ${c.child} in ${c.parent} y: centre ${cb.center.y} vs ${pb.center.y} (delta %.2f > %.1f)".format(d, ALIGN_TOL) }
         }
         for (row in keys.rows) for (edge in row.edges) {
-            val vals = row.keys.map { k -> b(k)?.let { r -> when (edge) { "top" -> r.top; "bottom" -> r.bottom; else -> r.center.y } } }
+            val vals = row.keys.map { k -> b(k)?.let { r -> when (edge) { "top" -> r.top; "bottom" -> r.bottom; "left" -> r.left; "right" -> r.right; "centerX" -> r.center.x; else -> r.center.y } } }
             if (vals.any { it == null }) { fails += "ROW ${row.name}: node missing for $edge"; continue }
             val spread = vals.maxOf { it!! } - vals.minOf { it!! }
             if (spread > ALIGN_TOL) fails += "ROW ${row.name} $edge: spread %.2f > %.1f over ${row.keys.zip(vals).joinToString { "${it.first}=${it.second}" }}".format(spread, ALIGN_TOL)

@@ -1,0 +1,159 @@
+{
+ "screen": "signin",
+ "systemNote": "Status bar row (y 0..36) and the gesture pill are system UI: not drawn by the app. The mock draws no bottom bar or mini player on this screen.",
+ "elements": [
+  {
+   "path": "#box>div.app:nth-child(1)>div.statusbar:nth-child(1)>span#clock:nth-child(1)",
+   "system": true
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div.statusbar:nth-child(1)>span.sys:nth-child(2)>span#netIcon:nth-child(1)",
+   "system": true
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div.statusbar:nth-child(1)>span.sys:nth-child(2)>i:nth-child(2)",
+   "system": true
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.welcome:nth-child(1)>div.logo:nth-child(1)",
+   "key": "signin.logo",
+   "styleFrom": "signin.logo.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.welcome:nth-child(1)>h1:nth-child(2)",
+   "key": "signin.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.welcome:nth-child(1)>p:nth-child(3)",
+   "key": "signin.intro"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.welcome:nth-child(1)>div.field:nth-child(4)",
+   "key": "signin.server.field"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.welcome:nth-child(1)>div.field:nth-child(4)>label:nth-child(1)",
+   "key": "signin.server.label",
+   "styleFrom": "signin.server.label.text"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.welcome:nth-child(1)>div.field:nth-child(4)>input:nth-child(2)",
+   "key": "signin.server.input",
+   "styleFrom": "signin.server.input"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.welcome:nth-child(1)>div.field.focus:nth-child(5)",
+   "key": "signin.email.field"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.welcome:nth-child(1)>div.field.focus:nth-child(5)>label:nth-child(1)",
+   "key": "signin.email.label",
+   "styleFrom": "signin.email.label.text"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.welcome:nth-child(1)>div.field.focus:nth-child(5)>input:nth-child(2)",
+   "key": "signin.email.input",
+   "styleFrom": "signin.email.input"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.welcome:nth-child(1)>div.field:nth-child(6)",
+   "key": "signin.password.field"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.welcome:nth-child(1)>div.field:nth-child(6)>label:nth-child(1)",
+   "key": "signin.password.label",
+   "styleFrom": "signin.password.label.text"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.welcome:nth-child(1)>div.field:nth-child(6)>input:nth-child(2)",
+   "key": "signin.password.input",
+   "styleFrom": "signin.password.input"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.welcome:nth-child(1)>button.btn.filled.block:nth-child(7)",
+   "key": "signin.submit",
+   "styleFrom": "signin.submit.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.welcome:nth-child(1)>button.btn.text.block:nth-child(8)",
+   "key": "signin.skip",
+   "styleFrom": "signin.skip.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.welcome:nth-child(1)>p.sub:nth-child(9)",
+   "key": "signin.note",
+   "styleFrom": "signin.note.text"
+  },
+  {
+   "path": "#box>div.gesture:nth-child(7)",
+   "system": true
+  }
+ ],
+ "aux": [
+  "signin.logo.label",
+  "signin.server.label.text",
+  "signin.email.label.text",
+  "signin.password.label.text",
+  "signin.submit.label",
+  "signin.skip.label",
+  "signin.note.text"
+ ],
+ "centered": [
+  {
+   "child": "signin.logo.label",
+   "parent": "signin.logo",
+   "axes": "xy"
+  },
+  {
+   "child": "signin.submit.label",
+   "parent": "signin.submit",
+   "axes": "xy"
+  },
+  {
+   "child": "signin.skip.label",
+   "parent": "signin.skip",
+   "axes": "xy"
+  }
+ ],
+ "rows": [
+  {
+   "name": "left edge of the column",
+   "keys": [
+    "signin.logo",
+    "signin.title",
+    "signin.intro",
+    "signin.server.field",
+    "signin.email.field",
+    "signin.password.field",
+    "signin.submit",
+    "signin.skip",
+    "signin.note"
+   ],
+   "edges": [
+    "left"
+   ]
+  },
+  {
+   "name": "right edge of the column",
+   "keys": [
+    "signin.title",
+    "signin.intro",
+    "signin.server.field",
+    "signin.email.field",
+    "signin.password.field",
+    "signin.submit",
+    "signin.skip",
+    "signin.note"
+   ],
+   "edges": [
+    "right"
+   ]
+  }
+ ],
+ "tolerance": {
+  "signin.server.label": {
+   "w": 2.5
+  }
+ },
+ "toleranceNote": "Chrome (mock reference) lays 12px text out with integer-rounded glyph advances, Skia with fractional ones: the label \"Sunucu\" is 50px wide in the reference, 52px here. The label box is wrap-content (text + 2x4px padding), so only its width differs by the text-width delta; every other box is fill/fixed and held to 1px."
+}
