@@ -1,8 +1,11 @@
-package com.muratkirazkaya.meiro
+package com.muratkirazkaya.meiro.spike
 
 import android.content.Intent
 import androidx.media3.common.MediaItem
+import com.muratkirazkaya.meiro.CHROME_UA
 import androidx.media3.common.Player
+import androidx.annotation.OptIn
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
@@ -11,6 +14,7 @@ import androidx.media3.session.MediaSessionService
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
 
+@OptIn(UnstableApi::class)
 class PlaybackService : MediaSessionService() {
     private var session: MediaSession? = null
 

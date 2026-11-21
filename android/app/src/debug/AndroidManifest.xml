@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <!-- Throwaway spike UI, debug builds only: adb shell am start -n com.muratkirazkaya.meiro/.spike.SpikeActivity (extra: action) -->
+        <activity
+            android:name=".spike.SpikeActivity"
+            android:exported="true"
+            android:label="Meiro Spike"
+            android:launchMode="singleTop" />
+        <service
+            android:name=".spike.PlaybackService"
+            android:exported="true"
+            android:foregroundServiceType="mediaPlayback">
+            <intent-filter>
+                <action android:name="androidx.media3.session.MediaSessionService" />
+            </intent-filter>
+        </service>
+    </application>
+</manifest>

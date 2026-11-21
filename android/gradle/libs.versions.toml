@@ -7,6 +7,9 @@ youtubedl = "0.18.1"
 coroutines = "1.10.2"
 activityCompose = "1.11.0"
 junit = "4.13.2"
+navigationCompose = "2.9.6"
+roborazzi = "1.77.0"
+robolectric = "4.17"
 
 [libraries]
 compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
@@ -19,6 +22,12 @@ media3-session = { module = "androidx.media3:media3-session", version.ref = "med
 ytdl-library = { module = "io.github.junkfood02.youtubedl-android:library", version.ref = "youtubedl" }
 ytdl-common = { module = "io.github.junkfood02.youtubedl-android:common", version.ref = "youtubedl" }
 coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
+navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
+compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
+compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+roborazzi = { module = "io.github.takahirom.roborazzi:roborazzi", version.ref = "roborazzi" }
+roborazzi-compose = { module = "io.github.takahirom.roborazzi:roborazzi-compose", version.ref = "roborazzi" }
 junit = { module = "junit:junit", version.ref = "junit" }
 json = { module = "org.json:json", version = "20240303" }
 
@@ -26,3 +35,4 @@ json = { module = "org.json:json", version = "20240303" }
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+roborazzi = { id = "io.github.takahirom.roborazzi", version.ref = "roborazzi" }

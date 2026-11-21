@@ -1,4 +1,4 @@
-package com.muratkirazkaya.meiro
+package com.muratkirazkaya.meiro.spike
 
 import android.app.ActivityManager
 import android.content.ComponentName
@@ -6,6 +6,11 @@ import android.content.Context
 import android.os.Debug
 import android.os.SystemClock
 import androidx.core.content.ContextCompat
+import com.muratkirazkaya.meiro.firstUrlLine
+import com.muratkirazkaya.meiro.lastErrorLine
+import com.muratkirazkaya.meiro.parseSoundCloudJson
+import com.muratkirazkaya.meiro.soundCloudArgs
+import com.muratkirazkaya.meiro.ytmArgs
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.MimeTypes
@@ -201,7 +206,7 @@ object Spike {
         return c
     }
 
-    /** Debug entry: `adb shell am start -n .../.MainActivity --es action resolve_visionos`. */
+    /** Debug entry: `adb shell am start -n .../.spike.SpikeActivity --es action resolve_visionos`. */
     fun dispatch(action: String, ytId: String, scLink: String) {
         SpikeLog.log("adb action: $action")
         when (action) {

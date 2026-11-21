@@ -27,7 +27,7 @@ Toolchain (in the home directory, no sudo): JDK 21 at
 |---|---|---|---|
 | A3a | Toolchain | done 2026-11-21 | `./gradlew :app:assembleDebug` builds; emulator boots with KVM |
 | A3b | Spike: yt-dlp resolve and Media3 playback | done 2026-11-21 (emulator only) | `spike-results.txt`; resolve 3.4 s and READY 1.5 s after tap, re-run by the lead agent |
-| M1 | App skeleton: theme from tokens, Google Sans, bottom bar, screen-vs-mock comparison, `check.sh` | not started | |
+| M1 | App skeleton: theme from tokens, Google Sans, bottom bar, screen-vs-mock comparison, `check.sh` | done 2026-11-21 (screen `empty` only) | `./android/check.sh` prints PASS; side-by-side in `android/build/check/empty/`, emulator shots `android/build/check/emulator-{light,dark}.png`; negative test (2dp shift) made it FAIL |
 | M2 | Meiro sign-in, local store, sync engine (contract tests against server fixtures) | not started | |
 | M3 | Playback: queue, Media3 session, lock screen, URL cache, pre-resolve | not started | |
 | M4 | Home, Search, Library, playlist, album, artist screens | not started | |

@@ -1,4 +1,4 @@
-package com.muratkirazkaya.meiro
+package com.muratkirazkaya.meiro.spike
 
 import android.os.SystemClock
 import android.util.Log
