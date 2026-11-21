@@ -33,21 +33,31 @@ import com.muratkirazkaya.meiro.ui.theme.MeiroType
  * from the playback state ([com.muratkirazkaya.meiro.playback.PlayerUi]).
  */
 data class MiniState(
-    val title: String, val artist: String, val hue: Int, val activeIsYtm: Boolean, val progress: Float,
+    val title: String, val artist: String, val cover: CoverSpec, val sources: List<Provider>, val active: Provider, val progress: Float,
     val playing: Boolean = true,
 )
 
-/** The mini player's state for what plays. The cover is the mock's gradient placeholder, its hue taken from the track. */
-fun com.muratkirazkaya.meiro.playback.PlayerUi.toMini() = MiniState(
-    title = item.title.ifEmpty { item.key },
-    artist = item.artist,
-    hue = Math.floorMod(item.key.hashCode(), 360),
-    activeIsYtm = item.provider() != com.muratkirazkaya.meiro.data.Source.SOUNDCLOUD,
-    progress = progress,
-    playing = playing,
-)
+/**
+ * The mini player's state for what plays: the track's own picture (the gradient, hue from the track key, only when it has
+ * none) and the sources the track has, the one it plays from active (the mock's `srcIcons`).
+ */
+fun com.muratkirazkaya.meiro.playback.PlayerUi.toMini(): MiniState {
+    val active = item.provider().toProvider()
+    val srcs = item.sources.map { it.toProvider() }.ifEmpty { listOf(active) }.let { if (active in it) it else it + active }
+    return MiniState(
+        title = item.title.ifEmpty { item.key },
+        artist = item.artist,
+        cover = CoverSpec(item.thumbnail.takeIf { it.isNotBlank() }, Math.floorMod(item.key.hashCode(), 360)),
+        sources = srcs,
+        active = active,
+        progress = progress,
+        playing = playing,
+    )
+}
 
-val SampleMini = MiniState("Bu Kalp Seni Unutur mu", "Fikret Kızılok", 10, true, 0.38f)
+private fun String.toProvider() = if (this == com.muratkirazkaya.meiro.data.Source.SOUNDCLOUD) Provider.Sc else Provider.Ytm
+
+val SampleMini = MiniState("Bu Kalp Seni Unutur mu", "Fikret Kızılok", CoverSpec(null, 10), listOf(Provider.Ytm, Provider.Sc), Provider.Ytm, 0.38f)
 
 /** The mock's cover placeholder: linear-gradient(135deg, hsl(h 55% 52%), hsl(h+50 60% 26%)). */
 fun coverBrush(hue: Int, spread: Int = 50) = Brush.linearGradient(
@@ -66,11 +76,7 @@ fun MiniPlayer(state: MiniState, modifier: Modifier = Modifier, onPlayPause: () 
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            val coverShape = RoundedCornerShape(10.dp)
-            Box(
-                Modifier.size(48.dp).inv("mini.cover", radiusDp = 10f).clip(coverShape)
-                    .background(coverBrush(state.hue)),
-            )
+            Cover(state.cover, 10.dp, "mini.cover", Modifier.size(48.dp))
             Column(Modifier.weight(1f)) {
                 MText(state.title, MeiroType.MiniTitle, c.onSurface, "mini.title", Modifier.fillMaxWidth(), maxLines = 1)
                 Row(
@@ -79,8 +85,8 @@ fun MiniPlayer(state: MiniState, modifier: Modifier = Modifier, onPlayPause: () 
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Logo("mini.src.ytm", MeiroLogos.Ytm, dim = !state.activeIsYtm)
-                        Logo("mini.src.sc", MeiroLogos.Sc, dim = state.activeIsYtm)
+                        if (Provider.Ytm in state.sources) SourceLogo("mini.src.ytm", Provider.Ytm, dim = state.active != Provider.Ytm)
+                        if (Provider.Sc in state.sources) SourceLogo("mini.src.sc", Provider.Sc, dim = state.active != Provider.Sc)
                     }
                     MText(state.artist, MeiroType.MiniArtist, c.onSurfaceVariant, "mini.artist.label", maxLines = 1)
                 }
@@ -100,11 +106,6 @@ fun MiniPlayer(state: MiniState, modifier: Modifier = Modifier, onPlayPause: () 
             )
         }
     }
-}
-
-@Composable
-private fun Logo(key: String, icon: androidx.compose.ui.graphics.vector.ImageVector, dim: Boolean) {
-    Image(icon, null, Modifier.size(14.dp).alpha(if (dim) 0.35f else 1f).inv(key))
 }
 
 /** The mock's 48dp circular icon button around a 24dp glyph. */

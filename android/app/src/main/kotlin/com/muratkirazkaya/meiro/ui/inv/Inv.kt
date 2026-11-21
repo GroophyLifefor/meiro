@@ -24,6 +24,9 @@ val InvOverflowKey = SemanticsPropertyKey<Boolean>("InvTextOverflow")
 /** Text that is meant to end in an ellipsis when it is too long (one line, `text-overflow: ellipsis` in the mock). */
 val InvSingleLineKey = SemanticsPropertyKey<Boolean>("InvTextSingleLine")
 
+/** A source logo drawn at 35% (the track does not play from it). */
+val InvDimKey = SemanticsPropertyKey<Boolean>("InvDim")
+var SemanticsPropertyReceiver.invDim by InvDimKey
 var SemanticsPropertyReceiver.invText by InvTextKey
 var SemanticsPropertyReceiver.invBg by InvBgKey
 var SemanticsPropertyReceiver.invRadius by InvRadiusKey

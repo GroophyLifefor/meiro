@@ -5,6 +5,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import com.muratkirazkaya.meiro.ui.components.Provider
 import com.muratkirazkaya.meiro.ui.components.toMini
 import kotlin.random.Random
 
@@ -228,7 +229,7 @@ class MiniStateTest {
     @Test fun mapsWhatPlaysToWhatTheMiniPlayerShows() {
         val ui = PlayerUi(QItem(source = "soundcloud", key = "https://soundcloud.com/a/b", title = "T", artist = "A"), playing = false, positionMs = 50_000, durationMs = 200_000, loading = false)
         val mini = ui.toMini()
-        assertEquals("T", mini.title); assertEquals("A", mini.artist); assertFalse(mini.activeIsYtm); assertFalse(mini.playing)
+        assertEquals("T", mini.title); assertEquals("A", mini.artist); assertEquals(Provider.Sc, mini.active); assertFalse(mini.playing)
         assertEquals(0.25f, mini.progress, 0.0001f)
         assertEquals("a track without a title shows its key", "abc", PlayerUi(QItem(key = "abc"), true, 0, 0, true).toMini().title)
         assertEquals("no length, no progress", 0f, PlayerUi(QItem(key = "abc"), true, 5000, 0, false).toMini().progress, 0f)

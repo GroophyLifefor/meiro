@@ -32,7 +32,7 @@ if gw :app:cleanTestDebugUnitTest :app:testDebugUnitTest --tests 'com.muratkiraz
 else tail -20 "$OUT/unit.log"; step "unit tests" FAIL "see $OUT/unit.log"; fi
 
 echo "== 2/5 Roborazzi render + mock comparison"
-./gradlew :app:cleanTestDebugUnitTest :app:testDebugUnitTest --tests 'com.muratkirazkaya.meiro.ui.EmptyScreenTest' --tests 'com.muratkirazkaya.meiro.ui.SignInScreenTest' --tests 'com.muratkirazkaya.meiro.ui.LibraryScreenTest' --tests 'com.muratkirazkaya.meiro.ui.PlaylistScreenTest' --tests 'com.muratkirazkaya.meiro.ui.PlaylistScrolledTest' --tests 'com.muratkirazkaya.meiro.ui.StressTest' -q >"$OUT/compare.log" 2>&1
+./gradlew :app:cleanTestDebugUnitTest :app:testDebugUnitTest --tests 'com.muratkirazkaya.meiro.ui.EmptyScreenTest' --tests 'com.muratkirazkaya.meiro.ui.SignInScreenTest' --tests 'com.muratkirazkaya.meiro.ui.LibraryScreenTest' --tests 'com.muratkirazkaya.meiro.ui.PlaylistScreenTest' --tests 'com.muratkirazkaya.meiro.ui.PlaylistScrolledTest' --tests 'com.muratkirazkaya.meiro.ui.StressTest' --tests 'com.muratkirazkaya.meiro.ui.CoverRealDataTest' -q >"$OUT/compare.log" 2>&1
 CMP=$?
 # playlist-scrolled: the same screen scrolled to its end, so the mock's offscreen elements are compared too.
 for screen in empty signin library playlist playlist-scrolled; do
@@ -45,7 +45,7 @@ for screen in empty signin library playlist playlist-scrolled; do
     else echo "  no summary for $screen $t"; CMP=1; fi
   done
 done
-if [ $CMP -eq 0 ]; then step "mock comparison (element-level, empty + signin + library + playlist, light+dark) and stress renders (long names, 320dp, font 1.3)" PASS "side-by-side: $OUT/{empty,signin,library,playlist}/side-by-side-{light,dark}.png, stress: $OUT/stress/"
+if [ $CMP -eq 0 ]; then step "mock comparison (element-level, empty + signin + library + playlist, light+dark) and stress renders (long names, 320dp, font 1.3), real-data cover rules (no letterbox band, mini player cover and source icons)" PASS "side-by-side: $OUT/{empty,signin,library,playlist}/side-by-side-{light,dark}.png, stress: $OUT/stress/"
 else step "mock comparison (element-level)" FAIL "see above, $OUT/compare.log"; fi
 
 echo "== 3/5 lint"

@@ -52,12 +52,18 @@ fun durationText(totalMs: Long): String? {
 
 fun Item.toQItem(): QItem {
     val (src, id) = activeRef()
-    return QItem(src, id, title, artist, if (durationMs > 0) clockText(durationMs) else "", picture().orEmpty())
+    return QItem(
+        src, id, title, artist, if (durationMs > 0) clockText(durationMs) else "", picture().orEmpty(),
+        sources = providers().toList(),
+    )
 }
+
+/** The providers a track is available from: its source refs plus the one it plays from. */
+fun Item.providers(): Set<String> = (sources.map { it.source } + source.ifEmpty { Source.YTM }).toSet()
 
 fun Item.toSongRow(links: LinksStore?, playingKey: String?): SongRowData {
     val (src, id) = activeRef()
-    val providers = (sources.map { it.source } + source.ifEmpty { Source.YTM }).toSet()
+    val providers = providers()
     val state = links?.song(src, id)?.state?.takeIf { it.isNotEmpty() } ?: state.ifEmpty { LinkState.UNKNOWN }
     return SongRowData(
         key = id,

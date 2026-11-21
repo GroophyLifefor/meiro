@@ -36,7 +36,13 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.semantics
+import com.muratkirazkaya.meiro.ui.inv.invDim
 import coil.compose.AsyncImage
+import coil.imageLoader
+import coil.request.ImageRequest
 import com.muratkirazkaya.meiro.ui.icons.MeiroIcons
 import com.muratkirazkaya.meiro.ui.icons.MeiroLogos
 import com.muratkirazkaya.meiro.ui.inv.inv
@@ -53,7 +59,14 @@ data class CoverSpec(val url: String? = null, val hue: Int = 0, val spread: Int 
 fun Cover(spec: CoverSpec, radius: Dp, key: String, modifier: Modifier = Modifier, content: @Composable () -> Unit = {}) {
     val shape = RoundedCornerShape(radius)
     Box(modifier.inv(key, radiusDp = radius.value).clip(shape).background(coverBrush(spec.hue, spec.spread))) {
-        if (!spec.url.isNullOrBlank()) AsyncImage(spec.url, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+        if (!spec.url.isNullOrBlank()) {
+            val ctx = LocalContext.current
+            val request = remember(spec.url) {
+                ImageRequest.Builder(ctx).data(spec.url)
+                    .apply { if (isVideoThumbnail(spec.url)) transformations(LetterboxTrim()) }.build()
+            }
+            AsyncImage(request, null, modifier = Modifier.fillMaxSize(), imageLoader = LocalCoverImageLoader.current ?: ctx.imageLoader, contentScale = ContentScale.Crop)
+        }
         content()
     }
 }
@@ -62,7 +75,7 @@ fun Cover(spec: CoverSpec, radius: Dp, key: String, modifier: Modifier = Modifie
 @Composable
 fun SourceLogo(key: String, source: Provider, dim: Boolean) {
     val icon = when (source) { Provider.Ytm -> MeiroLogos.Ytm; Provider.Sc -> MeiroLogos.Sc; Provider.Meiro -> MeiroLogos.Meiro }
-    Image(icon, null, Modifier.size(14.dp).alpha(if (dim) 0.35f else 1f).inv(key))
+    Image(icon, null, Modifier.size(14.dp).alpha(if (dim) 0.35f else 1f).inv(key).semantics { invDim = dim })
 }
 
 enum class Provider { Ytm, Sc, Meiro }

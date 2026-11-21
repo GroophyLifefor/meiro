@@ -16,6 +16,8 @@ data class QItem(
     val duration: String = "",
     val thumbnail: String = "",
     val kind: Kind = Kind.Track,
+    /** The providers the track is available from (the row's source icons); empty means only [source]. */
+    val sources: List<String> = emptyList(),
 ) {
     /** The queue's identity of a track (`Key()`): empty names no track. */
     fun queueKey(): String = key

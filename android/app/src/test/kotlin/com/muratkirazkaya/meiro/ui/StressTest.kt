@@ -9,6 +9,7 @@ import com.muratkirazkaya.meiro.ui.components.CoverSpec
 import com.muratkirazkaya.meiro.ui.components.LinkBadge
 import com.muratkirazkaya.meiro.ui.components.ListRowData
 import com.muratkirazkaya.meiro.ui.components.MiniState
+import com.muratkirazkaya.meiro.ui.components.Provider
 import com.muratkirazkaya.meiro.ui.components.SongRowData
 import com.muratkirazkaya.meiro.ui.components.Tab
 import com.muratkirazkaya.meiro.ui.screens.LibraryScreen
@@ -28,7 +29,7 @@ import org.robolectric.annotation.GraphicsMode
 private const val LONG_NAME = "Çok uzun bir liste adı: yaz akşamları denize karşı dinlenecek sakin, hafif ve biraz hüzünlü şarkılar, 2019 - 2024 arası"
 private const val LONG_TITLE = "Bu bir şarkı adı değil de neredeyse bir paragraf: gece yarısı sahilde, rüzgâr eserken, uzaktan bir radyodan gelen eski bir türkü (canlı kayıt, 1978, yeniden düzenlenmiş)"
 private const val LONG_ARTIST = "Sanatçı Bir, Sanatçı İki, Sanatçı Üç, Çok Uzun İsimli Konuk Sanatçı ve Orkestrası"
-private val LongMini = MiniState(LONG_TITLE, LONG_ARTIST, 10, true, 0.38f)
+private val LongMini = MiniState(LONG_TITLE, LONG_ARTIST, CoverSpec(null, 10), listOf(Provider.Ytm, Provider.Sc), Provider.Ytm, 0.38f)
 
 /**
  * Renders with no mock counterpart, judged only by the structural rules (rules 4 and 5: text that must not truncate does
