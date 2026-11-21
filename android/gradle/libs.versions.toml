@@ -1,0 +1,28 @@
+[versions]
+agp = "8.13.0"
+kotlin = "2.2.20"
+composeBom = "2025.10.00"
+media3 = "1.8.0"
+youtubedl = "0.18.1"
+coroutines = "1.10.2"
+activityCompose = "1.11.0"
+junit = "4.13.2"
+
+[libraries]
+compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
+compose-material3 = { module = "androidx.compose.material3:material3" }
+compose-ui = { module = "androidx.compose.ui:ui" }
+activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
+media3-exoplayer = { module = "androidx.media3:media3-exoplayer", version.ref = "media3" }
+media3-hls = { module = "androidx.media3:media3-exoplayer-hls", version.ref = "media3" }
+media3-session = { module = "androidx.media3:media3-session", version.ref = "media3" }
+ytdl-library = { module = "io.github.junkfood02.youtubedl-android:library", version.ref = "youtubedl" }
+ytdl-common = { module = "io.github.junkfood02.youtubedl-android:common", version.ref = "youtubedl" }
+coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
+junit = { module = "junit:junit", version.ref = "junit" }
+json = { module = "org.json:json", version = "20240303" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

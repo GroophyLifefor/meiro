@@ -1,0 +1,71 @@
+# Meiro A3b spike results: emulator-5554 (meiro36, android-36 x86_64 google_apis), debug build, yt-dlp 2025.11.12 bundled then updated to 2026.10.26 via updateYoutubeDL(STABLE)
+# Cold INIT on fresh install (earlier launch, log since cleared): "INIT ok in 1567 ms"; warm INIT 44-85 ms. First-ever visionos run after install fell inside this launch cycle; numbers below are from the final process.
+11-21 18:30:56.062  5059  5059 I MeiroSpike: [+0ms] adb action: resolve_visionos
+11-21 18:30:56.956  5059  5059 I MeiroSpike: [+894ms] INIT ok in 44 ms
+11-21 18:30:57.014  5059  5059 I MeiroSpike: [+953ms] YTM visionos: resolving dQw4w9WgXcQ ...
+11-21 18:30:58.093  5059  5059 I MeiroSpike: [+2032ms] yt-dlp version: library=null binary(--version)=2025.11.12
+11-21 18:31:03.413  5059  5059 I MeiroSpike: [+7352ms] YTM visionos: OK in 6399 ms url=https://<cdn>.googlevideo.com/videoplayback?expire=1795296663&ei=N7kBa_ftM...
+11-21 18:31:04.097  5059  5059 I MeiroSpike: [+8036ms] yt-dlp version: library=null binary(--version)=2025.11.12
+11-21 18:31:04.134  5059  5059 I MeiroSpike: [+8072ms] memory: javaHeap=8MB pss=85MB
+11-21 18:31:04.148  5059  5059 I MeiroSpike: [+8086ms] memory: process com.muratkirazkaya.meiro pid=5059 pss=85MB
+11-21 18:31:29.981  5059  5059 I MeiroSpike: [+33919ms] adb action: resolve_default
+11-21 18:31:29.982  5059  5059 I MeiroSpike: [+33920ms] YTM default/JS: resolving dQw4w9WgXcQ ...
+11-21 18:31:35.776  5059  5059 I MeiroSpike: [+39714ms] YTM default/JS: OK in 5794 ms url=https://<cdn>.googlevideo.com/videoplayback?expire=1795296696&ei=WLkBa7iqD...
+11-21 18:31:36.468  5059  5059 I MeiroSpike: [+40407ms] yt-dlp version: library=null binary(--version)=2025.11.12
+11-21 18:31:36.471  5059  5059 I MeiroSpike: [+40409ms] memory: javaHeap=5MB pss=83MB
+11-21 18:31:36.471  5059  5059 I MeiroSpike: [+40410ms] memory: process com.muratkirazkaya.meiro pid=5059 pss=85MB
+11-21 18:32:10.014  5059  5059 I MeiroSpike: [+73953ms] adb action: resolve_sc
+11-21 18:32:10.015  5059  5059 I MeiroSpike: [+73953ms] SC: resolving https://soundcloud.com/forss/flickermood ...
+11-21 18:32:15.423  5059  5059 I MeiroSpike: [+79361ms] SC: OK in 5408 ms duration=213.886s hls=true url=https://playback.media-streaming.soundcloud.cloud/cWHNerOLlkUq/aac_160k/fa250033-f3ae-45f5...
+11-21 18:32:16.169  5059  5059 I MeiroSpike: [+80108ms] yt-dlp version: library=null binary(--version)=2025.11.12
+11-21 18:32:16.172  5059  5059 I MeiroSpike: [+80110ms] memory: javaHeap=6MB pss=82MB
+11-21 18:32:16.172  5059  5059 I MeiroSpike: [+80111ms] memory: process com.muratkirazkaya.meiro pid=5059 pss=85MB
+11-21 18:32:30.047  5059  5059 I MeiroSpike: [+93985ms] adb action: play_ytm
+11-21 18:32:30.048  5059  5059 I MeiroSpike: [+93986ms] play ytm: tap
+11-21 18:32:30.173  5059  5059 I MeiroSpike: [+94111ms] PlaybackService created
+11-21 18:32:30.221  5059  5059 I MeiroSpike: [+94159ms] MediaController connected after 173 ms from tap
+11-21 18:32:30.222  5059  5059 I MeiroSpike: [+94161ms] state=BUFFERING at 175 ms from tap
+11-21 18:32:31.421  5059  5059 I MeiroSpike: [+95359ms] state=READY at 1373 ms from tap
+11-21 18:32:31.421  5059  5059 I MeiroSpike: [+95359ms] tap->STATE_READY 1373 ms
+11-21 18:32:31.421  5059  5059 I MeiroSpike: [+95359ms] isPlaying=true at 1373 ms from tap
+11-21 18:32:35.224  5059  5059 I MeiroSpike: [+99163ms] play ytm: +5s position=3764 ms isPlaying=true state=3
+11-21 18:32:42.072  5059  5059 I MeiroSpike: [+106010ms] adb action: stop
+11-21 18:32:42.073  5059  5059 I MeiroSpike: [+106011ms] state=IDLE at 12025 ms from tap
+11-21 18:32:42.073  5059  5059 I MeiroSpike: [+106011ms] stopped
+11-21 18:32:44.098  5059  5059 I MeiroSpike: [+108036ms] adb action: play_sc
+11-21 18:32:44.099  5059  5059 I MeiroSpike: [+108037ms] play sc: tap
+11-21 18:32:44.099  5059  5059 I MeiroSpike: [+108038ms] state=BUFFERING at 1 ms from tap
+11-21 18:32:44.879  5059  5059 I MeiroSpike: [+108817ms] state=READY at 780 ms from tap
+11-21 18:32:44.879  5059  5059 I MeiroSpike: [+108817ms] tap->STATE_READY 780 ms
+11-21 18:32:44.879  5059  5059 I MeiroSpike: [+108817ms] isPlaying=true at 780 ms from tap
+11-21 18:32:49.109  5059  5059 I MeiroSpike: [+113047ms] play sc: +5s position=4098 ms isPlaying=true state=3
+11-21 18:33:01.871  5059  5059 I MeiroSpike: [+125809ms] adb action: update
+11-21 18:33:01.872  5059  5059 I MeiroSpike: [+125810ms] update: updating yt-dlp (STABLE) ...
+11-21 18:33:03.777  5059  5059 I MeiroSpike: [+127716ms] update: DONE in 1906 ms
+11-21 18:33:04.514  5059  5059 I MeiroSpike: [+128452ms] yt-dlp version: library=2026.10.26 binary(--version)=2026.10.26
+11-21 18:33:37.042  5059  5059 I MeiroSpike: [+160980ms] adb action: resolve_visionos
+11-21 18:33:37.043  5059  5059 I MeiroSpike: [+160981ms] YTM visionos: resolving dQw4w9WgXcQ ...
+11-21 18:33:40.219  5059  5059 I MeiroSpike: [+164158ms] YTM visionos: OK in 3177 ms url=https://<cdn>.googlevideo.com/videoplayback?expire=1795296820&ei=1LkBa9qRL...
+11-21 18:33:40.886  5059  5059 I MeiroSpike: [+164824ms] yt-dlp version: library=2026.10.26 binary(--version)=2026.10.26
+11-21 18:33:40.889  5059  5059 I MeiroSpike: [+164827ms] memory: javaHeap=13MB pss=104MB
+11-21 18:33:40.889  5059  5059 I MeiroSpike: [+164828ms] memory: process com.muratkirazkaya.meiro pid=5059 pss=85MB
+11-21 18:33:57.077  5059  5059 I MeiroSpike: [+181015ms] adb action: resolve_default
+11-21 18:33:57.077  5059  5059 I MeiroSpike: [+181016ms] YTM default/JS: resolving dQw4w9WgXcQ ...
+11-21 18:34:07.427  5059  5059 I MeiroSpike: [+191365ms] YTM default/JS: OK in 10349 ms url=https://<cdn>.googlevideo.com/videoplayback?expire=1795296841&ei=6bkBa-9bj...
+11-21 18:34:08.005  5059  5059 I MeiroSpike: [+191944ms] yt-dlp version: library=2026.10.26 binary(--version)=2026.10.26
+11-21 18:34:08.009  5059  5059 I MeiroSpike: [+191947ms] memory: javaHeap=15MB pss=105MB
+11-21 18:34:08.009  5059  5059 I MeiroSpike: [+191948ms] memory: process com.muratkirazkaya.meiro pid=5059 pss=85MB
+11-21 18:34:22.110  5059  5059 I MeiroSpike: [+206048ms] adb action: resolve_sc
+11-21 18:34:22.111  5059  5059 I MeiroSpike: [+206049ms] SC: resolving https://soundcloud.com/forss/flickermood ...
+11-21 18:34:27.445  5059  5059 I MeiroSpike: [+211384ms] SC: OK in 5335 ms duration=213.886s hls=true url=https://playback.media-streaming.soundcloud.cloud/cWHNerOLlkUq/aac_160k/fa250033-f3ae-45f5...
+11-21 18:34:28.199  5059  5059 I MeiroSpike: [+212137ms] yt-dlp version: library=2026.10.26 binary(--version)=2026.10.26
+11-21 18:34:28.202  5059  5059 I MeiroSpike: [+212140ms] memory: javaHeap=9MB pss=100MB
+11-21 18:34:28.202  5059  5059 I MeiroSpike: [+212140ms] memory: process com.muratkirazkaya.meiro pid=5059 pss=85MB
+11-21 18:34:42.136  5059  5059 I MeiroSpike: [+226074ms] adb action: play_ytm
+11-21 18:34:42.137  5059  5059 I MeiroSpike: [+226075ms] play ytm: tap
+11-21 18:34:42.138  5059  5059 I MeiroSpike: [+226076ms] state=BUFFERING at 1 ms from tap
+11-21 18:34:42.138  5059  5059 I MeiroSpike: [+226076ms] isPlaying=false at 1 ms from tap
+11-21 18:34:43.458  5059  5059 I MeiroSpike: [+227396ms] state=READY at 1321 ms from tap
+11-21 18:34:43.458  5059  5059 I MeiroSpike: [+227396ms] tap->STATE_READY 1321 ms
+11-21 18:34:43.458  5059  5059 I MeiroSpike: [+227396ms] isPlaying=true at 1321 ms from tap
+11-21 18:34:47.148  5059  5059 I MeiroSpike: [+231087ms] play ytm: +5s position=3620 ms isPlaying=true state=3
