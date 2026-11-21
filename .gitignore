@@ -18,3 +18,10 @@ website/.wrangler/
 
 website/node_modules/
 PLAN.md
+# Android: build output and APKs are never committed or published.
+android/**/build/
+android/.gradle/
+android/.kotlin/
+android/local.properties
+*.apk
+*.aab
