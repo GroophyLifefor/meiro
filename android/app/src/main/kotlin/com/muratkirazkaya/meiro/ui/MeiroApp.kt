@@ -29,6 +29,13 @@ import com.muratkirazkaya.meiro.playback.PlaybackHost
 import com.muratkirazkaya.meiro.ui.components.toMini
 import com.muratkirazkaya.meiro.ui.components.Tab
 import com.muratkirazkaya.meiro.ui.screens.LibraryEmptyScreen
+import com.muratkirazkaya.meiro.ui.screens.LibraryScreen
+import com.muratkirazkaya.meiro.ui.screens.NewListSheet
+import com.muratkirazkaya.meiro.ui.screens.PlaylistScreen
+import com.muratkirazkaya.meiro.ui.components.Snack
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.dp
 import com.muratkirazkaya.meiro.ui.screens.MeiroShell
 import com.muratkirazkaya.meiro.ui.screens.PlaceholderScreen
 import com.muratkirazkaya.meiro.ui.screens.SignInField
@@ -61,7 +68,7 @@ private fun AppRoot(c: AppContainer, bars: SystemBars) {
     LaunchedEffect(c) { while (true) { session = c.session(); delay(500) } }
     var guest by remember { mutableStateOf(false) }
 
-    if (session.signedIn || guest) MainShell(bars)
+    if (session.signedIn || guest) MainShell(c, bars)
     else SignInRoute(c, session, bars, onSkip = { guest = true })
 }
 
@@ -96,33 +103,87 @@ private fun SignInRoute(c: AppContainer, session: Session, bars: SystemBars, onS
     )
 }
 
-/** The shell with the four tab routes. Library shows the empty state (no lists screen yet). */
+private const val PLAYLIST_ROUTE = "playlist/{id}"
+
+/** The shell with the four tab routes; Library lists the lists, and a list opens as `playlist/<id>`. */
 @Composable
-private fun MainShell(bars: SystemBars) {
+private fun MainShell(c: AppContainer, bars: SystemBars) {
     val nav = rememberNavController()
     val entry by nav.currentBackStackEntryAsState()
     val ctx = LocalContext.current
+    val scope = rememberCoroutineScope()
     val playing by PlaybackHost.ui.collectAsState()
-    val selected = Tab.entries.firstOrNull { it.route == entry?.destination?.route } ?: Tab.Home
-    MeiroShell(
-        selected = selected,
-        onSelect = { tab ->
-            nav.navigate(tab.route) {
-                popUpTo(Tab.Home.route) { saveState = true }
-                launchSingleTop = true
-                restoreState = true
+    val route = entry?.destination?.route
+    val selected = if (route == PLAYLIST_ROUTE) Tab.Library else Tab.entries.firstOrNull { it.route == route } ?: Tab.Home
+    var sheet by remember { mutableStateOf(false) }
+    var newName by remember { mutableStateOf("") }
+    var snack by remember { mutableStateOf<String?>(null) }
+    val openSheet = { newName = ""; sheet = true }
+
+    Box(Modifier.fillMaxSize()) {
+        MeiroShell(
+            selected = selected,
+            onSelect = { tab ->
+                nav.navigate(tab.route) {
+                    popUpTo(Tab.Home.route) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            },
+            bars = bars,
+            mini = playing?.toMini(),
+            onPlayPause = { PlaybackHost.togglePlay(ctx) },
+            onNext = { PlaybackHost.next(ctx) },
+        ) {
+            NavHost(nav, startDestination = Tab.Home.route) {
+                composable(Tab.Home.route) { PlaceholderScreen("Meiro") }
+                composable(Tab.Search.route) { PlaceholderScreen("Ara") }
+                composable(Tab.Library.route) { LibraryRoute(c, onOpen = { nav.navigate("playlist/$it") }, onNew = openSheet) }
+                composable(Tab.Downloads.route) { PlaceholderScreen("İndirilenler") }
+                composable(PLAYLIST_ROUTE) { e ->
+                    PlaylistRoute(c, e.arguments?.getString("id").orEmpty(), onBack = { nav.popBackStack() })
+                }
             }
-        },
-        bars = bars,
-        mini = playing?.toMini(),
-        onPlayPause = { PlaybackHost.togglePlay(ctx) },
-        onNext = { PlaybackHost.next(ctx) },
-    ) {
-        NavHost(nav, startDestination = Tab.Home.route) {
-            composable(Tab.Home.route) { PlaceholderScreen("Meiro") }
-            composable(Tab.Search.route) { PlaceholderScreen("Ara") }
-            composable(Tab.Library.route) { LibraryEmptyScreen() }
-            composable(Tab.Downloads.route) { PlaceholderScreen("İndirilenler") }
+        }
+        if (sheet) {
+            val create = {
+                val n = newName.trim()
+                if (n.isNotEmpty()) {
+                    sheet = false
+                    scope.launch { c.createList(n); snack = "\u201C$n\u201D oluşturuldu" }
+                }
+            }
+            NewListSheet(newName, { newName = it }, { sheet = false }, create, bars)
+        }
+        snack?.let { m ->
+            LaunchedEffect(m) { delay(2600); if (snack == m) snack = null }
+            Snack(m, { snack = null }, Modifier.align(Alignment.BottomCenter).padding(start = 12.dp, end = 12.dp, bottom = 160.dp))
         }
     }
+}
+
+@Composable
+private fun LibraryRoute(c: AppContainer, onOpen: (String) -> Unit, onNew: () -> Unit) {
+    val version by c.libraries.version.collectAsState()
+    val rows = remember(version) { c.libraries.list().map { it.toRow() } }
+    if (rows.isEmpty()) LibraryEmptyScreen(onNew) else LibraryScreen(rows, onOpen, onNew)
+}
+
+@Composable
+private fun PlaylistRoute(c: AppContainer, id: String, onBack: () -> Unit) {
+    val ctx = LocalContext.current
+    val version by c.libraries.version.collectAsState()
+    val now by PlaybackHost.ui.collectAsState()
+    val lib = remember(version, id) { c.libraries.get(id) }
+    // The list is gone (deleted on another device, say): back to the lists.
+    if (lib == null) { LaunchedEffect(Unit) { onBack() }; return }
+    val playingKey = now?.item?.key
+    val ui = remember(lib, playingKey) { lib.toPlaylistUi(c.links, playingKey) }
+    fun play(from: Int, items: List<com.muratkirazkaya.meiro.playback.QItem>) = PlaybackHost.playQueue(ctx, items, from, lib.name)
+    PlaylistScreen(
+        ui, playing = now?.playing == true, onBack = onBack,
+        onPlay = { play(0, lib.items.map { it.toQItem() }) },
+        onShuffle = { play(0, lib.items.map { it.toQItem() }.shuffled()) },
+        onRow = { i -> play(i, lib.items.map { it.toQItem() }) },
+    )
 }

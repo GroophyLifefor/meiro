@@ -71,6 +71,7 @@ dependencies {
     ksp(libs.room.compiler)
     implementation(libs.security.crypto)
     implementation(libs.work.runtime)
+    implementation(libs.coil.compose)
     testImplementation(libs.junit)
     testImplementation(libs.okhttp.mockwebserver)
     testImplementation(libs.json)

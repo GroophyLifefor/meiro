@@ -8,7 +8,7 @@ import com.muratkirazkaya.meiro.ui.components.TopBar
 
 /** Mock screen `empty`: Kütüphane with no Meiro lists yet. */
 @Composable
-fun LibraryEmptyScreen() {
+fun LibraryEmptyScreen(onNew: () -> Unit = {}) {
     Column {
         TopBar("Kütüphane")
         LibraryTabs()
@@ -16,6 +16,7 @@ fun LibraryEmptyScreen() {
             title = "Henüz liste yok",
             body = "Bir şarkının ⋮ menüsünden \"Listeye ekle\" ya da bir albümü Meiro listesine kopyala.",
             buttonLabel = "Yeni liste",
+            onButton = onNew,
         )
     }
 }

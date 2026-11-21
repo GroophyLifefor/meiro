@@ -21,12 +21,15 @@ val InvBgKey = SemanticsPropertyKey<Color>("InvBg")
 val InvRadiusKey = SemanticsPropertyKey<Float>("InvRadiusDp")
 val InvTintKey = SemanticsPropertyKey<Color>("InvTint")
 val InvOverflowKey = SemanticsPropertyKey<Boolean>("InvTextOverflow")
+/** Text that is meant to end in an ellipsis when it is too long (one line, `text-overflow: ellipsis` in the mock). */
+val InvSingleLineKey = SemanticsPropertyKey<Boolean>("InvTextSingleLine")
 
 var SemanticsPropertyReceiver.invText by InvTextKey
 var SemanticsPropertyReceiver.invBg by InvBgKey
 var SemanticsPropertyReceiver.invRadius by InvRadiusKey
 var SemanticsPropertyReceiver.invTint by InvTintKey
 var SemanticsPropertyReceiver.invOverflow by InvOverflowKey
+var SemanticsPropertyReceiver.invSingleLine by InvSingleLineKey
 
 /** Tag a node with its inventory key; place it after the size/padding modifiers so bounds match the box. */
 fun Modifier.inv(

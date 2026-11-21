@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.size
 import com.muratkirazkaya.meiro.ui.inv.InvText
 import com.muratkirazkaya.meiro.ui.inv.inv
 import com.muratkirazkaya.meiro.ui.inv.invOverflow
+import com.muratkirazkaya.meiro.ui.inv.invSingleLine
 import com.muratkirazkaya.meiro.ui.inv.invText
 import com.muratkirazkaya.meiro.ui.theme.MeiroText
 
@@ -42,6 +43,7 @@ fun MText(
         modifier = modifier.testTag(key).semantics {
             invText = InvText(style, color)
             invOverflow = overflow
+            invSingleLine = maxLines == 1
         }.then(if (style.tightLine) Modifier.cssLineBox(style.lineHeightSp) else Modifier),
         style = style.toStyle(color).copy(textAlign = textAlign),
         maxLines = maxLines,

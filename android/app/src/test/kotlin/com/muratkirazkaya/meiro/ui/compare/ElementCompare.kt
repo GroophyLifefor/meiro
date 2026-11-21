@@ -7,6 +7,7 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import com.muratkirazkaya.meiro.ui.inv.InvBgKey
 import com.muratkirazkaya.meiro.ui.inv.InvOverflowKey
+import com.muratkirazkaya.meiro.ui.inv.InvSingleLineKey
 import com.muratkirazkaya.meiro.ui.inv.InvRadiusKey
 import com.muratkirazkaya.meiro.ui.inv.InvTextKey
 import com.muratkirazkaya.meiro.ui.inv.InvTintKey
@@ -14,11 +15,11 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 
 class ElementSummary(
-    val theme: String, val inventoryTotal: Int, val system: Int, val matched: Int,
-    val missing: Int, val extra: Int, val maxBboxDelta: Double, val worstKey: String, val failures: List<String>,
+    val theme: String, val inventoryTotal: Int, val system: Int, val spacers: Int, val matched: Int,
+    val missing: Int, val extra: Int, val maxBboxDelta: Double, val worstKey: String, val failures: MutableList<String>,
     val toleranceKeys: List<String>,
 ) {
-    fun line() = "elements $theme: $matched matched of ${inventoryTotal - system} app elements ($system system-UI excluded), " +
+    fun line() = "elements $theme: $matched matched of ${inventoryTotal - system - spacers} mock elements ($system system-UI and $spacers empty spacer blocks excluded), " +
         "$missing missing, $extra extra, max bbox delta %.2fpx (%s), ${failures.size} mismatches; ${toleranceKeys.size} elements with a documented wider tolerance (renderer text width): $toleranceKeys".format(maxBboxDelta, worstKey)
 }
 
@@ -38,6 +39,7 @@ object ElementCompare {
         val mapped = keys.entries.mapNotNull { e -> e.key?.let { it } }.toSet()
         var matched = 0; var missing = 0; var maxDelta = 0.0; var worst = "-"
         val systemCount = keys.entries.count { it.system }
+        val spacerCount = keys.entries.count { it.spacer }
 
         // Inventory entries the key map does not know (rule 2 if visible).
         val knownPaths = keys.entries.map { it.path }.toSet()
@@ -47,7 +49,7 @@ object ElementCompare {
 
         for (ke in keys.entries) {
             val e = invByPath[ke.path] ?: run { fails += "key map refers to unknown inventory path ${ke.path}"; continue }
-            if (ke.system || e.offscreen || e.occluded) continue
+            if (ke.system || ke.spacer || e.offscreen || e.occluded) continue
             val key = ke.key!!
             val list = byKey[key]
             if (list == null) { missing++; fails += "MISSING $key: no node tagged for ${e.kind} ${e.icon ?: e.text ?: ""} at ${e.x},${e.y} ${e.w}x${e.h}"; continue }
@@ -106,9 +108,35 @@ object ElementCompare {
         var extra = 0
         for ((k, l) in byKey) if (k !in mapped && k !in keys.aux) { extra++; fails += "EXTRA $k: tagged node with no inventory element (bounds ${layoutRect(l[0])})" }
 
+        val kindByKey = keys.entries.mapNotNull { ke -> ke.key?.let { k -> invByPath[ke.path]?.let { k to it.kind } } }.toMap()
+        var containmentChecked = 0
+        containmentChecked = structural(byKey, root, keys, kindByKey, fails, stress = false)
+        return ElementSummary(theme, inv.size, systemCount, spacerCount, matched, missing, extra, maxDelta, worst, fails, keys.tolerance.keys.toList())
+    }
+
+    /** The structural rules alone, for a render that has no mock counterpart (long names, narrow widths, large fonts). */
+    fun stress(nodes: List<SemanticsNode>, root: Rect, keys: KeyMap): List<String> {
+        val byKey = HashMap<String, MutableList<SemanticsNode>>()
+        for (n in nodes) n.config.getOrNull(SemanticsProperties.TestTag)?.let { byKey.getOrPut(it) { mutableListOf() }.add(n) }
+        val fails = mutableListOf<String>()
+        structural(byKey, root, keys, emptyMap(), fails, stress = true)
+        return fails
+    }
+
+    /**
+     * Rules 4, 4b, 5 and the no-overlap rule: they need no mock numbers, only the composed tree. With [stress] a text
+     * that is meant to end in an ellipsis (one line) may do so, and a node a screen did not compose (it lies beyond
+     * the scrolled viewport) is skipped instead of failing the row and centring rules.
+     */
+    fun structural(
+        byKey: Map<String, List<SemanticsNode>>, root: Rect, keys: KeyMap, kindByKey: Map<String, String>,
+        fails: MutableList<String>, stress: Boolean,
+    ): Int {
+        fun node(k: String): SemanticsNode? = byKey[k]?.singleOrNull()
+        fun b(k: String): Rect? = node(k)?.let { layoutRect(it) }
         // Rule 4: overflow / clipping.
         for ((k, l) in byKey) for (n in l) {
-            if (n.config.getOrNull(InvOverflowKey) == true) fails += "OVERFLOW $k: text has visual overflow (clipped or ellipsized) in ${layoutRect(n)}"
+            if (n.config.getOrNull(InvOverflowKey) == true && k !in keys.ellipsis && !(stress && n.config.getOrNull(InvSingleLineKey) == true)) fails += "OVERFLOW $k: text has visual overflow (clipped or ellipsized) in ${layoutRect(n)}"
             val r = layoutRect(n)
             if (r.left < root.left - 0.01 || r.top < root.top - 0.01 || r.right > root.right + 0.01 || r.bottom > root.bottom + 0.01)
                 fails += "CLIPPED $k: bounds $r outside screen $root"
@@ -117,7 +145,6 @@ object ElementCompare {
         // Rule 4b: containment. A tagged node must lie inside its nearest tagged ancestor (+-0.5px) when that
         // ancestor is a control/surface (it exports a background or radius, or the mock inventory calls it a
         // control/surface). Independent of the mock's own numbers, so it also catches a bug the mock shares.
-        val kindByKey = keys.entries.mapNotNull { ke -> ke.key?.let { k -> invByPath[ke.path]?.let { k to it.kind } } }.toMap()
         var containmentChecked = 0
         for ((k, l) in byKey) for (n in l) {
             var p = n.parent
@@ -137,18 +164,24 @@ object ElementCompare {
         // Rule 5: centring and row alignment, measured on the Compose tree.
         for (c in keys.centered) {
             val cb = b(c.child); val pb = if (c.parent == "root") root else b(c.parent)
-            if (cb == null || pb == null) { fails += "CENTER ${c.child} in ${c.parent}: node missing"; continue }
+            if (cb == null || pb == null) { if (!stress) fails += "CENTER ${c.child} in ${c.parent}: node missing"; continue }
             if ('x' in c.axes) { val d = abs(cb.center.x - pb.center.x); if (d > ALIGN_TOL) fails += "CENTER ${c.child} in ${c.parent} x: centre ${cb.center.x} vs ${pb.center.x} (delta %.2f > %.1f)".format(d, ALIGN_TOL) }
             if ('y' in c.axes) { val d = abs(cb.center.y - pb.center.y); if (d > ALIGN_TOL) fails += "CENTER ${c.child} in ${c.parent} y: centre ${cb.center.y} vs ${pb.center.y} (delta %.2f > %.1f)".format(d, ALIGN_TOL) }
         }
         for (row in keys.rows) for (edge in row.edges) {
             val vals = row.keys.map { k -> b(k)?.let { r -> when (edge) { "top" -> r.top; "bottom" -> r.bottom; "left" -> r.left; "right" -> r.right; "centerX" -> r.center.x; else -> r.center.y } } }
-            if (vals.any { it == null }) { fails += "ROW ${row.name}: node missing for $edge"; continue }
+            if (vals.any { it == null }) { if (!stress) fails += "ROW ${row.name}: node missing for $edge"; continue }
             val spread = vals.maxOf { it!! } - vals.minOf { it!! }
             if (spread > ALIGN_TOL) fails += "ROW ${row.name} $edge: spread %.2f > %.1f over ${row.keys.zip(vals).joinToString { "${it.first}=${it.second}" }}".format(spread, ALIGN_TOL)
         }
-        return ElementSummary(theme, inv.size, systemCount, matched, missing, extra, maxDelta, worst, fails, keys.tolerance.keys.toList())
+        for ((x, y) in keys.noOverlap) {
+            val rx = b(x) ?: continue; val ry = b(y) ?: continue
+            val ox = minOf(rx.right, ry.right) - maxOf(rx.left, ry.left); val oy = minOf(rx.bottom, ry.bottom) - maxOf(rx.top, ry.top)
+            if (ox > 0.01 && oy > 0.01) fails += "OVERLAP $x $rx and $y $ry overlap by %.2f x %.2f px".format(ox, oy)
+        }
+        return containmentChecked
     }
+
 
     /** Layout bounds (not clipped by ancestors, unlike boundsInRoot). */
     private fun layoutRect(n: SemanticsNode) = Rect(n.positionInRoot, androidx.compose.ui.geometry.Size(n.size.width.toFloat(), n.size.height.toFloat()))

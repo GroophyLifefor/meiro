@@ -79,6 +79,14 @@ object MeiroType {
     val Body = MeiroText(BodyFontSizeSp, 400, BodyLineHeightSp, Ls)
     val FieldLabel = MeiroText(12f, 400, BodyLineHeightSp, Ls)
     val FieldInput = MeiroText(16f, 400, BodyLineHeightSp, 0f)
+    // Library and playlist: `.row .t b` 16/22, `.row .meta` 13/18, `.note` 12/17, `.hero h2` 24/30, `.hero .kind` and `.sub` 13/20, `.h-sec h2` 20/26.
+    val ListTitle = MeiroText(16f, 400, 22f, Ls)
+    val ListMeta = MeiroText(13f, 400, 18f, Ls)
+    val Note = MeiroText(12f, 400, 17f, Ls)
+    val HeroTitle = MeiroText(24f, 600, 30f, Ls)
+    val HeroKind = MeiroText(13f, 400, 20f, Ls)
+    val SectionTitle = MeiroText(20f, 500, 26f, Ls)
+    val SheetTitle = MeiroText(20f, 500, 26f, Ls)
     val SnackAction = MeiroText(BodyFontSizeSp, 600, BodyLineHeightSp, Ls)
 }
 

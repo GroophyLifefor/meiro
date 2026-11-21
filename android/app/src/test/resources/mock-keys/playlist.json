@@ -1,0 +1,798 @@
+{
+ "screen": "playlist",
+ "systemNote": "Status bar row (y 0..36) and the gesture pill are system UI on Android: not drawn by the app, excluded from element and pixel comparison.",
+ "elements": [
+  {
+   "path": "#box>div.app:nth-child(1)>div.statusbar:nth-child(1)>span#clock:nth-child(1)",
+   "system": true
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div.statusbar:nth-child(1)>span.sys:nth-child(2)>span#netIcon:nth-child(1)",
+   "system": true
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div.statusbar:nth-child(1)>span.sys:nth-child(2)>i:nth-child(2)",
+   "system": true
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar.withback:nth-child(1)",
+   "key": "topbar"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar.withback:nth-child(1)>button.ibtn:nth-child(1)",
+   "key": "topbar.backBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar.withback:nth-child(1)>button.ibtn:nth-child(1)>svg:nth-child(1)",
+   "key": "topbar.back.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar.withback:nth-child(1)>button.ibtn:nth-child(3)",
+   "key": "topbar.searchBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar.withback:nth-child(1)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "key": "topbar.search.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar.withback:nth-child(1)>button.ibtn:nth-child(4)",
+   "key": "topbar.moreBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar.withback:nth-child(1)>button.ibtn:nth-child(4)>svg:nth-child(1)",
+   "key": "topbar.more.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hero:nth-child(2)>div.big:nth-child(1)",
+   "key": "hero.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hero:nth-child(2)>h2:nth-child(2)",
+   "key": "hero.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hero:nth-child(2)>div.kind:nth-child(3)",
+   "key": "hero.kind",
+   "styleFrom": "hero.kind.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hero:nth-child(2)>div.kind:nth-child(3)>span.src:nth-child(1)>svg:nth-child(1)",
+   "key": "hero.kind.logo"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hero:nth-child(2)>div.hero.actions:nth-child(4)>button.ibtn:nth-child(1)",
+   "key": "hero.downloadBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hero:nth-child(2)>div.hero.actions:nth-child(4)>button.ibtn:nth-child(1)>svg:nth-child(1)",
+   "key": "hero.download.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hero:nth-child(2)>div.hero.actions:nth-child(4)>button.ibtn:nth-child(2)",
+   "key": "hero.shuffleBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hero:nth-child(2)>div.hero.actions:nth-child(4)>button.ibtn:nth-child(2)>svg:nth-child(1)",
+   "key": "hero.shuffle.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hero:nth-child(2)>div.hero.actions:nth-child(4)>button.play:nth-child(3)",
+   "key": "hero.playBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hero:nth-child(2)>div.hero.actions:nth-child(4)>button.play:nth-child(3)>svg:nth-child(1)",
+   "key": "hero.play.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hero:nth-child(2)>div.hero.actions:nth-child(4)>button.ibtn:nth-child(4)",
+   "key": "hero.editBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hero:nth-child(2)>div.hero.actions:nth-child(4)>button.ibtn:nth-child(4)>svg:nth-child(1)",
+   "key": "hero.edit.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hero:nth-child(2)>div.hero.actions:nth-child(4)>button.ibtn:nth-child(5)",
+   "key": "hero.shareBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hero:nth-child(2)>div.hero.actions:nth-child(4)>button.ibtn:nth-child(5)>svg:nth-child(1)",
+   "key": "hero.share.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.tools:nth-child(3)>span.sub.grow:nth-child(1)",
+   "key": "tools.summary"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.tools:nth-child(3)>button.btn.text:nth-child(2)",
+   "key": "tools.sort",
+   "styleFrom": "tools.sort.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.tools:nth-child(3)>button.btn.text:nth-child(2)>svg:nth-child(1)",
+   "key": "tools.sort.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(4)>div.cv:nth-child(1)",
+   "key": "song1.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(4)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "song1.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(4)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "key": "song1.src.ytm"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(4)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span.dim:nth-child(2)>svg:nth-child(1)",
+   "key": "song1.src.sc"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(4)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(2)",
+   "key": "song1.meta"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(4)>button.ibtn:nth-child(3)",
+   "key": "song1.moreBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(4)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "key": "song1.more.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(5)>div.cv:nth-child(1)",
+   "key": "song2.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(5)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "song2.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(5)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "key": "song2.src.sc"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(5)>div.t:nth-child(2)>span.meta:nth-child(2)>svg.dl:nth-child(2)",
+   "key": "song2.dl"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(5)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(3)",
+   "key": "song2.meta"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(5)>button.ibtn:nth-child(3)",
+   "key": "song2.moreBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(5)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "key": "song2.more.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(6)>div.cv:nth-child(1)",
+   "key": "song3.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(6)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "song3.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(6)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "key": "song3.src.ytm"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(6)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(2)",
+   "key": "song3.meta"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(6)>button.ibtn:nth-child(3)",
+   "key": "song3.moreBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(6)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "key": "song3.more.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(7)>div.cv:nth-child(1)",
+   "key": "song4.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(7)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "song4.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(7)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "key": "song4.src.sc"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(7)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(2)",
+   "key": "song4.meta"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(7)>button.linkbtn:nth-child(3)",
+   "key": "song4.link"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(7)>button.linkbtn:nth-child(3)>svg:nth-child(1)",
+   "key": "song4.link.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(7)>button.ibtn:nth-child(4)",
+   "key": "song4.moreBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(7)>button.ibtn:nth-child(4)>svg:nth-child(1)",
+   "key": "song4.more.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(8)>div.cv:nth-child(1)",
+   "key": "song5.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(8)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "song5.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(8)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "key": "song5.src.sc"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(8)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(2)",
+   "key": "song5.meta"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(8)>button.linkbtn.other:nth-child(3)",
+   "key": "song5.link"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(8)>button.linkbtn.other:nth-child(3)>svg:nth-child(1)",
+   "key": "song5.link.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(8)>button.ibtn:nth-child(4)",
+   "key": "song5.moreBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(8)>button.ibtn:nth-child(4)>svg:nth-child(1)",
+   "key": "song5.more.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row.now:nth-child(9)>div.cv:nth-child(1)>span.eq:nth-child(1)",
+   "key": "song6.eq"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row.now:nth-child(9)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "song6.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row.now:nth-child(9)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "key": "song6.src.ytm"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row.now:nth-child(9)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span.dim:nth-child(2)>svg:nth-child(1)",
+   "key": "song6.src.sc"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row.now:nth-child(9)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(2)",
+   "key": "song6.meta"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row.now:nth-child(9)>button.ibtn:nth-child(3)",
+   "key": "song6.moreBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row.now:nth-child(9)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "key": "song6.more.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(10)>div.cv:nth-child(1)",
+   "key": "song7.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(10)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "song7.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(10)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "key": "song7.src.ytm"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(10)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(2)",
+   "key": "song7.meta"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(10)>button.ibtn:nth-child(3)",
+   "key": "song7.moreBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(10)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "key": "song7.more.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.h-sec:nth-child(11)>h2:nth-child(1)",
+   "key": "similar.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(12)>div.cv:nth-child(1)",
+   "key": "similar1.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(12)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "similar1.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(12)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "key": "similar1.src.ytm"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(12)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span.dim:nth-child(2)>svg:nth-child(1)",
+   "key": "similar1.src.sc"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(12)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(2)",
+   "key": "similar1.meta"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(12)>button.ibtn:nth-child(3)",
+   "key": "similar1.moreBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(12)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "key": "similar1.more.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(13)>div.cv:nth-child(1)",
+   "key": "similar2.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(13)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "similar2.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(13)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "key": "similar2.src.ytm"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(13)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(2)",
+   "key": "similar2.meta"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(13)>button.linkbtn:nth-child(3)",
+   "key": "similar2.link"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(13)>button.linkbtn:nth-child(3)>svg:nth-child(1)",
+   "key": "similar2.link.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(13)>button.ibtn:nth-child(4)",
+   "key": "similar2.moreBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(13)>button.ibtn:nth-child(4)>svg:nth-child(1)",
+   "key": "similar2.more.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div:nth-child(14)",
+   "spacer": true
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)",
+   "key": "mini"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.cv:nth-child(1)",
+   "key": "mini.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "mini.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>span:nth-child(2)",
+   "key": "mini.artist",
+   "styleFrom": "mini.artist.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>span:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "key": "mini.src.ytm"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>span:nth-child(2)>span.src:nth-child(1)>span.dim:nth-child(2)>svg:nth-child(1)",
+   "key": "mini.src.sc"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(3)",
+   "key": "mini.playBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "key": "mini.play.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(4)",
+   "key": "mini.nextBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(4)>svg:nth-child(1)",
+   "key": "mini.next.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.bar:nth-child(5)",
+   "key": "mini.bar"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.bar:nth-child(5)>i:nth-child(1)",
+   "key": "mini.bar.fill"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)",
+   "key": "nav"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(1)",
+   "key": "nav.home",
+   "styleFrom": "nav.home.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(1)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "key": "nav.home.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(2)",
+   "key": "nav.search",
+   "styleFrom": "nav.search.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(2)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "key": "nav.search.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(3)",
+   "key": "nav.library",
+   "styleFrom": "nav.library.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(3)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "key": "nav.library.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(4)",
+   "key": "nav.downloads",
+   "styleFrom": "nav.downloads.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(4)>span.pill:nth-child(1)",
+   "key": "nav.downloads.pill"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(4)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "key": "nav.downloads.icon"
+  },
+  {
+   "path": "#box>div.gesture:nth-child(7)",
+   "system": true
+  }
+ ],
+ "aux": [
+  "hero.kind.label",
+  "mini.artist.label",
+  "nav.downloads.label",
+  "nav.home.label",
+  "nav.library.label",
+  "nav.search.label",
+  "song1.cv",
+  "song2.cv",
+  "song3.cv",
+  "song4.cv",
+  "song5.cv",
+  "song6.cv",
+  "song7.cv",
+  "tools.sort.label"
+ ],
+ "centered": [
+  {
+   "child": "topbar.back.icon",
+   "parent": "topbar.backBtn",
+   "axes": "xy"
+  },
+  {
+   "child": "topbar.search.icon",
+   "parent": "topbar.searchBtn",
+   "axes": "xy"
+  },
+  {
+   "child": "topbar.more.icon",
+   "parent": "topbar.moreBtn",
+   "axes": "xy"
+  },
+  {
+   "child": "hero.cover",
+   "parent": "root",
+   "axes": "x"
+  },
+  {
+   "child": "hero.title",
+   "parent": "root",
+   "axes": "x"
+  },
+  {
+   "child": "hero.kind",
+   "parent": "root",
+   "axes": "x"
+  },
+  {
+   "child": "hero.download.icon",
+   "parent": "hero.downloadBtn",
+   "axes": "xy"
+  },
+  {
+   "child": "hero.shuffle.icon",
+   "parent": "hero.shuffleBtn",
+   "axes": "xy"
+  },
+  {
+   "child": "hero.play.icon",
+   "parent": "hero.playBtn",
+   "axes": "xy"
+  },
+  {
+   "child": "hero.edit.icon",
+   "parent": "hero.editBtn",
+   "axes": "xy"
+  },
+  {
+   "child": "hero.share.icon",
+   "parent": "hero.shareBtn",
+   "axes": "xy"
+  },
+  {
+   "child": "tools.sort.label",
+   "parent": "tools.sort",
+   "axes": "y"
+  },
+  {
+   "child": "tools.sort.icon",
+   "parent": "tools.sort",
+   "axes": "y"
+  },
+  {
+   "child": "song1.more.icon",
+   "parent": "song1.moreBtn",
+   "axes": "xy"
+  },
+  {
+   "child": "song2.more.icon",
+   "parent": "song2.moreBtn",
+   "axes": "xy"
+  },
+  {
+   "child": "mini.play.icon",
+   "parent": "mini.playBtn",
+   "axes": "xy"
+  },
+  {
+   "child": "mini.next.icon",
+   "parent": "mini.nextBtn",
+   "axes": "xy"
+  },
+  {
+   "child": "nav.downloads.icon",
+   "parent": "nav.downloads.pill",
+   "axes": "xy"
+  },
+  {
+   "child": "nav.home.icon",
+   "parent": "nav.home",
+   "axes": "x"
+  },
+  {
+   "child": "nav.search.icon",
+   "parent": "nav.search",
+   "axes": "x"
+  },
+  {
+   "child": "nav.library.icon",
+   "parent": "nav.library",
+   "axes": "x"
+  },
+  {
+   "child": "nav.downloads.icon",
+   "parent": "nav.downloads",
+   "axes": "x"
+  },
+  {
+   "child": "nav.home.label",
+   "parent": "nav.home",
+   "axes": "x"
+  },
+  {
+   "child": "nav.search.label",
+   "parent": "nav.search",
+   "axes": "x"
+  },
+  {
+   "child": "nav.library.label",
+   "parent": "nav.library",
+   "axes": "x"
+  },
+  {
+   "child": "nav.downloads.label",
+   "parent": "nav.downloads",
+   "axes": "x"
+  }
+ ],
+ "rows": [
+  {
+   "name": "topbar",
+   "keys": [
+    "topbar.backBtn",
+    "topbar.searchBtn",
+    "topbar.moreBtn"
+   ],
+   "edges": [
+    "centerY"
+   ]
+  },
+  {
+   "name": "hero kind line",
+   "keys": [
+    "hero.kind.logo",
+    "hero.kind.label"
+   ],
+   "edges": [
+    "centerY"
+   ]
+  },
+  {
+   "name": "hero actions",
+   "keys": [
+    "hero.downloadBtn",
+    "hero.shuffleBtn",
+    "hero.playBtn",
+    "hero.editBtn",
+    "hero.shareBtn"
+   ],
+   "edges": [
+    "centerY"
+   ]
+  },
+  {
+   "name": "tools",
+   "keys": [
+    "tools.summary",
+    "tools.sort"
+   ],
+   "edges": [
+    "centerY"
+   ]
+  },
+  {
+   "name": "song1 row",
+   "keys": [
+    "song1.cover",
+    "song1.moreBtn"
+   ],
+   "edges": [
+    "top",
+    "centerY"
+   ]
+  },
+  {
+   "name": "song2 row",
+   "keys": [
+    "song2.cover",
+    "song2.moreBtn"
+   ],
+   "edges": [
+    "top",
+    "centerY"
+   ]
+  },
+  {
+   "name": "mini controls",
+   "keys": [
+    "mini.cover",
+    "mini.playBtn",
+    "mini.nextBtn"
+   ],
+   "edges": [
+    "centerY"
+   ]
+  },
+  {
+   "name": "mini source line",
+   "keys": [
+    "mini.src.ytm",
+    "mini.src.sc",
+    "mini.artist.label"
+   ],
+   "edges": [
+    "centerY"
+   ]
+  },
+  {
+   "name": "nav buttons",
+   "keys": [
+    "nav.home",
+    "nav.search",
+    "nav.library",
+    "nav.downloads"
+   ],
+   "edges": [
+    "top",
+    "bottom"
+   ]
+  },
+  {
+   "name": "nav icons",
+   "keys": [
+    "nav.home.icon",
+    "nav.search.icon",
+    "nav.library.icon",
+    "nav.downloads.icon"
+   ],
+   "edges": [
+    "top",
+    "centerY"
+   ]
+  },
+  {
+   "name": "nav labels",
+   "keys": [
+    "nav.home.label",
+    "nav.search.label",
+    "nav.library.label",
+    "nav.downloads.label"
+   ],
+   "edges": [
+    "top",
+    "bottom",
+    "centerY"
+   ]
+  }
+ ],
+ "noOverlap": [
+  [
+   "song1.title",
+   "song1.moreBtn"
+  ],
+  [
+   "song1.meta",
+   "song1.moreBtn"
+  ],
+  [
+   "song2.title",
+   "song2.moreBtn"
+  ],
+  [
+   "song2.meta",
+   "song2.moreBtn"
+  ]
+ ],
+ "ellipsis": [],
+ "toleranceNote": "Chrome (mock reference) lays text out with integer-rounded glyph advances, Skia with fractional ones: 12-14px text is 2-4% wider in the reference. Only boxes whose width is the text (wrap-content: the meta lines, the FAB, the sort button) depend on that, and what is aligned to their right edge moves with them; every other box is fill/fixed and held to 1px.",
+ "tolerance": {
+  "tools.summary": {
+   "w": 5.0
+  },
+  "tools.sort": {
+   "x": 5.0,
+   "w": 5.0
+  },
+  "tools.sort.icon": {
+   "x": 5.0
+  },
+  "hero.kind.logo": {
+   "x": 5.0
+  },
+  "song1.meta": {
+   "w": 8.0,
+   "x": 5.0
+  },
+  "song2.meta": {
+   "w": 8.0,
+   "x": 5.0
+  }
+ }
+}

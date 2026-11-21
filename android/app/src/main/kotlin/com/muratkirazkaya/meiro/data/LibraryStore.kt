@@ -1,5 +1,7 @@
 package com.muratkirazkaya.meiro.data
 
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import java.security.SecureRandom
 import java.time.Duration
 import java.time.Instant
@@ -44,7 +46,15 @@ class LibraryStore(
         deleted = deleted.filterNot { Duration.between(it.deletedAt, now) > TOMBSTONE_LIFE }.toMutableList()
     }
 
-    private fun save() = persistence.saveLibraries(LibraryFile(libs.toList(), deleted.toList()))
+    private val _version = MutableStateFlow(0)
+
+    /** Counts every change saved (made here or applied from the server); the UI re-reads the lists when it moves. */
+    val version: StateFlow<Int> = _version
+
+    private fun save() {
+        persistence.saveLibraries(LibraryFile(libs.toList(), deleted.toList()))
+        _version.value += 1
+    }
 
     private fun index(id: String) = libs.indexOfFirst { it.id == id }
 

@@ -35,12 +35,13 @@ class AppContainer(private val context: Context) {
     private val db = Room.databaseBuilder(context, MeiroDatabase::class.java, "meiro.db").build()
     private val persistence = RoomPersistence(db)
     val libraries = LibraryStore(persistence)
+    val links = LinksStore(persistence)
     val engine: SyncEngine
 
     init {
         SyncLog.sink = { Log.i(TAG, it) }
         engine = SyncEngine(
-            libraries, Outbox(persistence), EncryptedTokenStore(context), persistence, LinksStore(persistence),
+            libraries, Outbox(persistence), EncryptedTokenStore(context), persistence, links,
             deviceName = Build.MODEL,
         )
         // Reads the saved session token (this is the first use of the Keystore) and sends/reads what waits.
@@ -98,6 +99,22 @@ class AppContainer(private val context: Context) {
             Log.i(TAG, "sign-in: failed: $err")
             err
         }
+    }
+
+    /**
+     * Makes a list (`library.Create`): into the local store, and, when signed in, into the outbox right away (so it
+     * waits there if the server cannot be reached) and on its way to the server. Returns the new list's local id.
+     */
+    suspend fun createList(name: String): String = withContext(Dispatchers.IO) {
+        val lib = libraries.create(name)
+        Log.i(TAG, "list: created id=${lib.id} name=${lib.name}")
+        if (session().signedIn) {
+            engine.syncSnapshot().queue(engine.outbox)
+            Log.i(TAG, "list: queued, outbox pending=${engine.outbox.pending()}")
+            engine.syncNow(); engine.settled()
+            Log.i(TAG, "list: pushed, outbox pending=${engine.outbox.pending()} error=${engine.lastError.ifEmpty { "none" }}")
+        }
+        lib.id
     }
 
     /** One round of what the desktop does every 5 minutes: send what waits, read the lists and the plays. */
