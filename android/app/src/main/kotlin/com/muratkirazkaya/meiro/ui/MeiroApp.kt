@@ -40,6 +40,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
 import com.muratkirazkaya.meiro.ui.screens.MeiroShell
 import com.muratkirazkaya.meiro.ui.screens.PlaceholderScreen
+import com.muratkirazkaya.meiro.ui.screens.HomeActions
+import com.muratkirazkaya.meiro.ui.screens.HomeScreen
+import java.time.ZonedDateTime
 import com.muratkirazkaya.meiro.ui.screens.SignInField
 import com.muratkirazkaya.meiro.ui.screens.SignInScreen
 import com.muratkirazkaya.meiro.ui.screens.SystemBars
@@ -70,7 +73,7 @@ private fun AppRoot(c: AppContainer, bars: SystemBars) {
     LaunchedEffect(c) { while (true) { session = c.session(); delay(500) } }
     var guest by remember { mutableStateOf(false) }
 
-    if (session.signedIn || guest) MainShell(c, bars)
+    if (session.signedIn || guest) MainShell(c, bars, if (session.signedIn) session.email else "")
     else SignInRoute(c, session, bars, onSkip = { guest = true })
 }
 
@@ -109,14 +112,16 @@ private const val PLAYLIST_ROUTE = "playlist/{id}"
 
 /** The shell with the four tab routes; Library lists the lists, and a list opens as `playlist/<id>`. */
 @Composable
-private fun MainShell(c: AppContainer, bars: SystemBars) {
+private fun MainShell(c: AppContainer, bars: SystemBars, email: String) {
     val nav = rememberNavController()
     val entry by nav.currentBackStackEntryAsState()
     val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
     val playing by PlaybackHost.ui.collectAsState()
     val route = entry?.destination?.route
-    val selected = if (route == PLAYLIST_ROUTE) Tab.Library else Tab.entries.firstOrNull { it.route == route } ?: Tab.Home
+    // A list keeps the tab it was opened from selected (Kütüphane, or Ana sayfa for a quick pick), as the mock's stack does.
+    val from = if (route == PLAYLIST_ROUTE) nav.previousBackStackEntry?.destination?.route else route
+    val selected = Tab.entries.firstOrNull { it.route == from } ?: if (route == PLAYLIST_ROUTE) Tab.Library else Tab.Home
     var sheet by remember { mutableStateOf(false) }
     var newName by remember { mutableStateOf("") }
     var snack by remember { mutableStateOf<String?>(null) }
@@ -138,7 +143,9 @@ private fun MainShell(c: AppContainer, bars: SystemBars) {
             onNext = { PlaybackHost.next(ctx) },
         ) {
             NavHost(nav, startDestination = Tab.Home.route) {
-                composable(Tab.Home.route) { PlaceholderScreen("Meiro") }
+                composable(Tab.Home.route) {
+                    HomeRoute(c, email, onOpen = { nav.navigate("playlist/$it") }, onSnack = { snack = it })
+                }
                 composable(Tab.Search.route) { SearchRoute(c) }
                 composable(Tab.Library.route) { LibraryRoute(c, onOpen = { nav.navigate("playlist/$it") }, onNew = openSheet) }
                 composable(Tab.Downloads.route) { PlaceholderScreen("İndirilenler") }
@@ -162,6 +169,39 @@ private fun MainShell(c: AppContainer, bars: SystemBars) {
             Snack(m, { snack = null }, Modifier.align(Alignment.BottomCenter).padding(start = 12.dp, end = 12.dp, bottom = 160.dp))
         }
     }
+}
+
+/**
+ * Home: rebuilt from the store when the lists, the history or what plays change, and every half minute (the greeting
+ * and "today" follow the clock). The Daily mix card and the history button lead to screens that do not exist yet.
+ */
+@Composable
+private fun HomeRoute(c: AppContainer, email: String, onOpen: (String) -> Unit, onSnack: (String) -> Unit) {
+    val ctx = LocalContext.current
+    val version by c.libraries.version.collectAsState()
+    val historyVersion by c.historyVersion.collectAsState()
+    val now by PlaybackHost.ui.collectAsState()
+    var clock by remember { mutableStateOf(ZonedDateTime.now()) }
+    LaunchedEffect(Unit) { while (true) { delay(30_000); clock = ZonedDateTime.now() } }
+    val playingKey = now?.item?.key
+    val minute = clock.withSecond(0).withNano(0)
+    val data = remember(version, historyVersion, playingKey, minute, email) {
+        HomeMapping.build(email, ZonedDateTime.now(), c.engine.history(), c.libraries.list(), c.links, c.engine.settings.dailyMixId, playingKey)
+    }
+    HomeScreen(
+        data.ui, playing = now?.playing == true,
+        actions = HomeActions(
+            onPlayMix = {
+                if (data.mixItems.isNotEmpty()) {
+                    PlaybackHost.playQueue(ctx, data.mixItems, 0, "Daily mix")
+                    onSnack("Daily mix çalıyor")
+                }
+            },
+            onPick = { i -> data.pickIds.getOrNull(i)?.let(onOpen) },
+            // The desktop plays a history row on its own (`historyPlay`).
+            onResume = { i -> data.resume.getOrNull(i)?.let { PlaybackHost.playQueue(ctx, listOf(it), 0, "history") } },
+        ),
+    )
 }
 
 @Composable

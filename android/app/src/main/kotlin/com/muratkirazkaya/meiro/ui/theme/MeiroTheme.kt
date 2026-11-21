@@ -94,6 +94,13 @@ object MeiroType {
     val ChipSmall = MeiroText(12f, 400, BodyLineHeightSp, Ls)
     val TileTitle = MeiroText(14f, 500, 18f, Ls)
     val TileMeta = MeiroText(12f, 400, 16f, Ls)
+
+    // Home (`.hello`, `.sub`, `.mix`).
+    val Greeting = MeiroText(28f, 500, 36f, Ls)
+    val GreetingSub = MeiroText(13f, 400, 20f, Ls)
+    val MixKicker = MeiroText(12f, 400, 20f, 0.6f)
+    val MixTitle = MeiroText(22f, 600, 28f, Ls)
+    val MixBody = MeiroText(13f, 400, 18f, Ls)
 }
 
 object MeiroShapes {

@@ -41,6 +41,8 @@ import kotlinx.coroutines.runInterruptible
 import java.util.concurrent.atomic.AtomicLong
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import java.util.concurrent.TimeUnit
 
 /** What the UI needs to know about the account, read from the engine. */
@@ -70,12 +72,18 @@ class AppContainer(private val context: Context) {
         }
     }
 
+    private val _historyVersion = MutableStateFlow(0L)
+
+    /** Grows when the listening history changes (a play starts or ends here, or a sync brings plays from elsewhere). */
+    val historyVersion: StateFlow<Long> = _historyVersion
+
     private val playWriter = Executors.newSingleThreadExecutor { r -> Thread(r, "meiro-plays") }
     private val playStore = object : PlayStore {
         // The history is written to Room, which must not happen on the main thread; one writer keeps the order.
         override fun begin(entry: HistoryEntry) {
             playWriter.execute {
                 engine.beginPlay(entry)
+                _historyVersion.value += 1
                 Log.i(TAG, "play: begin event=${entry.eventId} ${entry.source}:${entry.videoId} duration=${entry.durationMs} ms")
             }
         }
@@ -83,6 +91,7 @@ class AppContainer(private val context: Context) {
         override fun finish(eventId: String, playedMs: Long, completed: Boolean) {
             playWriter.execute {
                 val e = engine.finishPlay(eventId, playedMs, completed)
+                _historyVersion.value += 1
                 Log.i(
                     TAG,
                     "play: finish event=$eventId played=$playedMs ms completed=$completed " +
@@ -158,6 +167,7 @@ class AppContainer(private val context: Context) {
         engine.settled()
         engine.syncNow(); engine.pullChanges(); engine.pullEvents()
         engine.settled()
+        _historyVersion.value += 1
         val s = engine.settings
         Log.i(
             TAG,
