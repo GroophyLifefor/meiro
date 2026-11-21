@@ -32,8 +32,6 @@ class ResolveException(message: String) : Exception(message)
  * bounded by 90 s.
  */
 class AudioResolver(private val context: Context, scope: CoroutineScope, private val log: (String) -> Unit = { Log.i(TAG, it) }) {
-    private val initLock = Mutex()
-    @Volatile private var ready = false
     private val pids = AtomicLong()
 
     private val ytm = UrlCache<Resolved>(scope) { id -> resolveYtm(id) }
@@ -49,35 +47,8 @@ class AudioResolver(private val context: Context, scope: CoroutineScope, private
     /** Drops a track's URL so the next [get] resolves again (it stopped working, or the network changed). */
     fun forget(item: QItem) = cacheFor(item).forget(item.key)
 
-    private suspend fun ensureInit() {
-        if (ready) return
-        initLock.withLock {
-            if (ready) return
-            withContext(Dispatchers.IO) {
-                YoutubeDL.getInstance().init(context.applicationContext)
-                updateIfDue()
-            }
-            ready = true
-        }
-    }
-
-    /**
-     * YouTube changes under yt-dlp, and the copy that ships in the app ages: it is updated in the app (PLAN.md), at most
-     * once a day, before the first resolve of a process. A failed update (offline) is tried again next time.
-     */
-    private fun updateIfDue() {
-        val prefs = context.getSharedPreferences("meiro-ytdlp", Context.MODE_PRIVATE)
-        val last = prefs.getLong("updatedAt", 0)
-        if (System.currentTimeMillis() - last < UPDATE_EVERY_MS) return
-        val t0 = System.nanoTime()
-        try {
-            val status = YoutubeDL.getInstance().updateYoutubeDL(context.applicationContext, YoutubeDL.UpdateChannel.STABLE)
-            prefs.edit().putLong("updatedAt", System.currentTimeMillis()).apply()
-            log("yt-dlp update: $status in ${(System.nanoTime() - t0) / 1_000_000} ms")
-        } catch (e: Throwable) {
-            log("yt-dlp update failed (will retry next start): ${e.message}")
-        }
-    }
+    /** yt-dlp is set up once per process, shared with the SoundCloud search ([YtdlpSetup]). */
+    private suspend fun ensureInit() = YtdlpSetup.ensure(context, log)
 
     private suspend fun resolveYtm(id: String): Resolved {
         ensureInit()
@@ -128,7 +99,6 @@ class AudioResolver(private val context: Context, scope: CoroutineScope, private
 
     companion object {
         const val TAG = "MeiroPlay"
-        const val UPDATE_EVERY_MS = 24 * 60 * 60 * 1000L
 
         /** The non-secret shape of a media URL for the log: the client, itag and the address family it was issued for. */
         fun urlShape(url: String): String {
