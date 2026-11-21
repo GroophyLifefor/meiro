@@ -61,6 +61,11 @@ class KeyMap(
     /** Keys whose text the mock itself ends in an ellipsis (its inventory lists the element under `clippedText`). */
     val ellipsis: Set<String>,
     val tolerance: Map<String, Map<String, Double>>,
+    /**
+     * Key prefixes of elements in a horizontally scrolling row (the mock's `overflow-x:auto` chips and shelf): such an
+     * element may lie partly outside the screen, so the outside-the-screen rule skips them. Every other rule applies.
+     */
+    val hscroll: List<String> = emptyList(),
 ) {
     companion object {
         fun load(name: String): KeyMap {
@@ -78,6 +83,7 @@ class KeyMap(
                 j.optJSONArray("noOverlap")?.let { a -> arr(a).map { p -> p as JSONArray; p.getString(0) to p.getString(1) } } ?: emptyList(),
                 j.optJSONArray("ellipsis")?.let { a -> arr(a).map { it as String }.toSet() } ?: emptySet(),
                 j.optJSONObject("tolerance")?.let { t -> t.keys().asSequence().associateWith { k -> t.getJSONObject(k).let { o -> o.keys().asSequence().associateWith { o.getDouble(it) } } } } ?: emptyMap(),
+                j.optJSONArray("hscroll")?.let { a -> arr(a).map { it as String } } ?: emptyList(),
             )
         }
     }

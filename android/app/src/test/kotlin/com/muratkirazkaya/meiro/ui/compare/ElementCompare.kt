@@ -138,7 +138,8 @@ object ElementCompare {
         for ((k, l) in byKey) for (n in l) {
             if (n.config.getOrNull(InvOverflowKey) == true && k !in keys.ellipsis && !(stress && n.config.getOrNull(InvSingleLineKey) == true)) fails += "OVERFLOW $k: text has visual overflow (clipped or ellipsized) in ${layoutRect(n)}"
             val r = layoutRect(n)
-            if (r.left < root.left - 0.01 || r.top < root.top - 0.01 || r.right > root.right + 0.01 || r.bottom > root.bottom + 0.01)
+            val inHScroll = keys.hscroll.any { k.startsWith(it) }
+            if (!inHScroll && (r.left < root.left - 0.01 || r.top < root.top - 0.01 || r.right > root.right + 0.01 || r.bottom > root.bottom + 0.01))
                 fails += "CLIPPED $k: bounds $r outside screen $root"
         }
 

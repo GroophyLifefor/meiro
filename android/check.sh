@@ -14,7 +14,7 @@ OUT="$PWD/build/check"
 PKG=com.muratkirazkaya.meiro
 mkdir -p "$OUT"
 rm -f "$OUT"/*.log "$OUT"/emulator-*.png "$OUT"/status.txt
-rm -rf "$OUT/empty" "$OUT/signin" "$OUT/library" "$OUT/playlist" "$OUT/stress" "$OUT/roborazzi"
+rm -rf "$OUT/empty" "$OUT/signin" "$OUT/library" "$OUT/playlist" "$OUT/search" "$OUT/search-done" "$OUT/stress" "$OUT/roborazzi"
 declare -a RESULTS=()
 FAILED=0
 step() { # name, status, detail
@@ -27,17 +27,19 @@ echo "== 1/5 unit tests"
 # M2a: the sync engine's tests (JVM, MockWebServer, Room under Robolectric) are part of this step. The live tests
 # (tools/live-sync.sh) are excluded here: MEIRO_LIVE_URL must be unset or Gradle would run only those.
 unset MEIRO_LIVE_URL
-if gw :app:cleanTestDebugUnitTest :app:testDebugUnitTest --tests 'com.muratkirazkaya.meiro.YtdlpTest' --tests 'com.muratkirazkaya.meiro.sync.*' --tests 'com.muratkirazkaya.meiro.data.*' --tests 'com.muratkirazkaya.meiro.playback.*' --tests 'com.muratkirazkaya.meiro.ui.ListMappingTest' >"$OUT/unit.log"; then
-  step "unit tests (YtdlpTest + sync/data/playback engine tests)" PASS
+if gw :app:cleanTestDebugUnitTest :app:testDebugUnitTest --tests 'com.muratkirazkaya.meiro.YtdlpTest' --tests 'com.muratkirazkaya.meiro.sync.*' --tests 'com.muratkirazkaya.meiro.data.*' --tests 'com.muratkirazkaya.meiro.playback.*' --tests 'com.muratkirazkaya.meiro.ui.ListMappingTest' --tests 'com.muratkirazkaya.meiro.youtube.*' --tests 'com.muratkirazkaya.meiro.search.*' >"$OUT/unit.log"; then
+  step "unit tests (YtdlpTest + sync/data/playback engine tests + YouTube Music search parser against recorded responses, SoundCloud parse, provider merge, search controller)" PASS
 else tail -20 "$OUT/unit.log"; step "unit tests" FAIL "see $OUT/unit.log"; fi
 
 echo "== 2/5 Roborazzi render + mock comparison"
-./gradlew :app:cleanTestDebugUnitTest :app:testDebugUnitTest --tests 'com.muratkirazkaya.meiro.ui.EmptyScreenTest' --tests 'com.muratkirazkaya.meiro.ui.SignInScreenTest' --tests 'com.muratkirazkaya.meiro.ui.LibraryScreenTest' --tests 'com.muratkirazkaya.meiro.ui.PlaylistScreenTest' --tests 'com.muratkirazkaya.meiro.ui.PlaylistScrolledTest' --tests 'com.muratkirazkaya.meiro.ui.StressTest' --tests 'com.muratkirazkaya.meiro.ui.CoverRealDataTest' -q >"$OUT/compare.log" 2>&1
+./gradlew :app:cleanTestDebugUnitTest :app:testDebugUnitTest --tests 'com.muratkirazkaya.meiro.ui.EmptyScreenTest' --tests 'com.muratkirazkaya.meiro.ui.SignInScreenTest' --tests 'com.muratkirazkaya.meiro.ui.LibraryScreenTest' --tests 'com.muratkirazkaya.meiro.ui.PlaylistScreenTest' --tests 'com.muratkirazkaya.meiro.ui.PlaylistScrolledTest' --tests 'com.muratkirazkaya.meiro.ui.SearchScreenTest' --tests 'com.muratkirazkaya.meiro.ui.SearchDoneScreenTest' --tests 'com.muratkirazkaya.meiro.ui.SearchDoneScrolledTest' --tests 'com.muratkirazkaya.meiro.ui.StressTest' --tests 'com.muratkirazkaya.meiro.ui.SearchStressTest' --tests 'com.muratkirazkaya.meiro.ui.CoverRealDataTest' -q >"$OUT/compare.log" 2>&1
 CMP=$?
 # playlist-scrolled: the same screen scrolled to its end, so the mock's offscreen elements are compared too.
-for screen in empty signin library playlist playlist-scrolled; do
+# search-done-scrolled: the same for the search results (the preview row, "Albümler" and "Listeler").
+for screen in empty signin library playlist playlist-scrolled search search-done search-done-scrolled; do
   for t in light dark; do
     f="$OUT/$screen/summary-$t.txt"; [ "$screen" = playlist-scrolled ] && f="$OUT/playlist/summary-$t-scrolled.txt"
+    [ "$screen" = search-done-scrolled ] && f="$OUT/search-done/summary-$t-scrolled.txt"
     if [ -f "$f" ]; then
       echo "  [$screen]"; sed -n 1,2p "$f"
       n=$(sed -n '3,$p' "$f" | grep -c .)
@@ -45,7 +47,7 @@ for screen in empty signin library playlist playlist-scrolled; do
     else echo "  no summary for $screen $t"; CMP=1; fi
   done
 done
-if [ $CMP -eq 0 ]; then step "mock comparison (element-level, empty + signin + library + playlist, light+dark) and stress renders (long names, 320dp, font 1.3), real-data cover rules (no letterbox band, mini player cover and source icons)" PASS "side-by-side: $OUT/{empty,signin,library,playlist}/side-by-side-{light,dark}.png, stress: $OUT/stress/"
+if [ $CMP -eq 0 ]; then step "mock comparison (element-level, empty + signin + library + playlist + search + search-done, light+dark) and stress renders (long names, 320dp, font 1.3), real-data cover rules (no letterbox band, mini player cover and source icons)" PASS "side-by-side: $OUT/{empty,signin,library,playlist,search,search-done}/side-by-side-{light,dark}.png, stress: $OUT/stress/"
 else step "mock comparison (element-level)" FAIL "see above, $OUT/compare.log"; fi
 
 echo "== 3/5 lint"

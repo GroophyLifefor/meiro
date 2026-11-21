@@ -1,0 +1,569 @@
+{
+ "screen": "search-done-scrolled",
+ "systemNote": "Status bar row (y 0..36) and the gesture pill are system UI on Android: not drawn by the app, excluded from element and pixel comparison.",
+ "elements": [
+  {
+   "path": "#box>div.app:nth-child(1)>div.statusbar:nth-child(1)>span#clock:nth-child(1)",
+   "system": true
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div.statusbar:nth-child(1)>span.sys:nth-child(2)>span#netIcon:nth-child(1)",
+   "system": true
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div.statusbar:nth-child(1)>span.sys:nth-child(2)>i:nth-child(2)",
+   "system": true
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar:nth-child(1)",
+   "key": "topbar"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar:nth-child(1)>h1:nth-child(1)",
+   "key": "topbar.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar:nth-child(1)>button.ibtn:nth-child(2)",
+   "key": "topbar.avatarBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar:nth-child(1)>button.ibtn:nth-child(2)>span.avatar:nth-child(1)",
+   "key": "topbar.avatar",
+   "styleFrom": "topbar.avatar.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>label.searchbar:nth-child(2)",
+   "key": "search"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>label.searchbar:nth-child(2)>svg:nth-child(1)",
+   "key": "search.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>label.searchbar:nth-child(2)>input#q:nth-child(2)",
+   "key": "search.input"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>label.searchbar:nth-child(2)>button.ibtn:nth-child(3)",
+   "key": "search.clearBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>label.searchbar:nth-child(2)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "key": "search.clear.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.chips:nth-child(3)>button.chip.sel:nth-child(1)",
+   "key": "chip.all",
+   "styleFrom": "chip.all.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.chips:nth-child(3)>button.chip.sel:nth-child(1)>svg:nth-child(1)",
+   "key": "chip.all.check"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.chips:nth-child(3)>button.chip:nth-child(2)",
+   "key": "chip.songs",
+   "styleFrom": "chip.songs.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.chips:nth-child(3)>button.chip:nth-child(3)",
+   "key": "chip.artists",
+   "styleFrom": "chip.artists.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.chips:nth-child(3)>button.chip:nth-child(4)",
+   "key": "chip.albums",
+   "styleFrom": "chip.albums.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.chips:nth-child(3)>button.chip:nth-child(5)",
+   "key": "chip.lists",
+   "styleFrom": "chip.lists.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.chips:nth-child(4)>button.chip.sel:nth-child(1)",
+   "key": "prov.ytm",
+   "styleFrom": "prov.ytm.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.chips:nth-child(4)>button.chip.sel:nth-child(1)>span.src:nth-child(1)>svg:nth-child(1)",
+   "key": "prov.ytm.logo"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.chips:nth-child(4)>button.chip.sel:nth-child(2)",
+   "key": "prov.sc",
+   "styleFrom": "prov.sc.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.chips:nth-child(4)>button.chip.sel:nth-child(2)>span.src:nth-child(1)>svg:nth-child(1)",
+   "key": "prov.sc.logo"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.h-sec:nth-child(5)>h2:nth-child(1)",
+   "key": "artists.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(6)>div.cv.round:nth-child(1)",
+   "key": "artist1.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(6)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "artist1.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(6)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(1)",
+   "key": "artist1.meta"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(7)>div.cv.round:nth-child(1)",
+   "key": "artist2.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(7)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "artist2.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(7)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>svg:nth-child(1)",
+   "key": "artist2.logo"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(7)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(2)",
+   "key": "artist2.meta"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(7)>button.linkbtn:nth-child(3)",
+   "key": "artist2.link"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(7)>button.linkbtn:nth-child(3)>svg:nth-child(1)",
+   "key": "artist2.link.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.h-sec:nth-child(8)>h2:nth-child(1)",
+   "key": "songs.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(9)>div.cv:nth-child(1)",
+   "key": "song1.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(9)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "song1.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(9)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "key": "song1.src.ytm"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(9)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span.dim:nth-child(2)>svg:nth-child(1)",
+   "key": "song1.src.sc"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(9)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(2)",
+   "key": "song1.meta"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(9)>button.ibtn:nth-child(3)",
+   "key": "song1.moreBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(9)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "key": "song1.more.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(10)>div.cv:nth-child(1)",
+   "key": "song2.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(10)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "song2.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(10)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "key": "song2.src.ytm"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(10)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(2)",
+   "key": "song2.meta"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(10)>button.ibtn:nth-child(3)",
+   "key": "song2.moreBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(10)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "key": "song2.more.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(11)>div.cv:nth-child(1)",
+   "key": "song3.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(11)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "song3.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(11)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "key": "song3.src.sc"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(11)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(2)",
+   "key": "song3.meta"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(11)>button.linkbtn:nth-child(3)",
+   "key": "song3.link"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(11)>button.linkbtn:nth-child(3)>svg:nth-child(1)",
+   "key": "song3.link.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(11)>button.ibtn:nth-child(4)",
+   "key": "song3.moreBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(11)>button.ibtn:nth-child(4)>svg:nth-child(1)",
+   "key": "song3.more.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(12)>div.cv:nth-child(1)",
+   "key": "song4.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(12)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "song4.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(12)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "key": "song4.src.sc"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(12)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(2)",
+   "key": "song4.meta"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(12)>span.chip:nth-child(3)",
+   "key": "song4.preview",
+   "styleFrom": "song4.preview.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(12)>button.ibtn:nth-child(4)",
+   "key": "song4.moreBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(12)>button.ibtn:nth-child(4)>svg:nth-child(1)",
+   "key": "song4.more.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.h-sec:nth-child(13)>h2:nth-child(1)",
+   "key": "albums.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(14)>div.tile:nth-child(1)>div.art:nth-child(1)>span.badge:nth-child(1)",
+   "key": "album1.badge"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(14)>div.tile:nth-child(1)>div.art:nth-child(1)>span.badge:nth-child(1)>svg:nth-child(1)",
+   "key": "album1.logo"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(14)>div.tile:nth-child(1)>b:nth-child(2)",
+   "key": "album1.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(14)>div.tile:nth-child(1)>span:nth-child(3)",
+   "key": "album1.meta"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(14)>div.tile:nth-child(2)>div.art:nth-child(1)>span.badge:nth-child(1)",
+   "key": "album2.badge"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(14)>div.tile:nth-child(2)>div.art:nth-child(1)>span.badge:nth-child(1)>svg:nth-child(1)",
+   "key": "album2.logo"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(14)>div.tile:nth-child(2)>b:nth-child(2)",
+   "key": "album2.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(14)>div.tile:nth-child(2)>span:nth-child(3)",
+   "key": "album2.meta"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.h-sec:nth-child(15)>h2:nth-child(1)",
+   "key": "lists.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(16)>div.cv:nth-child(1)",
+   "key": "list1.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(16)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "list1.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(16)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>svg:nth-child(1)",
+   "key": "list1.logo"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(16)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(2)",
+   "key": "list1.meta"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(16)>button.ibtn:nth-child(3)",
+   "key": "list1.moreBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(16)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "key": "list1.more.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(17)>div.cv:nth-child(1)",
+   "key": "list2.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(17)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "list2.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(17)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>svg:nth-child(1)",
+   "key": "list2.logo"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(17)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(2)",
+   "key": "list2.meta"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(17)>button.ibtn:nth-child(3)",
+   "key": "list2.moreBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(17)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "key": "list2.more.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div:nth-child(18)",
+   "spacer": true
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)",
+   "key": "mini"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.cv:nth-child(1)",
+   "key": "mini.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "mini.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>span:nth-child(2)",
+   "key": "mini.artist",
+   "styleFrom": "mini.artist.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>span:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "key": "mini.src.ytm"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>span:nth-child(2)>span.src:nth-child(1)>span.dim:nth-child(2)>svg:nth-child(1)",
+   "key": "mini.src.sc"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(3)",
+   "key": "mini.playBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "key": "mini.play.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(4)",
+   "key": "mini.nextBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(4)>svg:nth-child(1)",
+   "key": "mini.next.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.bar:nth-child(5)",
+   "key": "mini.bar"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.bar:nth-child(5)>i:nth-child(1)",
+   "key": "mini.bar.fill"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)",
+   "key": "nav"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(1)",
+   "key": "nav.home",
+   "styleFrom": "nav.home.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(1)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "key": "nav.home.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(2)",
+   "key": "nav.search",
+   "styleFrom": "nav.search.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(2)>span.pill:nth-child(1)",
+   "key": "nav.search.pill"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(2)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "key": "nav.search.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(3)",
+   "key": "nav.library",
+   "styleFrom": "nav.library.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(3)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "key": "nav.library.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(4)",
+   "key": "nav.downloads",
+   "styleFrom": "nav.downloads.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(4)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "key": "nav.downloads.icon"
+  },
+  {
+   "path": "#box>div.gesture:nth-child(7)",
+   "system": true
+  }
+ ],
+ "aux": [
+  "chip.albums.label",
+  "chip.all.label",
+  "chip.artists.label",
+  "chip.lists.label",
+  "chip.songs.label",
+  "mini.artist.label",
+  "nav.downloads.label",
+  "nav.home.label",
+  "nav.library.label",
+  "nav.search.label",
+  "prov.sc.label",
+  "prov.ytm.label",
+  "song4.preview.label",
+  "topbar.avatar.label"
+ ],
+ "centered": [],
+ "rows": [],
+ "noOverlap": [],
+ "ellipsis": [
+  "song1.meta",
+  "song2.meta",
+  "song3.title",
+  "song4.meta"
+ ],
+ "toleranceNote": "Chrome (mock reference) lays text out with integer-rounded glyph advances, Skia with fractional ones: 12-14px text is 2-4% wider in the reference. Only boxes whose width is the text (wrap-content: the meta lines, the FAB, the sort button) depend on that, and what is aligned to their right edge moves with them; every other box is fill/fixed and held to 1px. Search: the chips, the \"Temizle\" button and the \"önizleme\" chip are wrap-content too; the chips after the first move by the sum of the earlier ones' differences, and a title that ends where such a chip starts changes width with it.",
+ "tolerance": {
+  "albums.title": {
+   "w": 2.0
+  },
+  "artist1.meta": {
+   "w": 3.0,
+   "x": 1.5
+  },
+  "artist2.meta": {
+   "w": 3.0,
+   "x": 1.5
+  },
+  "artists.title": {
+   "w": 2.0
+  },
+  "chip.albums": {
+   "x": 2.5,
+   "w": 2.5
+  },
+  "chip.all": {
+   "x": 2.5,
+   "w": 2.5
+  },
+  "chip.all.check": {
+   "x": 2.5
+  },
+  "chip.artists": {
+   "x": 2.5,
+   "w": 2.5
+  },
+  "chip.lists": {
+   "x": 2.5,
+   "w": 2.5
+  },
+  "chip.songs": {
+   "x": 2.5,
+   "w": 2.5
+  },
+  "list1.meta": {
+   "w": 3.0,
+   "x": 1.5
+  },
+  "list2.meta": {
+   "w": 3.0,
+   "x": 1.5
+  },
+  "lists.title": {
+   "w": 2.0
+  },
+  "prov.sc": {
+   "x": 2.5,
+   "w": 2.5
+  },
+  "prov.sc.logo": {
+   "x": 2.5
+  },
+  "prov.ytm": {
+   "x": 2.5,
+   "w": 2.5
+  },
+  "prov.ytm.logo": {
+   "x": 2.5
+  },
+  "song1.meta": {
+   "w": 3.0,
+   "x": 1.5
+  },
+  "song2.meta": {
+   "w": 3.0,
+   "x": 1.5
+  },
+  "song3.meta": {
+   "w": 3.0,
+   "x": 1.5
+  },
+  "song4.meta": {
+   "w": 3.0,
+   "x": 1.5
+  },
+  "song4.preview": {
+   "x": 1.5,
+   "w": 1.5
+  },
+  "song4.title": {
+   "w": 1.5
+  },
+  "songs.title": {
+   "w": 2.0
+  }
+ },
+ "hscroll": [
+  "chip.",
+  "prov.",
+  "album"
+ ]
+}
