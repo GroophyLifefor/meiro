@@ -1,0 +1,105 @@
+// Cross-check helper: drives the DESKTOP's own internal/sync client (a copy of it, in this scratch module) against the
+// local dev server. "seed" pushes data the way the desktop does and dumps every request body; "verify" reads the
+// account back with the desktop's reader and prints it.
+package main
+
+import (
+	"bytes"
+	"context"
+	"fmt"
+	"io"
+	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
+	"time"
+
+	meirosync "github.com/elianiva/meiro/internal/sync"
+	"github.com/elianiva/meiro/media"
+)
+
+type dumper struct {
+	dir string
+	n   int
+}
+
+func (d *dumper) RoundTrip(r *http.Request) (*http.Response, error) {
+	if r.Body != nil && d.dir != "" {
+		body, _ := io.ReadAll(r.Body)
+		r.Body = io.NopCloser(bytes.NewReader(body))
+		d.n++
+		name := fmt.Sprintf("%02d-%s.json", d.n, strings.ReplaceAll(strings.Trim(r.URL.Path, "/"), "/", "_"))
+		_ = os.WriteFile(filepath.Join(d.dir, name), body, 0o600)
+	}
+	return http.DefaultTransport.RoundTrip(r)
+}
+
+func must(err error) {
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "ERROR:", err)
+		os.Exit(1)
+	}
+}
+
+func main() {
+	mode, url, email, pass, dump := os.Args[1], os.Args[2], os.Args[3], os.Args[4], ""
+	if len(os.Args) > 5 {
+		dump = os.Args[5]
+	}
+	ctx := context.Background()
+	c := &meirosync.Client{BaseURL: url, HTTP: &http.Client{Transport: &dumper{dir: dump}, Timeout: 30 * time.Second}}
+	token, err := c.Login(ctx, email, pass)
+	must(err)
+	c.Token = token
+
+	switch mode {
+	case "seed":
+		now := time.Now() // local zone: the desktop writes offsets such as +03:00 and nanoseconds
+		track := func(id, title string) meirosync.Track {
+			t := meirosync.TrackFor(media.SourceYTM, id, "", title, "Go Artist", 200000)
+			t.Thumbnail, t.AlbumThumbnail = "https://pic/"+id, "https://album/"+id
+			return t
+		}
+		lib := meirosync.LibraryID("go-local-1")
+		_, err = c.PushLibraries(ctx, []meirosync.Library{
+			{ID: lib, Kind: "custom", Name: "Go desktop list", Cover: "https://cover/go", UpdatedAt: now},
+			{ID: meirosync.DailyMixID(), Kind: "custom", Name: "Daily mix", UpdatedAt: now},
+		})
+		must(err)
+		_, err = c.PushLibraryItems(ctx, meirosync.LibraryItems{LibraryID: lib, Items: []meirosync.LibraryItem{
+			{Track: track("go-song-1", "Go song one"), Position: 0, UpdatedAt: now},
+			{Track: track("go-song-2", "Go song two"), Position: 1, Note: "a reason", UpdatedAt: now.Add(time.Millisecond)},
+			{Track: meirosync.TrackFor(media.SourceYTM, "go-removed", "", "Gone", "Go Artist", 0), UpdatedAt: now, Deleted: true},
+		}})
+		must(err)
+		_, err = c.PushLibraryItems(ctx, meirosync.LibraryItems{LibraryID: meirosync.DailyMixID(), Items: []meirosync.LibraryItem{
+			{Track: track("go-mix-1", "Mix from desktop"), Position: 0, Note: "because desktop", UpdatedAt: now},
+		}})
+		must(err)
+		ev := meirosync.Event{ClientEventID: "7e57ab1e-0000-4000-8000-000000000001", Track: track("go-song-1", "Go song one"), PlayedMS: 150000, DurationMS: 200000, Completed: false, Device: "go-desktop", PlayedAt: now}
+		acc, dup, err := c.PushEvents(ctx, []meirosync.Event{ev})
+		must(err)
+		fmt.Printf("SEED events accepted=%v duplicates=%v\n", acc, dup)
+		must(c.PushLinks(ctx, meirosync.Links{Artists: []meirosync.ArtistLink{{ArtistKey: "go artist", Name: "Go Artist", State: "matched", MBID: "go-mbid", UpdatedAt: now}}}))
+		fmt.Println("SEED ok local-id go-local-1 server-id", lib, "daily-mix", meirosync.DailyMixID())
+	case "verify":
+		ch, err := c.FetchAllChanges(ctx, 0)
+		must(err)
+		names := map[string]string{}
+		for _, l := range ch.Libraries {
+			names[l.ID] = l.Name
+			fmt.Printf("VERIFY list %q id=%s deleted=%v updated=%s\n", l.Name, l.ID, l.Deleted, l.UpdatedAt.UTC().Format(time.RFC3339Nano))
+		}
+		for _, i := range ch.Items {
+			fmt.Printf("VERIFY item list=%q key=%s deleted=%v pos=%d note=%q\n", names[i.LibraryID], i.Track.ProviderTrackID, i.Deleted, i.Position, i.Note)
+		}
+		plays, err := c.FetchAllEvents(ctx, 0)
+		must(err)
+		for _, e := range plays.Events {
+			fmt.Printf("VERIFY play id=%s device=%s title=%q played=%s completed=%v\n", e.ClientEventID, e.Device, e.Track.Title, e.PlayedAt.UTC().Format(time.RFC3339Nano), e.Completed)
+		}
+		links, err := c.FetchLinks(ctx)
+		must(err)
+		fmt.Printf("VERIFY links songs=%d artists=%d alternates=%d\n", len(links.Songs), len(links.Artists), len(links.Alternates))
+	}
+}

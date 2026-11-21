@@ -24,8 +24,11 @@ step() { # name, status, detail
 gw() { ./gradlew "$@" -q 2>&1 | grep -v "SDK XML\|^w: "; return "${PIPESTATUS[0]}"; }
 
 echo "== 1/5 unit tests"
-if gw :app:cleanTestDebugUnitTest :app:testDebugUnitTest --tests 'com.muratkirazkaya.meiro.YtdlpTest' >"$OUT/unit.log"; then
-  step "unit tests (YtdlpTest)" PASS
+# M2a: the sync engine's tests (JVM, MockWebServer, Room under Robolectric) are part of this step. The live tests
+# (tools/live-sync.sh) are excluded here: MEIRO_LIVE_URL must be unset or Gradle would run only those.
+unset MEIRO_LIVE_URL
+if gw :app:cleanTestDebugUnitTest :app:testDebugUnitTest --tests 'com.muratkirazkaya.meiro.YtdlpTest' --tests 'com.muratkirazkaya.meiro.sync.*' --tests 'com.muratkirazkaya.meiro.data.*' >"$OUT/unit.log"; then
+  step "unit tests (YtdlpTest + sync/data engine tests)" PASS
 else tail -20 "$OUT/unit.log"; step "unit tests" FAIL "see $OUT/unit.log"; fi
 
 echo "== 2/5 Roborazzi render + mock comparison"

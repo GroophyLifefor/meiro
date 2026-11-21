@@ -3,7 +3,11 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.roborazzi)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.ksp)
 }
+
+ksp { arg("room.schemaLocation", "$projectDir/schemas") }
 
 android {
     namespace = "com.muratkirazkaya.meiro"
@@ -22,6 +26,13 @@ android {
             isIncludeAndroidResources = true
             isReturnDefaultValues = true
             all {
+                // Live tests (two engines against the LOCAL dev server) run only when MEIRO_LIVE_URL is set,
+                // and then they are the only ones that run. See android/tools/live-sync.sh.
+                it.useJUnit {
+                    if (System.getenv("MEIRO_LIVE_URL").isNullOrBlank()) excludeCategories("com.muratkirazkaya.meiro.LiveTest")
+                    else includeCategories("com.muratkirazkaya.meiro.LiveTest")
+                }
+                System.getenv("MEIRO_LIVE_URL")?.let { v -> it.environment("MEIRO_LIVE_URL", v) }
                 // Reference images and inventory live in docs/; check.sh reads the same output dir.
                 it.systemProperty("meiro.mockDir", rootProject.file("../docs/android/mock").absolutePath)
                 it.systemProperty("meiro.outDir", rootProject.file("build/check").absolutePath)
@@ -52,7 +63,15 @@ dependencies {
     implementation(libs.ytdl.library)
     implementation(libs.ytdl.common)
     implementation(libs.coroutines.android)
+    implementation(libs.coroutines.core)
+    implementation(libs.okhttp)
+    implementation(libs.serialization.json)
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
+    implementation(libs.security.crypto)
     testImplementation(libs.junit)
+    testImplementation(libs.okhttp.mockwebserver)
     testImplementation(libs.json)
     testImplementation(libs.robolectric)
     testImplementation(libs.roborazzi)
