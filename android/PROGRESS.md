@@ -1,0 +1,44 @@
+# Android progress
+
+Read this first in every session. A row is "done" only with evidence: the
+command that was run and what it printed, or a screenshot path. "Tests pass"
+alone is not evidence that a feature works (see the quality rules in
+`PLAN.md`, "Bağlayıcı kalite kuralları").
+
+Sources of truth:
+
+- Design: `docs/android/mock/index.html`, its reference images in
+  `docs/android/mock/ref/<screen>-<theme>.png` (370 x 824 CSS px), the element
+  inventory in `docs/android/mock/inventory/<screen>.json` and the tokens in
+  `docs/android/mock/tokens.json`. Regenerate with `tools/mockref`.
+- Behaviour: `docs/android/PORTING.md` (desktop code to port, with line
+  references) and the desktop Go code itself.
+- Font: `fonts/GoogleSans.ttf` (variable, 100-1000), the same file the mock
+  uses.
+
+Toolchain (in the home directory, no sudo): JDK 21 at
+`~/.local/share/jdks/jdk-21*`, Android SDK at `~/Android/Sdk`, AVD `meiro36`
+(android-36, x86_64, google_apis). APKs are built here and installed with
+`adb`; they are never committed or published.
+
+## Milestones
+
+| | Scope | Status | Evidence |
+|---|---|---|---|
+| A3a | Toolchain | done 2026-11-21 | `./gradlew :app:assembleDebug` builds; emulator boots with KVM |
+| A3b | Spike: yt-dlp resolve and Media3 playback | done 2026-11-21 (emulator only) | `spike-results.txt`; resolve 3.4 s and READY 1.5 s after tap, re-run by the lead agent |
+| M1 | App skeleton: theme from tokens, Google Sans, bottom bar, screen-vs-mock comparison, `check.sh` | not started | |
+| M2 | Meiro sign-in, local store, sync engine (contract tests against server fixtures) | not started | |
+| M3 | Playback: queue, Media3 session, lock screen, URL cache, pre-resolve | not started | |
+| M4 | Home, Search, Library, playlist, album, artist screens | not started | |
+| M5 | Downloads, audio cache, cover cache, offline | not started | |
+| M6 | History, Daily mix, stats, settings, MusicBrainz linking | not started | |
+| M7 | All 28 screens compared with the mock, run on Murat's phone | not started | |
+
+## Open items from the spike
+
+- Not run on a real arm64 phone yet.
+- Screen-off and swipe-away playback not tested.
+- Single runs per measurement; numbers are rough.
+- `YoutubeDL.version()` returns null before the first update; read the binary's
+  `--version` instead.
