@@ -1,0 +1,9 @@
+{
+  "name": "meiro-mockref",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Reference renders, inventory, audit and tokens for the Meiro Android HTML mock",
+  "scripts": { "mockref": "node mockref.mjs" },
+  "dependencies": { "playwright": "1.63.0" }
+}

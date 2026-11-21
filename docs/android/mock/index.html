@@ -1,0 +1,1015 @@
+<!doctype html>
+<html lang="tr" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meiro Android: hedef arayüz (mock)</title>
+<style>
+  @font-face{font-family:"Google Sans"; src:url("../meiro/fonts/GoogleSans.ttf") format("truetype"); font-weight:100 1000; font-display:swap}
+  :root{
+    --surface:#131317;
+    --surface-container-low:#1c1b1f; --surface-container:#201f23; --surface-container-high:#2a292e; --surface-container-highest:#353439;
+    --on-surface:#e2e2e7; --on-surface-variant:#c7c5d1; --outline:#918f9a; --outline-variant:#47454f;
+    --primary:#c9bbff; --on-primary:#361c68; --primary-container:#4c3582; --on-primary-container:#e3ddff;
+    --secondary-container:#48435c; --on-secondary-container:#e3defd;
+    --tertiary-container:#643649; --on-tertiary-container:#ffd5e5;
+    --error:#ffb4ab; --error-container:#93000a; --on-error-container:#ffdad6;
+    --scrim:rgba(0,0,0,.55);
+    --page:#0c0c0f;
+    --shadow:0 1px 2px rgba(0,0,0,.30), 0 2px 6px rgba(0,0,0,.40);
+  }
+  html[data-theme="light"]{
+    --surface:#f9f8fe;
+    --surface-container-low:#f4f3f9; --surface-container:#eeedf3; --surface-container-high:#e8e7ed; --surface-container-highest:#e2e2e7;
+    --on-surface:#1c1b1f; --on-surface-variant:#47454f; --outline:#777580; --outline-variant:#c7c5d1;
+    --primary:#634d9d; --on-primary:#ffffff; --primary-container:#e3ddff; --on-primary-container:#22004e;
+    --secondary-container:#e3defd; --on-secondary-container:#1d172d;
+    --tertiary-container:#ffd5e5; --on-tertiary-container:#330a1e;
+    --error:#ba1a1a; --error-container:#ffdad6; --on-error-container:#410002;
+    --scrim:rgba(0,0,0,.35);
+    --page:#e9e8ef;
+    --shadow:0 1px 2px rgba(0,0,0,.10), 0 2px 6px rgba(0,0,0,.14);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0; background:var(--page); color:var(--on-surface)}
+  body{font-family:"Google Sans", system-ui, -apple-system, Roboto, sans-serif; font-size:14px; line-height:20px; letter-spacing:.2px; -webkit-font-smoothing:antialiased}
+  button{font:inherit; color:inherit; cursor:pointer}
+  svg{display:block}
+
+  /* ---------- sayfa: telefon + inceleme paneli ---------- */
+  .stage{display:flex; gap:40px; justify-content:center; align-items:flex-start; padding:32px 24px; min-height:100vh}
+  .phone{position:sticky; top:24px; flex:none; width:390px; height:min(844px, calc(100vh - 48px)); border-radius:46px; padding:10px; background:#05050a; box-shadow:0 30px 60px rgba(0,0,0,.35)}
+  .screenbox{position:relative; width:100%; height:100%; border-radius:37px; overflow:hidden; background:var(--surface)}
+  .review{width:420px; max-width:100%}
+  .review h1{font-size:24px; line-height:32px; margin:0 0 4px; font-weight:600}
+  .review .lead{color:var(--on-surface-variant); margin:0 0 18px}
+  .review .ctl{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:22px}
+  .review h2{font-size:12px; letter-spacing:.8px; text-transform:uppercase; color:var(--on-surface-variant); margin:22px 0 8px; font-weight:600}
+  .jump{display:block; width:100%; text-align:left; border:0; background:transparent; padding:10px 12px; border-radius:12px}
+  .jump b{display:block; font-weight:500}
+  .jump span{display:block; font-size:12px; line-height:16px; color:var(--on-surface-variant)}
+  .jump:hover{background:var(--surface-container-high)}
+  .jump.on{background:var(--secondary-container); color:var(--on-secondary-container)}
+  .jump.on span{color:inherit; opacity:.8}
+  .tog{border:1px solid var(--outline-variant); background:transparent; border-radius:9999px; padding:6px 14px; font-size:13px}
+  .tog.on{background:var(--secondary-container); color:var(--on-secondary-container); border-color:transparent}
+  @media (max-width:900px){
+    .stage{display:block; padding:0}
+    .phone{position:relative; top:0; width:100%; height:100vh; height:100dvh; border-radius:0; padding:0; box-shadow:none}
+    .screenbox{border-radius:0}
+    .review{padding:24px 16px 48px; width:auto}
+  }
+
+  /* ---------- uygulama iskeleti ---------- */
+  .app{position:absolute; inset:0; display:flex; flex-direction:column}
+  .statusbar{height:36px; flex:none; display:flex; align-items:center; justify-content:space-between; padding:6px 26px 0; font-size:13px; font-weight:500}
+  .statusbar .sys{display:flex; gap:6px; align-items:center}
+  .statusbar .sys i{display:block; width:16px; height:10px; border-radius:2px; background:var(--on-surface); opacity:.85}
+  .content{flex:1; overflow-y:auto; overflow-x:hidden; position:relative; scrollbar-width:none}
+  .content::-webkit-scrollbar{display:none}
+  .banner{display:flex; align-items:center; gap:10px; margin:0 16px 8px; padding:10px 14px; border-radius:14px; background:var(--surface-container-high); font-size:13px; color:var(--on-surface-variant)}
+  .banner svg{width:18px; height:18px; fill:currentColor; flex:none}
+
+  .topbar{position:sticky; top:0; z-index:3; display:flex; align-items:center; gap:6px; height:64px; padding:0 8px 0 16px; background:var(--surface)}
+  .topbar.withback{padding-left:4px}
+  .topbar h1{flex:1; min-width:0; margin:0; font-size:22px; line-height:28px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .ibtn{width:48px; height:48px; border:0; background:transparent; border-radius:50%; display:grid; place-items:center; color:var(--on-surface-variant); flex:none}
+  .ibtn svg{width:24px; height:24px; fill:currentColor}
+  .ibtn:active{background:var(--surface-container-high)}
+  .avatar{width:32px; height:32px; border-radius:50%; background:var(--primary-container); color:var(--on-primary-container); display:grid; place-items:center; font-size:13px; font-weight:600}
+
+  .navbar{flex:none; height:80px; display:flex; background:var(--surface-container); padding:12px 0 16px}
+  .nav{flex:1; border:0; background:transparent; display:flex; flex-direction:column; align-items:center; gap:4px; font-size:12px; font-weight:500; color:var(--on-surface-variant)}
+  .nav .pill{width:64px; height:32px; border-radius:16px; display:grid; place-items:center}
+  .nav svg{width:24px; height:24px; fill:currentColor}
+  .nav.on{color:var(--on-surface)}
+  .nav.on .pill{background:var(--secondary-container); color:var(--on-secondary-container)}
+  .gesture{position:absolute; left:50%; bottom:6px; transform:translateX(-50%); width:108px; height:4px; border-radius:2px; background:var(--on-surface); opacity:.45; z-index:30; pointer-events:none}
+
+  /* mini oynatici */
+  .mini{flex:none; position:relative; margin:0 8px 8px; height:64px; border-radius:16px; background:var(--surface-container-high); display:flex; align-items:center; gap:12px; padding:0 4px 0 8px; overflow:hidden}
+  .mini .cv{width:48px; height:48px; border-radius:10px; flex:none}
+  .mini .t{flex:1; min-width:0}
+  .mini .t b{display:block; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .mini .t span{display:flex; align-items:center; gap:6px; font-size:12px; color:var(--on-surface-variant); white-space:nowrap; overflow:hidden}
+  .mini .bar{position:absolute; left:12px; right:12px; bottom:0; height:2px; background:var(--outline-variant); border-radius:1px}
+  .mini .bar i{display:block; height:100%; width:38%; background:var(--primary); border-radius:1px}
+  .mini .ibtn{color:var(--on-surface)}
+  .spinner{width:22px; height:22px; border-radius:50%; border:3px solid var(--outline-variant); border-top-color:var(--primary); animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* ---------- ortak parcalar ---------- */
+  .pad{padding:0 16px}
+  .h-sec{display:flex; align-items:center; justify-content:space-between; padding:20px 16px 10px}
+  .h-sec h2{margin:0; font-size:20px; line-height:26px; font-weight:500}
+  .h-sec .more{font-size:13px; color:var(--primary); border:0; background:transparent; font-weight:500}
+  .hello{padding:4px 16px 4px; font-size:28px; line-height:36px; font-weight:500}
+  .sub{color:var(--on-surface-variant); font-size:13px}
+  .shelf{display:flex; gap:12px; overflow-x:auto; padding:0 16px 4px; scrollbar-width:none}
+  .shelf::-webkit-scrollbar{display:none}
+  .tile{width:140px; flex:none}
+  .tile .art{width:140px; height:140px; border-radius:14px; position:relative}
+  .tile .art .badge{position:absolute; left:8px; bottom:8px; display:grid}
+  .tile b{display:block; margin-top:8px; font-weight:500; line-height:18px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
+  .tile span{display:block; font-size:12px; line-height:16px; color:var(--on-surface-variant); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .badge{display:inline-grid; place-items:center; width:22px; height:22px; border-radius:50%; background:rgba(0,0,0,.55)}
+  .badge svg{width:14px; height:14px}
+
+  .row{display:flex; align-items:center; gap:12px; min-height:64px; padding:8px 4px 8px 16px; border-radius:0; position:relative}
+  .row:active{background:var(--surface-container)}
+  .row.now{background:color-mix(in srgb, var(--primary) 12%, transparent)}
+  .row.now .t b{color:var(--primary)}
+  .row .cv{width:48px; height:48px; border-radius:8px; flex:none; position:relative}
+  .row .cv.round{border-radius:50%}
+  .row .cv .eq{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; gap:3px; background:rgba(0,0,0,.45); border-radius:inherit}
+  .row .cv .eq i{width:3px; background:#fff; border-radius:2px; animation:eq 1s ease-in-out infinite}
+  .row .cv .eq i:nth-child(2){animation-delay:.2s} .row .cv .eq i:nth-child(3){animation-delay:.4s}
+  @keyframes eq{0%,100%{height:6px}50%{height:16px}}
+  .row .t{flex:1; min-width:0}
+  .row .t b{display:block; font-weight:400; font-size:16px; line-height:22px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .row .t .meta{display:flex; align-items:center; gap:6px; font-size:13px; line-height:18px; color:var(--on-surface-variant); white-space:nowrap; overflow:hidden}
+  .row .t .meta .txt{overflow:hidden; text-overflow:ellipsis}
+  .row .t .why{display:block; font-size:12px; line-height:16px; color:var(--primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .row .num{width:24px; text-align:center; color:var(--on-surface-variant); flex:none}
+  .row .drag{width:24px; height:24px; fill:var(--on-surface-variant); flex:none}
+  .src{display:inline-flex; align-items:center; gap:2px; flex:none}
+  .src svg{width:14px; height:14px}
+  .src .dim{opacity:.35}
+  .dl{width:14px; height:14px; fill:var(--primary); flex:none}
+  .chip{flex:none; height:24px; padding:0 10px; border-radius:8px; border:1px solid var(--outline-variant); background:transparent; font-size:12px; color:var(--on-surface-variant); display:inline-flex; align-items:center; gap:4px}
+  .chip svg{width:14px; height:14px; fill:currentColor}
+  .chip.other{border-style:dashed}
+  .linkbtn{flex:none; width:32px; height:32px; border-radius:50%; border:1px solid var(--outline); background:transparent; display:grid; place-items:center; color:var(--on-surface-variant); padding:0}
+  .linkbtn svg{width:18px; height:18px; fill:currentColor}
+  .linkbtn.other{border-style:dashed; opacity:.7}
+  .np .linkbtn{color:#fff; border-color:rgba(255,255,255,.5)}
+  .chip.sel{background:var(--secondary-container); color:var(--on-secondary-container); border-color:transparent}
+  .chips{display:flex; gap:8px; overflow-x:auto; padding:4px 16px 8px; scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .chips .chip{height:32px; padding:0 14px; font-size:13px; border-radius:8px}
+
+  .btn{height:40px; padding:0 20px; border-radius:20px; border:0; font-weight:500; display:inline-flex; align-items:center; gap:8px; flex:none}
+  .btn svg{width:18px; height:18px; fill:currentColor}
+  .btn.filled{background:var(--primary); color:var(--on-primary)}
+  .btn.tonal{background:var(--secondary-container); color:var(--on-secondary-container)}
+  .btn.outlined{background:transparent; border:1px solid var(--outline); color:var(--primary)}
+  .btn.text{background:transparent; color:var(--primary); padding:0 12px}
+  .btn.block{width:100%; justify-content:center; height:48px; border-radius:24px}
+
+  .card{margin:0 16px; border-radius:20px; background:var(--surface-container-low); overflow:hidden}
+  .mix{margin:4px 16px 0; border-radius:24px; padding:16px; display:flex; gap:14px; align-items:center; color:#fff; position:relative; overflow:hidden}
+  .mix .cv{width:96px; height:96px; border-radius:16px; flex:none; display:grid; grid-template-columns:1fr 1fr; overflow:hidden; box-shadow:0 4px 14px rgba(0,0,0,.3)}
+  .mix .cv i{display:block}
+  .mix .k{font-size:12px; letter-spacing:.6px; text-transform:uppercase; opacity:.85}
+  .mix h3{margin:2px 0 4px; font-size:22px; line-height:28px; font-weight:600}
+  .mix > div:nth-child(2){min-width:0; padding-right:52px}
+  .mix p{margin:0 0 10px; font-size:13px; line-height:18px; opacity:.9}
+  .mix .play{width:48px; height:48px; border-radius:50%; border:0; background:#fff; color:#1c1b1f; display:grid; place-items:center; position:absolute; right:16px; bottom:16px}
+  .mix .play svg{width:26px; height:26px; fill:currentColor}
+
+  .hero{padding:8px 16px 4px; text-align:center}
+  .hero .big{width:220px; height:220px; border-radius:20px; margin:0 auto 16px; box-shadow:0 10px 30px rgba(0,0,0,.35)}
+  .hero .big.round{border-radius:50%}
+  .hero h2{margin:0; font-size:24px; line-height:30px; font-weight:600}
+  .hero .kind{display:flex; justify-content:center; align-items:center; gap:6px; margin-top:6px; color:var(--on-surface-variant); font-size:13px}
+  .hero .actions{display:flex; justify-content:center; align-items:center; gap:4px; margin:14px 0 6px}
+  .hero .actions .play{width:56px; height:56px; border-radius:18px; border:0; background:var(--primary); color:var(--on-primary); display:grid; place-items:center; margin:0 8px}
+  .hero .actions .play svg{width:28px; height:28px; fill:currentColor}
+  .tools{display:flex; align-items:center; gap:8px; padding:6px 8px 6px 16px}
+  .tools .grow{flex:1}
+
+  .searchbar{margin:8px 16px 8px; height:56px; border-radius:28px; background:var(--surface-container-high); display:flex; align-items:center; gap:4px; padding:0 4px 0 16px; color:var(--on-surface-variant)}
+  .searchbar svg{width:24px; height:24px; fill:currentColor; flex:none}
+  .searchbar input{flex:1; min-width:0; border:0; outline:0; background:transparent; color:var(--on-surface); font:inherit; font-size:16px; margin-left:8px}
+  .recent{display:flex; align-items:center; gap:14px; height:52px; padding:0 8px 0 20px; color:var(--on-surface)}
+  .recent svg{width:22px; height:22px; fill:var(--on-surface-variant); flex:none}
+  .recent span{flex:1}
+
+  .tabs{display:flex; position:sticky; top:64px; z-index:2; background:var(--surface); border-bottom:1px solid var(--outline-variant)}
+  .tabs button{flex:1; height:48px; border:0; background:transparent; font-weight:500; color:var(--on-surface-variant); position:relative}
+  .tabs button.on{color:var(--primary)}
+  .tabs button.on::after{content:""; position:absolute; left:28%; right:28%; bottom:0; height:3px; border-radius:3px 3px 0 0; background:var(--primary)}
+
+  .fab{position:absolute; right:16px; bottom:168px; height:56px; padding:0 20px 0 16px; border-radius:16px; border:0; background:var(--primary-container); color:var(--on-primary-container); display:flex; align-items:center; gap:10px; font-weight:500; box-shadow:var(--shadow); z-index:4}
+  .fab svg{width:24px; height:24px; fill:currentColor}
+
+  .meter{margin:4px 16px 8px; padding:16px; border-radius:20px; background:var(--surface-container-low)}
+  .meter .bar{height:8px; border-radius:4px; background:var(--surface-container-highest); display:flex; overflow:hidden; margin:10px 0 8px}
+  .meter .bar i{display:block; height:100%}
+  .meter .legend{display:flex; gap:14px; font-size:12px; color:var(--on-surface-variant); flex-wrap:wrap}
+  .meter .legend span::before{content:""; display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; background:var(--c)}
+  .prog{height:4px; border-radius:2px; background:var(--surface-container-highest); margin-top:6px; overflow:hidden}
+  .prog i{display:block; height:100%; background:var(--primary)}
+
+  .empty{padding:56px 32px; text-align:center; color:var(--on-surface-variant)}
+  .empty svg{width:56px; height:56px; fill:var(--outline); margin:0 auto 14px}
+  .empty b{display:block; color:var(--on-surface); font-size:18px; font-weight:500; margin-bottom:6px}
+  .empty p{margin:0 0 18px}
+  .skel{background:linear-gradient(90deg, var(--surface-container) 0%, var(--surface-container-high) 50%, var(--surface-container) 100%); background-size:200% 100%; animation:sk 1.4s ease-in-out infinite; border-radius:8px}
+  @keyframes sk{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+  /* ayarlar */
+  .sgroup{padding:22px 16px 8px; font-size:13px; font-weight:500; color:var(--primary)}
+  .srow{display:flex; align-items:center; gap:14px; min-height:64px; padding:10px 16px}
+  .srow > svg{width:24px; height:24px; fill:var(--on-surface-variant); flex:none}
+  .srow .k{flex:1; min-width:0}
+  .srow .k b{display:block; font-weight:400; font-size:16px; line-height:22px}
+  .srow .k span{display:block; font-size:13px; line-height:18px; color:var(--on-surface-variant)}
+  .srow .k b .tag{display:inline-block; vertical-align:2px; margin-left:6px; color:var(--on-surface-variant)}
+  .sw{width:52px; height:32px; border-radius:16px; background:var(--surface-container-highest); border:2px solid var(--outline); position:relative; flex:none}
+  .sw::after{content:""; position:absolute; left:6px; top:6px; width:16px; height:16px; border-radius:50%; background:var(--outline); transition:.15s}
+  .sw.on{background:var(--primary); border-color:var(--primary)}
+  .sw.on::after{left:22px; top:2px; width:24px; height:24px; background:var(--on-primary)}
+  .seg{display:flex; border:1px solid var(--outline); border-radius:20px; overflow:hidden; height:40px; margin:4px 16px 8px}
+  .seg button{flex:1; border:0; background:transparent; font-size:13px; font-weight:500}
+  .seg button+button{border-left:1px solid var(--outline)}
+  .seg button.on{background:var(--secondary-container); color:var(--on-secondary-container)}
+  .swatches{display:flex; gap:10px; padding:4px 16px 10px}
+  .swatches i{width:36px; height:36px; border-radius:50%; display:block; border:3px solid transparent}
+  .swatches i.on{border-color:var(--on-surface)}
+  .slider{flex:none; width:120px; height:4px; border-radius:2px; background:var(--surface-container-highest); position:relative}
+  .slider i{position:absolute; left:0; top:0; bottom:0; border-radius:2px; background:var(--primary)}
+  .slider b{position:absolute; top:-8px; width:4px; height:20px; border-radius:2px; background:var(--primary)}
+  .field{margin:6px 16px 10px; border:1px solid var(--outline); border-radius:6px; padding:10px 14px 8px; position:relative}
+  .field label{position:absolute; top:-9px; left:10px; padding:0 4px; font-size:12px; color:var(--on-surface-variant); background:var(--surface)}
+  .field input{width:100%; border:0; outline:0; background:transparent; color:var(--on-surface); font:inherit; font-size:16px}
+  .field.focus{border:2px solid var(--primary)}
+  .field.focus label{color:var(--primary)}
+  .note{margin:6px 16px; font-size:12px; line-height:17px; color:var(--on-surface-variant)}
+
+  .row .t .why.muted{color:var(--on-surface-variant); font-variant-numeric:tabular-nums}
+  .hrow.skip .row{opacity:.55}
+  /* istatistik */
+  .stat{display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:0 16px}
+  .stat > div{background:var(--surface-container-low); border-radius:18px; padding:14px}
+  .stat b{display:block; font-size:26px; line-height:32px; font-weight:600}
+  .stat span{font-size:12px; color:var(--on-surface-variant)}
+  .bars{display:flex; align-items:flex-end; gap:6px; height:120px; margin:0 16px; padding:14px; border-radius:18px; background:var(--surface-container-low)}
+  .bars i{flex:1; border-radius:4px 4px 2px 2px; background:var(--primary); opacity:.85}
+  .bars i.lo{opacity:.35}
+  .rank{display:flex; align-items:center; gap:12px; padding:8px 16px}
+  .rank .n{width:22px; color:var(--on-surface-variant); font-weight:600}
+  .rank .cv{width:44px; height:44px; border-radius:8px; flex:none}
+  .rank .cv.round{border-radius:50%}
+  .rank .t{flex:1; min-width:0}
+  .rank .t b{display:block; font-weight:400; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .rank .t span{font-size:12px; color:var(--on-surface-variant)}
+
+  /* ---------- tam oynatici ---------- */
+  .np{position:absolute; inset:0; z-index:10; display:flex; flex-direction:column; transform:translateY(100%); transition:transform .32s cubic-bezier(.2,0,0,1); color:#fff; overflow:hidden}
+  .np.open{transform:none}
+  .np .bg{position:absolute; inset:0; z-index:-1}
+  .np .bg::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,.15), rgba(0,0,0,.55) 70%, rgba(0,0,0,.7))}
+  .np .top{display:flex; align-items:center; padding:36px 8px 0}
+  .np .top .ctx{flex:1; text-align:center; font-size:12px; line-height:16px}
+  .np .top .ctx span{display:block; opacity:.75; letter-spacing:.6px; text-transform:uppercase; font-size:11px}
+  .np .ibtn{color:#fff}
+  .np .art{width:326px; height:326px; max-width:calc(100% - 48px); aspect-ratio:1; margin:18px auto 0; border-radius:22px; box-shadow:0 16px 40px rgba(0,0,0,.45); position:relative}
+  .np .art .prep{position:absolute; inset:0; display:grid; place-items:center; background:rgba(0,0,0,.4); border-radius:inherit; font-size:13px; text-align:center}
+  .np .art .prep .spinner{margin:0 auto 10px; border-color:rgba(255,255,255,.3); border-top-color:#fff}
+  .np .info{display:flex; align-items:center; gap:8px; padding:22px 24px 0}
+  .np .info .t{flex:1; min-width:0}
+  .np .info h2{margin:0; font-size:22px; line-height:28px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .np .info .a{opacity:.8; font-size:15px}
+  .np .info .linkchip{margin-top:6px; display:inline-flex}
+  .np .chip{color:#fff; border-color:rgba(255,255,255,.4)}
+  .provsw{display:flex; gap:8px; padding:12px 24px 0}
+  .provsw button{display:flex; align-items:center; gap:6px; height:32px; padding:0 12px 0 8px; border-radius:16px; border:1px solid rgba(255,255,255,.35); background:transparent; color:#fff; font-size:12px}
+  .provsw button svg{width:16px; height:16px}
+  .provsw button.on{background:rgba(255,255,255,.92); color:#1c1b1f; border-color:transparent}
+  .provsw button.na{opacity:.4}
+  .seek{padding:16px 24px 0}
+  .seek .line{height:4px; border-radius:2px; background:rgba(255,255,255,.3); position:relative}
+  .seek .line i{position:absolute; left:0; top:0; bottom:0; width:38%; background:#fff; border-radius:2px}
+  .seek .line b{position:absolute; left:38%; top:-6px; width:16px; height:16px; margin-left:-8px; border-radius:50%; background:#fff}
+  .seek .times{display:flex; justify-content:space-between; font-size:12px; opacity:.8; margin-top:8px}
+  .ctrls{display:flex; align-items:center; justify-content:space-between; padding:6px 20px 0}
+  .ctrls .pp{width:76px; height:76px; border-radius:26px; border:0; background:#fff; color:#1c1b1f; display:grid; place-items:center}
+  .ctrls .pp svg{width:36px; height:36px; fill:currentColor}
+  .ctrls .ibtn svg{width:30px; height:30px}
+  .ctrls .ibtn.small svg{width:24px; height:24px}
+  .ctrls .ibtn.act{color:#fff; opacity:1}
+  .ctrls .ibtn.off{opacity:.6}
+  .np .lowtabs{margin-top:auto; display:flex; justify-content:space-around; padding:0 16px 22px}
+  .np .lowtabs button{border:0; background:transparent; color:#fff; font-weight:500; font-size:13px; letter-spacing:.4px; text-transform:uppercase; opacity:.85; padding:12px}
+
+  /* alt sayfa (bottom sheet) */
+  .scrim{position:absolute; inset:0; z-index:20; background:var(--scrim); opacity:0; pointer-events:none; transition:opacity .2s}
+  .scrim.open{opacity:1; pointer-events:auto}
+  .sheet{position:absolute; left:0; right:0; bottom:0; z-index:21; max-height:88%; display:flex; flex-direction:column; border-radius:28px 28px 0 0; background:var(--surface-container-low); color:var(--on-surface); transform:translateY(105%); transition:transform .28s cubic-bezier(.2,0,0,1); padding-bottom:20px}
+  .sheet.open{transform:none}
+  .sheet.tall{height:88%}
+  .sheet .handle{width:32px; height:4px; border-radius:2px; background:var(--outline); margin:16px auto 8px; flex:none}
+  .sheet .shead{display:flex; align-items:center; gap:12px; padding:4px 16px 12px; flex:none}
+  .sheet .shead .cv{width:48px; height:48px; border-radius:8px; flex:none}
+  .sheet .shead .t{flex:1; min-width:0}
+  .sheet .shead b{display:block; font-size:16px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .sheet .shead span{font-size:13px; color:var(--on-surface-variant)}
+  .sheet .shead h3{flex:1; margin:0; font-size:20px; line-height:26px; font-weight:500}
+  .sheet .sbody{overflow-y:auto; flex:1; min-height:0}
+  .sheet .div{height:1px; background:var(--outline-variant); margin:4px 0}
+  .mi{display:flex; align-items:center; gap:16px; width:100%; height:52px; padding:0 20px; border:0; background:transparent; text-align:left; font-size:15px}
+  .mi svg{width:24px; height:24px; fill:var(--on-surface-variant); flex:none}
+  .mi .r{margin-left:auto; display:flex; gap:6px; align-items:center; font-size:12px; color:var(--on-surface-variant)}
+  .mi:active{background:var(--surface-container-high)}
+  .mi.warn{color:var(--error)} .mi.warn svg{fill:var(--error)}
+  .acts{display:flex; gap:8px; padding:14px 16px 0; flex-wrap:wrap; flex:none}
+  .acts .sp{flex:1}
+  .res{display:flex; align-items:center; gap:12px; padding:10px 16px; border:0; background:transparent; width:100%; text-align:left}
+  .res .cv{width:44px; height:44px; border-radius:8px; flex:none}
+  .res .t{flex:1; min-width:0}
+  .res .t b{display:block; font-weight:500}
+  .res .t span{display:block; font-size:12px; color:var(--on-surface-variant)}
+  .res .sim{font-size:12px; color:var(--on-surface-variant); flex:none}
+  .res .radio{width:20px; height:20px; border-radius:50%; border:2px solid var(--outline); flex:none; position:relative}
+  .res.sel .radio{border-color:var(--primary)}
+  .res.sel .radio::after{content:""; position:absolute; inset:3px; border-radius:50%; background:var(--primary)}
+  .res.sel{background:color-mix(in srgb, var(--primary) 10%, transparent)}
+
+  /* oynatici sekmeleri (up next / lyrics / related) */
+  .qtabs{display:flex; margin:0 16px 8px; padding:4px; border-radius:22px; background:var(--surface-container-high); flex:none}
+  .qtabs button{flex:1; height:36px; border:0; border-radius:18px; background:transparent; font-weight:500; color:var(--on-surface-variant)}
+  .qtabs button.on{background:var(--secondary-container); color:var(--on-secondary-container)}
+  .qhead{display:flex; align-items:center; gap:8px; padding:6px 16px}
+  .qhead .k{flex:1}
+  .qhead .k b{display:block; font-weight:500}
+  .qhead .k span{display:block; font-size:12px; color:var(--on-surface-variant)}
+  .qlabel{padding:14px 16px 4px; font-size:13px; font-weight:500; color:var(--on-surface-variant); display:flex; align-items:center; gap:8px}
+  .tag{font-size:11px; line-height:16px; padding:0 8px; border-radius:6px; background:var(--tertiary-container); color:var(--on-tertiary-container); flex:none}
+  .tag.yt{background:var(--surface-container-highest); color:var(--on-surface-variant)}
+  .lyrics{padding:8px 24px 40px; font-size:24px; line-height:34px; font-weight:600}
+  .lyrics p{margin:0 0 14px; opacity:.35}
+  .lyrics p.on{opacity:1; color:var(--primary)}
+  .lyrics p.past{opacity:.6}
+  .lyrsrc{display:flex; align-items:center; gap:8px; padding:0 16px 8px}
+
+  /* bildirim / kilit ekrani */
+  .lock{position:absolute; inset:0; z-index:15; display:none; flex-direction:column; align-items:center; padding:90px 16px 0; background:linear-gradient(160deg,#1b2a4a,#3b1f4d 55%,#120f1d); color:#fff}
+  .lock.open{display:flex}
+  .lock .clock{font-size:82px; line-height:86px; font-weight:400}
+  .lock .date{opacity:.8; margin-bottom:40px}
+  .media{width:100%; border-radius:26px; padding:16px; color:#fff; position:relative; overflow:hidden}
+  .media .row1{display:flex; gap:12px; align-items:center}
+  .media .row1 > svg{width:24px; height:24px; fill:#fff; flex:none}
+  .media .cv{width:56px; height:56px; border-radius:12px; flex:none}
+  .media .t{flex:1; min-width:0}
+  .media .t b{display:block; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .media .t span{font-size:13px; opacity:.8}
+  .media .app{position:static; display:flex; flex-direction:row; align-items:center; gap:6px; font-size:12px; opacity:.8; margin-bottom:10px}
+  .media .line{height:4px; border-radius:2px; background:rgba(255,255,255,.3); margin:14px 0 6px}
+  .media .line i{display:block; height:100%; width:38%; border-radius:2px; background:#fff}
+  .media .c{display:flex; justify-content:space-around; align-items:center}
+  .media .c svg{width:30px; height:30px; fill:#fff}
+  .media .c .pp{width:52px; height:52px; border-radius:16px; background:#fff; display:grid; place-items:center}
+  .media .c .pp svg{fill:#1c1b1f}
+
+  .snack{position:absolute; left:12px; right:12px; bottom:160px; z-index:25; background:var(--on-surface); color:var(--surface); border-radius:6px; padding:14px 16px; display:flex; align-items:center; gap:12px; font-size:14px; box-shadow:var(--shadow); opacity:0; transform:translateY(10px); transition:.2s; pointer-events:none}
+  .snack.open{opacity:1; transform:none; pointer-events:auto}
+  .snack button{margin-left:auto; border:0; background:transparent; color:var(--primary-container); font-weight:600}
+
+  /* giris */
+  .welcome{padding:48px 24px 24px; display:flex; flex-direction:column; min-height:100%}
+  .welcome .logo{width:72px; height:72px; border-radius:22px; background:var(--primary); color:var(--on-primary); display:grid; place-items:center; font-size:34px; font-weight:700; margin-bottom:24px}
+  .welcome h1{margin:0 0 8px; font-size:30px; line-height:38px; font-weight:500}
+  .welcome p{margin:0 0 26px; color:var(--on-surface-variant)}
+  .welcome .field{margin:10px 0 14px}
+  .welcome .field label{background:var(--surface)}
+  .webview{margin:0 12px; border-radius:16px; border:1px solid var(--outline-variant); overflow:hidden; background:#fff; color:#202124}
+  .webview .url{display:flex; align-items:center; gap:8px; padding:10px 12px; background:#f1f3f4; font-size:12px; color:#5f6368}
+  .webview .url svg{width:14px; height:14px; fill:#188038}
+  .webview .body{padding:26px 22px 28px}
+  .webview .g{font-size:22px; margin-bottom:6px}
+  .webview .gi{border:1px solid #dadce0; border-radius:4px; padding:14px 12px; color:#5f6368; margin:18px 0 10px}
+  .webview .gb{display:flex; justify-content:flex-end; margin-top:18px}
+  .webview .gb span{background:#1a73e8; color:#fff; border-radius:4px; padding:9px 22px; font-weight:500}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="phone"><div class="screenbox" id="box">
+    <div class="app">
+      <div class="statusbar"><span id="clock">14:51</span><span class="sys"><span id="netIcon">5G</span><i></i></span></div>
+      <div class="content" id="content"></div>
+      <div id="miniWrap"></div>
+      <nav class="navbar" id="navbar"></nav>
+      <div id="fabWrap"></div>
+    </div>
+    <div class="np" id="np"></div>
+    <div class="lock" id="lock"></div>
+    <div class="scrim" id="scrim"></div>
+    <div class="sheet" id="sheet"></div>
+    <div class="snack" id="snack"></div>
+    <div class="gesture"></div>
+  </div></div>
+
+  <aside class="review">
+    <h1>Meiro Android: mock</h1>
+    <p class="lead">Telefonun tüm ekranları. Soldaki telefona dokunarak gez, ya da buradan bir ekrana atla. Masaüstüyle aynı renk ve dil.</p>
+    <div class="ctl">
+      <button class="tog" id="tTheme">Tema: Koyu</button>
+      <button class="tog on" id="tNet">Çevrimiçi</button>
+      <button class="tog on" id="tYtm">YouTube Music girişli</button>
+    </div>
+    <div id="jumps"></div>
+  </aside>
+</div>
+
+<script>
+/* ---------- ikonlar ---------- */
+const P = {
+  home:'M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z',
+  search:'M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z',
+  library:'M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 5h-3v5.5a2.5 2.5 0 0 1-5 0 2.5 2.5 0 0 1 2.5-2.5c.57 0 1.08.19 1.5.51V5h4v2zM4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6z',
+  download:'M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z',
+  done:'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z',
+  settings:'M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2z',
+  play:'M8 5v14l11-7z', pause:'M6 19h4V5H6v14zm8-14v14h4V5h-4z',
+  next:'M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z', prev:'M6 6h2v12H6zm3.5 6 8.5 6V6z',
+  more:'M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z',
+  link:'M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z',
+  shuffle:'M10.59 9.17 5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z',
+  repeat:'M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z',
+  heart:'M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3zm-4.4 15.55-.1.1-.1-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05z',
+  heartf:'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z',
+  down:'M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z',
+  back:'M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z',
+  close:'M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z',
+  check:'M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z',
+  add:'M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z',
+  queue:'M15 6H3v2h12V6zm0 4H3v2h12v-2zM3 16h8v-2H3v2zM17 6v8.18c-.31-.11-.65-.18-1-.18-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3V8h3V6h-5z',
+  playnext:'M3 10h11v2H3zm0-4h11v2H3zm0 8h7v2H3zm13-1v8l6-4z',
+  lines:'M14 17H4v2h10v-2zm6-8H4v2h16V9zM4 15h16v-2H4v2zM4 5v2h16V5H4z',
+  sort:'M3 18h6v-2H3v2zM3 6v2h18V6H3zm0 7h12v-2H3v2z',
+  del:'M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z',
+  drag:'M20 9H4v2h16V9zM4 15h16v-2H4v2z',
+  stats:'M5 9.2h3V19H5zM10.6 5h2.8v14h-2.8zm5.6 8H19v6h-2.8z',
+  sync:'M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0 0 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 0 0 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z',
+  offline:'M23.64 7c-.45-.34-4.93-4-11.64-4-1.5 0-2.89.19-4.15.48L18.18 13.8 23.64 7zm-6.6 8.22L3.27 1.44 2 2.72l2.05 2.06C1.91 5.76.59 6.82.36 7l11.63 14.49.01.01.01-.01 3.9-4.86 3.32 3.32 1.27-1.27-3.46-3.46z',
+  history:'M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.95 8.95 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z',
+  person:'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z',
+  album:'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 14.5c-2.49 0-4.5-2.01-4.5-4.5S9.51 7.5 12 7.5s4.5 2.01 4.5 4.5-2.01 4.5-4.5 4.5zm0-5.5c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1z',
+  share:'M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z',
+  copy:'M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z',
+  palette:'M12 3a9 9 0 0 0 0 18c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3-4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3 4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z',
+  volume:'M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 7.97v8.05c1.48-.73 2.5-2.25 2.5-4.02z',
+  storage:'M2 20h20v-4H2v4zm2-3h2v2H4v-2zM2 4v4h20V4H2zm4 3H4V5h2v2zm-4 7h20v-4H2v4zm2-3h2v2H4v-2z',
+  info:'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z',
+  spark:'M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z',
+  wifi:'M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8 3 3 3-3a4.24 4.24 0 0 0-6 0zm-4-4 2 2a7.07 7.07 0 0 1 10 0l2-2C15.14 9.14 8.87 9.14 5 13z',
+  lock:'M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z',
+  edit:'M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z'
+};
+const I = (k, cls) => '<svg viewBox="0 0 24 24"' + (cls ? ' class="' + cls + '"' : '') + '><path d="' + P[k] + '"/></svg>';
+const LOGO = {
+  ytm:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#ff0033"/><path d="M9.5 7.5v9l7-4.5z" fill="#fff"/></svg>',
+  sc:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#ff5500"/><g fill="#fff"><rect x="5" y="12" width="1.4" height="4" rx=".7"/><rect x="7.3" y="10.5" width="1.4" height="5.5" rx=".7"/><rect x="9.6" y="9" width="1.4" height="7" rx=".7"/><path d="M12 8.6c2.6-.6 5 1.1 5.3 3.5 1.3.1 2 1 2 2 0 1.1-.9 1.9-2 1.9H12z"/></g></svg>',
+  meiro:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#7c5cff"/><path d="M7 16.5V8l5 5 5-5v8.5" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+};
+const NAMES = { ytm:'YouTube Music', sc:'SoundCloud', meiro:'Meiro listesi' };
+
+/* ---------- veri (kapaklar telifsiz renk alanı) ---------- */
+const cov = (h, s) => 'background:linear-gradient(135deg,hsl(' + h + ' 55% 52%),hsl(' + ((h + (s || 50)) % 360) + ' 60% 26%))';
+const DB = {
+  s1:{t:'Get Lucky', a:'Daft Punk, Pharrell Williams', al:'Random Access Memories', d:'4:08', srcs:['ytm','sc'], st:'matched', h:36},
+  s2:{t:'Instant Crush', a:'Daft Punk, Julian Casablancas', al:'Random Access Memories', d:'5:37', srcs:['ytm'], st:'matched', h:36},
+  s3:{t:'Around the World (remix)', a:'DJ KB', d:'4:06', srcs:['sc'], st:'unknown', h:190},
+  s4:{t:'Nightcall', a:'Kavinsky', al:'OutRun', d:'4:18', srcs:['ytm','sc'], st:'matched', h:300},
+  s5:{t:'Stolen Dance', a:'Milky Chance', al:'Sadnecessary', d:'5:13', srcs:['sc'], st:'matched', h:150, dl:true},
+  s6:{t:'After Dark', a:'Mr.Kitty', al:'Time', d:'4:19', srcs:['ytm'], st:'matched', h:330},
+  s7:{t:'Gece Yarısı (canlı)', a:'Anıl Kaya', d:'3:41', srcs:['sc'], st:'unknown', h:220},
+  s8:{t:'Bedroom Demo 3', a:'kendi kaydım', d:'2:12', srcs:['sc'], st:'other', h:90},
+  s9:{t:'Son Arzum', a:'Nilüfer', d:'3:47', srcs:['ytm'], st:'unknown', h:24, dl:true},
+  s10:{t:'Bu Kalp Seni Unutur mu', a:'Fikret Kızılok', d:'4:22', srcs:['ytm','sc'], st:'matched', h:10},
+  s11:{t:'Cesaretin Var mı Aşka', a:'Gülay', d:'3:35', srcs:['ytm'], st:'unknown', h:170},
+  s12:{t:'Yolla', a:'Tarkan', d:'4:05', srcs:['ytm'], st:'matched', h:270},
+  s13:{t:'Starboy', a:'The Weeknd, Daft Punk', d:'0:30', srcs:['sc'], st:'matched', h:0, preview:true}
+};
+const MIX = [
+  ['s10','Fikret Kızılok\'u sık dinliyorsun'],
+  ['s11','Fikret Kızılok dinleyenler de dinliyor'],
+  ['s4','Gece Sürüşü listene benziyor'],
+  ['s9','Yeni sanatçı · Gülay ile benzer'],
+  ['s12','Son bir ayda 14 kez dinledin'],
+  ['s6','Kavinsky ile benzer']
+];
+const MB = [
+  {t:'Gece Yarısı (live)', s:'Kayıt · Anıl Kaya · 3:40 · 2019', sim:97, h:220},
+  {t:'Gece Yarısı', s:'Kayıt · Anıl Kaya · 3:38 · 2017', sim:93, h:225},
+  {t:'Gece Yarısı', s:'Kayıt · Ece Kaya · 4:02', sim:61, h:40}
+];
+const LYR = ['Gece çöktü, şehir sustu', 'Farlar yanıyor yol boyunca', 'Bir şarkı çalıyor radyoda', 'Ve sen yine aklımdasın', 'Durmadan gidiyoruz', 'Sabaha kadar bu yolda'];
+
+const st = {
+  tab:'home', stack:[], now:'s10', playing:true, preparing:false, online:true, ytm:true, signedIn:true,
+  npOpen:false, npTab:null, src:{}, liked:{s10:true}, qTab:'upnext', libTab:'meiro', search:'', searchDone:false,
+  filter:'Hepsi', histFilter:'Hepsi', mbSel:0, statsPeriod:'month', sheetKind:null
+};
+const activeSrc = id => st.src[id] && DB[id].srcs.includes(st.src[id]) ? st.src[id] : DB[id].srcs[0];
+
+/* ---------- parcalar ---------- */
+const srcIcons = id => '<span class="src">' + DB[id].srcs.map(x => '<span class="' + (x === activeSrc(id) ? '' : 'dim') + '" title="' + NAMES[x] + '">' + LOGO[x] + '</span>').join('') + '</span>';
+function stateChip(id){
+  const s = DB[id];
+  if (s.st === 'unknown') return '<button class="linkbtn" data-act="link" data-id="' + id + '" title="MusicBrainz\'e bağla" aria-label="MusicBrainz\'e bağla">' + I('link') + '</button>';
+  if (s.st === 'other') return '<button class="linkbtn other" data-act="link" data-id="' + id + '" title="Diğer: MusicBrainz\'de yok" aria-label="Diğer olarak işaretli">' + I('link') + '</button>';
+  return '';
+}
+function songRow(id, o){
+  o = o || {};
+  const s = DB[id], now = st.now === id;
+  const left = o.num ? '<span class="num">' + o.num + '</span>' : (o.drag ? I('drag', 'drag') : '');
+  return '<div class="row' + (now ? ' now' : '') + '" data-act="play" data-id="' + id + '">' + left +
+    '<div class="cv" style="' + cov(s.h) + '">' + (now && st.playing ? '<span class="eq"><i></i><i></i><i></i></span>' : '') + '</div>' +
+    '<div class="t"><b>' + s.t + '</b><span class="meta">' + srcIcons(id) +
+    (s.dl ? I('done', 'dl') : '') + '<span class="txt">' + (o.sub || s.a + ' · ' + s.d) + '</span></span>' +
+    (o.why ? '<span class="why">' + o.why + '</span>' : '') +
+    (o.note ? '<span class="why muted">' + o.note + '</span>' : '') + '</div>' +
+    (s.preview ? '<span class="chip">önizleme</span>' : '') +
+    stateChip(id) + '<button class="ibtn" data-act="menu" data-id="' + id + '" aria-label="Seçenekler">' + I('more') + '</button></div>';
+}
+function tile(name, by, src, h, act){
+  return '<div class="tile" data-act="' + (act || 'open-playlist') + '"><div class="art" style="' + cov(h, 80) + '"><span class="badge">' + LOGO[src] + '</span></div><b>' + name + '</b><span>' + by + '</span></div>';
+}
+function listRow(name, by, src, h, act){
+  return '<div class="row" data-act="' + (act || 'open-playlist') + '"><div class="cv" style="' + cov(h, 80) + '"></div><div class="t"><b>' + name + '</b><span class="meta"><span class="src">' + LOGO[src] + '</span><span class="txt">' + by + '</span></span></div><button class="ibtn" data-act="listmenu">' + I('more') + '</button></div>';
+}
+function topbar(title, opts){
+  opts = opts || {};
+  return '<div class="topbar' + (opts.back ? ' withback' : '') + '">' +
+    (opts.back ? '<button class="ibtn" data-act="back" aria-label="Geri">' + I('back') + '</button>' : '') +
+    '<h1>' + title + '</h1>' + (opts.right || '') +
+    (opts.noAvatar ? '' : '<button class="ibtn" data-act="account" aria-label="Hesap"><span class="avatar">M</span></button>') + '</div>';
+}
+function offlineBanner(){
+  return st.online ? '' : '<div class="banner">' + I('offline') + '<span>Çevrimdışı. İndirilenler ve önbellekteki şarkılar çalar.</span></div>';
+}
+
+/* ---------- ekranlar ---------- */
+const V = {};
+V.home = () => {
+  const mixCovers = MIX.slice(0, 4).map(m => '<i style="' + cov(DB[m[0]].h) + '"></i>').join('');
+  let h = topbar('Meiro', {right:'<button class="ibtn" data-act="go" data-to="stats" aria-label="Özet">' + I('stats') + '</button>'}) + offlineBanner() +
+    '<div class="hello">İyi akşamlar, Murat</div><div class="pad sub">Bugün 47 dakika dinledin</div>' +
+    '<div class="h-sec"><h2>Senin için</h2></div>' +
+    '<div class="mix" style="background:linear-gradient(135deg,#5b3fb0,#a2365f)" data-act="open-mix">' +
+    '<div class="cv">' + mixCovers + '</div><div><div class="k">Daily mix · bugün</div><h3>30 şarkı</h3><p>Fikret Kızılok, Gülay, Kavinsky ve 9 yeni sanatçı</p></div>' +
+    '<button class="play" data-act="play-mix" aria-label="Daily mix\'i çal">' + I('play') + '</button></div>' +
+    '<div class="h-sec"><h2>Hızlı seçimler</h2></div><div class="shelf">' +
+    tile('Gece Sürüşü', 'Meiro listesi · 28', 'meiro', 280) +
+    (st.ytm ? tile('Beğenilenler', 'YouTube Music · 1.204', 'ytm', 350) : '') +
+    tile('Simülasyon', 'Hidra · Meiro kopyası', 'meiro', 200) +
+    tile('Late Night Set', 'SoundCloud seti', 'sc', 20) + '</div>' +
+    '<div class="h-sec"><h2>Kaldığın yerden</h2><button class="more" data-act="go" data-to="history">Geçmiş</button></div>' + songRow('s10') + songRow('s4') + songRow('s5');
+  if (st.ytm && st.online) h += '<div class="h-sec"><h2>YouTube Music: Yeni çıkanlar</h2><button class="more">Tümü</button></div><div class="shelf">' +
+    tile('Random Access Memories', 'Daft Punk · Albüm', 'ytm', 36, 'open-album') + tile('OutRun', 'Kavinsky · Albüm', 'ytm', 300, 'open-album') + tile('Time', 'Mr.Kitty · Albüm', 'ytm', 330, 'open-album') + '</div>';
+  return h + '<div style="height:24px"></div>';
+};
+V.search = () => {
+  let h = '<div class="topbar"><h1>Ara</h1><button class="ibtn" data-act="account"><span class="avatar">M</span></button></div>' + offlineBanner() +
+    '<label class="searchbar" data-act="focus-search">' + I('search') + '<input id="q" placeholder="Şarkı, sanatçı, albüm, liste" value="' + st.search + '">' +
+    (st.search ? '<button class="ibtn" data-act="clear-search">' + I('close') + '</button>' : '') + '</label>';
+  if (!st.searchDone){
+    return h + '<div class="h-sec"><h2>Son aramalar</h2><button class="more">Temizle</button></div>' +
+      ['daft punk','hidra simülasyon','fikret kızılok'].map(q => '<div class="recent" data-act="do-search" data-q="' + q + '">' + I('history') + '<span>' + q + '</span>' + '<button class="ibtn">' + I('close') + '</button></div>').join('');
+  }
+  h += '<div class="chips">' + ['Hepsi','Şarkılar','Sanatçılar','Albümler','Listeler'].map(f => '<button class="chip' + (st.filter === f ? ' sel' : '') + '" data-act="filter" data-f="' + f + '">' + (st.filter === f ? I('check') : '') + f + '</button>').join('') + '</div>' +
+    '<div class="chips" style="padding-top:0">' + '<button class="chip sel">' + '<span class="src">' + LOGO.ytm + '</span>YouTube Music</button><button class="chip sel"><span class="src">' + LOGO.sc + '</span>SoundCloud</button></div>';
+  if (!st.online){
+    return h + '<div class="note" style="margin-bottom:8px">Ağ yok: sonuçlar bu cihazdan, indirilenlerden ve önbellekten.</div>' + songRow('s5') + songRow('s9');
+  }
+  const f = st.filter;
+  if (f === 'Hepsi' || f === 'Sanatçılar') h += '<div class="h-sec"><h2>Sanatçılar</h2></div>' +
+    '<div class="row" data-act="open-artist"><div class="cv round" style="' + cov(36) + '"></div><div class="t"><b>Daft Punk</b><span class="meta"><span class="txt">MusicBrainz · Fransa · elektronik</span></span></div></div>' +
+    '<div class="row" data-act="open-artist"><div class="cv round" style="' + cov(220) + '"></div><div class="t"><b>Anıl Kaya</b><span class="meta"><span class="src">' + LOGO.sc + '</span><span class="txt">yalnızca SoundCloud</span></span></div>' + stateChip('s7') + '</div>';
+  if (f === 'Hepsi' || f === 'Şarkılar') h += '<div class="h-sec"><h2>Şarkılar</h2></div>' + songRow('s1') + songRow('s2') + songRow('s3') + songRow('s13');
+  if (f === 'Hepsi' || f === 'Albümler') h += '<div class="h-sec"><h2>Albümler</h2></div><div class="shelf">' + tile('Random Access Memories', 'Daft Punk · 2013', 'ytm', 36, 'open-album') + tile('Discovery', 'Daft Punk · 2001', 'ytm', 210, 'open-album') + '</div>';
+  if (f === 'Hepsi' || f === 'Listeler') h += '<div class="h-sec"><h2>Listeler</h2></div>' + listRow('Daft Punk Essentials', 'YouTube Music listesi', 'ytm', 60) + listRow('french touch mix', 'SoundCloud seti', 'sc', 120);
+  return h + '<div style="height:24px"></div>';
+};
+V.library = () => {
+  const tabs = [['meiro','Meiro listeleri']].concat(st.ytm ? [['ytm','YouTube Music']] : []);
+  if (!st.ytm && st.libTab === 'ytm') st.libTab = 'meiro';
+  let h = topbar('Kütüphane', {right:'<button class="ibtn" data-act="sort">' + I('sort') + '</button>'}) +
+    '<div class="tabs">' + tabs.map(t => '<button class="' + (st.libTab === t[0] ? 'on' : '') + '" data-act="libtab" data-t="' + t[0] + '">' + t[1] + '</button>').join('') + '</div>' + offlineBanner();
+  if (st.libTab === 'meiro'){
+    h += '<div style="height:8px"></div>' +
+      listRow('Daily mix', 'Meiro · bugün · 30 parça', 'meiro', 270, 'open-mix') +
+      listRow('Gece Sürüşü', 'Meiro · 28 parça · YT 18, SC 10', 'meiro', 280) +
+      listRow('Simülasyon', 'Meiro · Hidra albümünden kopya · 11', 'meiro', 200) +
+      listRow('Keşifler', 'Meiro · 37 parça', 'meiro', 120) +
+      '<div class="note">Listeler Meiro hesabında tutulur, masaüstüyle iki yönlü eşitlenir.</div>' +
+      '<div style="height:88px"></div>';
+  } else {
+    h += '<div style="height:8px"></div>' + listRow('Beğenilenler', 'YouTube Music · 1.204 parça', 'ytm', 350) +
+      listRow('Hareketli Yol Şarkıları', 'YouTube Music listesi · 52', 'ytm', 60) +
+      listRow('Simülasyon', 'Hidra · Albüm', 'ytm', 200, 'open-album') +
+      '<div class="note">YouTube Music sekmesi yalnız YouTube Music girişi varken görünür. Bir listeyi Meiro listesine kopyalamak için ⋮ menüsü.</div>';
+  }
+  return h + '<div style="height:16px"></div>';
+};
+V.downloads = () => {
+  if (!st.online) { /* ayni ekran, sadece banner */ }
+  return topbar('İndirilenler') + offlineBanner() +
+    '<div class="meter"><b>2,1 GB</b> <span class="sub">kullanılıyor · telefonda 41 GB boş</span>' +
+    '<div class="bar"><i style="width:28%;background:var(--primary)"></i><i style="width:9%;background:#ff0033"></i><i style="width:5%;background:#ff5500"></i></div>' +
+    '<div class="legend"><span style="--c:var(--primary)">İndirilen 1,4 GB · 212</span><span style="--c:#ff0033">YT önbellek 480 MB</span><span style="--c:#ff5500">SC önbellek 230 MB</span></div></div>' +
+    '<div class="h-sec"><h2>İniyor</h2><button class="more">Hepsini durdur</button></div>' +
+    '<div class="row"><div class="cv" style="' + cov(270) + '"></div><div class="t"><b>Daily mix</b><span class="meta"><span class="txt">12 / 30 şarkı · Wi-Fi bekleniyor</span></span><div class="prog"><i style="width:40%"></i></div></div><button class="ibtn">' + I('close') + '</button></div>' +
+    '<div class="h-sec"><h2>Şarkılar</h2><button class="more">Sırala</button></div>' +
+    songRow('s5', {sub:'Milky Chance · 9,1 MB'}) + songRow('s9', {sub:'Nilüfer · 6,8 MB'}) + songRow('s4', {sub:'Kavinsky · 8,2 MB'}) +
+    '<div class="note">İndirilenler önbellek temizliğinden etkilenmez. Çevrimdışıyken çalma önce buradan başlar.</div><div style="height:24px"></div>';
+};
+V.playlist = () => {
+  return topbar('', {back:true, noAvatar:true, right:'<button class="ibtn">' + I('search') + '</button><button class="ibtn" data-act="listmenu">' + I('more') + '</button>'}) +
+    '<div class="hero"><div class="big" style="' + cov(280, 80) + '"></div><h2>Gece Sürüşü</h2>' +
+    '<div class="kind"><span class="src">' + LOGO.meiro + '</span>Meiro listesi · 28 parça · 1 sa 52 dk</div>' +
+    '<div class="hero actions"><button class="ibtn" aria-label="İndir">' + I('download') + '</button><button class="ibtn" aria-label="Karıştır">' + I('shuffle') + '</button>' +
+    '<button class="play" data-act="play" data-id="s4" aria-label="Çal">' + I('play') + '</button><button class="ibtn" aria-label="Sırayı düzenle">' + I('edit') + '</button><button class="ibtn" aria-label="Paylaş">' + I('share') + '</button></div></div>' +
+    '<div class="tools"><span class="sub grow">YT 18 · SC 10 · eşleşen 24</span><button class="btn text">' + I('sort') + 'Ekleme sırası</button></div>' +
+    songRow('s4') + songRow('s5') + songRow('s6') + songRow('s7') + songRow('s8') + songRow('s10') + songRow('s12') +
+    '<div class="h-sec"><h2>Benzer şarkılar</h2></div>' + songRow('s1') + songRow('s11') + '<div style="height:24px"></div>';
+};
+V.mix = () => {
+  return topbar('', {back:true, noAvatar:true, right:'<button class="ibtn">' + I('more') + '</button>'}) +
+    '<div class="hero"><div class="big" style="background:linear-gradient(135deg,#5b3fb0,#a2365f)"></div><h2>Daily mix</h2>' +
+    '<div class="kind"><span class="src">' + LOGO.meiro + '</span>Bugün için · 30 parça · her sabah yenilenir</div>' +
+    '<div class="hero actions"><button class="ibtn">' + I('download') + '</button><button class="ibtn">' + I('shuffle') + '</button><button class="play" data-act="play" data-id="s10">' + I('play') + '</button><button class="ibtn" data-act="go" data-to="settings">' + I('settings') + '</button><button class="ibtn">' + I('share') + '</button></div></div>' +
+    '<div class="note" style="margin-bottom:8px">Neden önerildiği her şarkının altında. Bir şarkıyı beğenmezsen ⋮ → "Bunu önerme".</div>' +
+    MIX.map(m => songRow(m[0], {why:m[1]})).join('') + '<div style="height:24px"></div>';
+};
+V.album = () => {
+  return topbar('', {back:true, noAvatar:true, right:'<button class="ibtn" data-act="listmenu">' + I('more') + '</button>'}) +
+    '<div class="hero"><div class="big" style="' + cov(36, 80) + '"></div><h2>Random Access Memories</h2>' +
+    '<div class="kind"><span class="src">' + LOGO.ytm + '</span>Albüm · Daft Punk · 2013 · 13 parça</div>' +
+    '<div class="hero actions"><button class="ibtn">' + I('download') + '</button><button class="ibtn">' + I('shuffle') + '</button><button class="play" data-act="play" data-id="s1">' + I('play') + '</button><button class="ibtn" data-act="dup" title="Meiro listesi olarak kopyala">' + I('copy') + '</button><button class="ibtn">' + I('share') + '</button></div></div>' +
+    songRow('s2', {num:5, sub:'Daft Punk · 5:37'}) + songRow('s1', {num:8, sub:'Daft Punk · 4:08'}) +
+    '<div class="note">Albüm şarkılarında kapak yoksa albüm kapağı kullanılır. Kapaklar telefonda önbelleğe alınır.</div><div style="height:24px"></div>';
+};
+V.artist = () => {
+  return topbar('', {back:true, noAvatar:true}) +
+    '<div class="hero"><div class="big round" style="' + cov(36, 80) + '"></div><h2>Daft Punk</h2>' +
+    '<div class="kind">MusicBrainz ile eşleşti · Fransa · 1993–2021</div>' +
+    '<div class="hero actions"><button class="btn tonal">' + I('shuffle') + 'Karıştır</button><button class="play" data-act="play" data-id="s1">' + I('play') + '</button><button class="btn outlined">' + I('link') + 'Bağı değiştir</button></div></div>' +
+    '<div class="h-sec"><h2>Popüler</h2></div>' + songRow('s1') + songRow('s2') +
+    '<div class="h-sec"><h2>Albümler</h2></div><div class="shelf">' + tile('Random Access Memories', '2013', 'ytm', 36, 'open-album') + tile('Discovery', '2001', 'ytm', 210, 'open-album') + tile('Homework', '1997', 'ytm', 120, 'open-album') + '</div>' +
+    '<div class="h-sec"><h2>Benzer sanatçılar</h2></div><div class="shelf">' + tile('Justice', 'ListenBrainz', 'meiro', 0, 'open-artist') + tile('Kavinsky', 'ListenBrainz', 'meiro', 300, 'open-artist') + '</div><div style="height:24px"></div>';
+};
+const HIST = [
+  ['Bugün', [
+    ['14:48','s10','phone','full','tamamı'],
+    ['14:44','s9','phone','full','tamamı'],
+    ['14:40','s12','phone','skip','geçildi · 0:12'],
+    ['14:31','s4','desktop','part','2:05 / 4:18'],
+    ['10:02','s5','desktop','full','tamamı']]],
+  ['Dün', [
+    ['23:17','s6','desktop','full','tamamı'],
+    ['23:12','s7','desktop','skip','geçildi · 0:08'],
+    ['22:58','s11','phone','full','tamamı']]],
+  ['27 Ekim Salı', [
+    ['19:40','s1','phone','full','tamamı'],
+    ['19:36','s13','phone','part','0:30']]]
+];
+const DEV = { phone:'telefon', desktop:'masaüstü' };
+V.history = () => {
+  const f = st.histFilter;
+  const keep = e => f === 'Hepsi' || (f === 'Sayılanlar' ? e[3] !== 'skip' : f === 'Geçilenler' ? e[3] === 'skip' : f === DEV[e[2]] );
+  let h = topbar('Dinleme geçmişi', {back:true, noAvatar:true, right:'<button class="ibtn" aria-label="Geçmişte ara">' + I('search') + '</button><button class="ibtn" data-act="sheet" data-k="histmenu" aria-label="Seçenekler">' + I('more') + '</button>'}) +
+    '<div class="chips">' + ['Hepsi','Sayılanlar','Geçilenler','telefon','masaüstü'].map(x => '<button class="chip' + (f === x ? ' sel' : '') + '" data-act="hfilter" data-f="' + x + '">' + (f === x ? I('check') : '') + (x === 'telefon' ? 'Telefon' : x === 'masaüstü' ? 'Masaüstü' : x) + '</button>').join('') + '</div>';
+  for (const [day, list] of HIST) {
+    const rows = list.filter(keep);
+    if (!rows.length) continue;
+    const mins = rows.filter(e => e[3] !== 'skip').length * 4;
+    h += '<div class="h-sec"><h2>' + day + '</h2><span class="sub">' + rows.length + ' çalma · ~' + mins + ' dk</span></div>';
+    h += rows.map(e => '<div class="hrow' + (e[3] === 'skip' ? ' skip' : '') + '">' +
+      songRow(e[1], {sub: DB[e[1]].a, note: e[0] + ' · ' + DEV[e[2]] + ' · ' + e[4]}) + '</div>').join('');
+  }
+  return h + '<div class="note">Bütün cihazlardaki çalmalar, Meiro hesabından. 30 saniyeden kısa ya da yarısından az dinlenenler soluk: geçmişte durur ama Özet\'e ve önerilere sayılmaz.</div><div style="height:24px"></div>';
+};
+V.stats = () => {
+  const m = st.statsPeriod === 'month';
+  const hs = m ? [30,45,20,60,80,55,40,70,90,65,35,50,75,85] : [40,55,60,45,70,85,65,50,75,90,60,80];
+  return topbar('Özet', {back:true, noAvatar:true}) +
+    '<div class="seg" style="margin-top:4px"><button class="' + (m ? 'on' : '') + '" data-act="period" data-p="month">Ekim 2026</button><button class="' + (m ? '' : 'on') + '" data-act="period" data-p="year">2026</button></div>' +
+    '<div class="stat"><div><b>' + (m ? '41 sa' : '388 sa') + '</b><span>dinleme</span></div><div><b>' + (m ? '612' : '5.940') + '</b><span>çalma</span></div><div><b>' + (m ? '184' : '1.402') + '</b><span>farklı şarkı</span></div><div><b>' + (m ? '73' : '411') + '</b><span>sanatçı · ' + (m ? '19' : '160') + ' yeni</span></div></div>' +
+    '<div class="h-sec"><h2>' + (m ? 'Günlere göre' : 'Aylara göre') + '</h2></div><div class="bars">' + hs.map((v, i) => '<i style="height:' + v + '%" class="' + (i % 3 ? '' : 'lo') + '"></i>').join('') + '</div>' +
+    '<div class="h-sec"><h2>En çok dinlenen sanatçılar</h2></div>' +
+    [['Fikret Kızılok','96 çalma',10],['Kavinsky','71 çalma',300],['Hidra','58 çalma',200]].map((r, i) => '<div class="rank"><span class="n">' + (i + 1) + '</span><div class="cv round" style="' + cov(r[2]) + '"></div><div class="t"><b>' + r[0] + '</b><span>' + r[1] + '</span></div></div>').join('') +
+    '<div class="h-sec"><h2>En çok dinlenen şarkılar</h2></div>' +
+    [['s10','42 çalma'],['s4','31 çalma'],['s9','27 çalma']].map((r, i) => '<div class="rank"><span class="n">' + (i + 1) + '</span><div class="cv" style="' + cov(DB[r[0]].h) + '"></div><div class="t"><b>' + DB[r[0]].t + '</b><span>' + DB[r[0]].a + ' · ' + r[1] + '</span></div></div>').join('') +
+    '<div class="note">Bütün cihazlardaki dinlemeler, Meiro hesabından. Aynı özet dashboard\'da da var.</div><div style="height:24px"></div>';
+};
+V.settings = () => {
+  const sw = on => '<span class="sw' + (on ? ' on' : '') + '"></span>';
+  return topbar('Ayarlar', {back:true, noAvatar:true}) +
+    '<div class="sgroup">Hesaplar</div>' +
+    '<div class="srow">' + I('person') + '<div class="k"><b>Meiro hesabı</b><span>murat@… · eşitleme güncel, 2 dk önce</span></div><button class="btn text">Çıkış</button></div>' +
+    '<div class="srow">' + I('sync') + '<div class="k"><b>Sunucu</b><span>meiro.muratkirazkaya.com</span></div><button class="btn text">Değiştir</button></div>' +
+    '<div class="srow" data-act="go" data-to="ytmlogin"><span class="src" style="width:24px;justify-content:center">' + LOGO.ytm + '</span><div class="k"><b>YouTube Music <span class="tag yt">isteğe bağlı</span></b><span>' + (st.ytm ? 'Girişli · Murat K. · kanal: kişisel' : 'Giriş yok. Arama ve çalma hesapsız çalışır.') + '</span></div><button class="btn text">' + (st.ytm ? 'Çıkış' : 'Giriş') + '</button></div>' +
+    '<div class="srow"><span class="src" style="width:24px;justify-content:center"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#d51007"/></svg></span><div class="k"><b>Last.fm</b><span>Bağlı değil</span></div><button class="btn text">Bağla</button></div>' +
+    '<div class="sgroup">Görünüm</div>' +
+    '<div class="srow">' + I('palette') + '<div class="k"><b>Tema</b></div></div><div class="seg"><button class="on">Sistem</button><button>Açık</button><button>Koyu</button></div>' +
+    '<div class="srow"><span style="width:24px"></span><div class="k"><b>Duvar kağıdından renk</b><span>Android 12+ için. Kapalıyken aşağıdaki renk.</span></div>' + sw(false) + '</div>' +
+    '<div class="swatches" style="padding-left:54px"><i style="background:#7c5cff" class="on"></i><i style="background:#3b82f6"></i><i style="background:#10b981"></i><i style="background:#f59e0b"></i><i style="background:#ef4444"></i></div>' +
+    '<div class="srow"><span style="width:24px"></span><div class="k"><b>Rengi kapaktan al</b><span>Oynatıcı çalan şarkının kapağına göre renklenir.</span></div>' + sw(true) + '</div>' +
+    '<div class="sgroup">Çalma</div>' +
+    '<div class="srow">' + I('volume') + '<div class="k"><b>Ses seviyesini dengele</b></div>' + sw(true) + '</div>' +
+    '<div class="srow"><span style="width:24px"></span><div class="k"><b>Kaynak sırası</b><span>İki sağlayıcıda olan şarkı önce: YouTube Music, sonra SoundCloud. Önce indirilen dosya çalar.</span></div><button class="btn text">Düzenle</button></div>' +
+    '<div class="srow"><span style="width:24px"></span><div class="k"><b>Mobil veride ses kalitesi</b><span>Düşük (≈ 70 kbps). Wi-Fi\'de en yüksek.</span></div><button class="btn text">Değiştir</button></div>' +
+    '<div class="sgroup">Öneriler</div>' +
+    '<div class="srow">' + I('spark') + '<div class="k"><b>Şarkı öner</b><span>Daily mix ve kuyruğa öneri. Meiro hesabındaki tüm dinlemelerden öğrenir.</span></div>' + sw(true) + '</div>' +
+    '<div class="srow"><span style="width:24px"></span><div class="k"><b>Yeni sanatçılar</b><span>Önerilerin %30\'u hiç dinlemediğin sanatçılardan</span></div><span class="slider"><i style="width:30%"></i><b style="left:30%"></b></span></div>' +
+    '<div class="srow"><span style="width:24px"></span><div class="k"><b>Daily mix</b><span>Bugün 07:12\'de yapıldı</span></div><button class="btn text">Şimdi yap</button></div>' +
+    '<div class="sgroup">İndirme ve depolama</div>' +
+    '<div class="srow">' + I('wifi') + '<div class="k"><b>Yalnız Wi-Fi\'de indir</b></div>' + sw(true) + '</div>' +
+    '<div class="srow">' + I('storage') + '<div class="k"><b>YouTube Music önbelleği</b><span>480 MB / 1 GB · 112 şarkı</span></div><button class="btn text">Temizle</button></div>' +
+    '<div class="srow"><span style="width:24px"></span><div class="k"><b>SoundCloud önbelleği</b><span>230 MB / 1 GB · 51 şarkı</span></div><button class="btn text">Temizle</button></div>' +
+    '<div class="srow"><span style="width:24px"></span><div class="k"><b>Kapak önbelleği</b><span>64 MB · 3.120 kapak</span></div><button class="btn text">Temizle</button></div>' +
+    '<div class="srow"><span style="width:24px"></span><div class="k"><b>MusicBrainz önbelleği</b><span>sanatçı 30 gün, şarkı 1 gün · 2,4 MB</span></div><button class="btn text">Temizle</button></div>' +
+    '<div class="sgroup">Geçmiş</div>' +
+    '<div class="srow">' + I('history') + '<div class="k"><b>Dinleme geçmişi</b><span>1.204 çalma · 30 sn ya da yarısı sayılır</span></div><button class="btn text" data-act="go" data-to="history">Aç</button></div>' +
+    '<div class="sgroup">Hakkında</div>' +
+    '<div class="srow">' + I('person') + '<div class="k"><b>Meiro fork\'u üzerine Murat Kirazkaya tarafından geliştirilmiştir</b></div></div>' +
+    '<div class="srow">' + I('info') + '<div class="k"><b>Meiro 0.5.0</b><span>Android · APK</span></div></div>' +
+    '<div class="srow"><span style="width:24px"></span><div class="k"><b>yt-dlp</b><span>2026.10.12 · her şarkının sesini bulur</span></div><button class="btn text">Güncelle</button></div>' +
+    '<div style="height:24px"></div>';
+};
+V.ytmlogin = () => {
+  return topbar('YouTube Music girişi', {back:true, noAvatar:true}) +
+    '<div class="note" style="margin:0 16px 12px">Giriş Google\'ın kendi sayfasında olur. Meiro şifreni görmez, yalnızca oturum çerezini bu telefonda saklar.</div>' +
+    '<div class="webview"><div class="url">' + I('lock') + 'accounts.google.com</div><div class="body"><div class="g">Oturum açın</div><div style="color:#5f6368">YouTube Music\'e devam etmek için</div><div class="gi">E-posta veya telefon</div><div style="color:#1a73e8;font-size:13px">E-postanızı mı unuttunuz?</div><div class="gb"><span>İleri</span></div></div></div>' +
+    '<div class="note" style="margin-top:14px">Giriş isteğe bağlıdır: kütüphane, beğeniler ve YouTube Music listeleri için gerekir.</div>';
+};
+V.signin = () => {
+  return '<div class="welcome"><div class="logo">M</div><h1>Meiro\'ya hoş geldin</h1><p>Listelerin, indirilenlerin ve dinleme özetin Meiro hesabında. Masaüstüyle aynı hesap.</p>' +
+    '<div class="field"><label>Sunucu</label><input value="meiro.muratkirazkaya.com"></div>' +
+    '<div class="field focus"><label>E-posta</label><input value="murat@"></div>' +
+    '<div class="field"><label>Şifre</label><input type="password" value="••••••••"></div>' +
+    '<button class="btn filled block" data-act="signin-ok">Giriş yap</button>' +
+    '<button class="btn text block" style="margin-top:8px" data-act="signin-ok">Hesapsız devam et</button>' +
+    '<p class="sub" style="margin:auto 0 0;padding-top:24px;font-size:12px">Hesapsız: arama ve çalma çalışır, listeler yalnız bu telefonda kalır.</p></div>';
+};
+V.loading = () => topbar('Meiro') + '<div style="padding:8px 16px">' +
+  '<div class="skel" style="height:34px;width:70%;margin-bottom:10px"></div><div class="skel" style="height:14px;width:40%;margin-bottom:24px"></div>' +
+  '<div class="skel" style="height:128px;border-radius:24px;margin-bottom:24px"></div>' +
+  [1,2,3,4].map(() => '<div style="display:flex;gap:12px;align-items:center;margin-bottom:16px"><div class="skel" style="width:48px;height:48px"></div><div style="flex:1"><div class="skel" style="height:14px;width:70%;margin-bottom:8px"></div><div class="skel" style="height:12px;width:45%"></div></div></div>').join('') + '</div>';
+V.empty = () => topbar('Kütüphane') + '<div class="tabs"><button class="on">Meiro listeleri</button></div>' +
+  '<div class="empty">' + I('library') + '<b>Henüz liste yok</b><p>Bir şarkının ⋮ menüsünden "Listeye ekle" ya da bir albümü Meiro listesine kopyala.</p><button class="btn filled" data-act="new-playlist">' + I('add') + 'Yeni liste</button></div>';
+V.error = () => topbar('Ara') + '<label class="searchbar">' + I('search') + '<input value="hidra"></label>' +
+  '<div class="empty">' + I('info') + '<b>YouTube Music cevap vermedi</b><p>SoundCloud sonuçları aşağıda. Biraz sonra tekrar denenecek.</p><button class="btn tonal">Tekrar dene</button></div>' + songRow('s7');
+
+const SCREENS = [
+  ['Başlangıç', [
+    ['signin','Giriş','Meiro hesabı, sunucu prod adresi. Hesapsız devam da var.'],
+    ['ytmlogin','YouTube Music girişi','Google sayfası uygulama içinde. İsteğe bağlı.']]],
+  ['Ana sekmeler (alt çubuk)', [
+    ['home','Ana sayfa','Daily mix en üstte, hızlı seçimler, kaldığın yerden, YT rafları.'],
+    ['search','Arama','Son aramalar; arayınca filtreler ve sağlayıcı seçimi.'],
+    ['search-done','Arama sonuçları','Sanatçılar kayar (yapışkan değil). Her satırda kaynak logosu.'],
+    ['library','Kütüphane','Meiro listeleri; YouTube Music sekmesi yalnız girişliyken.'],
+    ['downloads','İndirilenler','Depolama, inen listeler, indirilen şarkılar.']]],
+  ['Sayfalar', [
+    ['mix','Daily mix','Her şarkının altında neden önerildiği.'],
+    ['playlist','Meiro listesi','Satırda kaynak, eşleşme rozeti, ⋮ menüsü; altta benzer şarkılar.'],
+    ['album','Albüm','"Meiro listesi olarak kopyala" düğmesi.'],
+    ['artist','Sanatçı','MusicBrainz bilgisi, benzer sanatçılar.'],
+    ['history','Dinleme geçmişi','Gün gün çalmalar; cihaz ve ne kadar dinlendiği. Geçilenler soluk.'],
+    ['stats','Özet','Aylık ve yıllık; bütün cihazlardan.'],
+    ['settings','Ayarlar','Hesaplar, görünüm, çalma, öneri, depolama, yt-dlp.']]],
+  ['Oynatıcı', [
+    ['np','Tam oynatıcı','Kapak rengi, kaynak seçici (YT / SC), beğeni, eşleşme.'],
+    ['np-prep','Şarkı hazırlanıyor','yt-dlp sesi ararken ilk birkaç saniye.'],
+    ['upnext','Sıradakiler','Sürükle-sırala; önerilerin kaynağı etiketli.'],
+    ['lyrics','Sözler','Senkron; çalan satır vurgulu.'],
+    ['related','Benzerler','Çalan şarkıya benzer şarkılar.'],
+    ['lock','Kilit ekranı','Medya kontrolleri ve bildirim.']]],
+  ['Menüler', [
+    ['menu','Şarkı menüsü','Sıradaki, listeye ekle, indir, bağla, kaynak, paylaş.'],
+    ['link','MusicBrainz bağlama','Benzerlik yüzdesiyle sonuçlar; "diğer" işareti.'],
+    ['addto','Listeye ekle','Mevcut listeler ve yeni liste.'],
+    ['account','Hesap menüsü','Avatar: Özet, Ayarlar, eşitleme durumu.']]],
+  ['Durumlar', [
+    ['offline','Çevrimdışı','Bant, arama cihazdan sonuç verir.'],
+    ['loading','Yükleniyor','İskelet ekran.'],
+    ['empty','Boş kütüphane','İlk kullanım.'],
+    ['error','Hata','Bir sağlayıcı düşünce öbürü yine sonuç verir.']]]
+];
+
+/* ---------- cizim ---------- */
+const $ = id => document.getElementById(id);
+let current = 'home';
+function render(){
+  const page = st.stack.length ? st.stack[st.stack.length - 1] : st.tab;
+  $('content').innerHTML = V[page]();
+  const full = page === 'signin';
+  $('navbar').style.display = full ? 'none' : '';
+  $('miniWrap').innerHTML = full ? '' : mini();
+  $('navbar').innerHTML = [['home','Ana sayfa','home'],['search','Ara','search'],['library','Kütüphane','library'],['downloads','İndirilenler','download']]
+    .map(n => '<button class="nav' + (st.tab === n[0] ? ' on' : '') + '" data-act="tab" data-t="' + n[0] + '"><span class="pill">' + I(n[2]) + '</span>' + n[1] + '</button>').join('');
+  $('fabWrap').innerHTML = page === 'library' && st.libTab === 'meiro' ? '<button class="fab" data-act="new-playlist">' + I('add') + 'Yeni liste</button>' : '';
+  $('netIcon').textContent = st.online ? '5G' : '✕';
+  renderNP();
+  document.querySelectorAll('.jump').forEach(b => b.classList.toggle('on', b.dataset.s === current));
+}
+function mini(){
+  const s = DB[st.now];
+  return '<div class="mini" data-act="open-np"><div class="cv" style="' + cov(s.h) + '"></div><div class="t"><b>' + s.t + '</b><span>' +
+    (st.preparing ? '<span class="spinner" style="width:12px;height:12px;border-width:2px"></span>Hazırlanıyor…' : srcIcons(st.now) + s.a) + '</span></div>' +
+    '<button class="ibtn" data-act="toggle" aria-label="Çal/duraklat">' + (st.preparing ? '<span class="spinner"></span>' : I(st.playing ? 'pause' : 'play')) + '</button>' +
+    '<button class="ibtn" data-act="next" aria-label="Sonraki">' + I('next') + '</button><div class="bar"><i></i></div></div>';
+}
+function renderNP(){
+  const s = DB[st.now], id = st.now, act = activeSrc(id);
+  const linkPart = '<button class="chip" data-act="link" data-id="' + id + '">' + I(s.st === 'matched' ? 'check' : 'link') + (s.st === 'matched' ? 'MusicBrainz' : s.st === 'other' ? 'diğer' : 'MusicBrainz\'e bağla') + '</button>';
+  $('np').classList.toggle('open', st.npOpen);
+  $('np').innerHTML = '<div class="bg" style="' + cov(s.h, 70) + '"></div>' +
+    '<div class="top"><button class="ibtn" data-act="close-np" aria-label="Kapat">' + I('down') + '</button><div class="ctx"><span>Çalınıyor</span>Gece Sürüşü</div><button class="ibtn" data-act="menu" data-id="' + id + '">' + I('more') + '</button></div>' +
+    '<div class="art" style="' + cov(s.h) + '">' + (st.preparing ? '<div class="prep"><div><div class="spinner"></div>Ses hazırlanıyor…<br><span style="opacity:.7;font-size:12px">ilk çalmada birkaç saniye sürebilir</span></div></div>' : '') + '</div>' +
+    '<div class="info"><div class="t"><h2>' + s.t + '</h2><div class="a">' + s.a + '</div><div class="linkchip">' + linkPart + '</div></div>' +
+    '<button class="ibtn" data-act="like" style="color:#fff">' + I(st.liked[id] ? 'heartf' : 'heart') + '</button></div>' +
+    '<div class="provsw">' + ['ytm','sc'].map(x => '<button class="' + (x === act ? 'on' : '') + (s.srcs.includes(x) ? '' : ' na') + '" data-act="src" data-src="' + x + '">' + LOGO[x] + NAMES[x] + '</button>').join('') + '</div>' +
+    '<div class="seek"><div class="line"><i></i><b></b></div><div class="times"><span>1:40</span><span>' + s.d + '</span></div></div>' +
+    '<div class="ctrls"><button class="ibtn small off">' + I('shuffle') + '</button><button class="ibtn act" data-act="prev">' + I('prev') + '</button>' +
+    '<button class="pp" data-act="toggle">' + (st.preparing ? '<span class="spinner" style="border-color:#ccc;border-top-color:#1c1b1f"></span>' : I(st.playing ? 'pause' : 'play')) + '</button>' +
+    '<button class="ibtn act" data-act="next">' + I('next') + '</button><button class="ibtn small off">' + I('repeat') + '</button></div>' +
+    '<div class="lowtabs"><button data-act="qsheet" data-q="upnext">Sıradakiler</button><button data-act="qsheet" data-q="lyrics">Sözler</button><button data-act="qsheet" data-q="related">Benzerler</button></div>';
+}
+
+/* ---------- alt sayfalar ---------- */
+function openSheet(kind, id){
+  st.sheetKind = kind;
+  const sh = $('sheet');
+  sh.className = 'sheet' + (['qsheet','link','addto'].includes(kind) ? ' tall' : '');
+  sh.innerHTML = '<div class="handle"></div>' + SHEET[kind](id);
+  // Read the layout so the closed position is applied before opening, and the
+  // slide plays; a deferred open could fire after a later close.
+  void sh.offsetHeight;
+  sh.classList.add('open'); $('scrim').classList.add('open');
+}
+function closeSheet(){ $('sheet').classList.remove('open'); $('scrim').classList.remove('open'); st.sheetKind = null; }
+const SHEET = {};
+SHEET.histmenu = () => '<div class="shead"><h3>Dinleme geçmişi</h3></div><div class="div"></div>' +
+  '<button class="mi" data-act="snack" data-m="Geçmiş kaydı duraklatıldı">' + I('pause') + 'Kaydı duraklat</button>' +
+  '<button class="mi" data-act="go-close" data-to="stats">' + I('stats') + 'Özet\'i aç</button>' +
+  '<button class="mi warn">' + I('del') + 'Geçmişi temizle<span class="r">bütün cihazlarda</span></button>';
+SHEET.menu = id => {
+  const s = DB[id];
+  return '<div class="shead"><div class="cv" style="' + cov(s.h) + '"></div><div class="t"><b>' + s.t + '</b><span>' + s.a + '</span></div><button class="ibtn" data-act="like-in">' + I(st.liked[id] ? 'heartf' : 'heart') + '</button></div><div class="div"></div><div class="sbody">' +
+    '<button class="mi" data-act="snack" data-m="Sıradaki olarak eklendi">' + I('playnext') + 'Sıradaki olarak çal</button>' +
+    '<button class="mi" data-act="snack" data-m="Kuyruğun sonuna eklendi">' + I('queue') + 'Kuyruğa ekle</button>' +
+    '<button class="mi" data-act="sheet" data-k="addto" data-id="' + id + '">' + I('add') + 'Listeye ekle</button>' +
+    '<button class="mi" data-act="snack" data-m="İndirme başladı">' + I(s.dl ? 'done' : 'download') + (s.dl ? 'İndirildi · kaldır' : 'İndir') + '</button>' +
+    '<button class="mi" data-act="sheet" data-k="link" data-id="' + id + '">' + I('link') + 'MusicBrainz\'e bağla<span class="r">' + (s.st === 'matched' ? 'eşleşti' : s.st === 'other' ? 'diğer' : 'unknown') + '</span></button>' +
+    '<button class="mi">' + I('sync') + 'Kaynağı değiştir<span class="r">' + s.srcs.map(x => '<span class="src">' + LOGO[x] + '</span>').join('') + '</span></button>' +
+    '<div class="div"></div>' +
+    '<button class="mi" data-act="go-close" data-to="artist">' + I('person') + 'Sanatçıya git</button>' +
+    (s.al ? '<button class="mi" data-act="go-close" data-to="album">' + I('album') + 'Albüme git</button>' : '') +
+    '<button class="mi">' + I('share') + 'Bağlantıyı paylaş</button>' +
+    '<button class="mi warn" data-act="snack" data-m="Bir daha önerilmeyecek">' + I('close') + 'Bunu önerme</button></div>';
+};
+SHEET.link = id => {
+  const s = DB[id];
+  return '<div class="shead"><h3>MusicBrainz kaydı</h3><button class="ibtn" data-act="close-sheet">' + I('close') + '</button></div>' +
+    '<div class="note" style="margin-top:-6px">"' + s.t + '" · ' + s.a + '. Popülerlik ve benzerliğe göre sıralı, doğru olanı seç.</div>' +
+    '<label class="searchbar" style="margin:10px 16px">' + I('search') + '<input value="' + s.t + ' ' + s.a + '"></label><div class="sbody">' +
+    MB.map((r, i) => '<button class="res' + (st.mbSel === i ? ' sel' : '') + '" data-act="mbsel" data-i="' + i + '"><span class="radio"></span><div class="cv" style="' + cov(r.h) + '"></div><div class="t"><b>' + r.t + '</b><span>' + r.s + '</span></div><span class="sim">%' + r.sim + '</span></button>').join('') +
+    '</div><div class="acts"><button class="btn outlined" data-act="mb-other">Hiçbiri: "diğer"</button><span class="sp"></span><button class="btn filled" data-act="mb-ok">Bağla</button></div>';
+};
+SHEET.addto = id => '<div class="shead"><h3>Listeye ekle</h3><button class="ibtn" data-act="close-sheet">' + I('close') + '</button></div><div class="sbody">' +
+  '<button class="mi" data-act="new-playlist">' + I('add') + 'Yeni liste</button><div class="div"></div>' +
+  [['Gece Sürüşü','28 parça',280],['Simülasyon','11 parça',200],['Keşifler','37 parça',120]].map(l => '<div class="row" data-act="snack" data-m="“' + l[0] + '” listesine eklendi"><div class="cv" style="' + cov(l[2], 80) + '"></div><div class="t"><b>' + l[0] + '</b><span class="meta"><span class="src">' + LOGO.meiro + '</span><span class="txt">' + l[1] + '</span></span></div></div>').join('') + '</div>';
+SHEET.account = () => '<div class="shead"><span class="avatar" style="width:48px;height:48px;font-size:18px">M</span><div class="t"><b>Meiro hesabı</b><span>murat@… · eşitleme güncel</span></div></div><div class="div"></div>' +
+  '<button class="mi" data-act="go-close" data-to="history">' + I('history') + 'Dinleme geçmişi</button>' +
+  '<button class="mi" data-act="go-close" data-to="stats">' + I('stats') + 'Özet</button>' +
+  '<button class="mi" data-act="go-close" data-to="settings">' + I('settings') + 'Ayarlar</button>' +
+  '<button class="mi">' + I('sync') + 'Şimdi eşitle<span class="r">2 dk önce</span></button>' +
+  '<div class="div"></div><button class="mi">' + I('back') + 'Çıkış yap</button>';
+SHEET.listmenu = () => '<div class="shead"><h3>Liste</h3></div><div class="div"></div>' +
+  '<button class="mi" data-act="snack" data-m="Meiro listesi olarak kopyalandı">' + I('copy') + 'Meiro listesi olarak kopyala</button>' +
+  '<button class="mi">' + I('download') + 'Hepsini indir</button><button class="mi">' + I('edit') + 'Yeniden adlandır</button>' +
+  '<button class="mi">' + I('link') + 'Hepsini MusicBrainz\'e bağla<span class="r">4 unknown</span></button>' +
+  '<button class="mi warn">' + I('del') + 'Listeyi sil</button>';
+SHEET.qsheet = () => {
+  const t = st.qTab;
+  let body = '';
+  if (t === 'upnext'){
+    body = '<div class="qhead"><div class="k"><b>Otomatik devam</b><span>Kuyruk bitince benzer müzik ekle</span></div><span class="sw on"></span></div>' +
+      '<div class="qhead"><div class="k"><span>Gece Sürüşü\'nden çalıyor · 2 sırada</span></div><button class="btn text">Temizle</button></div>' +
+      songRow('s10', {drag:true}) + songRow('s9', {drag:true}) + songRow('s5', {drag:true}) +
+      '<div class="qlabel">Önerilenler <span class="tag">Meiro: zevkine göre</span></div>' + songRow('s11', {drag:true, why:'Fikret Kızılok dinleyenler de dinliyor'}) +
+      '<div class="qlabel">Önerilenler <span class="tag yt">YouTube Music</span></div>' + songRow('s12', {drag:true}) + songRow('s6', {drag:true});
+  } else if (t === 'lyrics'){
+    body = '<div class="lyrsrc"><button class="chip sel">' + I('check') + 'Senkron</button><button class="chip">Düz</button><span class="sub" style="margin-left:auto">Kaynak: LRCLIB</span></div><div class="lyrics">' +
+      LYR.map((l, i) => '<p class="' + (i === 2 ? 'on' : i < 2 ? 'past' : '') + '">' + l + '</p>').join('') + '</div>';
+  } else {
+    body = '<div class="note">Çalan şarkıya benzer. YouTube Music ve SoundCloud\'dan, sonra MusicBrainz ile eşleştirilir.</div>' + songRow('s11') + songRow('s4') + songRow('s3');
+  }
+  return '<div class="qtabs">' + [['upnext','Sıradakiler'],['lyrics','Sözler'],['related','Benzerler']].map(x => '<button class="' + (t === x[0] ? 'on' : '') + '" data-act="qtab" data-q="' + x[0] + '">' + x[1] + '</button>').join('') + '</div><div class="sbody">' + body + '</div>';
+};
+SHEET.newlist = () => '<div class="shead"><h3>Yeni liste</h3></div><div class="field focus" style="margin:10px 16px"><label style="background:var(--surface-container-low)">Ad</label><input value="Yaz akşamları"></div>' +
+  '<div class="note">Meiro hesabında tutulur. İçine YouTube Music ve SoundCloud şarkıları birlikte eklenebilir.</div>' +
+  '<div class="acts"><span class="sp"></span><button class="btn text" data-act="close-sheet">İptal</button><button class="btn filled" data-act="snack" data-m="“Yaz akşamları” oluşturuldu">Oluştur</button></div>';
+
+function renderLock(){
+  const s = DB[st.now];
+  $('lock').innerHTML = '<div class="clock">14:51</div><div class="date">Perşembe, 29 Ekim</div>' +
+    '<div class="media" style="' + cov(s.h, 70) + '"><div class="app"><span class="src" style="width:16px">' + LOGO.meiro + '</span>Meiro · ' + NAMES[activeSrc(st.now)] + '</div>' +
+    '<div class="row1"><div class="cv" style="' + cov(s.h) + '"></div><div class="t"><b>' + s.t + '</b><span>' + s.a + '</span></div>' + I('heartf') + '</div>' +
+    '<div class="line"><i></i></div><div class="c">' + I('prev') + '<span class="pp">' + I('pause') + '</span>' + I('next') + '</div></div>' +
+    '<p style="margin-top:20px;font-size:12px;opacity:.75;text-align:center">Medya bildirimi arka planda çalma için gerekli, kapatılamaz.<br>Şarkı değişince ayrıca bildirim atılmaz.</p>' +
+    '<button class="btn tonal" style="margin-top:auto;margin-bottom:40px" data-act="unlock">Kilidi aç</button>';
+}
+
+let snackT;
+function snack(m){ const s = $('snack'); s.innerHTML = m + '<button data-act="hide-snack">Tamam</button>'; s.classList.add('open'); clearTimeout(snackT); snackT = setTimeout(() => s.classList.remove('open'), 2600); }
+
+/* ---------- gezinme ---------- */
+function reset(){ st.npOpen = false; st.preparing = false; closeSheet(); $('lock').classList.remove('open'); }
+function goTo(key){
+  current = key;
+  reset();
+  const tabs = ['home','search','library','downloads'];
+  st.searchDone = false; st.stack = []; st.histFilter = 'Hepsi';
+  if (key !== 'offline') st.online = $('tNet').classList.contains('on');
+  if (tabs.includes(key)) { st.tab = key; }
+  else if (key === 'search-done') { st.tab = 'search'; st.search = 'daft punk'; st.searchDone = true; }
+  else if (key === 'offline') { st.online = false; st.tab = 'search'; st.search = 'gece'; st.searchDone = true; }
+  else if (['np','np-prep','upnext','lyrics','related'].includes(key)) {
+    st.npOpen = true; st.preparing = key === 'np-prep';
+    if (['upnext','lyrics','related'].includes(key)) { st.qTab = key; render(); openSheet('qsheet'); return; }
+  }
+  else if (key === 'lock') { render(); renderLock(); $('lock').classList.add('open'); return; }
+  else if (['menu','link','addto','account'].includes(key)) { st.tab = 'library'; st.stack = ['playlist']; render(); openSheet(key, key === 'account' ? null : 's7'); return; }
+  else st.stack = [key];
+  render();
+  $('content').scrollTop = 0;
+}
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]');
+  if (!el) { if (e.target.id === 'scrim') closeSheet(); return; }
+  const a = el.dataset.act, id = el.dataset.id;
+  e.stopPropagation();
+  switch (a){
+    case 'tab': st.tab = el.dataset.t; st.stack = []; st.searchDone = false; current = el.dataset.t; render(); $('content').scrollTop = 0; break;
+    case 'back': st.stack.pop(); render(); break;
+    case 'go': if (el.dataset.to === 'history') st.histFilter = 'Hepsi'; st.stack.push(el.dataset.to); current = el.dataset.to; st.npOpen = false; render(); $('content').scrollTop = 0; break;
+    case 'go-close': closeSheet(); st.npOpen = false; st.stack.push(el.dataset.to); render(); $('content').scrollTop = 0; break;
+    case 'open-playlist': st.stack.push('playlist'); render(); $('content').scrollTop = 0; break;
+    case 'open-mix': st.stack.push('mix'); render(); $('content').scrollTop = 0; break;
+    case 'open-album': st.stack.push('album'); render(); $('content').scrollTop = 0; break;
+    case 'open-artist': st.stack.push('artist'); render(); $('content').scrollTop = 0; break;
+    case 'play':
+      if (st.now === id) { st.npOpen = true; render(); break; }
+      st.now = id; st.playing = true; st.preparing = !DB[id].dl && st.online;
+      render();
+      if (st.preparing) setTimeout(() => { st.preparing = false; render(); }, 1800);
+      break;
+    case 'play-mix': st.now = 's10'; st.playing = true; render(); snack('Daily mix çalıyor'); break;
+    case 'toggle': if (!st.preparing) { st.playing = !st.playing; render(); } break;
+    case 'next': { const k = Object.keys(DB); st.now = k[(k.indexOf(st.now) + 1) % k.length]; render(); break; }
+    case 'prev': { const k = Object.keys(DB); st.now = k[(k.indexOf(st.now) + k.length - 1) % k.length]; render(); break; }
+    case 'open-np': st.npOpen = true; render(); break;
+    case 'close-np': st.npOpen = false; render(); break;
+    case 'src': if (DB[st.now].srcs.includes(el.dataset.src)) { st.src[st.now] = el.dataset.src; st.preparing = true; render(); setTimeout(() => { st.preparing = false; render(); }, 1200); } else snack(NAMES[el.dataset.src] + '\'da bu şarkı bulunamadı'); break;
+    case 'like': case 'like-in': st.liked[st.now] = !st.liked[st.now]; render(); if (a === 'like-in') closeSheet(); break;
+    case 'menu': openSheet('menu', id); break;
+    case 'link': openSheet('link', id); break;
+    case 'sheet': openSheet(el.dataset.k, id); break;
+    case 'account': openSheet('account'); break;
+    case 'listmenu': openSheet('listmenu'); break;
+    case 'new-playlist': openSheet('newlist'); break;
+    case 'qsheet': st.qTab = el.dataset.q; openSheet('qsheet'); break;
+    case 'qtab': st.qTab = el.dataset.q; $('sheet').innerHTML = '<div class="handle"></div>' + SHEET.qsheet(); break;
+    case 'close-sheet': closeSheet(); break;
+    case 'mbsel': st.mbSel = +el.dataset.i; $('sheet').querySelectorAll('.res').forEach((r, i) => r.classList.toggle('sel', i === st.mbSel)); break;
+    case 'mb-ok': DB.s7.st = 'matched'; closeSheet(); render(); snack('Bağlandı · bütün cihazlarda görünür'); break;
+    case 'mb-other': DB.s7.st = 'other'; closeSheet(); render(); snack('"Diğer" olarak işaretlendi'); break;
+    case 'snack': closeSheet(); snack(el.dataset.m); break;
+    case 'hide-snack': $('snack').classList.remove('open'); break;
+    case 'libtab': st.libTab = el.dataset.t; render(); break;
+    case 'filter': st.filter = el.dataset.f; render(); break;
+    case 'hfilter': st.histFilter = el.dataset.f; render(); break;
+    case 'do-search': st.search = el.dataset.q; st.searchDone = true; render(); break;
+    case 'clear-search': st.search = ''; st.searchDone = false; render(); break;
+    case 'period': st.statsPeriod = el.dataset.p; render(); break;
+    case 'dup': snack('“Random Access Memories” Meiro listesi olarak kopyalandı'); break;
+    case 'signin-ok': goTo('home'); break;
+    case 'unlock': $('lock').classList.remove('open'); break;
+    case 'jump': goTo(el.dataset.s); break;
+  }
+});
+document.addEventListener('keydown', e => {
+  if (e.target.id === 'q' && e.key === 'Enter') { st.search = e.target.value; st.searchDone = !!st.search; render(); }
+});
+$('scrim').addEventListener('click', closeSheet);
+
+/* inceleme paneli */
+$('jumps').innerHTML = SCREENS.map(g => '<h2>' + g[0] + '</h2>' + g[1].map(s => '<button class="jump" data-act="jump" data-s="' + s[0] + '"><b>' + s[1] + '</b><span>' + s[2] + '</span></button>').join('')).join('');
+$('tTheme').onclick = () => { const r = document.documentElement, d = r.dataset.theme === 'dark'; r.dataset.theme = d ? 'light' : 'dark'; $('tTheme').textContent = 'Tema: ' + (d ? 'Açık' : 'Koyu'); };
+$('tNet').onclick = () => { st.online = !st.online; $('tNet').classList.toggle('on', st.online); $('tNet').textContent = st.online ? 'Çevrimiçi' : 'Çevrimdışı'; render(); };
+$('tYtm').onclick = () => { st.ytm = !st.ytm; $('tYtm').classList.toggle('on', st.ytm); $('tYtm').textContent = st.ytm ? 'YouTube Music girişli' : 'YouTube Music girişsiz'; render(); };
+
+render();
+</script>
+</body>
+</html>

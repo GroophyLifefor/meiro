@@ -25,3 +25,4 @@ android/.kotlin/
 android/local.properties
 *.apk
 *.aab
+tools/mockref/node_modules/

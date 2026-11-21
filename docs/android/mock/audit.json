@@ -1,0 +1,39 @@
+{
+ "generatedFor": "docs/android/mock/index.html",
+ "phoneScreenCssSize": {
+  "w": 370,
+  "h": 824
+ },
+ "themes": [
+  "light",
+  "dark"
+ ],
+ "screens": 28,
+ "note": "Mock self-audit. Heuristic-based; false positives are possible, each finding names the heuristic. The mock is NOT modified.",
+ "checkedTotals": {
+  "elements": 7874,
+  "overflowHidden": 5816,
+  "centringContainers": 3152,
+  "centringIntended": 2598,
+  "pseudo": 28,
+  "flexRowsCentre": 1024,
+  "flexRowsLines": 134
+ },
+ "summary": {},
+ "fontLoadStatus": [
+  {
+   "family": "Google Sans",
+   "status": "error",
+   "weight": "100 1000"
+  },
+  {
+   "family": "Google Sans",
+   "status": "loaded",
+   "weight": "100 1000"
+  }
+ ],
+ "pageErrors": [
+  "requestfailed file:///home/muratkirazkaya/Desktop/Code/OSS/meiro/docs/android/meiro/fonts/GoogleSans.ttf"
+ ],
+ "findings": []
+}
