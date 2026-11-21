@@ -114,6 +114,26 @@ object ElementCompare {
                 fails += "CLIPPED $k: bounds $r outside screen $root"
         }
 
+        // Rule 4b: containment. A tagged node must lie inside its nearest tagged ancestor (+-0.5px) when that
+        // ancestor is a control/surface (it exports a background or radius, or the mock inventory calls it a
+        // control/surface). Independent of the mock's own numbers, so it also catches a bug the mock shares.
+        val kindByKey = keys.entries.mapNotNull { ke -> ke.key?.let { k -> invByPath[ke.path]?.let { k to it.kind } } }.toMap()
+        var containmentChecked = 0
+        for ((k, l) in byKey) for (n in l) {
+            var p = n.parent
+            while (p != null && p.config.getOrNull(SemanticsProperties.TestTag) == null) p = p.parent
+            val pk = p?.config?.getOrNull(SemanticsProperties.TestTag) ?: continue
+            val encloses = p.config.getOrNull(InvBgKey) != null || p.config.getOrNull(InvRadiusKey) != null ||
+                kindByKey[pk] == "control" || kindByKey[pk] == "surface"
+            if (!encloses) continue
+            containmentChecked++
+            val r = layoutRect(n); val pr = layoutRect(p)
+            val over = mapOf("left" to pr.left - r.left, "top" to pr.top - r.top, "right" to r.right - pr.right, "bottom" to r.bottom - pr.bottom)
+            val worstSide = over.maxByOrNull { it.value }!!
+            if (worstSide.value > ALIGN_TOL)
+                fails += "CONTAINMENT $k: bounds $r extend beyond tagged parent $pk $pr by %.2fpx (${over.entries.joinToString { "${it.key} %.2f".format(it.value) }})".format(worstSide.value)
+        }
+
         // Rule 5: centring and row alignment, measured on the Compose tree.
         for (c in keys.centered) {
             val cb = b(c.child); val pb = if (c.parent == "root") root else b(c.parent)

@@ -33,8 +33,7 @@ import java.io.File
  * writes the PNG, the pixel comparison against docs/android/mock/ref/empty-<theme>.png (reported, not a
  * gate) and the element comparison against inventory/empty.json (the gate: any mismatch fails).
  *
- * The mock shows the Ara tab selected on this screen, so the shell is rendered with Tab.Search; in the
- * app the Kütüphane tab is selected here. Status bar and gesture pill are system UI: the shell reserves
+ * The mock shows the Kütüphane tab selected on this screen (as in the app). Status bar and gesture pill are system UI: the shell reserves
  * the mock's 36dp and 16dp and the comparison masks them.
  */
 @RunWith(RobolectricTestRunner::class)
@@ -50,7 +49,7 @@ class EmptyScreenTest {
         rule.setContent {
             MeiroTheme(darkTheme = theme == "dark") {
                 Box(Modifier.size(370.dp, 824.dp)) {
-                    MeiroShell(Tab.Search, {}, SystemBars(36.dp, 16.dp), SampleMini) { LibraryEmptyScreen() }
+                    MeiroShell(Tab.Library, {}, SystemBars(36.dp, 16.dp), SampleMini) { LibraryEmptyScreen() }
                 }
             }
         }

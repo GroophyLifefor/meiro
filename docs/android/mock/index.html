@@ -202,7 +202,7 @@
   .prog i{display:block; height:100%; background:var(--primary)}
 
   .empty{padding:56px 32px; text-align:center; color:var(--on-surface-variant)}
-  .empty svg{width:56px; height:56px; fill:var(--outline); margin:0 auto 14px}
+  .empty > svg{width:56px; height:56px; fill:var(--outline); margin:0 auto 14px}
   .empty b{display:block; color:var(--on-surface); font-size:18px; font-weight:500; margin-bottom:6px}
   .empty p{margin:0 0 18px}
   .skel{background:linear-gradient(90deg, var(--surface-container) 0%, var(--surface-container-high) 50%, var(--surface-container) 100%); background-size:200% 100%; animation:sk 1.4s ease-in-out infinite; border-radius:8px}
@@ -939,7 +939,12 @@ function goTo(key){
   }
   else if (key === 'lock') { render(); renderLock(); $('lock').classList.add('open'); return; }
   else if (['menu','link','addto','account'].includes(key)) { st.tab = 'library'; st.stack = ['playlist']; render(); openSheet(key, key === 'account' ? null : 's7'); return; }
-  else st.stack = [key];
+  else {
+    // A state screen belongs to the tab it stands in for.
+    if (key === 'empty') st.tab = 'library';
+    if (key === 'error') st.tab = 'search';
+    st.stack = [key];
+  }
   render();
   $('content').scrollTop = 0;
 }

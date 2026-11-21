@@ -2,15 +2,12 @@ package com.muratkirazkaya.meiro.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -25,9 +22,7 @@ import com.muratkirazkaya.meiro.ui.theme.MeiroType
 /**
  * The mock's `.empty` block ("Henüz liste yok") with its filled "Yeni liste" button.
  *
- * Mock quirk reproduced on purpose: the mock's `.empty svg` rule also hits the button's "add" glyph, so
- * it is drawn 56dp in the outline colour, overflowing the 40dp button (inventory: icon 56x56 at y 344).
- * The button must not clip, so the shape is a background shape, not a clip.
+ * The button's "add" glyph is the mock's `.btn svg`: 18dp, currentColor (on-primary).
  */
 @Composable
 fun EmptyState(
@@ -55,9 +50,7 @@ fun EmptyState(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Box(Modifier.requiredSize(56.dp).offset(y = (-7).dp), Alignment.Center) {
-                MIcon(MeiroIcons.Add, c.outline, "empty.button.icon", size = 56)
-            }
+            MIcon(MeiroIcons.Add, c.onPrimary, "empty.button.icon", size = 18)
             MText(buttonLabel, MeiroType.ButtonLabel, c.onPrimary, "empty.button.label")
         }
     }

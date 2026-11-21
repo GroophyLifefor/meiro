@@ -128,25 +128,25 @@
    "key": "nav.home.icon"
   },
   {
-   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(2)",
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(2)",
    "key": "nav.search",
    "styleFrom": "nav.search.label"
   },
   {
-   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(2)>span.pill:nth-child(1)",
-   "key": "nav.search.pill"
-  },
-  {
-   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(2)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(2)>span.pill:nth-child(1)>svg:nth-child(1)",
    "key": "nav.search.icon"
   },
   {
-   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(3)",
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(3)",
    "key": "nav.library",
    "styleFrom": "nav.library.label"
   },
   {
-   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(3)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(3)>span.pill:nth-child(1)",
+   "key": "nav.library.pill"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(3)>span.pill:nth-child(1)>svg:nth-child(1)",
    "key": "nav.library.icon"
   },
   {
@@ -230,8 +230,8 @@
    "axes": "xy"
   },
   {
-   "child": "nav.search.icon",
-   "parent": "nav.search.pill",
+   "child": "nav.library.icon",
+   "parent": "nav.library.pill",
    "axes": "xy"
   },
   {

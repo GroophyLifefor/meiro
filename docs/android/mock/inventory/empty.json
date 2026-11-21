@@ -699,9 +699,9 @@
    "text": "Yeni liste",
    "icon": null,
    "bbox": {
-    "x": 103.5,
+    "x": 122.5,
     "y": 359,
-    "w": 163,
+    "w": 125,
     "h": 40
    },
    "offscreen": false,
@@ -750,10 +750,10 @@
    "text": null,
    "icon": "add",
    "bbox": {
-    "x": 123.5,
-    "y": 344,
-    "w": 56,
-    "h": 56
+    "x": 142.5,
+    "y": 370,
+    "w": 18,
+    "h": 18
    },
    "offscreen": false,
    "clipped": false,
@@ -781,8 +781,8 @@
      "dark": "rgb(54, 28, 104)"
     },
     "fill": {
-     "light": "rgb(119, 117, 128)",
-     "dark": "rgb(145, 143, 154)"
+     "light": "rgb(255, 255, 255)",
+     "dark": "rgb(54, 28, 104)"
     }
    },
    "occluded": false,
@@ -1571,11 +1571,10 @@
    ]
   },
   {
-   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(2)",
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(2)",
    "tag": "button",
    "classes": [
-    "nav",
-    "on"
+    "nav"
    ],
    "kind": "control",
    "role": null,
@@ -1584,6 +1583,111 @@
    "icon": null,
    "bbox": {
     "x": 92.5,
+    "y": 756,
+    "w": 92.5,
+    "h": 52
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "12px",
+    "fontWeight": "500",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(2)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "search",
+   "bbox": {
+    "x": 127,
+    "y": 758,
+    "w": 24,
+    "h": 24
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "12px",
+    "fontWeight": "500",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(3)",
+   "tag": "button",
+   "classes": [
+    "nav",
+    "on"
+   ],
+   "kind": "control",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Kütüphane",
+   "icon": null,
+   "bbox": {
+    "x": 185,
     "y": 756,
     "w": 92.5,
     "h": 52
@@ -1625,7 +1729,7 @@
    ]
   },
   {
-   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(2)>span.pill:nth-child(1)",
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(3)>span.pill:nth-child(1)",
    "tag": "span",
    "classes": [
     "pill"
@@ -1636,7 +1740,7 @@
    "text": null,
    "icon": null,
    "bbox": {
-    "x": 107,
+    "x": 199.5,
     "y": 757,
     "w": 64,
     "h": 26
@@ -1678,111 +1782,7 @@
    ]
   },
   {
-   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(2)>span.pill:nth-child(1)>svg:nth-child(1)",
-   "tag": "svg",
-   "classes": [],
-   "kind": "icon",
-   "role": null,
-   "ariaLabel": null,
-   "text": null,
-   "icon": "search",
-   "bbox": {
-    "x": 127,
-    "y": 758,
-    "w": 24,
-    "h": 24
-   },
-   "offscreen": false,
-   "clipped": false,
-   "style": {
-    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
-    "fontSize": "12px",
-    "fontWeight": "500",
-    "lineHeight": "20px",
-    "letterSpacing": "normal",
-    "borderRadius": "0px",
-    "opacity": "1",
-    "borderWidth": "0px",
-    "textAlign": "center",
-    "textTransform": "none",
-    "color": {
-     "light": "rgb(29, 23, 45)",
-     "dark": "rgb(227, 222, 253)"
-    },
-    "backgroundColor": {
-     "light": "rgba(0, 0, 0, 0)",
-     "dark": "rgba(0, 0, 0, 0)"
-    },
-    "borderColor": {
-     "light": "rgb(29, 23, 45)",
-     "dark": "rgb(227, 222, 253)"
-    },
-    "fill": {
-     "light": "rgb(29, 23, 45)",
-     "dark": "rgb(227, 222, 253)"
-    }
-   },
-   "occluded": false,
-   "visibleIn": [
-    "light",
-    "dark"
-   ]
-  },
-  {
-   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(3)",
-   "tag": "button",
-   "classes": [
-    "nav"
-   ],
-   "kind": "control",
-   "role": null,
-   "ariaLabel": null,
-   "text": "Kütüphane",
-   "icon": null,
-   "bbox": {
-    "x": 185,
-    "y": 756,
-    "w": 92.5,
-    "h": 52
-   },
-   "offscreen": false,
-   "clipped": false,
-   "style": {
-    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
-    "fontSize": "12px",
-    "fontWeight": "500",
-    "lineHeight": "20px",
-    "letterSpacing": "normal",
-    "borderRadius": "0px",
-    "opacity": "1",
-    "borderWidth": "0px",
-    "textAlign": "center",
-    "textTransform": "none",
-    "color": {
-     "light": "rgb(71, 69, 79)",
-     "dark": "rgb(199, 197, 209)"
-    },
-    "backgroundColor": {
-     "light": "rgba(0, 0, 0, 0)",
-     "dark": "rgba(0, 0, 0, 0)"
-    },
-    "borderColor": {
-     "light": "rgb(71, 69, 79)",
-     "dark": "rgb(199, 197, 209)"
-    },
-    "fill": {
-     "light": "rgb(0, 0, 0)",
-     "dark": "rgb(0, 0, 0)"
-    }
-   },
-   "occluded": false,
-   "visibleIn": [
-    "light",
-    "dark"
-   ]
-  },
-  {
-   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(3)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(3)>span.pill:nth-child(1)>svg:nth-child(1)",
    "tag": "svg",
    "classes": [],
    "kind": "icon",
@@ -1810,20 +1810,20 @@
     "textAlign": "center",
     "textTransform": "none",
     "color": {
-     "light": "rgb(71, 69, 79)",
-     "dark": "rgb(199, 197, 209)"
+     "light": "rgb(29, 23, 45)",
+     "dark": "rgb(227, 222, 253)"
     },
     "backgroundColor": {
      "light": "rgba(0, 0, 0, 0)",
      "dark": "rgba(0, 0, 0, 0)"
     },
     "borderColor": {
-     "light": "rgb(71, 69, 79)",
-     "dark": "rgb(199, 197, 209)"
+     "light": "rgb(29, 23, 45)",
+     "dark": "rgb(227, 222, 253)"
     },
     "fill": {
-     "light": "rgb(71, 69, 79)",
-     "dark": "rgb(199, 197, 209)"
+     "light": "rgb(29, 23, 45)",
+     "dark": "rgb(227, 222, 253)"
     }
    },
    "occluded": false,
