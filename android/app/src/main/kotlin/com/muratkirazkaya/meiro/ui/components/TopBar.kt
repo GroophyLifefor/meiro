@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,9 +22,12 @@ import com.muratkirazkaya.meiro.ui.inv.inv
 import com.muratkirazkaya.meiro.ui.theme.Meiro
 import com.muratkirazkaya.meiro.ui.theme.MeiroType
 
+/** The account avatar's letter, provided by the signed-in shell; "M" (the mock's) when nothing provides one. */
+val LocalAvatarInitial = staticCompositionLocalOf { "M" }
+
 /**
  * The mock's topbar: 64dp, an optional back button (then 4dp start padding instead of 16), the title (flex 1; the
- * playlist's is empty), [actions] (icon buttons), and the account avatar button (the "M" initial is a placeholder)
+ * playlist's is empty), [actions] (icon buttons), and the account avatar button (its letter is [LocalAvatarInitial])
  * unless [avatar] is false.
  */
 @Composable
@@ -52,7 +56,7 @@ fun TopBar(
                         .clip(CircleShape).background(c.primaryContainer),
                     Alignment.Center,
                 ) {
-                    MText("M", MeiroType.AvatarInitial, c.onPrimaryContainer, "topbar.avatar.label")
+                    MText(LocalAvatarInitial.current, MeiroType.AvatarInitial, c.onPrimaryContainer, "topbar.avatar.label")
                 }
             }
         }

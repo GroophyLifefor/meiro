@@ -35,6 +35,8 @@ import com.muratkirazkaya.meiro.ui.screens.PlaylistScreen
 import com.muratkirazkaya.meiro.ui.screens.SearchActions
 import com.muratkirazkaya.meiro.ui.screens.SearchScreen
 import com.muratkirazkaya.meiro.ui.components.Snack
+import com.muratkirazkaya.meiro.ui.components.LocalAvatarInitial
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
@@ -127,7 +129,7 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String) {
     var snack by remember { mutableStateOf<String?>(null) }
     val openSheet = { newName = ""; sheet = true }
 
-    Box(Modifier.fillMaxSize()) {
+    CompositionLocalProvider(LocalAvatarInitial provides avatarInitial(email)) { Box(Modifier.fillMaxSize()) {
         MeiroShell(
             selected = selected,
             onSelect = { tab ->
@@ -168,8 +170,12 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String) {
             LaunchedEffect(m) { delay(2600); if (snack == m) snack = null }
             Snack(m, { snack = null }, Modifier.align(Alignment.BottomCenter).padding(start = 12.dp, end = 12.dp, bottom = 160.dp))
         }
-    }
+    } }
 }
+
+/** The account avatar's letter: the first letter of the greeting's name, "M" without an account. */
+internal fun avatarInitial(email: String): String =
+    HomeMapping.firstName(email)?.take(1)?.uppercase(java.util.Locale.forLanguageTag("tr")) ?: "M"
 
 /**
  * Home: rebuilt from the store when the lists, the history or what plays change, and every half minute (the greeting
