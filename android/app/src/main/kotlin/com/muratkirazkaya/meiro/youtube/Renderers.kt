@@ -34,6 +34,8 @@ data class MusicItem(
     val thumbnail: String = "",
     /** The providers a merged track plays from (`Sources`); empty means only [source]. */
     val sources: List<Ref> = emptyList(),
+    /** The track's number on an album page (the renderer's `index`), "" elsewhere. */
+    val index: String = "",
 ) {
     /** `Item.Target`: a video ID always wins over the artist link beside it; album and playlist IDs route items without. */
     fun target(): Pair<TargetKind, String> {
@@ -247,6 +249,7 @@ object Renderers {
             kind = k, id = id, videoId = videoId, browseId = browseId, playlistId = playlistId, playlistSetId = setId,
             title = title, subtitle = subtitle, duration = duration,
             artist = artists.firstOrNull().orEmpty(), artists = artists.joinToString(", "), album = album, thumbnail = thumb,
+            index = rendererText(r["index"]).trim(),
         )
     }
 

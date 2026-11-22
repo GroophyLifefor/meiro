@@ -97,6 +97,18 @@ class YtmClient(
         return YtmSearch.parseSuggestions(execute("music/get_search_suggestions", JSONObject().put("input", input)))
     }
 
+    /** `GetAlbum` (`browse.go:196`): an album page, `MPR...` or a privately owned release. */
+    suspend fun album(id: String): BrowsePage {
+        require(isAlbumId(id)) { "youtube: invalid album ID \"$id\"" }
+        return YtmBrowse.parse(execute("browse", JSONObject().put("browseId", id)))
+    }
+
+    /** `GetArtist` (`browse.go:189`): an artist page, `UC...` or a privately owned artist. */
+    suspend fun artist(id: String): BrowsePage {
+        require(id.startsWith("UC") || id.startsWith("FEmusic_library_privately_owned_artist")) { "youtube: invalid artist ID \"$id\"" }
+        return YtmBrowse.parse(execute("browse", JSONObject().put("browseId", id)))
+    }
+
     private suspend fun execute(endpoint: String, payload: JSONObject): String = withContext(Dispatchers.IO) {
         val client = JSONObject().put("hl", "en").put("gl", "US").put("clientName", CLIENT_NAME).put("clientVersion", CLIENT_VERSION)
         val vd = visitorData

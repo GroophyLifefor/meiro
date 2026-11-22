@@ -5,12 +5,16 @@
 #   ytm_search_daft_punk_songs.json  the same search with the "Songs" chip's params, read from the first answer
 #   ytm_search_songs_continuation.json  the next page of the Songs search
 #   ytm_suggestions_daft_p.json      music/get_search_suggestions for "daft p"
+#   ytm_browse_artist_daft_punk.json browse of the artist the search leads with (M4d artist page)
+#   ytm_browse_album_ram.json        browse of the first album of that search, "Random Access Memories" (M4d album page)
+# With the argument `browse` only the two browse files are recorded, from the ids in the saved search fixture, so the
+# search fixtures (and the tests written against them) stay as they are.
 # Anything that could tie a response to a visitor is removed: responseContext (visitorData, serviceTrackingParams,
 # responseId) and every trackingParams / clickTrackingParams value. Output is minified JSON.
 set -euo pipefail
 OUT="$(cd "$(dirname "$0")/.." && pwd)/app/src/test/resources/fixtures"
 mkdir -p "$OUT"
-python3 -I - "$OUT" <<'PY'
+python3 -I - "$OUT" "${1:-all}" <<'PY'
 import json, sys, urllib.request
 out = sys.argv[1]
 UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
@@ -59,6 +63,34 @@ def find(o, key):
     elif isinstance(o, list):
         for v in o: yield from find(v, key)
 
+def browse_ids(root):
+    artist = album = None
+    for card in find(root, "musicCardShelfRenderer"):
+        for run in card.get("title", {}).get("runs", []):
+            bid = run.get("navigationEndpoint", {}).get("browseEndpoint", {}).get("browseId", "")
+            if bid.startswith("UC") and not artist: artist = bid
+    # The mock's album, "Random Access Memories", when the search lists it; else the first album.
+    for key in ("musicResponsiveListItemRenderer", "musicTwoRowItemRenderer"):
+        for r in find(root, key):
+            text = json.dumps(r.get("flexColumns", r.get("title", "")))
+            if "Random Access Memories" in text and not album:
+                album = next((b["browseId"] for b in find(r, "browseEndpoint") if b.get("browseId", "").startswith("MPRE")), None)
+    for be in find(root, "browseEndpoint"):
+        bid = be.get("browseId", "")
+        if bid.startswith("MPRE") and not album: album = bid
+    assert artist and album, (artist, album)
+    return artist, album
+
+def save_browse(root):
+    artist, album = browse_ids(root)
+    print("artist", artist, "album", album)
+    save("ytm_browse_artist_daft_punk", call("browse", {"browseId": artist}))
+    save("ytm_browse_album_ram", call("browse", {"browseId": album}))
+
+if sys.argv[2] == "browse":
+    save_browse(json.load(open(f"{out}/ytm_search_daft_punk.json", encoding="utf-8")))
+    sys.exit(0)
+
 first = save("ytm_search_daft_punk", call("search", {"query": "daft punk"}))
 params = None
 for chip in find(first, "chipCloudChipRenderer"):
@@ -71,4 +103,5 @@ token = next((c for c in find(songs, "continuation") if isinstance(c, str)), Non
 assert token, "no continuation token"
 save("ytm_search_songs_continuation", call("search", {"continuation": token}))
 save("ytm_suggestions_daft_p", call("music/get_search_suggestions", {"input": "daft p"}))
+save_browse(first)
 PY
