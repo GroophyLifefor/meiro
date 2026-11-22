@@ -140,7 +140,11 @@ object ElementCompare {
             if (n.config.getOrNull(InvOverflowKey) == true && k !in keys.ellipsis && !(stress && n.config.getOrNull(InvSingleLineKey) == true)) fails += "OVERFLOW $k: text has visual overflow (clipped or ellipsized) in ${layoutRect(n)}"
             val r = layoutRect(n)
             val inHScroll = keys.hscroll.any { k.startsWith(it) }
-            if (!inHScroll && (r.left < root.left - 0.01 || r.top < root.top - 0.01 || r.right > root.right + 0.01 || r.bottom > root.bottom + 0.01))
+            // A node a vertical list has scrolled wholly out of its viewport (the list clips it to nothing) is not drawn;
+            // it only counts when it also sticks out sideways.
+            val vis = n.boundsInRoot
+            val scrolledAway = (vis.height <= 0f || vis.width <= 0f) && r.left >= root.left - 0.01 && r.right <= root.right + 0.01
+            if (!inHScroll && !scrolledAway && (r.left < root.left - 0.01 || r.top < root.top - 0.01 || r.right > root.right + 0.01 || r.bottom > root.bottom + 0.01))
                 fails += "CLIPPED $k: bounds $r outside screen $root"
         }
 
