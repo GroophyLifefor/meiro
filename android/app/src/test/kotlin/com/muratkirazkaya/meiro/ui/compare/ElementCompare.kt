@@ -117,7 +117,8 @@ object ElementCompare {
     /** The structural rules alone, for a render that has no mock counterpart (long names, narrow widths, large fonts). */
     fun stress(nodes: List<SemanticsNode>, root: Rect, keys: KeyMap): List<String> {
         val byKey = HashMap<String, MutableList<SemanticsNode>>()
-        for (n in nodes) n.config.getOrNull(SemanticsProperties.TestTag)?.let { byKey.getOrPut(it) { mutableListOf() }.add(n) }
+        // A lazy list keeps a row it scrolled past composed but not placed (it is not drawn): its bounds are meaningless.
+        for (n in nodes) if (n.layoutInfo.isPlaced) n.config.getOrNull(SemanticsProperties.TestTag)?.let { byKey.getOrPut(it) { mutableListOf() }.add(n) }
         val fails = mutableListOf<String>()
         structural(byKey, root, keys, emptyMap(), fails, stress = true)
         return fails
