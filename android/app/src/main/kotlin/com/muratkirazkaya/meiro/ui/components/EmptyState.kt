@@ -31,27 +31,29 @@ fun EmptyState(
     buttonLabel: String,
     modifier: Modifier = Modifier,
     onButton: () -> Unit = {},
+    /** The mock's `error` screen: the info glyph and a tonal button without a glyph. */
+    error: Boolean = false,
 ) {
     val c = Meiro.colors
     Column(
         modifier.fillMaxWidth().padding(start = 32.dp, end = 32.dp, top = 56.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        MIcon(MeiroIcons.Library, c.outline, "empty.icon", size = 56)
+        MIcon(if (error) MeiroIcons.Info else MeiroIcons.Library, c.outline, "empty.icon", size = 56)
         Spacer(Modifier.height(14.dp))
         MText(title, MeiroType.EmptyTitle, c.onSurface, "empty.title", Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
         Spacer(Modifier.height(6.dp))
         MText(body, MeiroType.EmptyBody, c.onSurfaceVariant, "empty.text", Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
         Spacer(Modifier.height(18.dp))
         Row(
-            Modifier.height(40.dp).inv("empty.button", bg = c.primary, radiusDp = 20f)
-                .background(c.primary, RoundedCornerShape(20.dp))
+            Modifier.height(40.dp).inv("empty.button", bg = if (error) c.secondaryContainer else c.primary, radiusDp = 20f)
+                .background(if (error) c.secondaryContainer else c.primary, RoundedCornerShape(20.dp))
                 .clickableNoIndication(onButton).padding(horizontal = 20.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            MIcon(MeiroIcons.Add, c.onPrimary, "empty.button.icon", size = 18)
-            MText(buttonLabel, MeiroType.ButtonLabel, c.onPrimary, "empty.button.label")
+            if (!error) MIcon(MeiroIcons.Add, c.onPrimary, "empty.button.icon", size = 18)
+            MText(buttonLabel, MeiroType.ButtonLabel, if (error) c.onSecondaryContainer else c.onPrimary, "empty.button.label")
         }
     }
 }

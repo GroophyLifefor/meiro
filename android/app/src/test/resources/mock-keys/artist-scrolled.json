@@ -1,0 +1,507 @@
+{
+ "screen": "artist",
+ "systemNote": "Status bar row (y 0..36) and the gesture pill are system UI on Android: not drawn by the app, excluded from element and pixel comparison.",
+ "elements": [
+  {
+   "path": "#box>div.app:nth-child(1)>div.statusbar:nth-child(1)>span#clock:nth-child(1)",
+   "system": true
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div.statusbar:nth-child(1)>span.sys:nth-child(2)>span#netIcon:nth-child(1)",
+   "system": true
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div.statusbar:nth-child(1)>span.sys:nth-child(2)>i:nth-child(2)",
+   "system": true
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar.withback:nth-child(1)",
+   "key": "topbar"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar.withback:nth-child(1)>button.ibtn:nth-child(1)",
+   "key": "topbar.backBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar.withback:nth-child(1)>button.ibtn:nth-child(1)>svg:nth-child(1)",
+   "key": "topbar.back.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hero:nth-child(2)>div.big.round:nth-child(1)",
+   "key": "hero.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hero:nth-child(2)>h2:nth-child(2)",
+   "key": "hero.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hero:nth-child(2)>div.kind:nth-child(3)",
+   "key": "hero.kind"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hero:nth-child(2)>div.hero.actions:nth-child(4)>button.btn.tonal:nth-child(1)",
+   "key": "hero.shuffleBtn",
+   "styleFrom": "hero.shuffleBtn.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hero:nth-child(2)>div.hero.actions:nth-child(4)>button.btn.tonal:nth-child(1)>svg:nth-child(1)",
+   "key": "hero.shuffleBtn.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hero:nth-child(2)>div.hero.actions:nth-child(4)>button.play:nth-child(2)",
+   "key": "hero.playBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hero:nth-child(2)>div.hero.actions:nth-child(4)>button.play:nth-child(2)>svg:nth-child(1)",
+   "key": "hero.play.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hero:nth-child(2)>div.hero.actions:nth-child(4)>button.btn.outlined:nth-child(3)",
+   "key": "hero.linkBtn",
+   "styleFrom": "hero.linkBtn.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hero:nth-child(2)>div.hero.actions:nth-child(4)>button.btn.outlined:nth-child(3)>svg:nth-child(1)",
+   "key": "hero.linkBtn.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.h-sec:nth-child(3)>h2:nth-child(1)",
+   "key": "popular.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(4)>div.cv:nth-child(1)",
+   "key": "song1.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(4)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "song1.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(4)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "key": "song1.src.ytm"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(4)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span.dim:nth-child(2)>svg:nth-child(1)",
+   "key": "song1.src.sc"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(4)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(2)",
+   "key": "song1.meta"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(4)>button.ibtn:nth-child(3)",
+   "key": "song1.moreBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(4)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "key": "song1.more.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(5)>div.cv:nth-child(1)",
+   "key": "song2.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(5)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "song2.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(5)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "key": "song2.src.ytm"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(5)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(2)",
+   "key": "song2.meta"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(5)>button.ibtn:nth-child(3)",
+   "key": "song2.moreBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(5)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "key": "song2.more.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.h-sec:nth-child(6)>h2:nth-child(1)",
+   "key": "albums.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(7)>div.tile:nth-child(1)>div.art:nth-child(1)>span.badge:nth-child(1)",
+   "key": "album1.badge"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(7)>div.tile:nth-child(1)>div.art:nth-child(1)>span.badge:nth-child(1)>svg:nth-child(1)",
+   "key": "album1.logo"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(7)>div.tile:nth-child(1)>b:nth-child(2)",
+   "key": "album1.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(7)>div.tile:nth-child(1)>span:nth-child(3)",
+   "key": "album1.meta"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(7)>div.tile:nth-child(2)>div.art:nth-child(1)>span.badge:nth-child(1)",
+   "key": "album2.badge"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(7)>div.tile:nth-child(2)>div.art:nth-child(1)>span.badge:nth-child(1)>svg:nth-child(1)",
+   "key": "album2.logo"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(7)>div.tile:nth-child(2)>b:nth-child(2)",
+   "key": "album2.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(7)>div.tile:nth-child(2)>span:nth-child(3)",
+   "key": "album2.meta"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(7)>div.tile:nth-child(3)>div.art:nth-child(1)>span.badge:nth-child(1)",
+   "key": "album3.badge"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(7)>div.tile:nth-child(3)>div.art:nth-child(1)>span.badge:nth-child(1)>svg:nth-child(1)",
+   "key": "album3.logo"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(7)>div.tile:nth-child(3)>b:nth-child(2)",
+   "key": "album3.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(7)>div.tile:nth-child(3)>span:nth-child(3)",
+   "key": "album3.meta"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.h-sec:nth-child(8)>h2:nth-child(1)",
+   "key": "similar.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(9)>div.tile:nth-child(1)>div.art:nth-child(1)>span.badge:nth-child(1)",
+   "key": "similar1.badge"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(9)>div.tile:nth-child(1)>div.art:nth-child(1)>span.badge:nth-child(1)>svg:nth-child(1)",
+   "key": "similar1.logo"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(9)>div.tile:nth-child(1)>b:nth-child(2)",
+   "key": "similar1.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(9)>div.tile:nth-child(1)>span:nth-child(3)",
+   "key": "similar1.meta"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(9)>div.tile:nth-child(2)>div.art:nth-child(1)>span.badge:nth-child(1)",
+   "key": "similar2.badge"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(9)>div.tile:nth-child(2)>div.art:nth-child(1)>span.badge:nth-child(1)>svg:nth-child(1)",
+   "key": "similar2.logo"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(9)>div.tile:nth-child(2)>b:nth-child(2)",
+   "key": "similar2.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(9)>div.tile:nth-child(2)>span:nth-child(3)",
+   "key": "similar2.meta"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div:nth-child(10)",
+   "spacer": true
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)",
+   "key": "mini"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.cv:nth-child(1)",
+   "key": "mini.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "mini.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>span:nth-child(2)",
+   "key": "mini.artist",
+   "styleFrom": "mini.artist.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>span:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "key": "mini.src.ytm"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>span:nth-child(2)>span.src:nth-child(1)>span.dim:nth-child(2)>svg:nth-child(1)",
+   "key": "mini.src.sc"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(3)",
+   "key": "mini.playBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "key": "mini.play.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(4)",
+   "key": "mini.nextBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(4)>svg:nth-child(1)",
+   "key": "mini.next.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.bar:nth-child(5)",
+   "key": "mini.bar"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.bar:nth-child(5)>i:nth-child(1)",
+   "key": "mini.bar.fill"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)",
+   "key": "nav"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(1)",
+   "key": "nav.home",
+   "styleFrom": "nav.home.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(1)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "key": "nav.home.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(2)",
+   "key": "nav.search",
+   "styleFrom": "nav.search.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(2)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "key": "nav.search.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(3)",
+   "key": "nav.library",
+   "styleFrom": "nav.library.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(3)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "key": "nav.library.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(4)",
+   "key": "nav.downloads",
+   "styleFrom": "nav.downloads.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(4)>span.pill:nth-child(1)",
+   "key": "nav.downloads.pill"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(4)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "key": "nav.downloads.icon"
+  },
+  {
+   "path": "#box>div.gesture:nth-child(7)",
+   "system": true
+  }
+ ],
+ "aux": [
+  "hero.linkBtn.label",
+  "hero.shuffleBtn.label",
+  "mini.artist.label",
+  "nav.downloads.label",
+  "nav.home.label",
+  "nav.library.label",
+  "nav.search.label"
+ ],
+ "centered": [
+  {
+   "child": "song2.more.icon",
+   "parent": "song2.moreBtn",
+   "axes": "xy"
+  },
+  {
+   "child": "mini.play.icon",
+   "parent": "mini.playBtn",
+   "axes": "xy"
+  },
+  {
+   "child": "mini.next.icon",
+   "parent": "mini.nextBtn",
+   "axes": "xy"
+  },
+  {
+   "child": "nav.downloads.icon",
+   "parent": "nav.downloads.pill",
+   "axes": "xy"
+  },
+  {
+   "child": "nav.home.icon",
+   "parent": "nav.home",
+   "axes": "x"
+  },
+  {
+   "child": "nav.search.icon",
+   "parent": "nav.search",
+   "axes": "x"
+  },
+  {
+   "child": "nav.library.icon",
+   "parent": "nav.library",
+   "axes": "x"
+  },
+  {
+   "child": "nav.downloads.icon",
+   "parent": "nav.downloads",
+   "axes": "x"
+  },
+  {
+   "child": "nav.home.label",
+   "parent": "nav.home",
+   "axes": "x"
+  },
+  {
+   "child": "nav.search.label",
+   "parent": "nav.search",
+   "axes": "x"
+  },
+  {
+   "child": "nav.library.label",
+   "parent": "nav.library",
+   "axes": "x"
+  },
+  {
+   "child": "nav.downloads.label",
+   "parent": "nav.downloads",
+   "axes": "x"
+  }
+ ],
+ "rows": [
+  {
+   "name": "song2 row",
+   "keys": [
+    "song2.cover",
+    "song2.moreBtn"
+   ],
+   "edges": [
+    "centerY"
+   ]
+  },
+  {
+   "name": "mini controls",
+   "keys": [
+    "mini.cover",
+    "mini.playBtn",
+    "mini.nextBtn"
+   ],
+   "edges": [
+    "centerY"
+   ]
+  },
+  {
+   "name": "mini source line",
+   "keys": [
+    "mini.src.ytm",
+    "mini.src.sc",
+    "mini.artist.label"
+   ],
+   "edges": [
+    "centerY"
+   ]
+  },
+  {
+   "name": "nav buttons",
+   "keys": [
+    "nav.home",
+    "nav.search",
+    "nav.library",
+    "nav.downloads"
+   ],
+   "edges": [
+    "top",
+    "bottom"
+   ]
+  },
+  {
+   "name": "nav icons",
+   "keys": [
+    "nav.home.icon",
+    "nav.search.icon",
+    "nav.library.icon",
+    "nav.downloads.icon"
+   ],
+   "edges": [
+    "top",
+    "centerY"
+   ]
+  },
+  {
+   "name": "nav labels",
+   "keys": [
+    "nav.home.label",
+    "nav.search.label",
+    "nav.library.label",
+    "nav.downloads.label"
+   ],
+   "edges": [
+    "top",
+    "bottom",
+    "centerY"
+   ]
+  }
+ ],
+ "noOverlap": [
+  [
+   "song2.title",
+   "song2.moreBtn"
+  ],
+  [
+   "song2.meta",
+   "song2.moreBtn"
+  ]
+ ],
+ "ellipsis": [
+  "song1.meta",
+  "song2.meta"
+ ],
+ "toleranceNote": "Chrome (mock reference) lays text out with integer-rounded glyph advances, Skia with fractional ones: 12-14px text is 2-4% wider in the reference. Only boxes whose width is the text (wrap-content: the meta lines, the FAB, the sort button) depend on that, and what is aligned to their right edge moves with them; every other box is fill/fixed and held to 1px. Artist: the labelled hero buttons (\"Karıştır\", \"Bağı değiştir\") are wrap-content: Skia draws \"Bağı değiştir\" 3px narrower, the centred row is then 3px narrower and every button in it starts up to 1.5px (rounded 2px) further right; the section titles are wrap-content too.",
+ "tolerance": {
+  "hero.shuffleBtn": {
+   "x": 2.5
+  },
+  "hero.shuffleBtn.icon": {
+   "x": 2.5
+  },
+  "hero.playBtn": {
+   "x": 2.5
+  },
+  "hero.play.icon": {
+   "x": 2.5
+  },
+  "hero.linkBtn": {
+   "x": 2.5,
+   "w": 4.0
+  },
+  "hero.linkBtn.icon": {
+   "x": 2.5
+  },
+  "albums.title": {
+   "w": 2.0
+  },
+  "popular.title": {
+   "w": 2.0
+  },
+  "similar.title": {
+   "w": 2.0
+  }
+ },
+ "hscroll": [
+  "album",
+  "similar"
+ ]
+}

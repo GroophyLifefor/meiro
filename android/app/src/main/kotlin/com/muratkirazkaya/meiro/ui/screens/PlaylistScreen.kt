@@ -1,6 +1,5 @@
 package com.muratkirazkaya.meiro.ui.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -21,11 +19,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.muratkirazkaya.meiro.ui.components.Cover
+import com.muratkirazkaya.meiro.ui.components.DetailHero
+import com.muratkirazkaya.meiro.ui.components.HeroPlayButton
 import com.muratkirazkaya.meiro.ui.components.CoverSpec
 import com.muratkirazkaya.meiro.ui.components.IconButton
 import com.muratkirazkaya.meiro.ui.components.MIcon
@@ -33,7 +29,6 @@ import com.muratkirazkaya.meiro.ui.components.MText
 import com.muratkirazkaya.meiro.ui.components.Provider
 import com.muratkirazkaya.meiro.ui.components.SongRow
 import com.muratkirazkaya.meiro.ui.components.SongRowData
-import com.muratkirazkaya.meiro.ui.components.SourceLogo
 import com.muratkirazkaya.meiro.ui.components.TopBar
 import com.muratkirazkaya.meiro.ui.components.clickableNoIndication
 import com.muratkirazkaya.meiro.ui.icons.MeiroIcons
@@ -100,39 +95,13 @@ fun PlaylistScreen(
 @Composable
 private fun Hero(ui: PlaylistUi, onPlay: () -> Unit, onShuffle: () -> Unit) {
     val c = Meiro.colors
-    Column(Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        Cover(
-            ui.cover, 20.dp, "hero.cover",
-            Modifier.size(220.dp).shadow(16.dp, RoundedCornerShape(20.dp), clip = false, ambientColor = Color.Black.copy(0.35f), spotColor = Color.Black.copy(0.35f)),
-        )
-        Spacer(Modifier.height(16.dp))
-        MText(ui.title, MeiroType.HeroTitle, c.onSurface, "hero.title", Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
-        Spacer(Modifier.height(6.dp))
-        Row(Modifier.fillMaxWidth().inv("hero.kind"), Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally), Alignment.CenterVertically) {
-            SourceLogo("hero.kind.logo", Provider.Meiro, false)
-            MText(ui.kind, MeiroType.HeroKind, c.onSurfaceVariant, "hero.kind.label", Modifier.weight(1f, fill = false), textAlign = TextAlign.Center)
-        }
-        Spacer(Modifier.height(14.dp))
-        Row(Modifier.padding(top = 8.dp, bottom = 4.dp), Arrangement.spacedBy(4.dp), Alignment.CenterVertically) {
-            IconButton("hero.downloadBtn", "hero.download.icon", MeiroIcons.Download, c.onSurfaceVariant)
-            IconButton("hero.shuffleBtn", "hero.shuffle.icon", MeiroIcons.Shuffle, c.onSurfaceVariant, onShuffle)
-            Box56(onPlay)
-            IconButton("hero.editBtn", "hero.edit.icon", MeiroIcons.Edit, c.onSurfaceVariant)
-            IconButton("hero.shareBtn", "hero.share.icon", MeiroIcons.Share, c.onSurfaceVariant)
-        }
-        Spacer(Modifier.height(6.dp))
+    DetailHero(ui.cover, ui.title, ui.kind, Provider.Meiro) {
+        IconButton("hero.downloadBtn", "hero.download.icon", MeiroIcons.Download, c.onSurfaceVariant)
+        IconButton("hero.shuffleBtn", "hero.shuffle.icon", MeiroIcons.Shuffle, c.onSurfaceVariant, onShuffle)
+        HeroPlayButton(onPlay)
+        IconButton("hero.editBtn", "hero.edit.icon", MeiroIcons.Edit, c.onSurfaceVariant)
+        IconButton("hero.shareBtn", "hero.share.icon", MeiroIcons.Share, c.onSurfaceVariant)
     }
-}
-
-/** The mock's `.play`: 56dp, 18dp radius, primary, 28dp play glyph, 8dp side margins. */
-@Composable
-private fun Box56(onPlay: () -> Unit) {
-    val c = Meiro.colors
-    Box(
-        Modifier.padding(horizontal = 8.dp).size(56.dp).inv("hero.playBtn", bg = c.primary, radiusDp = 18f)
-            .clip(RoundedCornerShape(18.dp)).background(c.primary).clickableNoIndication(onPlay),
-        Alignment.Center,
-    ) { MIcon(MeiroIcons.Play, c.onPrimary, "hero.play.icon", size = 28) }
 }
 
 /** The mock's `.btn.text` "Ekleme sırası" (the only order for now; inert). */

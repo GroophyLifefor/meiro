@@ -19,6 +19,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.muratkirazkaya.meiro.AppContainer
 import com.muratkirazkaya.meiro.MeiroApplication
 import com.muratkirazkaya.meiro.Session
@@ -32,6 +33,10 @@ import com.muratkirazkaya.meiro.ui.screens.LibraryEmptyScreen
 import com.muratkirazkaya.meiro.ui.screens.LibraryScreen
 import com.muratkirazkaya.meiro.ui.screens.NewListSheet
 import com.muratkirazkaya.meiro.ui.screens.PlaylistScreen
+import com.muratkirazkaya.meiro.ui.screens.AlbumScreen
+import com.muratkirazkaya.meiro.ui.screens.ArtistScreen
+import com.muratkirazkaya.meiro.ui.screens.DetailActions
+import com.muratkirazkaya.meiro.youtube.BrowsePage
 import com.muratkirazkaya.meiro.ui.screens.SearchActions
 import com.muratkirazkaya.meiro.ui.screens.SearchScreen
 import com.muratkirazkaya.meiro.ui.components.Snack
@@ -111,6 +116,8 @@ private fun SignInRoute(c: AppContainer, session: Session, bars: SystemBars, onS
 }
 
 private const val PLAYLIST_ROUTE = "playlist/{id}"
+private const val ALBUM_ROUTE = "album/{id}?tab={tab}"
+private const val ARTIST_ROUTE = "artist/{id}?tab={tab}"
 
 /** The shell with the four tab routes; Library lists the lists, and a list opens as `playlist/<id>`. */
 @Composable
@@ -121,9 +128,16 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String) {
     val scope = rememberCoroutineScope()
     val playing by PlaybackHost.ui.collectAsState()
     val route = entry?.destination?.route
-    // A list keeps the tab it was opened from selected (Kütüphane, or Ana sayfa for a quick pick), as the mock's stack does.
-    val from = if (route == PLAYLIST_ROUTE) nav.previousBackStackEntry?.destination?.route else route
+    // A list keeps the tab it was opened from selected (Kütüphane, or Ana sayfa for a quick pick), as the mock's stack
+    // does; an album or artist page carries the tab it was opened from (it can be several pages deep).
+    val from = when (route) {
+        PLAYLIST_ROUTE -> nav.previousBackStackEntry?.destination?.route
+        ALBUM_ROUTE, ARTIST_ROUTE -> entry?.arguments?.getString("tab")
+        else -> route
+    }
     val selected = Tab.entries.firstOrNull { it.route == from } ?: if (route == PLAYLIST_ROUTE) Tab.Library else Tab.Home
+    val openAlbum = { id: String -> nav.navigate("album/$id?tab=${selected.route}") }
+    val openArtist = { id: String -> nav.navigate("artist/$id?tab=${selected.route}") }
     var sheet by remember { mutableStateOf(false) }
     var newName by remember { mutableStateOf("") }
     var snack by remember { mutableStateOf<String?>(null) }
@@ -148,9 +162,15 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String) {
                 composable(Tab.Home.route) {
                     HomeRoute(c, email, onOpen = { nav.navigate("playlist/$it") }, onSnack = { snack = it })
                 }
-                composable(Tab.Search.route) { SearchRoute(c) }
+                composable(Tab.Search.route) { SearchRoute(c, openAlbum, openArtist) }
                 composable(Tab.Library.route) { LibraryRoute(c, onOpen = { nav.navigate("playlist/$it") }, onNew = openSheet) }
                 composable(Tab.Downloads.route) { PlaceholderScreen("İndirilenler") }
+                composable(ALBUM_ROUTE, listOf(navArgument("tab") { defaultValue = Tab.Search.route })) { e ->
+                    AlbumRoute(c, e.arguments?.getString("id").orEmpty(), onBack = { nav.popBackStack() }, onSnack = { snack = it })
+                }
+                composable(ARTIST_ROUTE, listOf(navArgument("tab") { defaultValue = Tab.Search.route })) { e ->
+                    ArtistRoute(c, e.arguments?.getString("id").orEmpty(), onBack = { nav.popBackStack() }, openAlbum, openArtist)
+                }
                 composable(PLAYLIST_ROUTE) { e ->
                     PlaylistRoute(c, e.arguments?.getString("id").orEmpty(), onBack = { nav.popBackStack() })
                 }
@@ -218,7 +238,7 @@ private fun LibraryRoute(c: AppContainer, onOpen: (String) -> Unit, onNew: () ->
 }
 
 @Composable
-private fun SearchRoute(c: AppContainer) {
+private fun SearchRoute(c: AppContainer, onAlbum: (String) -> Unit, onArtist: (String) -> Unit) {
     val ctx = LocalContext.current
     val ctl = c.search
     val s by ctl.state.collectAsState()
@@ -244,6 +264,8 @@ private fun SearchRoute(c: AppContainer) {
                 with(SearchMapping) { PlaybackHost.playQueue(ctx, items.map { it.toQItem() }, i, "search: ${s.submitted}") }
             },
             onEnd = ctl::loadMore,
+            onArtist = { i -> ui.artists.getOrNull(i)?.let { onArtist(it.key) } },
+            onAlbum = { i -> ui.albums.getOrNull(i)?.let { onAlbum(it.key) } },
         ),
     )
 }
@@ -264,5 +286,89 @@ private fun PlaylistRoute(c: AppContainer, id: String, onBack: () -> Unit) {
         onPlay = { play(0, lib.items.map { it.toQItem() }) },
         onShuffle = { play(0, lib.items.map { it.toQItem() }.shuffled()) },
         onRow = { i -> play(i, lib.items.map { it.toQItem() }) },
+    )
+}
+
+/** A browse page as it loads: null while it loads, then the page or the error's message. */
+private class Loaded(val page: BrowsePage? = null, val error: String? = null)
+
+@Composable
+private fun rememberBrowsePage(c: AppContainer, id: String, retry: Int): Loaded? {
+    val loaded by produceState<Loaded?>(null, id, retry) {
+        value = try {
+            Loaded(c.browsePage(id))
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            android.util.Log.i(AppContainer.TAG, "browse: $id failed: $e")
+            Loaded(error = e.message ?: e.javaClass.simpleName)
+        }
+    }
+    return loaded
+}
+
+/**
+ * An album page (`browse` `MPR...`): rows play the album from that track, play and shuffle play all of it, and the copy
+ * button makes a Meiro list of it with the mock's snack.
+ */
+@Composable
+private fun AlbumRoute(c: AppContainer, id: String, onBack: () -> Unit, onSnack: (String) -> Unit) {
+    val ctx = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val now by PlaybackHost.ui.collectAsState()
+    val version by c.libraries.version.collectAsState()
+    var retry by remember { mutableStateOf(0) }
+    val loaded = rememberBrowsePage(c, id, retry)
+    val playingKey = now?.item?.key
+    val data = remember(loaded, playingKey, version) {
+        loaded?.page?.let { BrowseMapping.album(id, it, { src, key -> c.links.song(src, key)?.state }, playingKey) }
+    }
+    fun play(from: Int, items: List<com.muratkirazkaya.meiro.playback.QItem>) = PlaybackHost.playQueue(ctx, items, from, data?.ui?.title.orEmpty())
+    AlbumScreen(
+        data?.ui, playing = now?.playing == true,
+        actions = DetailActions(
+            onBack = onBack,
+            onPlay = { data?.let { if (it.tracks.isNotEmpty()) play(0, it.queue) } },
+            onShuffle = { data?.let { if (it.tracks.isNotEmpty()) play(0, it.queue.shuffled()) } },
+            onRow = { i -> data?.let { play(i, it.queue) } },
+            onCopy = {
+                data?.let { d ->
+                    if (d.tracks.isNotEmpty()) scope.launch {
+                        c.copyAsList(d.ui.title, d.cover, d.listItems())
+                        onSnack("\u201C${d.ui.title}\u201D Meiro listesi olarak kopyalandı")
+                    }
+                }
+            },
+            onRetry = { retry++ },
+        ),
+        error = loaded?.error,
+    )
+}
+
+/** An artist page (`browse` `UC...`): its popular tracks play, its album tiles open the album, similar artists open theirs. */
+@Composable
+private fun ArtistRoute(c: AppContainer, id: String, onBack: () -> Unit, onAlbum: (String) -> Unit, onArtist: (String) -> Unit) {
+    val ctx = LocalContext.current
+    val now by PlaybackHost.ui.collectAsState()
+    val version by c.libraries.version.collectAsState()
+    var retry by remember { mutableStateOf(0) }
+    val loaded = rememberBrowsePage(c, id, retry)
+    val playingKey = now?.item?.key
+    val data = remember(loaded, playingKey, version) {
+        loaded?.page?.let { BrowseMapping.artist(id, it, { src, key -> c.links.song(src, key)?.state }, playingKey) }
+    }
+    fun play(from: Int, items: List<com.muratkirazkaya.meiro.playback.QItem>) = PlaybackHost.playQueue(ctx, items, from, data?.ui?.name.orEmpty())
+    ArtistScreen(
+        data?.ui, playing = now?.playing == true,
+        actions = DetailActions(
+            onBack = onBack,
+            onPlay = { data?.let { if (it.tracks.isNotEmpty()) play(0, it.queue) } },
+            onShuffle = { data?.let { if (it.tracks.isNotEmpty()) play(0, it.queue.shuffled()) } },
+            onRow = { i -> data?.let { play(i, it.queue) } },
+            onAlbum = { i -> data?.albumIds?.getOrNull(i)?.let(onAlbum) },
+            onArtist = { i -> data?.artistIds?.getOrNull(i)?.let(onArtist) },
+            onRetry = { retry++ },
+        ),
+        error = loaded?.error,
     )
 }

@@ -77,6 +77,9 @@ class SearchActions(
     val onSong: (Int) -> Unit = {},
     /** The list was scrolled to its end (the next page of a filtered search is asked for). */
     val onEnd: () -> Unit = {},
+    /** An artist row and an album tile: they open the artist and the album page. */
+    val onArtist: (Int) -> Unit = {},
+    val onAlbum: (Int) -> Unit = {},
 )
 
 /**
@@ -128,7 +131,7 @@ fun SearchScreen(ui: SearchUi, playing: Boolean, actions: SearchActions, state: 
             }
             if (ui.artists.isNotEmpty()) {
                 item(key = "artists.head") { SectionHead("Sanatçılar", "artists.title") }
-                itemsIndexed(ui.artists, key = { i, a -> "a$i/${a.key}" }) { i, a -> ArtistRow("artist${i + 1}", a) {} }
+                itemsIndexed(ui.artists, key = { i, a -> "a$i/${a.key}" }) { i, a -> ArtistRow("artist${i + 1}", a) { actions.onArtist(i) } }
             }
             if (ui.songs.isNotEmpty()) {
                 // The offline note stands over its rows without a section title, as in the mock's offline state.
@@ -139,7 +142,7 @@ fun SearchScreen(ui: SearchUi, playing: Boolean, actions: SearchActions, state: 
                 item(key = "albums.head") { SectionHead("Albümler", "albums.title") }
                 item(key = "albums") {
                     LazyRow(contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 4.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        itemsIndexed(ui.albums, key = { i, t -> "t$i/${t.key}" }) { i, t -> AlbumTile("album${i + 1}", t) {} }
+                        itemsIndexed(ui.albums, key = { i, t -> "t$i/${t.key}" }) { i, t -> AlbumTile("album${i + 1}", t) { actions.onAlbum(i) } }
                     }
                 }
             }

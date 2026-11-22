@@ -33,6 +33,7 @@ import com.muratkirazkaya.meiro.search.SoundCloudSearch
 import com.muratkirazkaya.meiro.youtube.MusicItem
 import com.muratkirazkaya.meiro.youtube.SearchResult
 import com.muratkirazkaya.meiro.youtube.YtmClient
+import com.muratkirazkaya.meiro.youtube.BrowsePage
 import com.yausername.youtubedl_android.YoutubeDL
 import com.yausername.youtubedl_android.YoutubeDLRequest
 import kotlinx.coroutines.CoroutineScope
@@ -158,6 +159,43 @@ class AppContainer(private val context: Context) {
             Log.i(TAG, "list: pushed, outbox pending=${engine.outbox.pending()} error=${engine.lastError.ifEmpty { "none" }}")
         }
         lib.id
+    }
+
+    /**
+     * `duplicateAsMeiro` (`librarypage.go:164`): a new list named [name] holding [items], with [cover] as its picture,
+     * then (signed in) queued and sent as [createList] does. Returns the new list's local id and how many tracks it got.
+     */
+    suspend fun copyAsList(name: String, cover: String, items: List<com.muratkirazkaya.meiro.data.Item>): Pair<String, Int> = withContext(Dispatchers.IO) {
+        val lib = libraries.create(name.trim().ifEmpty { "Kopyalanan liste" })
+        if (cover.isNotEmpty()) libraries.setCover(lib.id, cover)
+        val added = libraries.addItems(lib.id, items)
+        Log.i(TAG, "list: copied id=${lib.id} name=${lib.name} tracks=$added")
+        if (session().signedIn) {
+            engine.syncSnapshot().queue(engine.outbox)
+            engine.syncNow(); engine.settled()
+            Log.i(TAG, "list: copy pushed, outbox pending=${engine.outbox.pending()} error=${engine.lastError.ifEmpty { "none" }}")
+        }
+        lib.id to added
+    }
+
+    /** The anonymous YouTube Music client the album and artist pages read (the search has its own). */
+    val ytm: YtmClient by lazy { YtmClient() }
+
+    private val pages = object : LinkedHashMap<String, BrowsePage>(16, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, BrowsePage>?) = size > 20
+    }
+
+    /**
+     * An album (`MPR...`) or artist (`UC...`) page, read once per process and kept for the last 20 pages, so going
+     * back to a page shows it at once (the desktop keeps its pages the same way while the app runs).
+     */
+    suspend fun browsePage(id: String): BrowsePage {
+        synchronized(pages) { pages[id] }?.let { return it }
+        val t0 = System.nanoTime()
+        val page = if (com.muratkirazkaya.meiro.youtube.isAlbumId(id)) ytm.album(id) else ytm.artist(id)
+        Log.i(TAG, "browse: $id \"${page.title}\" ${page.sections.size} sections in ${(System.nanoTime() - t0) / 1_000_000} ms")
+        synchronized(pages) { pages[id] = page }
+        return page
     }
 
     /** One round of what the desktop does every 5 minutes: send what waits, read the lists and the plays. */
