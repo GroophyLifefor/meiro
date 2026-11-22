@@ -34,6 +34,12 @@ import com.muratkirazkaya.meiro.youtube.MusicItem
 import com.muratkirazkaya.meiro.youtube.SearchResult
 import com.muratkirazkaya.meiro.youtube.YtmClient
 import com.muratkirazkaya.meiro.youtube.BrowsePage
+import com.muratkirazkaya.meiro.youtube.YtmRelated
+import com.muratkirazkaya.meiro.recommend.DailyMixMaker
+import com.muratkirazkaya.meiro.recommend.RelatedCache
+import com.muratkirazkaya.meiro.recommend.RelatedSources
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import com.yausername.youtubedl_android.YoutubeDL
 import com.yausername.youtubedl_android.YoutubeDLRequest
 import kotlinx.coroutines.CoroutineScope
@@ -198,6 +204,58 @@ class AppContainer(private val context: Context) {
         return page
     }
 
+    private val recScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val recBusy = java.util.concurrent.atomic.AtomicBoolean(false)
+
+    /** Makes the Daily mix (recommendations.go): related songs from YouTube Music and SoundCloud, kept for a day on disk. */
+    val dailyMix: DailyMixMaker by lazy {
+        DailyMixMaker(AppRelatedSources(context, ytm), RelatedCache(java.io.File(context.filesDir, "recommendations-cache.json")) { Log.i(MIX_TAG, it) }, log = { Log.i(MIX_TAG, it) })
+    }
+
+    /**
+     * The desktop's `recommendTick`, on its schedule: the first check 45 s after the app starts, then every hour while
+     * the process lives. The phone uses the ranking only for the Daily mix (its queue takes no suggestions yet), so a
+     * check does nothing once today's mix is made, here or on another device.
+     */
+    fun startRecommendations() {
+        recScope.launch {
+            delay(DailyMixMaker.FIRST_CHECK.toMillis())
+            while (true) {
+                try { recommendTick("schedule") } catch (e: kotlinx.coroutines.CancellationException) { throw e } catch (e: Exception) { Log.i(MIX_TAG, "daily mix: run failed: $e") }
+                delay(DailyMixMaker.CHECK_EVERY.toMillis())
+            }
+        }
+    }
+
+    /**
+     * One run (`refreshRecommendations` + `writeDailyMix`): nothing when today's mix is made or a run is on its way;
+     * otherwise gather, rank, write the mix when there are at least 5 picks and (signed in) send it. True when it wrote.
+     */
+    suspend fun recommendTick(reason: String): Boolean = withContext(Dispatchers.IO) {
+        if (engine.dailyMixMadeToday()) { Log.i(MIX_TAG, "daily mix ($reason): today's mix is made (${engine.settings.dailyMixDate})"); return@withContext false }
+        if (!recBusy.compareAndSet(false, true)) return@withContext false
+        try {
+            val t0 = System.nanoTime()
+            val items = kotlinx.coroutines.withTimeoutOrNull(DailyMixMaker.RUN_TIMEOUT.toMillis()) {
+                dailyMix.make(
+                    profileNow = { dailyMix.profile(engine.history(), libraries.list(), engine.settings.dailyMixId, java.time.Instant.now()) },
+                    history = { engine.history() }, now = java.time.Instant.now(), zone = java.time.ZoneId.systemDefault(),
+                )
+            }
+            if (items == null) { Log.i(MIX_TAG, "daily mix ($reason): gave up after ${DailyMixMaker.RUN_TIMEOUT.toMinutes()} min"); return@withContext false }
+            val wrote = engine.writeDailyMix(items)
+            Log.i(MIX_TAG, "daily mix ($reason): ${items.size} picks in ${(System.nanoTime() - t0) / 1_000_000} ms, written=$wrote")
+            if (wrote && session().signedIn) {
+                engine.syncSnapshot().queue(engine.outbox)
+                engine.syncNow(); engine.settled()
+                Log.i(MIX_TAG, "daily mix ($reason): pushed, outbox pending=${engine.outbox.pending()} error=${engine.lastError.ifEmpty { "none" }}")
+            }
+            wrote
+        } finally {
+            recBusy.set(false)
+        }
+    }
+
     /** One round of what the desktop does every 5 minutes: send what waits, read the lists and the plays. */
     suspend fun sync(reason: String) = withContext(Dispatchers.IO) {
         if (!session().signedIn) { Log.i(TAG, "sync ($reason): skipped, not signed in"); return@withContext }
@@ -217,6 +275,7 @@ class AppContainer(private val context: Context) {
     companion object {
         const val TAG = "MeiroSync"
         const val SEARCH_TAG = "MeiroSearch"
+        const val MIX_TAG = "MeiroMix"
 
         /** The server field takes a bare host as the mock shows it; anything with a scheme is kept. */
         fun normalizeServer(s: String): String {
@@ -249,6 +308,27 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
     override suspend fun doWork(): Result {
         (applicationContext as MeiroApplication).container().sync("worker")
         return Result.success()
+    }
+}
+
+/** What the Daily mix asks: YouTube Music's "Related" tab, and SoundCloud's recommendations through the bundled yt-dlp. */
+class AppRelatedSources(private val context: Context, private val ytm: YtmClient) : RelatedSources {
+    private val pids = AtomicLong()
+
+    override suspend fun youtube(videoId: String): List<MusicItem> = YtmRelated.tracks(ytm.related(videoId))
+
+    override suspend fun soundCloud(pageUrl: String): List<MusicItem> {
+        YtdlpSetup.ensure(context) { Log.i(AppContainer.MIX_TAG, it) }
+        val pid = "screlated-${pids.incrementAndGet()}"
+        val cache = java.io.File(context.cacheDir, "yt-dlp").apply { mkdirs() }
+        val req = YoutubeDLRequest(emptyList()).apply { addCommands(listOf("--cache-dir", cache.path) + SoundCloudSearch.relatedArgs(pageUrl)) }
+        val out = try {
+            runInterruptible(Dispatchers.IO) { YoutubeDL.getInstance().execute(req, pid, null).out }
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            YoutubeDL.getInstance().destroyProcessById(pid)
+            throw e
+        }
+        return SoundCloudSearch.parse(out)
     }
 }
 

@@ -70,6 +70,33 @@ object YtmSearch {
     }
 }
 
+/** A track's tabs (`tracktabs.go`): finding a tab's page in a `next` response, and the tracks of the related page. */
+object YtmRelated {
+    const val RELATED_PAGE = "MUSIC_PAGE_TYPE_TRACK_RELATED"
+
+    /** `musicTabBrowseID`: the browse id of the nearest ancestor (or the node itself) of the node whose pageType is [pageType]. */
+    fun tabBrowseId(text: String, pageType: String): String {
+        fun walk(v: Any?, parents: List<JObj>): String {
+            when (v) {
+                is List<*> -> for (c in v) walk(c, parents).takeIf { it.isNotEmpty() }?.let { return it }
+                is JObj -> {
+                    if (v["pageType"] == pageType) {
+                        for (i in parents.indices.reversed()) Renderers.navigationId(parents[i]).takeIf { it.isNotEmpty() }?.let { return it }
+                        return Renderers.navigationId(v)
+                    }
+                    val with = parents + v
+                    for ((_, m) in v.members) walk(m, with).takeIf { it.isNotEmpty() }?.let { return it }
+                }
+            }
+            return ""
+        }
+        return walk(OrderedJson.parse(text), emptyList())
+    }
+
+    /** `relatedTracks` (recommendations.go:232): the playable tracks of the page's items and of every section, in page order. */
+    fun tracks(page: BrowsePage): List<MusicItem> = page.items.filter { it.isTrack() } + page.sections.flatMap { s -> s.items.filter { it.isTrack() } }
+}
+
 /**
  * The anonymous YouTube Music InnerTube client (`youtube/client.go`, PORTING.md 2.1): WEB_REMIX, `hl=en`, `gl=US`, no
  * cookie. The visitor id is learned from the first response and sent from then on, kept only in memory.
@@ -107,6 +134,18 @@ class YtmClient(
     suspend fun artist(id: String): BrowsePage {
         require(id.startsWith("UC") || id.startsWith("FEmusic_library_privately_owned_artist")) { "youtube: invalid artist ID \"$id\"" }
         return YtmBrowse.parse(execute("browse", JSONObject().put("browseId", id)))
+    }
+
+    /**
+     * `GetRelated` (`tracktabs.go:111`): the track's "Related" tab. `next` for the video names the tab's browse id
+     * (`MUSIC_PAGE_TYPE_TRACK_RELATED`), and that page is read like any browse page.
+     */
+    suspend fun related(videoId: String): BrowsePage {
+        require(videoId.isNotBlank()) { "youtube: video ID is required" }
+        val next = execute("next", JSONObject().put("videoId", videoId))
+        val browseId = YtmRelated.tabBrowseId(next, YtmRelated.RELATED_PAGE)
+        if (browseId.isEmpty()) throw YtmException("youtube: track response has no ${YtmRelated.RELATED_PAGE} tab")
+        return YtmBrowse.parse(execute("browse", JSONObject().put("browseId", browseId)))
     }
 
     private suspend fun execute(endpoint: String, payload: JSONObject): String = withContext(Dispatchers.IO) {

@@ -9,6 +9,9 @@
 #   ytm_browse_album_ram.json        browse of the first album of that search, "Random Access Memories" (M4d album page)
 # With the argument `browse` only the two browse files are recorded, from the ids in the saved search fixture, so the
 # search fixtures (and the tests written against them) stay as they are.
+# With the argument `related` (M4e Daily mix) only the related tab of the first song of the saved search fixture:
+#   ytm_next_related_seed.json       `next` for that video (it names the related tab's browse id)
+#   ytm_browse_related.json          browse of that related tab (MUSIC_PAGE_TYPE_TRACK_RELATED)
 # Anything that could tie a response to a visitor is removed: responseContext (visitorData, serviceTrackingParams,
 # responseId) and every trackingParams / clickTrackingParams value. Output is minified JSON.
 set -euo pipefail
@@ -86,6 +89,40 @@ def save_browse(root):
     print("artist", artist, "album", album)
     save("ytm_browse_artist_daft_punk", call("browse", {"browseId": artist}))
     save("ytm_browse_album_ram", call("browse", {"browseId": album}))
+
+def first_video(root):
+    for r in find(root, "musicResponsiveListItemRenderer"):
+        for w in find(r, "watchEndpoint"):
+            if w.get("videoId"): return w["videoId"]
+    raise AssertionError("no video in the search fixture")
+
+def related_browse_id(root):
+    def walk(o, parents):
+        if isinstance(o, dict):
+            if o.get("pageType") == "MUSIC_PAGE_TYPE_TRACK_RELATED":
+                for p in reversed(parents + [o]):
+                    bid = p.get("browseEndpoint", {}).get("browseId") if isinstance(p, dict) else None
+                    if bid: return bid
+            for v in o.values():
+                r = walk(v, parents + [o])
+                if r: return r
+        elif isinstance(o, list):
+            for v in o:
+                r = walk(v, parents)
+                if r: return r
+        return None
+    bid = walk(root, [])
+    assert bid, "no related tab"
+    return bid
+
+if sys.argv[2] == "related":
+    vid = first_video(json.load(open(f"{out}/ytm_search_daft_punk.json", encoding="utf-8")))
+    print("seed video", vid)
+    nxt = save("ytm_next_related_seed", call("next", {"videoId": vid}))
+    bid = related_browse_id(nxt)
+    print("related browse", bid)
+    save("ytm_browse_related", call("browse", {"browseId": bid}))
+    sys.exit(0)
 
 if sys.argv[2] == "browse":
     save_browse(json.load(open(f"{out}/ytm_search_daft_punk.json", encoding="utf-8")))

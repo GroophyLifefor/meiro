@@ -551,6 +551,37 @@ class SyncEngine(
         return changed
     }
 
+    /** Whether today's Daily mix is made here or by another device (the settings' date is today's local date). */
+    fun dailyMixMadeToday(): Boolean = lock.withLock { settings.dailyMixDate == today() }
+
+    /**
+     * `writeDailyMix` (recommendations.go:423): puts [items] in the Daily mix, once a day. The mix has one identity on
+     * the server whichever device makes it, so the first device to make today's fills it: a device that finds the list
+     * already holds tracks put there today adopts that mix and makes none. The list is made the first time (under the
+     * shared id, named "Daily mix", no cover) and its tracks replaced after that; a mix kept under another id is
+     * deleted. Needs at least [MIN_DAILY_MIX] items. Says whether it wrote the mix; the caller sends it.
+     */
+    fun writeDailyMix(items: List<com.muratkirazkaya.meiro.data.Item>, remake: Boolean = false): Boolean = lock.withLock {
+        if (items.size < MIN_DAILY_MIX || (!remake && settings.dailyMixDate == today())) return false
+        if (!remake && adoptDailyMix()) {
+            saveSettings()
+            if (settings.dailyMixDate == today()) return false
+        }
+        val shared = Ids.dailyMixId()
+        val lib = localList(shared) ?: run {
+            // A mix made before the lists were shared is a list of its own on the server: take it away, or the other
+            // devices would show it beside the shared one.
+            val old = settings.dailyMixId
+            if (old.isNotEmpty() && libraries.get(old) != null) libraries.delete(old)
+            libraries.addRemote(shared, "Daily mix", "", clock.now())
+        }
+        libraries.replaceItems(lib.id, items)
+        update { it.copy(dailyMixId = lib.id, dailyMixDate = today()) }
+        saveSettings()
+        SyncLog.log("daily mix: wrote ${items.size} tracks to ${lib.id} for ${today()}")
+        true
+    }
+
     private fun madeToday(lib: LocalLibrary): Boolean = lib.items.any { it.updatedAt.atZone(zone).toLocalDate().toString() == today() }
 
     /**
@@ -783,6 +814,8 @@ class SyncEngine(
         const val SYNC_CALL_TIMEOUT_MS = 30_000L
         /** How many times a delivery that fails for a reason that may pass is tried, with backoff between tries. */
         const val SYNC_ATTEMPTS = 4
+        /** The fewest picks that make a Daily mix worth showing (`minDailyMix`, recommendations.go:62). */
+        const val MIN_DAILY_MIX = 5
         /** How often records that wait are tried again while the app runs (the WorkManager period later). */
         val SYNC_INTERVAL: Duration = Duration.ofMinutes(5)
     }

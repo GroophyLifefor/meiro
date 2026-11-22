@@ -84,6 +84,14 @@ object SoundCloudSearch {
 
     fun args(query: String): List<String> = listOf("--flat-playlist", "--dump-single-json", "--no-warnings", "scsearch$LIMIT:$query")
 
+    /** `GetRelated` (soundcloud/client.go:90): the page yt-dlp reads a track's recommendations from (`relatedURL`). */
+    fun relatedUrl(pageUrl: String): String {
+        val t = pageUrl.trimEnd('/')
+        return if (t.endsWith("/recommended")) t else "$t/recommended"
+    }
+
+    fun relatedArgs(pageUrl: String): List<String> = listOf("--flat-playlist", "--dump-single-json", "--no-warnings", relatedUrl(pageUrl))
+
     /** yt-dlp's flat JSON to tracks: entries with neither an id nor a page URL are skipped. */
     fun parse(json: String): List<MusicItem> {
         val o = JSONObject(json)
