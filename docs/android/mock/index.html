@@ -173,7 +173,9 @@
   .hero h2{margin:0; font-size:24px; line-height:30px; font-weight:600}
   .hero .kind{display:flex; justify-content:center; align-items:center; gap:6px; margin-top:6px; color:var(--on-surface-variant); font-size:13px}
   .hero .actions{display:flex; justify-content:center; align-items:center; gap:4px; margin:14px 0 6px}
-  .hero .actions .play{width:56px; height:56px; border-radius:18px; border:0; background:var(--primary); color:var(--on-primary); display:grid; place-items:center; margin:0 8px}
+  .hero .actions .play{width:56px; height:56px; border-radius:18px; border:0; background:var(--primary); color:var(--on-primary); display:grid; place-items:center; margin:0 8px; flex:none}
+  /* Beside two labelled buttons (artist) there is no room for the side margins: the gap is enough. */
+  .hero .actions .btn + .play{margin:0}
   .hero .actions .play svg{width:28px; height:28px; fill:currentColor}
   .tools{display:flex; align-items:center; gap:8px; padding:6px 8px 6px 16px}
   .tools .grow{flex:1}
