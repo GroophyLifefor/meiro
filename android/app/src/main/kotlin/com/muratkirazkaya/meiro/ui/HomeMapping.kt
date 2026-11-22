@@ -79,19 +79,26 @@ object HomeMapping {
             ?: libs.firstOrNull { libraryServerId(it.id, it.serverId) == Ids.dailyMixId() }
 
     /**
-     * The Daily mix card, or null when there is no mix with tracks (the app does not make one yet; a mix made by the
-     * desktop arrives with the sync). The kicker says "bugün" when its tracks were put there today, else the day.
+     * The Daily mix card, or null when there is no mix with tracks (made by this phone, or by the desktop and brought by
+     * the sync). The kicker says "bugün" when its tracks were put there today, else the day.
      */
     fun mix(lib: Library?, history: List<HistoryEntry>, others: List<Library>, today: LocalDate, zone: ZoneId): MixUi? {
         if (lib == null || lib.items.isEmpty()) return null
-        val made = lib.items.maxOf { it.updatedAt }.let { if (it.isZero) lib.updatedAt else it }
-        val day = made.atZone(zone).toLocalDate()
-        val kicker = "Daily mix · " + when (day) {
-            today -> "bugün"
-            today.minusDays(1) -> "dün"
-            else -> day.format(DateTimeFormatter.ofPattern("d MMMM", Turkish))
-        }
+        val kicker = "Daily mix · " + dayWord(madeDay(lib, zone), today)
         return MixUi(kicker, "${lib.items.size} şarkı", artistsLine(lib.items, history, others), lib.items.take(4).map { it.cover() })
+    }
+
+    /** The local day the mix's tracks were put there (the latest track change; the list's own when none is dated). */
+    fun madeDay(lib: Library, zone: ZoneId): LocalDate {
+        val made = (lib.items.maxOfOrNull { it.updatedAt } ?: lib.updatedAt).let { if (it.isZero) lib.updatedAt else it }
+        return made.atZone(zone).toLocalDate()
+    }
+
+    /** "bugün", "dün", else the day ("3 Kasım"). */
+    fun dayWord(day: LocalDate, today: LocalDate): String = when (day) {
+        today -> "bugün"
+        today.minusDays(1) -> "dün"
+        else -> day.format(DateTimeFormatter.ofPattern("d MMMM", Turkish))
     }
 
     /**

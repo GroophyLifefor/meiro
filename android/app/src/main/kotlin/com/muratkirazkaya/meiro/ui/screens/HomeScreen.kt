@@ -25,12 +25,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.muratkirazkaya.meiro.ui.components.AlbumTile
 import com.muratkirazkaya.meiro.ui.components.Cover
 import com.muratkirazkaya.meiro.ui.components.CoverSpec
+import com.muratkirazkaya.meiro.ui.components.MixBrush
 import com.muratkirazkaya.meiro.ui.components.IconButton
 import com.muratkirazkaya.meiro.ui.components.MIcon
 import com.muratkirazkaya.meiro.ui.components.MText
@@ -74,8 +74,6 @@ class HomeActions(
     val onRelease: (Int) -> Unit = {},
 )
 
-/** The mock's `.mix` background: linear-gradient(135deg, #5b3fb0, #a2365f). */
-private val MixBrush = Brush.linearGradient(listOf(Color(0xFF5B3FB0), Color(0xFFA2365F)))
 private val MixPlayIcon = Color(0xFF1C1B1F)
 private val Turkish = Locale.forLanguageTag("tr")
 

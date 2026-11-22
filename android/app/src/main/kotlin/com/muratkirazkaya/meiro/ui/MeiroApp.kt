@@ -49,6 +49,7 @@ import com.muratkirazkaya.meiro.ui.screens.MeiroShell
 import com.muratkirazkaya.meiro.ui.screens.PlaceholderScreen
 import com.muratkirazkaya.meiro.ui.screens.HomeActions
 import com.muratkirazkaya.meiro.ui.screens.HomeScreen
+import com.muratkirazkaya.meiro.ui.screens.MixScreen
 import java.time.ZonedDateTime
 import com.muratkirazkaya.meiro.ui.screens.SignInField
 import com.muratkirazkaya.meiro.ui.screens.SignInScreen
@@ -116,6 +117,7 @@ private fun SignInRoute(c: AppContainer, session: Session, bars: SystemBars, onS
 }
 
 private const val PLAYLIST_ROUTE = "playlist/{id}"
+private const val MIX_ROUTE = "mix"
 private const val ALBUM_ROUTE = "album/{id}?tab={tab}"
 private const val ARTIST_ROUTE = "artist/{id}?tab={tab}"
 
@@ -131,7 +133,7 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String) {
     // A list keeps the tab it was opened from selected (Kütüphane, or Ana sayfa for a quick pick), as the mock's stack
     // does; an album or artist page carries the tab it was opened from (it can be several pages deep).
     val from = when (route) {
-        PLAYLIST_ROUTE -> nav.previousBackStackEntry?.destination?.route
+        PLAYLIST_ROUTE, MIX_ROUTE -> nav.previousBackStackEntry?.destination?.route
         ALBUM_ROUTE, ARTIST_ROUTE -> entry?.arguments?.getString("tab")
         else -> route
     }
@@ -160,10 +162,12 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String) {
         ) {
             NavHost(nav, startDestination = Tab.Home.route) {
                 composable(Tab.Home.route) {
-                    HomeRoute(c, email, onOpen = { nav.navigate("playlist/$it") }, onSnack = { snack = it })
+                    HomeRoute(c, email, onOpen = { nav.navigate("playlist/$it") }, onMix = { nav.navigate(MIX_ROUTE) }, onSnack = { snack = it })
                 }
                 composable(Tab.Search.route) { SearchRoute(c, openAlbum, openArtist) }
-                composable(Tab.Library.route) { LibraryRoute(c, onOpen = { nav.navigate("playlist/$it") }, onNew = openSheet) }
+                composable(Tab.Library.route) {
+                    LibraryRoute(c, onOpen = { nav.navigate("playlist/$it") }, onMix = { nav.navigate(MIX_ROUTE) }, onNew = openSheet)
+                }
                 composable(Tab.Downloads.route) { PlaceholderScreen("İndirilenler") }
                 composable(ALBUM_ROUTE, listOf(navArgument("tab") { defaultValue = Tab.Search.route })) { e ->
                     AlbumRoute(c, e.arguments?.getString("id").orEmpty(), onBack = { nav.popBackStack() }, onSnack = { snack = it })
@@ -171,6 +175,7 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String) {
                 composable(ARTIST_ROUTE, listOf(navArgument("tab") { defaultValue = Tab.Search.route })) { e ->
                     ArtistRoute(c, e.arguments?.getString("id").orEmpty(), onBack = { nav.popBackStack() }, openAlbum, openArtist)
                 }
+                composable(MIX_ROUTE) { MixRoute(c, onBack = { nav.popBackStack() }) }
                 composable(PLAYLIST_ROUTE) { e ->
                     PlaylistRoute(c, e.arguments?.getString("id").orEmpty(), onBack = { nav.popBackStack() })
                 }
@@ -199,10 +204,11 @@ internal fun avatarInitial(email: String): String =
 
 /**
  * Home: rebuilt from the store when the lists, the history or what plays change, and every half minute (the greeting
- * and "today" follow the clock). The Daily mix card and the history button lead to screens that do not exist yet.
+ * and "today" follow the clock). The Daily mix card opens the mix page; the history button leads to a screen that does
+ * not exist yet.
  */
 @Composable
-private fun HomeRoute(c: AppContainer, email: String, onOpen: (String) -> Unit, onSnack: (String) -> Unit) {
+private fun HomeRoute(c: AppContainer, email: String, onOpen: (String) -> Unit, onMix: () -> Unit, onSnack: (String) -> Unit) {
     val ctx = LocalContext.current
     val version by c.libraries.version.collectAsState()
     val historyVersion by c.historyVersion.collectAsState()
@@ -217,6 +223,7 @@ private fun HomeRoute(c: AppContainer, email: String, onOpen: (String) -> Unit, 
     HomeScreen(
         data.ui, playing = now?.playing == true,
         actions = HomeActions(
+            onMix = { if (data.mixId != null) onMix() },
             onPlayMix = {
                 if (data.mixItems.isNotEmpty()) {
                     PlaybackHost.playQueue(ctx, data.mixItems, 0, "Daily mix")
@@ -231,10 +238,42 @@ private fun HomeRoute(c: AppContainer, email: String, onOpen: (String) -> Unit, 
 }
 
 @Composable
-private fun LibraryRoute(c: AppContainer, onOpen: (String) -> Unit, onNew: () -> Unit) {
+private fun LibraryRoute(c: AppContainer, onOpen: (String) -> Unit, onMix: () -> Unit, onNew: () -> Unit) {
     val version by c.libraries.version.collectAsState()
-    val rows = remember(version) { c.libraries.list().map { it.toRow() } }
-    if (rows.isEmpty()) LibraryEmptyScreen(onNew) else LibraryScreen(rows, onOpen, onNew)
+    val (rows, mixId) = remember(version) {
+        val libs = c.libraries.list()
+        val mix = HomeMapping.dailyMix(libs, c.engine.settings.dailyMixId)
+        val now = ZonedDateTime.now()
+        // The Daily mix is the mock's "Daily mix" row ("Meiro · bugün · 30 parça"), which opens the mix page.
+        libs.map { if (it.id == mix?.id) MixMapping.libraryRow(it, now.toLocalDate(), now.zone) else it.toRow() } to mix?.id
+    }
+    if (rows.isEmpty()) LibraryEmptyScreen(onNew) else LibraryScreen(rows, { id -> if (id == mixId) onMix() else onOpen(id) }, onNew)
+}
+
+/**
+ * The Daily mix page: the stored mix (the list the settings name, else the one under the shared mix id), rebuilt when
+ * the lists or what plays change. Rows play the mix from that track; play and shuffle play all of it.
+ */
+@Composable
+private fun MixRoute(c: AppContainer, onBack: () -> Unit) {
+    val ctx = LocalContext.current
+    val version by c.libraries.version.collectAsState()
+    val now by PlaybackHost.ui.collectAsState()
+    val lib = remember(version) { HomeMapping.dailyMix(c.libraries.list(), c.engine.settings.dailyMixId) }
+    // The mix is gone (no mix stored any more): back to where it was opened from.
+    if (lib == null) { LaunchedEffect(Unit) { onBack() }; return }
+    val playingKey = now?.item?.key
+    val ui = remember(lib, playingKey) { val t = ZonedDateTime.now(); MixMapping.page(lib, c.links, playingKey, t.toLocalDate(), t.zone) }
+    fun play(from: Int, items: List<com.muratkirazkaya.meiro.playback.QItem>) { if (items.isNotEmpty()) PlaybackHost.playQueue(ctx, items, from, "Daily mix") }
+    MixScreen(
+        ui, playing = now?.playing == true,
+        actions = DetailActions(
+            onBack = onBack,
+            onPlay = { play(0, lib.items.map { it.toQItem() }) },
+            onShuffle = { play(0, lib.items.map { it.toQItem() }.shuffled()) },
+            onRow = { i -> play(i, lib.items.map { it.toQItem() }) },
+        ),
+    )
 }
 
 @Composable

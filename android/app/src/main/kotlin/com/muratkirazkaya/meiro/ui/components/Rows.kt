@@ -30,6 +30,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -53,13 +54,16 @@ import com.muratkirazkaya.meiro.ui.theme.MeiroType
  * A cover: the picture at [url] when there is one, else (and under the picture while it loads) the mock's gradient
  * placeholder, whose hue comes from the list or track ([coverBrush]). Radius and size are the caller's.
  */
-data class CoverSpec(val url: String? = null, val hue: Int = 0, val spread: Int = 50)
+data class CoverSpec(val url: String? = null, val hue: Int = 0, val spread: Int = 50, val brush: Brush? = null)
+
+/** The Daily mix's own background (the mock's `.mix` card and the mix page's cover): linear-gradient(135deg, #5b3fb0, #a2365f). */
+val MixBrush: Brush = Brush.linearGradient(listOf(Color(0xFF5B3FB0), Color(0xFFA2365F)))
 
 @Composable
 fun Cover(spec: CoverSpec, radius: Dp, key: String?, modifier: Modifier = Modifier, content: @Composable androidx.compose.foundation.layout.BoxScope.() -> Unit = {}) {
     val shape = RoundedCornerShape(radius)
     // A null key draws a cover the mock's inventory does not list (the art of a shelf tile).
-    Box(modifier.then(if (key != null) Modifier.inv(key, radiusDp = radius.value) else Modifier).clip(shape).background(coverBrush(spec.hue, spec.spread))) {
+    Box(modifier.then(if (key != null) Modifier.inv(key, radiusDp = radius.value) else Modifier).clip(shape).background(spec.brush ?: coverBrush(spec.hue, spec.spread))) {
         if (!spec.url.isNullOrBlank()) {
             val ctx = LocalContext.current
             val request = remember(spec.url) {
@@ -121,6 +125,8 @@ data class SongRowData(
     val now: Boolean = false,
     /** SoundCloud gives only a 30 s preview of the track (the mock's "önizleme" chip). */
     val preview: Boolean = false,
+    /** Why the Daily mix recommends the track (the mock's `.why` line under the meta); empty elsewhere. */
+    val why: String = "",
 )
 
 /**
@@ -154,6 +160,7 @@ fun SongRow(p: String, row: SongRowData, playing: Boolean, onClick: () -> Unit, 
                 if (row.downloaded) MIcon(MeiroIcons.Done, c.primary, "$p.dl", size = 14)
                 MText(row.subtitle, MeiroType.ListMeta, c.onSurfaceVariant, "$p.meta", Modifier.weight(1f, fill = false), maxLines = 1)
             }
+            if (row.why.isNotEmpty()) MText(row.why, MeiroType.Why, c.primary, "$p.why", Modifier.fillMaxWidth(), maxLines = 1)
         }
         if (row.preview) PreviewChip("$p.preview")
         if (row.link != LinkBadge.None) LinkButton(p, row.link == LinkBadge.Other)
