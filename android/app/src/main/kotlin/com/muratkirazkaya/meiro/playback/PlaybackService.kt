@@ -56,6 +56,8 @@ class PlaybackService : MediaSessionService() {
             val e = PlaybackEngine(
                 this@PlaybackService, player, AudioResolver(this@PlaybackService, scope),
                 container.playStore(), container.engine.deviceName, scope, PlaybackHost::publish,
+                upNextSource = container.upNextSource, suggestions = container::suggestionPicks,
+                autoPlayInitially = container.autoPlay(), saveAutoPlay = container::saveAutoPlay,
             )
             engine = e
             PlaybackHost.attach(e)

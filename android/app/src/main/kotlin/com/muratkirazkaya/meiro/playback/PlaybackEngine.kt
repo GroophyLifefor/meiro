@@ -22,8 +22,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import com.muratkirazkaya.meiro.data.Source
 
-/** What the UI shows of playback (the mini player today). */
+/** What the UI shows of playback: the mini player, the full player and its up-next list. */
 data class PlayerUi(
     val item: QItem,
     val playing: Boolean,
@@ -32,8 +33,28 @@ data class PlayerUi(
     val loading: Boolean,
     /** The reason the track did not play ([PlayError.message]); null when it plays. */
     val error: String? = null,
+    val queue: QueueView = QueueView(),
+    val shuffle: Boolean = false,
+    val repeat: RepeatMode = RepeatMode.Off,
+    val autoPlay: Boolean = false,
 ) {
     val progress: Float get() = if (durationMs > 0) (positionMs.toFloat() / durationMs).coerceIn(0f, 1f) else 0f
+}
+
+/**
+ * The queue as the up-next list shows it: every track, the place of the one playing, where the generated tracks start
+ * (-1: none), which of those are Meiro's own suggestions, the list it plays from, and why recommendations failed.
+ */
+data class QueueView(
+    val items: List<QItem> = emptyList(),
+    val index: Int = 0,
+    val recStart: Int = -1,
+    val suggested: Set<String> = emptySet(),
+    val source: String = "",
+    val upNextError: String = "",
+) {
+    /** How many chosen tracks follow the one playing (the generated ones not counted). */
+    val chosenAfter: Int get() = ((if (recStart >= 0) recStart else items.size) - index - 1).coerceAtLeast(0)
 }
 
 /**
@@ -60,11 +81,20 @@ class PlaybackEngine(
     private val publishTo: (PlayerUi?) -> Unit,
     private val log: (String) -> Unit = { Log.i(AudioResolver.TAG, it) },
     newId: () -> String = { com.muratkirazkaya.meiro.sync.Ids.newId() },
+    upNextSource: UpNextSource? = null,
+    suggestions: () -> List<QItem> = { emptyList() },
+    /** Auto-play as the settings hold it, and where a change is kept (`settings.AutoPlay`, on by default). */
+    autoPlayInitially: Boolean = true,
+    private val saveAutoPlay: (Boolean) -> Unit = {},
 ) {
     val queue = Queue()
-    var repeat = RepeatMode.Off
-    /** Up-next generation is a later milestone: the queue ends where the chosen tracks end. */
-    private val autoPlay = false
+    var repeat = RepeatMode.Off; private set
+    /** Shuffle (`a.shuffle`): the queue was arranged behind the track playing, and is put back when turned off. */
+    var shuffle = false; private set
+    /** Generated tracks follow the chosen ones (`settings.AutoPlay`). */
+    var autoPlay = autoPlayInitially; private set
+    private val upNext = UpNext(scope, upNextSource, suggestions, log)
+    private val upNextAvailable = upNextSource != null
 
     private val recorder = PlayRecorder(store, device, newId)
 
@@ -147,8 +177,112 @@ class PlaybackEngine(
         if (items.isEmpty()) return
         val i = index.coerceIn(0, items.size - 1)
         queue.replace(items[i], items, i, source)
+        upNext.suggested.clear()
+        upNext.reset(if (items[i].provider() == Source.YTM) items[i].key else "")
+        if (shuffle) queue.shuffleQueue()
         skipped = 0
         startTrack(queue.at(queue.index))
+    }
+
+    /**
+     * A tap on a row of the up-next list (`playFrom` with the queue's own tracks): the queue is played again from that
+     * track, so the tracks generated so far become chosen ones and auto-play starts over from it. A tap on the track
+     * playing does nothing.
+     */
+    fun playFromQueue(index: Int) {
+        if (index !in 0 until queue.size || (index == queue.index && current != null)) return
+        playQueue(queue.items.toList(), index, queue.source)
+    }
+
+    /** `setShuffle`: arranges the queue behind the track playing, or puts it back in the order it had. */
+    fun setShuffle(on: Boolean) {
+        if (shuffle == on) return
+        shuffle = on
+        if (on) queue.shuffleQueue() else queue.restoreQueue()
+        queueChanged()
+    }
+
+    /** `cycleRepeat`: off, the queue, the track, and off again. */
+    fun cycleRepeat() {
+        repeat = repeat.next()
+        queueChanged()
+    }
+
+    /** `setAutoPlay`: whether generated tracks can follow the chosen queue; kept for the next run. */
+    fun setAutoPlay(enabled: Boolean) {
+        if (autoPlay == enabled) return
+        autoPlay = enabled
+        saveAutoPlay(enabled)
+        if (enabled) {
+            upNext.restart(current?.takeIf { it.provider() == Source.YTM }?.key.orEmpty())
+            queue.regenerate()
+            ensureUpNext()
+        } else upNext.cancel()
+        publish()
+    }
+
+    /** `moveQueue` for one track: the track at [from] ends up at place [to] of the queue. */
+    fun moveQueueItem(from: Int, to: Int) {
+        if (from !in 0 until queue.size || to !in 0 until queue.size || from == to) return
+        val before = if (to > from) to + 1 else to
+        if (queue.moveRows(listOf(queue.rowOf(from)), queue.rowOf(before))) queueChanged()
+    }
+
+    /** `clearUpcoming`: drops every track after the one playing, the generated ones included. */
+    fun clearUpcoming() {
+        if (queue.clearUpcoming()) { upNext.suggested.clear(); queueChanged() }
+    }
+
+    /**
+     * `chooseSource` for the track playing: it plays on from [source] at the place it had reached, when the track is
+     * held there. Reports whether anything changed.
+     */
+    fun switchSource(source: String): Boolean {
+        val c = current ?: return false
+        if (c.provider() == source) return false
+        val key = c.refFor(source) ?: return false
+        val updated = c.copy(source = source, key = key, refs = c.refs + (c.provider() to c.key))
+        queue.replaceAt(queue.index, updated)
+        log("source: ${c.provider()}:${c.key} -> $source:$key at ${player.currentPosition} ms")
+        startTrack(updated, startAt = player.currentPosition, sameTrack = true)
+        return true
+    }
+
+    /** `queueChanged`: what plays next may be another track now. */
+    private fun queueChanged() {
+        warmNext()
+        ensureUpNext()
+        publish()
+    }
+
+    private fun ensureUpNext() {
+        upNext.ensure(autoPlay, queue, current) { continuation, failed ->
+            if (!failed) warmNext() // a generated track can be the one that plays next
+            if (!upNext.waiting) { publish(); return@ensure }
+            when {
+                failed -> { upNext.waiting = false; stopAtQueueEnd() }
+                queue.next(autoPlay, repeat) != null -> { upNext.waiting = false; advance() }
+                continuation.isNotEmpty() -> ensureUpNext() // the list had more to pull
+                else -> { upNext.waiting = false; stopAtQueueEnd() } // a fresh request found nothing to follow the queue
+            }
+        }
+    }
+
+    /** `advance`: the next track, or (auto-play on) a wait at the end of the queue for what YouTube Music follows it with. */
+    private fun advance() {
+        val n = queue.next(autoPlay, repeat)
+        if (n != null) { skipped = 0; startTrack(queue.moveTo(n)); return }
+        if (autoPlay && upNextAvailable && current?.provider() == Source.YTM) {
+            upNext.waiting = true
+            startJob?.cancel(); generation++
+            loading = false; awaitingAudio = false
+            player.stop(); player.clearMediaItems()
+            log("queue ended, waiting for up next")
+            ensureUpNext()
+            publish()
+            return
+        }
+        stopAtQueueEnd()
     }
 
     fun play() {
@@ -166,7 +300,7 @@ class PlaybackEngine(
     /** The next track of the queue, or the end of it (`advance`, chosen by the listener). */
     fun next() {
         val n = queue.next(autoPlay, repeat)
-        if (n == null) { recorder.finish(false); stopAtQueueEnd(); return }
+        if (n == null) { recorder.finish(false); advance(); return }
         skipped = 0
         val item = queue.at(n)
         if (preloadedKey == item.queueKey() && player.mediaItemCount == 2) {
@@ -221,11 +355,16 @@ class PlaybackEngine(
 
     // ---- starting tracks -----------------------------------------------------------------------------------
 
-    private fun startTrack(item: QItem) {
-        recorder.finish(false) // a skip, or a new track: the play before it is filed as not finished
+    /**
+     * Finds [item]'s audio and plays it from [startAt]. [sameTrack] is a provider switch of the track playing: its play
+     * goes on (not filed, not begun again).
+     */
+    private fun startTrack(item: QItem, startAt: Long = 0, sameTrack: Boolean = false) {
+        if (!sameTrack) recorder.finish(false) // a skip, or a new track: the play before it is filed as not finished
         val gen = ++generation
+        upNext.waiting = false
         current = item; totalMs = item.durationMs(); loading = true; playIntent = true
-        errorText = null; recoveries = 0; awaitingAudio = true
+        errorText = null; recoveries = 0; awaitingAudio = !sameTrack
         startedAt = SystemClock.elapsedRealtime()
         removePreloaded(); preloadFailed = ""
         startJob?.cancel()
@@ -239,12 +378,13 @@ class PlaybackEngine(
             if (gen != generation) return@launch
             if (r.durationMs > 0) totalMs = r.durationMs
             log("start: ${item.provider()}:${item.key} resolved in ${SystemClock.elapsedRealtime() - startedAt} ms (cache hit=$hit)")
-            player.setMediaItem(mediaItem(item, r))
+            player.setMediaItem(mediaItem(item, r), startAt)
             player.prepare()
             loading = false
             player.playWhenReady = true
             publish()
         }
+        ensureUpNext()
     }
 
     /** The first moment audio plays for a track: the play is recorded and the next track readied (`audioStarted`). */
@@ -337,6 +477,7 @@ class PlaybackEngine(
         awaitingAudio = true
         log("followed: ${item.provider()}:${item.key} took over${if (auto) " at the end of the last" else " on a skip"}, ${SystemClock.elapsedRealtime() - startedAt} ms after the request")
         if (player.isPlaying) audioStarted()
+        ensureUpNext()
         publish()
     }
 
@@ -347,13 +488,11 @@ class PlaybackEngine(
         recorder.finish(true)
         val c = current ?: return
         if (repeat == RepeatMode.Track) { skipped = 0; startTrack(c); return }
-        val n = queue.next(autoPlay, repeat)
-        if (n == null) { stopAtQueueEnd(); return }
-        skipped = 0
-        startTrack(queue.moveTo(n))
+        advance()
     }
 
     private fun stopAtQueueEnd() {
+        upNext.waiting = false
         startJob?.cancel(); generation++
         loading = false; playIntent = false; awaitingAudio = false
         player.stop(); player.clearMediaItems()
@@ -448,7 +587,7 @@ class PlaybackEngine(
         if (loading || !player.isPlaying || player.playbackState == Player.STATE_BUFFERING) recorder.breakWatch()
         else recorder.observe(SystemClock.elapsedRealtime(), pos)
         if (recoveries > 0 && pos > recoveredFrom + RECOVERY_HEALTHY_MS) recoveries = 0
-        if (player.isPlaying) syncPreload(pos)
+        if (player.isPlaying) { syncPreload(pos); ensureUpNext() }
         publish(pos)
     }
 
@@ -456,7 +595,11 @@ class PlaybackEngine(
         val c = current
         publishTo(
             if (c == null) null
-            else PlayerUi(c, playIntent, if (loading) 0 else pos.coerceAtLeast(0), totalMs, loading, errorText),
+            else PlayerUi(
+                c, playIntent, if (loading) 0 else pos.coerceAtLeast(0), totalMs, loading, errorText,
+                QueueView(queue.items.toList(), queue.index, queue.recStart, upNext.suggested.toSet(), queue.source, upNext.error),
+                shuffle, repeat, autoPlay,
+            ),
         )
     }
 

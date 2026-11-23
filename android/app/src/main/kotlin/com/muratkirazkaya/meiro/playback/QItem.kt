@@ -18,6 +18,10 @@ data class QItem(
     val kind: Kind = Kind.Track,
     /** The providers the track is available from (the row's source icons); empty means only [source]. */
     val sources: List<String> = emptyList(),
+    /** The track's key at each provider it is held by ([Source] to video ID or page URL), so it can switch providers. */
+    val refs: Map<String, String> = emptyMap(),
+    /** Why Meiro suggests the track (a Daily mix pick's reason) when the queue gained it as a suggestion; else "". */
+    val why: String = "",
 ) {
     /** The queue's identity of a track (`Key()`): empty names no track. */
     fun queueKey(): String = key
@@ -26,6 +30,12 @@ data class QItem(
     fun provider(): String = source.ifEmpty { Source.YTM }
 
     fun durationMs(): Long = parseDurationMs(duration)
+
+    /** The key the track has at [src] (`RefFor`): its own for the provider it plays from, else a known ref, else null. */
+    fun refFor(src: String): String? = if (src == provider()) key else refs[src]?.takeIf { it.isNotEmpty() }
+
+    /** The providers the track is held by: [sources], the refs and the one it plays from. */
+    fun providers(): Set<String> = (sources + refs.keys + provider()).toSet()
 
     companion object {
         /** `ytm:<videoId>` or `sc:<page url>` (the debug entry form), optionally `|title|artist|m:ss`. */

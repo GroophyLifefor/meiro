@@ -93,6 +93,19 @@ class Queue(private val random: Random = Random.Default) {
     }
 
     /**
+     * Puts [item] in place of the track at [i] (the same song from another provider, whose key differs): the play-next
+     * mark and the generated set follow the new key.
+     */
+    fun replaceAt(i: Int, item: QItem) {
+        if (i !in items.indices) return
+        val old = items[i].queueKey()
+        items[i] = item
+        if (playNext == old) playNext = item.queueKey()
+        if (generated.remove(old)) generated.add(item.queueKey())
+        for (j in shuffleKept.indices) if (shuffleKept[j].queueKey() == old) shuffleKept[j] = item
+    }
+
+    /**
      * Adds a chosen track: after the current one when [playNext] is set, and otherwise at the end of the chosen
      * tracks, ahead of the generated ones.
      */

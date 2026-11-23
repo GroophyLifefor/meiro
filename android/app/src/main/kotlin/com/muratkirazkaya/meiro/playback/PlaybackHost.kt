@@ -64,5 +64,16 @@ object PlaybackHost {
     fun previous(context: Context) = withEngine(context) { it.previous() }
     fun pause(context: Context) = withEngine(context) { it.pause() }
     fun seekTo(context: Context, ms: Long) = withEngine(context) { it.seekTo(ms) }
+    fun setShuffle(context: Context, on: Boolean) = withEngine(context) { it.setShuffle(on) }
+    fun cycleRepeat(context: Context) = withEngine(context) { it.cycleRepeat() }
+    fun setAutoPlay(context: Context, on: Boolean) = withEngine(context) { it.setAutoPlay(on) }
+    fun playFromQueue(context: Context, index: Int) = withEngine(context) { it.playFromQueue(index) }
+    fun moveQueueItem(context: Context, from: Int, to: Int) = withEngine(context) { it.moveQueueItem(from, to) }
+    fun clearUpcoming(context: Context) = withEngine(context) { it.clearUpcoming() }
+    /** Switches the track playing to [source]; [onSwitched] gets the key it had before, when it switched. */
+    fun switchSource(context: Context, source: String, onSwitched: (oldKey: String) -> Unit = {}) = withEngine(context) { e ->
+        val old = e.current?.key.orEmpty()
+        if (e.switchSource(source)) onSwitched(old)
+    }
     internal fun debugBreak(context: Context) = withEngine(context) { it.debugBreakStream() }
 }
