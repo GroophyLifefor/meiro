@@ -70,6 +70,8 @@ object PlaybackHost {
     fun playFromQueue(context: Context, index: Int) = withEngine(context) { it.playFromQueue(index) }
     fun moveQueueItem(context: Context, from: Int, to: Int) = withEngine(context) { it.moveQueueItem(from, to) }
     fun clearUpcoming(context: Context) = withEngine(context) { it.clearUpcoming() }
+    /** "Sıradaki olarak çal" ([playNext]) and "Kuyruğa ekle" of the track menu (`enqueue`). */
+    fun enqueue(context: Context, item: QItem, playNext: Boolean) = withEngine(context) { it.enqueue(item, playNext) }
     /** Switches the track playing to [source]; [onSwitched] gets the key it had before, when it switched. */
     fun switchSource(context: Context, source: String, onSwitched: (oldKey: String) -> Unit = {}) = withEngine(context) { e ->
         val old = e.current?.key.orEmpty()

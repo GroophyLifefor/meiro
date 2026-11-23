@@ -228,6 +228,18 @@ class PlaybackEngine(
         if (queue.moveRows(listOf(queue.rowOf(from)), queue.rowOf(before))) queueChanged()
     }
 
+    /**
+     * `enqueue`: adds a chosen track without changing the one playing, after it ([playNext]) or at the end of the chosen
+     * tracks (ahead of the generated ones). With nothing playing it plays the track alone, as a queue named [ENQUEUE_SOURCE].
+     */
+    fun enqueue(item: QItem, playNext: Boolean) {
+        if (item.queueKey().isEmpty()) return
+        if (current == null || queue.size == 0) { playQueue(listOf(item), 0, ENQUEUE_SOURCE); return }
+        queue.insert(item, playNext, autoPlay)
+        log("queue: ${if (playNext) "next" else "end"} ${item.provider()}:${item.key}, ${queue.size} tracks")
+        queueChanged()
+    }
+
     /** `clearUpcoming`: drops every track after the one playing, the generated ones included. */
     fun clearUpcoming() {
         if (queue.clearUpcoming()) { upNext.suggested.clear(); queueChanged() }
@@ -619,5 +631,7 @@ class PlaybackEngine(
         const val RECOVERY_HEALTHY_MS = 10_000L
         const val END_OF_TRACK_LEAD_MS = 3_000L
         const val MAX_SKIPS = 3
+        /** The name of a queue a menu's "Sıradaki olarak çal" or "Kuyruğa ekle" started (the desktop's "Queue"). */
+        const val ENQUEUE_SOURCE = "Kuyruk"
     }
 }
