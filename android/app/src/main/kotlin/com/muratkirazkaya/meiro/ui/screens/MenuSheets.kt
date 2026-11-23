@@ -78,10 +78,11 @@ class TrackMenuActions(
  * [content]. [p] prefixes the inventory keys.
  */
 @Composable
-fun MenuSheetFrame(p: String, bars: SystemBars, onDismiss: () -> Unit, tall: Boolean = false, content: @Composable ColumnScope.() -> Unit) {
+fun MenuSheetFrame(p: String, bars: SystemBars, onDismiss: () -> Unit, tall: Boolean = false, scrimKey: Boolean = false, content: @Composable ColumnScope.() -> Unit) {
     val c = Meiro.colors
     BoxWithConstraints(Modifier.fillMaxSize()) {
-        Box(Modifier.fillMaxSize().background(c.scrim).clickableNoIndication(onDismiss))
+        // A short sheet leaves the scrim's middle in view, so the mock lists it ([scrimKey]); a tall one covers it.
+        Box(Modifier.fillMaxSize().then(if (scrimKey) Modifier.inv("$p.scrim", bg = c.scrim) else Modifier).background(c.scrim).clickableNoIndication(onDismiss))
         val shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
         Column(
             Modifier.align(Alignment.BottomCenter).fillMaxWidth()
@@ -262,6 +263,36 @@ fun AddToSheet(
                     }
                 }
             }
+        }
+    }
+}
+
+/**
+ * The mock's `SHEET.dellist`, opened by "Listeyi sil": the title, the note naming the list ("… Meiro'dan silinir, bu
+ * geri alınamaz.", the desktop's dialog in Turkish) and the "İptal" / "Sil" buttons. Deleting reaches every device at
+ * the next sync and cannot be undone, so the list menu asks here first, as the desktop does.
+ */
+@Composable
+fun DeleteListSheet(name: String, bars: SystemBars, onCancel: () -> Unit, onDelete: () -> Unit) {
+    val c = Meiro.colors
+    MenuSheetFrame("dellist", bars, onCancel, scrimKey = true) {
+        SheetTitleHead("dellist", "Listeyi sil")
+        MText(
+            "“$name” Meiro'dan silinir, bu geri alınamaz.", MeiroType.Note, c.onSurfaceVariant,
+            "dellist.note", Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 6.dp, bottom = 6.dp),
+        )
+        Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 14.dp), Arrangement.spacedBy(8.dp), Alignment.CenterVertically) {
+            Spacer(Modifier.weight(1f))
+            Box(
+                Modifier.height(40.dp).inv("dellist.cancel", radiusDp = 20f).clip(RoundedCornerShape(20.dp))
+                    .clickableNoIndication(onCancel).padding(horizontal = 12.dp),
+                Alignment.Center,
+            ) { MText("İptal", MeiroType.ButtonLabel, c.primary, "dellist.cancel.label", maxLines = 1) }
+            Box(
+                Modifier.height(40.dp).inv("dellist.delete", bg = c.primary, radiusDp = 20f).clip(RoundedCornerShape(20.dp))
+                    .background(c.primary).clickableNoIndication(onDelete).padding(horizontal = 20.dp),
+                Alignment.Center,
+            ) { MText("Sil", MeiroType.ButtonLabel, c.onPrimary, "dellist.delete.label", maxLines = 1) }
         }
     }
 }

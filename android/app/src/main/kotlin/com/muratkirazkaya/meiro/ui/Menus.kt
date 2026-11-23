@@ -19,6 +19,7 @@ import com.muratkirazkaya.meiro.data.Library
 import com.muratkirazkaya.meiro.playback.PlaybackHost
 import com.muratkirazkaya.meiro.ui.TrackMenuMapping.toListItem
 import com.muratkirazkaya.meiro.ui.screens.AddToSheet
+import com.muratkirazkaya.meiro.ui.screens.DeleteListSheet
 import com.muratkirazkaya.meiro.ui.screens.ListMenuActions
 import com.muratkirazkaya.meiro.ui.screens.ListMenuSheet
 import com.muratkirazkaya.meiro.ui.screens.ListMenuUi
@@ -74,13 +75,16 @@ class MenuState {
     var rename by mutableStateOf<Pair<String, String>?>(null)
     /** The link sheet (`SHEET.link`). */
     var link by mutableStateOf<LinkTarget?>(null)
+    /** "Listeyi sil" asks first (`SHEET.dellist`): the list id and its name. */
+    var delete by mutableStateOf<Pair<String, String>?>(null)
 
-    val open get() = track != null || list != null || addTo != null || newFor != null || rename != null || link != null
+    val open get() = track != null || list != null || addTo != null || newFor != null || rename != null || link != null || delete != null
 
     /** Back closes the sheet on top. */
     fun back() {
         when {
             link != null -> link = null
+            delete != null -> delete = null
             rename != null -> rename = null
             newFor != null -> newFor = null
             addTo != null -> addTo = null
@@ -230,12 +234,16 @@ fun MenuLayer(c: AppContainer, m: MenuState, bars: SystemBars, nav: MenuNav, sna
                         snack(if (n == 0) "Bağlanacak parça yok" else "$n parça MusicBrainz'de aranıyor")
                     }
                 },
-                onDelete = {
-                    m.list = null
-                    l.listId?.let { id -> launch("delete") { c.deleteList(id); snack("“${l.copyName}” silindi") } }
-                },
+                onDelete = { m.list = null; l.listId?.let { m.delete = it to l.copyName } },
             ),
         )
+    }
+
+    m.delete?.let { (id, name) ->
+        DeleteListSheet(name, bars, onCancel = { m.delete = null }) {
+            m.delete = null
+            launch("delete") { c.deleteList(id); snack("“$name” silindi") }
+        }
     }
 
     m.rename?.let { (id, name) ->

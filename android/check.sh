@@ -18,7 +18,7 @@ mkdir -p "$OUT"
 PART="${CHECK_PART:-all}"
 [ "$PART" != emulator ] && rm -f "$OUT"/*.log "$OUT"/status.txt
 rm -f "$OUT"/emulator-*.png
-[ "$PART" != emulator ] && rm -rf "$OUT/empty" "$OUT/home" "$OUT/album" "$OUT/artist" "$OUT/mix" "$OUT/np" "$OUT/np-prep" "$OUT/upnext" "$OUT/lyrics" "$OUT/related" "$OUT/menu" "$OUT/addto" "$OUT/link" "$OUT/downloads" "$OUT/offline" "$OUT/signin" "$OUT/library" "$OUT/playlist" "$OUT/search" "$OUT/search-done" "$OUT/stress" "$OUT/roborazzi"
+[ "$PART" != emulator ] && rm -rf "$OUT/empty" "$OUT/home" "$OUT/album" "$OUT/artist" "$OUT/mix" "$OUT/np" "$OUT/np-prep" "$OUT/upnext" "$OUT/lyrics" "$OUT/related" "$OUT/menu" "$OUT/addto" "$OUT/dellist" "$OUT/link" "$OUT/downloads" "$OUT/offline" "$OUT/signin" "$OUT/library" "$OUT/playlist" "$OUT/search" "$OUT/search-done" "$OUT/stress" "$OUT/roborazzi"
 declare -a RESULTS=()
 FAILED=0
 step() { # name, status, detail
@@ -44,7 +44,7 @@ CMP=$?
 # search-done-scrolled: the same for the search results (the preview row, "Albümler" and "Listeler").
 # artist-scrolled: the artist page scrolled to its shelves ("Albümler", "Benzer sanatçılar").
 # mix-scrolled: the Daily mix page scrolled so all six rows and their reasons are on screen.
-for screen in empty home home-scrolled signin library playlist playlist-scrolled search search-done search-done-scrolled album artist artist-scrolled mix mix-scrolled np np-prep upnext lyrics related menu addto link downloads offline; do
+for screen in empty home home-scrolled signin library playlist playlist-scrolled search search-done search-done-scrolled album artist artist-scrolled mix mix-scrolled np np-prep upnext lyrics related menu addto dellist link downloads offline; do
   for t in light dark; do
     f="$OUT/$screen/summary-$t.txt"; [ "$screen" = playlist-scrolled ] && f="$OUT/playlist/summary-$t-scrolled.txt"
     [ "$screen" = search-done-scrolled ] && f="$OUT/search-done/summary-$t-scrolled.txt"
@@ -58,7 +58,7 @@ for screen in empty home home-scrolled signin library playlist playlist-scrolled
     else echo "  no summary for $screen $t"; CMP=1; fi
   done
 done
-if [ $CMP -eq 0 ]; then step "mock comparison (element-level, empty + home + signin + library + playlist + search + search-done + album + artist + mix + np + np-prep + upnext + lyrics + related + menu + addto + link + downloads + offline, light+dark) and stress renders (long names, 320dp, font 1.3), real-data cover rules (no letterbox band, mini player cover and source icons)" PASS "side-by-side: $OUT/{empty,home,signin,library,playlist,search,search-done,album,artist,mix,np,np-prep,upnext,lyrics,related,menu,addto,link,downloads,offline}/side-by-side-{light,dark}.png, stress: $OUT/stress/"
+if [ $CMP -eq 0 ]; then step "mock comparison (element-level, empty + home + signin + library + playlist + search + search-done + album + artist + mix + np + np-prep + upnext + lyrics + related + menu + addto + dellist + link + downloads + offline, light+dark) and stress renders (long names, 320dp, font 1.3), real-data cover rules (no letterbox band, mini player cover and source icons)" PASS "side-by-side: $OUT/{empty,home,signin,library,playlist,search,search-done,album,artist,mix,np,np-prep,upnext,lyrics,related,menu,addto,dellist,link,downloads,offline}/side-by-side-{light,dark}.png, stress: $OUT/stress/"
 else step "mock comparison (element-level)" FAIL "see above, $OUT/compare.log"; fi
 
 echo "== 3/5 lint"

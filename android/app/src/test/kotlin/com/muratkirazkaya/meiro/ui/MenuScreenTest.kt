@@ -15,6 +15,8 @@ import com.muratkirazkaya.meiro.ui.components.Provider
 import com.muratkirazkaya.meiro.ui.components.SampleMini
 import com.muratkirazkaya.meiro.ui.components.Tab
 import com.muratkirazkaya.meiro.ui.screens.AddToSheet
+import androidx.compose.ui.test.assertTextEquals
+import com.muratkirazkaya.meiro.ui.screens.DeleteListSheet
 import com.muratkirazkaya.meiro.ui.screens.ListMenuActions
 import com.muratkirazkaya.meiro.ui.screens.ListMenuSheet
 import com.muratkirazkaya.meiro.ui.screens.ListMenuUi
@@ -71,6 +73,24 @@ class MenuScreenTest {
     @Test fun menuDark() = menu("dark")
     @Test fun addtoLight() = addto("light")
     @Test fun addtoDark() = addto("dark")
+
+    /** `SHEET.dellist`: "Listeyi sil" asks before the list goes (the mock's sample list name). */
+    private fun dellist(theme: String) = checkScreen(rule, "dellist", theme) {
+        Box(Modifier.fillMaxSize()) { page(); DeleteListSheet("Gece Sürüşü", Bars, {}, {}) }
+    }
+
+    @Test fun dellistLight() = dellist("light")
+    @Test fun dellistDark() = dellist("dark")
+
+    /** "Sil" deletes, "İptal" and the scrim do not. */
+    @Test fun dellistButtons() {
+        val calls = mutableListOf<String>()
+        rule.setContent { MeiroTheme { DeleteListSheet("X", Bars, { calls += "cancel" }, { calls += "delete" }) } }
+        rule.onNodeWithTag("dellist.cancel", useUnmergedTree = true).performClick()
+        rule.onNodeWithTag("dellist.delete", useUnmergedTree = true).performClick()
+        rule.onNodeWithTag("dellist.note", useUnmergedTree = true).assertTextEquals("“X” Meiro'dan silinir, bu geri alınamaz.")
+        assertEquals(listOf("cancel", "delete"), calls)
+    }
 
     /** Every item calls its own action; the scrim dismisses; a tap on the sheet's own background does nothing. */
     @Test fun trackMenuItemsCallTheirActions() {
