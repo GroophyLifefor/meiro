@@ -82,12 +82,15 @@ class SearchActions(
     /** An artist row and an album tile: they open the artist and the album page. */
     val onArtist: (Int) -> Unit = {},
     val onAlbum: (Int) -> Unit = {},
+    /** The MusicBrainz link button of the track, and of the artist, at that place: the link sheet. */
+    val onSongLink: (Int) -> Unit = {},
+    val onArtistLink: (Int) -> Unit = {},
 )
 
 /**
  * Mock screens `search` and `search-done` (`V.search`): top bar "Ara" with the avatar, the search bar, then either
  * "Son aramalar" or the results: filter chips, provider chips, Sanatçılar, Şarkılar, Albümler (a shelf) and Listeler.
- * List taps, the lists' ⋮ and the link buttons are inert; a track's ⋮ opens the track menu.
+ * List taps and the lists' ⋮ are inert; a track's ⋮ opens the track menu, the link buttons the link sheet.
  */
 @Composable
 fun SearchScreen(ui: SearchUi, playing: Boolean, actions: SearchActions, state: LazyListState = rememberLazyListState()) {
@@ -133,12 +136,12 @@ fun SearchScreen(ui: SearchUi, playing: Boolean, actions: SearchActions, state: 
             }
             if (ui.artists.isNotEmpty()) {
                 item(key = "artists.head") { SectionHead("Sanatçılar", "artists.title") }
-                itemsIndexed(ui.artists, key = { i, a -> "a$i/${a.key}" }) { i, a -> ArtistRow("artist${i + 1}", a) { actions.onArtist(i) } }
+                itemsIndexed(ui.artists, key = { i, a -> "a$i/${a.key}" }) { i, a -> ArtistRow("artist${i + 1}", a, { actions.onArtist(i) }, { actions.onArtistLink(i) }) }
             }
             if (ui.songs.isNotEmpty()) {
                 // The offline note stands over its rows without a section title, as in the mock's offline state.
                 if (ui.note == null) item(key = "songs.head") { SectionHead("Şarkılar", "songs.title") }
-                itemsIndexed(ui.songs, key = { i, s -> "s$i/${s.key}" }) { i, s -> SongRow("song${i + 1}", s, playing, { actions.onSong(i) }, onMore = { actions.onSongMore(i) }) }
+                itemsIndexed(ui.songs, key = { i, s -> "s$i/${s.key}" }) { i, s -> SongRow("song${i + 1}", s, playing, { actions.onSong(i) }, onMore = { actions.onSongMore(i) }, onLink = { actions.onSongLink(i) }) }
             }
             if (ui.albums.isNotEmpty()) {
                 item(key = "albums.head") { SectionHead("Albümler", "albums.title") }

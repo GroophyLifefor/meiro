@@ -128,9 +128,9 @@ fun SearchChipBox(key: String, label: String, selected: Boolean, onClick: () -> 
 /** An artist in the results: [logo] and the MusicBrainz link button are optional, as the mock's two artist rows show. */
 data class ArtistRowData(val key: String, val name: String, val meta: String, val cover: CoverSpec, val logo: Provider? = null, val link: Boolean = false)
 
-/** The mock's artist row: a round 48dp cover, the name, the meta line, and the (inert) link button for an unlinked artist. */
+/** The mock's artist row: a round 48dp cover, the name, the meta line, and the link button for an unlinked artist ([onLink]: the link sheet). */
 @Composable
-fun ArtistRow(p: String, row: ArtistRowData, onClick: () -> Unit) {
+fun ArtistRow(p: String, row: ArtistRowData, onClick: () -> Unit, onLink: () -> Unit = {}) {
     val c = Meiro.colors
     Row(
         Modifier.fillMaxWidth().heightIn(min = 64.dp).clickableNoIndication(onClick).padding(start = 16.dp, end = 4.dp, top = 8.dp, bottom = 8.dp),
@@ -144,7 +144,7 @@ fun ArtistRow(p: String, row: ArtistRowData, onClick: () -> Unit) {
                 MText(row.meta, MeiroType.ListMeta, c.onSurfaceVariant, "$p.meta", Modifier.weight(1f, fill = false), maxLines = 1)
             }
         }
-        if (row.link) LinkButton(p, false)
+        if (row.link) LinkButton(p, false, onLink)
     }
 }
 

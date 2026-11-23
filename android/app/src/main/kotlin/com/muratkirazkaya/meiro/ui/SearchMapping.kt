@@ -53,7 +53,11 @@ object SearchMapping {
         return if (s.chip == SearchChip.All) all.take(ALL_SONGS) else all
     }
 
-    fun toUi(s: SearchState, linkState: (String, String) -> String? = { _, _ -> null }, playingKey: String? = null): SearchUi {
+    fun toUi(
+        s: SearchState, linkState: (String, String) -> String? = { _, _ -> null }, playingKey: String? = null,
+        /** An artist's MusicBrainz state by name ("" or null: not linked): a linked artist has no link button. */
+        artistState: (String) -> String? = { null },
+    ): SearchUi {
         val base = SearchUi(query = s.field, results = s.submitted.isNotEmpty(), recent = s.recent, chip = s.chip, ytmOn = s.ytmOn, scOn = s.scOn)
         if (s.submitted.isEmpty()) return base
         if (s.local != null) {
@@ -68,7 +72,7 @@ object SearchMapping {
         val songs = if (shows(SearchChip.Songs)) songs(s) else emptyList()
         return base.copy(
             artists = artists.map { a ->
-                ArtistRowData(a.browseId, a.title, "YouTube Music sanatçısı", CoverSpec(url(a.thumbnail), hue(a.browseId)), Provider.Ytm, link = true)
+                ArtistRowData(a.browseId, a.title, "YouTube Music sanatçısı", CoverSpec(url(a.thumbnail), hue(a.browseId)), Provider.Ytm, link = artistState(a.title) != LinkState.MATCHED)
             },
             songs = songs.map { it.toSongRow(linkState, playingKey) },
             albums = albums.map { a -> TileData(a.browseId, a.title, bylineText(a), CoverSpec(url(a.thumbnail), hue(a.browseId), 80)) },

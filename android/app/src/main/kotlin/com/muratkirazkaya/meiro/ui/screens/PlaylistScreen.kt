@@ -49,7 +49,8 @@ data class PlaylistUi(
 /**
  * Mock screen `playlist`: top bar (back, search and ⋮; no avatar), the hero (cover, name, kind line, five actions),
  * the summary row with the sort button, the tracks, and "Benzer şarkılar" with its tracks when there are any.
- * Download, edit, share, search, sort and the link buttons are inert; ⋮ opens the list menu, a track's ⋮ the track menu.
+ * Download, edit, share, search and sort are inert; ⋮ opens the list menu, a track's ⋮ the track menu, its link
+ * button the link sheet.
  */
 @Composable
 fun PlaylistScreen(
@@ -64,6 +65,8 @@ fun PlaylistScreen(
     onMore: (Int) -> Unit = {},
     /** ⋮ in the top bar: the list menu. */
     onListMenu: () -> Unit = {},
+    /** The link button of the track at that place: the link sheet. */
+    onLink: (Int) -> Unit = {},
 ) {
     val c = Meiro.colors
     Column(Modifier.fillMaxSize()) {
@@ -82,7 +85,7 @@ fun PlaylistScreen(
                     SortButton()
                 }
             }
-            itemsIndexed(ui.rows, key = { i, r -> "$i/${r.key}" }) { i, r -> SongRow("song${i + 1}", r, playing, { onRow(i) }, onMore = { onMore(i) }) }
+            itemsIndexed(ui.rows, key = { i, r -> "$i/${r.key}" }) { i, r -> SongRow("song${i + 1}", r, playing, { onRow(i) }, onMore = { onMore(i) }, onLink = { onLink(i) }) }
             if (ui.similar.isNotEmpty()) {
                 item {
                     Box(Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 10.dp)) {

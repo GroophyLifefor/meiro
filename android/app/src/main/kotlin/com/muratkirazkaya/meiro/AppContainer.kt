@@ -80,6 +80,40 @@ class AppContainer(private val context: Context) {
         }
     }
 
+    /**
+     * MusicBrainz linking (`mblink.go`): the client with the desktop's User-Agent, its 1 request a second and its cache
+     * (in the app's cache dir), the link store, the lists, and the sync's link queue. Links the lists held before the
+     * store knew them are taken in first (`importListLinks`).
+     */
+    val linker: com.muratkirazkaya.meiro.musicbrainz.Linker by lazy {
+        val client = com.muratkirazkaya.meiro.musicbrainz.MusicBrainzClient(
+            cache = com.muratkirazkaya.meiro.musicbrainz.MbCache(java.io.File(context.cacheDir, "musicbrainz")),
+            log = { Log.i(LINK_TAG, it) },
+        )
+        com.muratkirazkaya.meiro.musicbrainz.Linker(
+            client, links, libraries, { engine.queueLinks(it) }, CoroutineScope(SupervisorJob() + Dispatchers.IO), log = { Log.i(LINK_TAG, it) },
+        ).also { it.importListLinks() }
+    }
+
+    private val linkScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    /**
+     * `afterEnter`'s `autoLink`: each new track that starts playing is linked to its MusicBrainz recording when the match
+     * is certain (at most once in 30 days per song unless it is linked or marked "other").
+     */
+    fun startAutoLink() {
+        linkScope.launch {
+            var last: Pair<String, String>? = null
+            com.muratkirazkaya.meiro.playback.PlaybackHost.ui.collect { p ->
+                val item = p?.item ?: return@collect
+                val k = item.provider() to item.key
+                if (k == last) return@collect
+                last = k
+                linker.autoLinkAll(listOf(item))
+            }
+        }
+    }
+
     private val _historyVersion = MutableStateFlow(0L)
 
     /** Grows when the listening history changes (a play starts or ends here, or a sync brings plays from elsewhere). */
@@ -177,6 +211,8 @@ class AppContainer(private val context: Context) {
         if (cover.isNotEmpty()) libraries.setCover(lib.id, cover)
         val added = libraries.addItems(lib.id, items)
         Log.i(TAG, "list: copied id=${lib.id} name=${lib.name} tracks=$added")
+        // The desktop links the copied tracks to MusicBrainz in the background (`autoLinkAll(copied)`).
+        linker.autoLinkAll(items.map { it.toQItem() })
         if (session().signedIn) {
             engine.syncSnapshot().queue(engine.outbox)
             engine.syncNow(); engine.settled()
@@ -200,7 +236,7 @@ class AppContainer(private val context: Context) {
     suspend fun addToList(id: String, item: com.muratkirazkaya.meiro.data.Item): Boolean = withContext(Dispatchers.IO) {
         val added = libraries.addItem(id, item)
         Log.i(TAG, "list: add ${item.source}:${item.key} to id=$id added=$added")
-        if (added) pushLists("add")
+        if (added) { pushLists("add"); linker.autoLinkAll(listOf(item.toQItem())) }
         added
     }
 
@@ -394,6 +430,7 @@ class AppContainer(private val context: Context) {
         const val TAG = "MeiroSync"
         const val SEARCH_TAG = "MeiroSearch"
         const val MIX_TAG = "MeiroMix"
+        const val LINK_TAG = "MeiroLink"
 
         /** The server field takes a bare host as the mock shows it; anything with a scheme is kept. */
         fun normalizeServer(s: String): String {

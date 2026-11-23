@@ -46,6 +46,7 @@ import com.muratkirazkaya.meiro.youtube.BrowsePage
 import com.muratkirazkaya.meiro.ui.screens.SearchActions
 import com.muratkirazkaya.meiro.ui.screens.SearchScreen
 import com.muratkirazkaya.meiro.ui.screens.ListMenuUi
+import com.muratkirazkaya.meiro.data.LinkState
 import com.muratkirazkaya.meiro.ui.components.Snack
 import com.muratkirazkaya.meiro.ui.components.LocalAvatarInitial
 import androidx.compose.runtime.CompositionLocalProvider
@@ -159,7 +160,7 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String) {
     val openPlayer = { if (PlaybackHost.ui.value != null) npOpen = true }
     // The track menu, the list menu and the sheets they open (M4h), over everything else.
     val menus = remember { MenuState() }
-    val openers = remember { MenuOpeners({ menus.track = it }, { menus.list = it }) }
+    val openers = remember { MenuOpeners({ menus.track = it }, { menus.list = it }, { menus.link = it }) }
 
     CompositionLocalProvider(LocalAvatarInitial provides avatarInitial(email), LocalOpenPlayer provides openPlayer, LocalMenus provides openers) { Box(Modifier.fillMaxSize()) {
         MeiroShell(
@@ -258,12 +259,13 @@ private fun HomeRoute(c: AppContainer, email: String, onOpen: (String) -> Unit, 
     val openPlayer = LocalOpenPlayer.current
     val version by c.libraries.version.collectAsState()
     val historyVersion by c.historyVersion.collectAsState()
+    val linkVersion by c.linker.version.collectAsState()
     val now by PlaybackHost.ui.collectAsState()
     var clock by remember { mutableStateOf(ZonedDateTime.now()) }
     LaunchedEffect(Unit) { while (true) { delay(30_000); clock = ZonedDateTime.now() } }
     val playingKey = now?.item?.key
     val minute = clock.withSecond(0).withNano(0)
-    val data = remember(version, historyVersion, playingKey, minute, email) {
+    val data = remember(version, historyVersion, linkVersion, playingKey, minute, email) {
         HomeMapping.build(email, ZonedDateTime.now(), c.engine.history(), c.libraries.list(), c.links, c.engine.settings.dailyMixId, playingKey)
     }
     HomeScreen(
@@ -280,6 +282,7 @@ private fun HomeRoute(c: AppContainer, email: String, onOpen: (String) -> Unit, 
             // The desktop plays a history row on its own (`historyPlay`).
             onResume = { i -> data.resume.getOrNull(i)?.let { playRow(ctx, listOf(it), 0, "Dinleme geçmişi", openPlayer) } },
             onResumeMore = { i -> data.resume.getOrNull(i)?.let { menus.track(MenuTarget(it)) } },
+            onResumeLink = { i -> data.resume.getOrNull(i)?.let { menus.link(LinkTarget.song(it)) } },
         ),
     )
 }
@@ -327,6 +330,7 @@ private fun MixRoute(c: AppContainer, onBack: () -> Unit) {
             onShuffle = { play(0, lib.items.map { it.toQItem() }.shuffled()) },
             onRow = { i -> lib.items.map { it.toQItem() }.let { q -> if (!openIfPlaying(q, i, openPlayer)) play(i, q) } },
             onMore = { i -> lib.items.getOrNull(i)?.let { menus.track(MenuTarget(it.toQItem(), listId = lib.id)) } },
+            onLink = { i -> lib.items.getOrNull(i)?.let { menus.link(LinkTarget.song(it.toQItem())) } },
         ),
     )
 }
@@ -339,10 +343,11 @@ private fun SearchRoute(c: AppContainer, onAlbum: (String) -> Unit, onArtist: (S
     val ctl = c.search
     val s by ctl.state.collectAsState()
     val now by PlaybackHost.ui.collectAsState()
-    val linksVersion by c.libraries.version.collectAsState()
+    val listsVersion by c.libraries.version.collectAsState()
+    val linkVersion by c.linker.version.collectAsState()
     val playingKey = now?.item?.key
-    val ui = remember(s, playingKey, linksVersion) {
-        SearchMapping.toUi(s, { src, id -> c.links.song(src, id)?.state }, playingKey)
+    val ui = remember(s, playingKey, listsVersion, linkVersion) {
+        SearchMapping.toUi(s, { src, id -> c.links.song(src, id)?.state }, playingKey, { c.linker.artistState(it) })
     }
     SearchScreen(
         ui, playing = now?.playing == true,
@@ -363,6 +368,8 @@ private fun SearchRoute(c: AppContainer, onAlbum: (String) -> Unit, onArtist: (S
             onEnd = ctl::loadMore,
             onArtist = { i -> ui.artists.getOrNull(i)?.let { onArtist(it.key) } },
             onAlbum = { i -> ui.albums.getOrNull(i)?.let { onAlbum(it.key) } },
+            onSongLink = { i -> with(SearchMapping) { SearchMapping.songs(ctl.state.value).getOrNull(i)?.let { menus.link(LinkTarget.song(it.toQItem())) } } },
+            onArtistLink = { i -> ui.artists.getOrNull(i)?.let { menus.link(LinkTarget.artist(it.name)) } },
         ),
     )
 }
@@ -387,6 +394,7 @@ private fun PlaylistRoute(c: AppContainer, id: String, onBack: () -> Unit) {
         onRow = { i -> lib.items.map { it.toQItem() }.let { q -> if (!openIfPlaying(q, i, openPlayer)) play(i, q) } },
         onMore = { i -> lib.items.getOrNull(i)?.let { menus.track(MenuTarget(it.toQItem(), listId = lib.id)) } },
         onListMenu = { menus.list(ListMenuTarget.own(lib)) },
+        onLink = { i -> lib.items.getOrNull(i)?.let { menus.link(LinkTarget.song(it.toQItem())) } },
     )
 }
 
@@ -422,8 +430,9 @@ private fun AlbumRoute(c: AppContainer, id: String, onBack: () -> Unit, onSnack:
     val version by c.libraries.version.collectAsState()
     var retry by remember { mutableStateOf(0) }
     val loaded = rememberBrowsePage(c, id, retry)
+    val linkVersion by c.linker.version.collectAsState()
     val playingKey = now?.item?.key
-    val data = remember(loaded, playingKey, version) {
+    val data = remember(loaded, playingKey, version, linkVersion) {
         loaded?.page?.let { BrowseMapping.album(id, it, { src, key -> c.links.song(src, key)?.state }, playingKey) }
     }
     fun play(from: Int, items: List<com.muratkirazkaya.meiro.playback.QItem>) = PlaybackHost.playQueue(ctx, items, from, data?.ui?.title.orEmpty())
@@ -444,8 +453,9 @@ private fun AlbumRoute(c: AppContainer, id: String, onBack: () -> Unit, onSnack:
             },
             onRetry = { retry++ },
             onMore = { i -> data?.let { d -> d.queue.getOrNull(i)?.let { menus.track(MenuTarget(it, albumId = id, albumArt = d.cover)) } } },
+            onLink = { i -> data?.queue?.getOrNull(i)?.let { menus.link(LinkTarget.song(it)) } },
             onListMenu = {
-                data?.let { d -> menus.list(ListMenuTarget(null, ListMenuUi(d.tracks.size, own = false), d.ui.title, d.cover, d.listItems())) }
+                data?.let { d -> menus.list(ListMenuTarget(null, ListMenuUi(d.queue.count { c.linker.stateOf(it).let { s -> s != LinkState.MATCHED && s != LinkState.OTHER } }, own = false), d.ui.title, d.cover, d.listItems())) }
             },
         ),
         error = loaded?.error,
@@ -462,8 +472,9 @@ private fun ArtistRoute(c: AppContainer, id: String, onBack: () -> Unit, onAlbum
     val version by c.libraries.version.collectAsState()
     var retry by remember { mutableStateOf(0) }
     val loaded = rememberBrowsePage(c, id, retry)
+    val linkVersion by c.linker.version.collectAsState()
     val playingKey = now?.item?.key
-    val data = remember(loaded, playingKey, version) {
+    val data = remember(loaded, playingKey, version, linkVersion) {
         loaded?.page?.let { BrowseMapping.artist(id, it, { src, key -> c.links.song(src, key)?.state }, playingKey) }
     }
     fun play(from: Int, items: List<com.muratkirazkaya.meiro.playback.QItem>) = PlaybackHost.playQueue(ctx, items, from, data?.ui?.name.orEmpty())
@@ -478,6 +489,8 @@ private fun ArtistRoute(c: AppContainer, id: String, onBack: () -> Unit, onAlbum
             onArtist = { i -> data?.artistIds?.getOrNull(i)?.let(onArtist) },
             onRetry = { retry++ },
             onMore = { i -> data?.queue?.getOrNull(i)?.let { menus.track(MenuTarget(it)) } },
+            onLink = { i -> data?.queue?.getOrNull(i)?.let { menus.link(LinkTarget.song(it)) } },
+            onArtistLink = { data?.ui?.name?.takeIf { it.isNotBlank() }?.let { menus.link(LinkTarget.artist(it)) } },
         ),
         error = loaded?.error,
     )
@@ -501,7 +514,8 @@ private fun PlayerRoute(
     val menus = LocalMenus.current
     val version by c.libraries.version.collectAsState()
     LightStatusBarIcons()
-    val linkOf: (String, String) -> String? = remember(version) {
+    val linkVersion by c.linker.version.collectAsState()
+    val linkOf: (String, String) -> String? = remember(version, linkVersion) {
         val libs = c.libraries.list();
         { src: String, key: String ->
             c.links.song(src, key)?.state?.takeIf { it.isNotEmpty() }
@@ -531,6 +545,7 @@ private fun PlayerRoute(
             },
             onTab = { onSheet(it) },
             onMore = { menus.track(MenuTarget(p.item)) },
+            onLink = { menus.link(LinkTarget.song(p.item)) },
         ),
     )
     if (sheetTab != null) {
@@ -548,7 +563,7 @@ private fun PlayerRoute(
         val relatedState by tabs.related.collectAsState()
         val static by c.staticLyrics.collectAsState()
         val lyrics = remember(key, lyricsState, static) { NowPlayingMapping.lyrics(key, lyricsState, static) }
-        val (related, relatedQueue) = remember(key, relatedState, version) { NowPlayingMapping.related(key, relatedState, key, linkOf) }
+        val (related, relatedQueue) = remember(key, relatedState, version, linkVersion) { NowPlayingMapping.related(key, relatedState, key, linkOf) }
         com.muratkirazkaya.meiro.ui.screens.UpNextSheet(
             NowPlayingMapping.upNext(p, linkOf), p.playing, bars,
             com.muratkirazkaya.meiro.ui.screens.UpNextActions(
@@ -565,6 +580,8 @@ private fun PlayerRoute(
                 onRelated = { i -> if (relatedQueue.getOrNull(i)?.key != key) PlaybackHost.playQueue(ctx, relatedQueue, i, RELATED_SOURCE) },
                 onRowMore = { i -> p.queue.items.getOrNull(i)?.let { menus.track(MenuTarget(it)) } },
                 onRelatedMore = { i -> relatedQueue.getOrNull(i)?.let { menus.track(MenuTarget(it)) } },
+                onRowLink = { i -> p.queue.items.getOrNull(i)?.let { menus.link(LinkTarget.song(it)) } },
+                onRelatedLink = { i -> relatedQueue.getOrNull(i)?.let { menus.link(LinkTarget.song(it)) } },
             ),
             tab = sheetTab, lyrics = lyrics, related = related, positionMs = p.positionMs,
         )

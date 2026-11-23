@@ -72,6 +72,9 @@ class UpNextActions(
     val onRowMore: (Int) -> Unit = {},
     /** ⋮ of the related track at that place: the track menu. */
     val onRelatedMore: (Int) -> Unit = {},
+    /** The link button of the queue's, and of the related list's, track at that place: the link sheet. */
+    val onRowLink: (Int) -> Unit = {},
+    val onRelatedLink: (Int) -> Unit = {},
 )
 
 /**
@@ -163,7 +166,7 @@ private fun QueueList(ui: UpNextUi, playing: Boolean, actions: UpNextActions, st
                 is QueueRow.Song -> {
                     val held = dragging == r.index
                     SongRow(
-                        names[i], r.row, playing, { actions.onRow(r.index) }, onMore = { actions.onRowMore(r.index) }, modifier =
+                        names[i], r.row, playing, { actions.onRow(r.index) }, onMore = { actions.onRowMore(r.index) }, onLink = { actions.onRowLink(r.index) }, modifier =
                         Modifier.zIndex(if (held) 1f else 0f).graphicsLayer { translationY = if (held) dragY else 0f }
                             .then(if (held) Modifier.background(c.surfaceContainerHigh) else Modifier),
                         dragHandle = Modifier.pointerInput(r.index) {

@@ -72,6 +72,8 @@ class HomeActions(
     val onResume: (Int) -> Unit = {},
     /** ⋮ of a "Kaldığın yerden" row: the track menu. */
     val onResumeMore: (Int) -> Unit = {},
+    /** The link button of a "Kaldığın yerden" row: the link sheet. */
+    val onResumeLink: (Int) -> Unit = {},
     val onReleases: () -> Unit = {},
     val onRelease: (Int) -> Unit = {},
 )
@@ -114,7 +116,7 @@ fun HomeScreen(ui: HomeUi, playing: Boolean, actions: HomeActions, state: LazyLi
             }
             if (ui.resume.isNotEmpty()) {
                 item(key = "resume.head") { SectionHead("Kaldığın yerden", "resume.title", "Geçmiş", "resume.historyBtn", actions.onHistory) }
-                itemsIndexed(ui.resume, key = { i, s -> "r$i/${s.key}" }) { i, s -> SongRow("resume${i + 1}", s, playing, { actions.onResume(i) }, onMore = { actions.onResumeMore(i) }) }
+                itemsIndexed(ui.resume, key = { i, s -> "r$i/${s.key}" }) { i, s -> SongRow("resume${i + 1}", s, playing, { actions.onResume(i) }, onMore = { actions.onResumeMore(i) }, onLink = { actions.onResumeLink(i) }) }
             }
             if (ui.releases.isNotEmpty()) {
                 item(key = "releases.head") { SectionHead("YouTube Music: Yeni çıkanlar", "fresh.title", "Tümü", "fresh.allBtn", actions.onReleases) }

@@ -26,8 +26,16 @@ import com.muratkirazkaya.meiro.ui.screens.NewListSheet
 import com.muratkirazkaya.meiro.ui.screens.SystemBars
 import com.muratkirazkaya.meiro.ui.screens.TrackMenuActions
 import com.muratkirazkaya.meiro.ui.screens.TrackMenuSheet
+import com.muratkirazkaya.meiro.playback.QItem
+import com.muratkirazkaya.meiro.ui.screens.LinkSheet
+import com.muratkirazkaya.meiro.ui.screens.LinkSheetActions
+import androidx.compose.runtime.LaunchedEffect
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 
 /**
  * What a list ⋮ opened on: one of the user's lists ([listId]), or an album page (copy only). [copyName], [copyCover]
@@ -41,8 +49,16 @@ data class ListMenuTarget(
     }
 }
 
-/** Opens the track menu and the list menu from any screen (provided by the shell). */
-class MenuOpeners(val track: (MenuTarget) -> Unit, val list: (ListMenuTarget) -> Unit)
+/** What the link sheet links: a song (to a MusicBrainz recording), or an artist by name. */
+data class LinkTarget(val song: QItem? = null, val artist: String? = null) {
+    companion object {
+        fun song(item: QItem) = LinkTarget(song = item)
+        fun artist(name: String) = LinkTarget(artist = name)
+    }
+}
+
+/** Opens the track menu, the list menu and the link sheet from any screen (provided by the shell). */
+class MenuOpeners(val track: (MenuTarget) -> Unit, val list: (ListMenuTarget) -> Unit, val link: (LinkTarget) -> Unit = {})
 
 internal val LocalMenus = staticCompositionLocalOf { MenuOpeners({}, {}) }
 
@@ -56,12 +72,15 @@ class MenuState {
     var newName by mutableStateOf("")
     /** The rename sheet (list id and the name being typed). */
     var rename by mutableStateOf<Pair<String, String>?>(null)
+    /** The link sheet (`SHEET.link`). */
+    var link by mutableStateOf<LinkTarget?>(null)
 
-    val open get() = track != null || list != null || addTo != null || newFor != null || rename != null
+    val open get() = track != null || list != null || addTo != null || newFor != null || rename != null || link != null
 
     /** Back closes the sheet on top. */
     fun back() {
         when {
+            link != null -> link = null
             rename != null -> rename = null
             newFor != null -> newFor = null
             addTo != null -> addTo = null
@@ -76,16 +95,17 @@ class MenuNav(val openArtist: (String) -> Unit, val openAlbum: (String) -> Unit,
 
 /**
  * The track menu, the add-to sheet, the new-list sheet a track is added to, the list menu and the rename sheet, over
- * everything else. Every item does what the desktop does (`songMenu`, `libraryRow`'s menu, `libraryPickerDialog`);
- * "İndir" (downloads, M5), "MusicBrainz'e bağla" and "Hepsini MusicBrainz'e bağla" (link sheet, M6), the heart (YouTube
- * Music likes need a YouTube Music sign-in), "Hepsini indir" (M5) and "Bunu önerme" (the desktop has no such feature) do
- * nothing yet.
+ * everything else, and the link sheet (M6a). Every item does what the desktop does (`songMenu`, `libraryRow`'s menu,
+ * `libraryPickerDialog`); "MusicBrainz'e bağla" opens the link sheet and "Hepsini MusicBrainz'e bağla" auto-links the
+ * list's tracks; "İndir" (downloads, M5), the heart (YouTube Music likes need a YouTube Music sign-in), "Hepsini indir"
+ * (M5) and "Bunu önerme" (the desktop has no such feature) do nothing yet.
  */
 @Composable
 fun MenuLayer(c: AppContainer, m: MenuState, bars: SystemBars, nav: MenuNav, snack: (String) -> Unit) {
     val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
     val version by c.libraries.version.collectAsState()
+    val linkVersion by c.linker.version.collectAsState()
     BackHandler(enabled = m.open) { m.back() }
 
     fun launch(what: String, block: suspend () -> Unit) {
@@ -101,8 +121,7 @@ fun MenuLayer(c: AppContainer, m: MenuState, bars: SystemBars, nav: MenuNav, sna
         val libs = remember(version) { c.libraries.list() }
         val item = t.item
         val held = t.listId?.let { id -> libs.firstOrNull { it.id == id }?.items?.firstOrNull { it.activeRef() == (item.provider() to item.key) } }
-        val state = c.links.song(item.provider(), item.key)?.state?.takeIf { it.isNotEmpty() }
-            ?: held?.state ?: libs.asSequence().flatMap { it.items }.firstOrNull { it.activeRef() == (item.provider() to item.key) }?.state
+        val state = remember(version, linkVersion, item) { c.linker.stateOf(item).ifEmpty { held?.state.orEmpty() } }
         TrackMenuSheet(
             TrackMenuMapping.menu(t, state), bars,
             TrackMenuActions(
@@ -110,6 +129,7 @@ fun MenuLayer(c: AppContainer, m: MenuState, bars: SystemBars, nav: MenuNav, sna
                 onPlayNext = { PlaybackHost.enqueue(ctx, item, true); m.track = null; snack("Sıradaki olarak eklendi") },
                 onQueue = { PlaybackHost.enqueue(ctx, item, false); m.track = null; snack("Kuyruğun sonuna eklendi") },
                 onAddTo = { m.track = null; m.addTo = t },
+                onLink = { m.track = null; m.link = LinkTarget.song(item) },
                 onSource = { source(ctx, c, t, held, m, snack, ::launch) },
                 onArtist = {
                     m.track = null
@@ -187,6 +207,14 @@ fun MenuLayer(c: AppContainer, m: MenuState, bars: SystemBars, nav: MenuNav, sna
                     }
                 },
                 onRename = { m.list = null; l.listId?.let { m.rename = it to l.copyName } },
+                onLinkAll = {
+                    m.list = null
+                    val items = l.copyItems.map { it.toQItem() }
+                    launch("link all") {
+                        val n = withContext(Dispatchers.IO) { c.linker.autoLinkAll(items, ignoreRecent = true) }
+                        snack(if (n == 0) "Bağlanacak parça yok" else "$n parça MusicBrainz'de aranıyor")
+                    }
+                },
                 onDelete = {
                     m.list = null
                     l.listId?.let { id -> launch("delete") { c.deleteList(id); snack("“${l.copyName}” silindi") } }
@@ -205,7 +233,69 @@ fun MenuLayer(c: AppContainer, m: MenuState, bars: SystemBars, nav: MenuNav, sna
         }
         NewListSheet(name, { m.rename = id to it }, { m.rename = null }, save, bars, title = "Yeniden adlandır", action = "Kaydet", note = false)
     }
+
+    m.link?.let { t -> LinkLayer(c, t, bars, close = { m.link = null }, snack = snack, launch = ::launch) }
 }
+
+/**
+ * The link sheet over everything (`linkDialog`): it searches MusicBrainz at once for the song's own names (or the
+ * artist's name), again when the keyboard's search key is pressed; the first result is chosen. "Bağla" links the chosen
+ * record (a recording also links its first artist), "Hiçbiri: "diğer"" marks the song or artist as one MusicBrainz does
+ * not hold; both close the sheet with the mock's snack and go to the server with the next sync.
+ */
+@Composable
+private fun LinkLayer(c: AppContainer, t: LinkTarget, bars: SystemBars, close: () -> Unit, snack: (String) -> Unit, launch: (String, suspend () -> Unit) -> Unit) {
+    val initial = remember(t) { LinkMapping.initialQuery(t) }
+    var query by remember(t) { mutableStateOf(initial) }
+    var asked by remember(t) { mutableStateOf(initial to 0) }
+    var found by remember(t) { mutableStateOf<List<com.muratkirazkaya.meiro.musicbrainz.LinkCandidate>?>(null) }
+    var failed by remember(t) { mutableStateOf(false) }
+    var selected by remember(t) { mutableStateOf(0) }
+    LaunchedEffect(t, asked) {
+        found = null; failed = false; selected = 0
+        val q = asked.first.trim()
+        if (q.isEmpty()) { found = emptyList(); return@LaunchedEffect }
+        found = try {
+            withContext(Dispatchers.IO) {
+                withTimeout(com.muratkirazkaya.meiro.musicbrainz.LinkRules.TIMEOUT_MS) {
+                    val song = t.song
+                    if (song != null) c.linker.searchSong(song, LinkMapping.searchTitle(song, q, initial)) else c.linker.searchArtist(q)
+                }
+            }
+        } catch (e: TimeoutCancellationException) {
+            Log.i(AppContainer.TAG, "link: search \"$q\" timed out"); failed = true; emptyList()
+        } catch (e: CancellationException) { throw e } catch (e: Exception) {
+            Log.i(AppContainer.TAG, "link: search \"$q\" failed: $e"); failed = true; emptyList()
+        }
+        Log.i(AppContainer.TAG, "link: search \"$q\" -> ${found?.size} results")
+    }
+    val shown = found?.take(com.muratkirazkaya.meiro.musicbrainz.LinkRules.RESULTS_SHOWN)
+    fun answer(state: String, chosen: com.muratkirazkaya.meiro.musicbrainz.LinkCandidate?, message: String) {
+        close()
+        launch("link") {
+            withContext(Dispatchers.IO) {
+                val song = t.song
+                if (song != null) c.linker.applySong(song, state, chosen) else c.linker.applyArtist(t.artist.orEmpty(), state, chosen)
+            }
+            snack(message)
+        }
+    }
+    LinkSheet(
+        LinkMapping.ui(t, query, shown, failed, selected), bars,
+        LinkSheetActions(
+            onClose = close,
+            onQuery = { query = it },
+            onSearch = { asked = query to asked.second + 1 },
+            onSelect = { selected = it },
+            onOther = { answer(com.muratkirazkaya.meiro.data.LinkState.OTHER, null, LINK_OTHER_SNACK) },
+            onLink = { shown?.getOrNull(selected)?.let { answer(com.muratkirazkaya.meiro.data.LinkState.MATCHED, it, LINK_DONE_SNACK) } },
+        ),
+    )
+}
+
+/** The mock's snacks after "Bağla" and "Hiçbiri: "diğer"". */
+const val LINK_DONE_SNACK = "Bağlandı · bütün cihazlarda görünür"
+const val LINK_OTHER_SNACK = "\"Diğer\" olarak işaretlendi"
 
 /** The snack a menu action that failed shows (YouTube Music or the store did not answer). */
 const val MENU_FAILED = "Olmadı, biraz sonra tekrar dene"

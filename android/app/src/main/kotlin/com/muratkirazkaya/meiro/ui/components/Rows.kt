@@ -142,6 +142,8 @@ fun SongRow(
     dragHandle: Modifier? = null,
     /** The ⋮ button: the track menu. */
     onMore: () -> Unit = {},
+    /** The MusicBrainz link button (shown for an `unknown` or `other` track): the link sheet. */
+    onLink: () -> Unit = {},
 ) {
     val c = Meiro.colors
     Row(
@@ -170,14 +172,14 @@ fun SongRow(
             if (row.why.isNotEmpty()) MText(row.why, MeiroType.Why, c.primary, "$p.why", Modifier.fillMaxWidth(), maxLines = 1)
         }
         if (row.preview) PreviewChip("$p.preview")
-        if (row.link != LinkBadge.None) LinkButton(p, row.link == LinkBadge.Other)
+        if (row.link != LinkBadge.None) LinkButton(p, row.link == LinkBadge.Other, onLink)
         IconButton("$p.moreBtn", "$p.more.icon", MeiroIcons.More, c.onSurfaceVariant, onMore)
     }
 }
 
-/** The mock's `.linkbtn`: 32dp circle, 1dp outline (dashed and 70% for `other`), an 18dp link glyph. Inert for now. */
+/** The mock's `.linkbtn`: 32dp circle, 1dp outline (dashed and 70% for `other`), an 18dp link glyph; opens the link sheet. */
 @Composable
-internal fun LinkButton(p: String, other: Boolean) {
+internal fun LinkButton(p: String, other: Boolean, onClick: () -> Unit = {}) {
     val c = Meiro.colors
     val outline = c.outline
     val dashed = Modifier.drawBehind {
@@ -190,7 +192,7 @@ internal fun LinkButton(p: String, other: Boolean) {
     Box(
         Modifier.size(32.dp).inv("$p.link", radiusDp = 16f).alpha(if (other) 0.7f else 1f)
             .then(if (other) dashed else Modifier.border(1.dp, outline, CircleShape))
-            .clip(CircleShape).clickableNoIndication {},
+            .clip(CircleShape).clickableNoIndication(onClick),
         Alignment.Center,
     ) { MIcon(MeiroIcons.Link, c.onSurfaceVariant, "$p.link.icon", size = 18) }
 }

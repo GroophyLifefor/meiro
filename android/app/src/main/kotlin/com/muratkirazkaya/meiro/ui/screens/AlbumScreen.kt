@@ -54,12 +54,16 @@ class DetailActions(
     val onMore: (Int) -> Unit = {},
     /** ⋮ in the top bar: the list menu (album; the mix page's ⋮ opens nothing in the mock). */
     val onListMenu: () -> Unit = {},
+    /** The link button of the track at that place: the link sheet. */
+    val onLink: (Int) -> Unit = {},
+    /** Artist: "Bağı değiştir", the artist's link sheet. */
+    val onArtistLink: () -> Unit = {},
 )
 
 /**
  * Mock screen `album`: top bar (back and ⋮), the hero (cover, name, YouTube Music logo and kind line; download,
  * shuffle, play, "Meiro listesi olarak kopyala", share), the tracks with their numbers, and the note. Download, share,
- * and the link buttons are inert (⋮ opens the list menu, a track's ⋮ the track menu). [ui] null: the page is loading (only the top bar);
+ * are inert (⋮ opens the list menu, a track's ⋮ the track menu, its link button the link sheet). [ui] null: the page is loading (only the top bar);
  * [error] set: YouTube Music did not answer (the mock's `error` block with "Tekrar dene").
  */
 @Composable
@@ -90,7 +94,7 @@ fun AlbumScreen(
                 }
             }
             itemsIndexed(ui.rows, key = { i, r -> "$i/${r.key}" }) { i, r ->
-                SongRow("song${i + 1}", r, playing, { actions.onRow(i) }, num = ui.nums.getOrElse(i) { "${i + 1}" }, onMore = { actions.onMore(i) })
+                SongRow("song${i + 1}", r, playing, { actions.onRow(i) }, num = ui.nums.getOrElse(i) { "${i + 1}" }, onMore = { actions.onMore(i) }, onLink = { actions.onLink(i) })
             }
             item {
                 MText(ALBUM_NOTE, MeiroType.Note, c.onSurfaceVariant, "note", Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp))

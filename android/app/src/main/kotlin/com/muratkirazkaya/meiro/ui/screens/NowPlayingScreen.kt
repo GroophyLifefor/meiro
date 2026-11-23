@@ -98,6 +98,8 @@ class NowPlayingActions(
     val onTab: (PlayerTab) -> Unit = {},
     /** ⋮ in the top row: the track menu of the track playing. */
     val onMore: () -> Unit = {},
+    /** The MusicBrainz chip: the link sheet of the track playing. */
+    val onLink: () -> Unit = {},
 )
 
 private val White = Color.White
@@ -150,7 +152,7 @@ fun NowPlayingScreen(ui: NowPlayingUi, bars: SystemBars, actions: NowPlayingActi
                     MText(ui.title, MeiroType.NpTitle, White, "np.title", Modifier.fillMaxWidth(), maxLines = 1)
                     MText(ui.artist, MeiroType.NpArtist, White, "np.artist", Modifier.fillMaxWidth().alpha(0.8f))
                     Spacer(Modifier.height(6.dp))
-                    LinkChip(ui.link)
+                    LinkChip(ui.link, actions.onLink)
                 }
                 IconButton("np.likeBtn", "np.like.icon", if (ui.liked) MeiroIcons.Heartf else MeiroIcons.Heart, White)
             }
@@ -207,12 +209,12 @@ private fun PrepVeil() {
 
 /** The mock's `.chip` in the info block: check + "MusicBrainz", or the link glyph and "diğer" / "MusicBrainz'e bağla". */
 @Composable
-private fun LinkChip(link: NpLink) {
+private fun LinkChip(link: NpLink, onClick: () -> Unit) {
     val shape = RoundedCornerShape(8.dp)
     Row(
         // 10px padding plus the 1px border CSS adds outside it; at least 24 tall (it grows with a larger font).
         Modifier.heightIn(min = 24.dp).inv("np.link", radiusDp = 8f).border(1.dp, White.copy(alpha = 0.4f), shape).clip(shape)
-            .clickableNoIndication {}.padding(horizontal = 11.dp),
+            .clickableNoIndication(onClick).padding(horizontal = 11.dp),
         Arrangement.spacedBy(4.dp), Alignment.CenterVertically,
     ) {
         MIcon(if (link == NpLink.Matched) MeiroIcons.Check else MeiroIcons.Link, White, "np.link.icon", size = 14)

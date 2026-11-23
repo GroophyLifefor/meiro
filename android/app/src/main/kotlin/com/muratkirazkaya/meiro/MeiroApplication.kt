@@ -16,7 +16,7 @@ class MeiroApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        ready = CoroutineScope(Dispatchers.IO).async { AppContainer(this@MeiroApplication).also { it.startRecommendations() } }
+        ready = CoroutineScope(Dispatchers.IO).async { AppContainer(this@MeiroApplication).also { it.startRecommendations(); it.startAutoLink() } }
     }
 
     suspend fun container(): AppContainer = ready.await()

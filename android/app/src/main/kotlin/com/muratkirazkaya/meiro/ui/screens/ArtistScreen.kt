@@ -40,7 +40,8 @@ data class ArtistUi(
 /**
  * Mock screen `artist`: top bar (back only), the hero (round picture, name, kind line; "Karıştır", play, "Bağı
  * değiştir"), "Popüler" tracks, the "Albümler" shelf and the "Benzer sanatçılar" shelf; a section with nothing in it
- * is left out. "Bağı değiştir" (link sheet) and the link buttons are inert; a track's ⋮ opens the track menu. [ui] null:
+ * is left out. "Bağı değiştir" opens the artist's link sheet, a track's link button the track's; a track's ⋮ opens the
+ * track menu. [ui] null:
  * loading (only the top bar), or [error].
  */
 @Composable
@@ -63,12 +64,12 @@ fun ArtistScreen(
                     HeroLabelButton("hero.shuffleBtn", MeiroIcons.Shuffle, "Karıştır", tonal = true, onClick = actions.onShuffle)
                     HeroPlayButton(actions.onPlay, margin = 0.dp)
                     // The last button takes what is left: on a narrow screen its label ends in an ellipsis.
-                    HeroLabelButton("hero.linkBtn", MeiroIcons.Link, "Bağı değiştir", tonal = false, onClick = {}, modifier = Modifier.weight(1f, fill = false))
+                    HeroLabelButton("hero.linkBtn", MeiroIcons.Link, "Bağı değiştir", tonal = false, onClick = actions.onArtistLink, modifier = Modifier.weight(1f, fill = false))
                 }
             }
             if (ui.popular.isNotEmpty()) {
                 item { SectionHead("Popüler", "popular.title") }
-                itemsIndexed(ui.popular, key = { i, r -> "p$i/${r.key}" }) { i, r -> SongRow("song${i + 1}", r, playing, { actions.onRow(i) }, onMore = { actions.onMore(i) }) }
+                itemsIndexed(ui.popular, key = { i, r -> "p$i/${r.key}" }) { i, r -> SongRow("song${i + 1}", r, playing, { actions.onRow(i) }, onMore = { actions.onMore(i) }, onLink = { actions.onLink(i) }) }
             }
             if (ui.albums.isNotEmpty()) {
                 item { SectionHead("Albümler", "albums.title") }
