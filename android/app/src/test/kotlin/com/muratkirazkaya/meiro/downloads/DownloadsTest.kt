@@ -301,4 +301,31 @@ class DownloadsTest {
         val kept = store.file(Source.YTM, "a")!!
         assertEquals(77, kept.length()); assertTrue(kept.name.endsWith(".webm"))
     }
+
+    /** "Yalnız Wi-Fi'de indir": off Wi-Fi nothing starts and the row says "Wi-Fi bekleniyor"; on Wi-Fi the batch goes on. */
+    @Test fun withWifiOnlyNothingStartsUntilWifi() = runBlocking {
+        val cached = File(dir, "c.webm").apply { writeBytes(bytes(10)) }
+        val store = DownloadStore(File(dir, "dl"))
+        val wifi = java.util.concurrent.atomic.AtomicBoolean(false)
+        val finished = CompletableDeferred<DownloadBatch>()
+        val d = Downloader(store, CoroutineScope(SupervisorJob() + Dispatchers.IO), resolve = { error("cached") }, fetch = AudioFetch(),
+            cached = { cached }, onFinished = { finished.complete(it) }, allowed = { wifi.get() }, recheckMs = 20)
+        d.download(listOf(item("a"), item("b")), "L")
+        delay(200)
+        assertTrue(store.list().isEmpty())
+        val row = d.state.value.single()
+        assertTrue(row.waitingWifi); assertEquals(0, row.running)
+        assertEquals("0 / 2 şarkı · Wi-Fi bekleniyor", com.muratkirazkaya.meiro.ui.DownloadsMapping.pending(row).meta)
+        wifi.set(true)
+        assertEquals(2, withTimeout(5_000) { finished.await() }.done)
+        assertEquals(2, store.list().size)
+    }
+
+    @Test fun clearingACacheRemovesItsFilesAndWhatItKnew() {
+        val cache = AudioCache(dir, fetch = AudioFetch(), scope = CoroutineScope(Dispatchers.IO))
+        File(dir, DownloadStore.fileName("", "k", "").take(64) + ".webm").writeBytes(bytes(30))
+        assertEquals(1, cache.count()); assertEquals(30L, cache.usage())
+        assertEquals(30L, cache.clear())
+        assertEquals(0, cache.count()); assertNull(cache.get("k")); assertTrue(cache.metas().isEmpty())
+    }
 }

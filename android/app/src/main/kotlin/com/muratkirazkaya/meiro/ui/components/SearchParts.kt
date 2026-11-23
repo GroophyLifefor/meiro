@@ -43,22 +43,32 @@ import com.muratkirazkaya.meiro.ui.theme.MeiroType
  * focuses the field; the keyboard's search key submits.
  */
 @Composable
-fun SearchField(value: String, onValue: (String) -> Unit, onSubmit: () -> Unit, onClear: () -> Unit, modifier: Modifier = Modifier) {
+fun SearchField(
+    value: String, onValue: (String) -> Unit, onSubmit: () -> Unit, onClear: () -> Unit, modifier: Modifier = Modifier,
+    placeholder: String = "Şarkı, sanatçı, albüm, liste",
+    /** The inventory keys' prefix ("search" on Ara). */
+    keyPrefix: String = "search",
+    /** The close button shows even with nothing typed (the history's search bar closes with it). */
+    alwaysClose: Boolean = false,
+    /** The field takes the focus (and the keyboard) as it appears, as the mock's `$('hq').focus()`. */
+    autoFocus: Boolean = false,
+) {
     val c = Meiro.colors
     val focus = remember { FocusRequester() }
     val keyboard = LocalSoftwareKeyboardController.current
     val shape = RoundedCornerShape(28.dp)
+    if (autoFocus) androidx.compose.runtime.LaunchedEffect(Unit) { try { focus.requestFocus() } catch (_: IllegalStateException) {} }
     Row(
         modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp).height(56.dp)
-            .inv("search", bg = c.surfaceContainerHigh, radiusDp = 28f).clip(shape).background(c.surfaceContainerHigh)
+            .inv(keyPrefix, bg = c.surfaceContainerHigh, radiusDp = 28f).clip(shape).background(c.surfaceContainerHigh)
             .clickableNoIndication { focus.requestFocus() }.padding(start = 16.dp, end = 4.dp),
         Arrangement.spacedBy(4.dp), Alignment.CenterVertically,
     ) {
-        MIcon(MeiroIcons.Search, c.onSurfaceVariant, "search.icon")
-        Box(Modifier.padding(start = 8.dp).weight(1f).height(22.dp).inv("search.input"), Alignment.CenterStart) {
+        MIcon(MeiroIcons.Search, c.onSurfaceVariant, "$keyPrefix.icon")
+        Box(Modifier.padding(start = 8.dp).weight(1f).height(22.dp).inv("$keyPrefix.input"), Alignment.CenterStart) {
             if (value.isEmpty()) {
                 BasicText(
-                    "Şarkı, sanatçı, albüm, liste", style = MeiroType.FieldInput.toStyle(c.onSurfaceVariant),
+                    placeholder, style = MeiroType.FieldInput.toStyle(c.onSurfaceVariant),
                     maxLines = 1, overflow = TextOverflow.Ellipsis,
                 )
             }
@@ -70,7 +80,7 @@ fun SearchField(value: String, onValue: (String) -> Unit, onSubmit: () -> Unit, 
                 keyboardActions = KeyboardActions(onSearch = { keyboard?.hide(); onSubmit() }),
             )
         }
-        if (value.isNotEmpty()) IconButton("search.clearBtn", "search.clear.icon", MeiroIcons.Close, c.onSurfaceVariant, onClear)
+        if (value.isNotEmpty() || alwaysClose) IconButton("$keyPrefix.clearBtn", "$keyPrefix.clear.icon", MeiroIcons.Close, c.onSurfaceVariant, onClear)
     }
 }
 

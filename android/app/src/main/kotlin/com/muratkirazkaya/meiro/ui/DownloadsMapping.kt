@@ -33,13 +33,13 @@ object DownloadsMapping {
     /** A row of "İniyor": a list says how many of its tracks are kept, a single track its percent, a waiting one "sırada". */
     fun pending(b: DownloadBatch): PendingRowUi {
         val meta = if (b.single) {
-            val state = if (b.running > 0) "%${(b.progress * 100).toInt()}" else "sırada"
+            val state = if (b.running > 0) "%${(b.progress * 100).toInt()}" else if (b.waitingWifi) "Wi-Fi bekleniyor" else "sırada"
             listOf(b.artist, state).filter { it.isNotEmpty() }.joinToString(" · ")
         } else {
             listOfNotNull(
                 "${b.done} / ${b.total} şarkı",
                 if (b.failed > 0) "${b.failed} indirilemedi" else null,
-                if (b.running == 0 && b.done + b.failed < b.total) "sırada" else null,
+                if (b.running == 0 && b.done + b.failed < b.total) (if (b.waitingWifi) "Wi-Fi bekleniyor" else "sırada") else null,
             ).joinToString(" · ")
         }
         return PendingRowUi(b.id, b.name, meta, b.progress, CoverSpec(b.cover.takeIf { it.startsWith("http") }, hue(b.id + b.name)))

@@ -7,6 +7,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
@@ -29,6 +30,8 @@ data class DownloadBatch(
     /** True for a single track asked for from its menu (the row names the track, not a list). */
     val single: Boolean,
     val artist: String = "",
+    /** Nothing can start: "Yalnız Wi-Fi'de indir" is on and the phone is not on Wi-Fi (the mock's "Wi-Fi bekleniyor"). */
+    val waitingWifi: Boolean = false,
 )
 
 /** What a download request did, for its snack (`downloadCollection`'s notices). */
@@ -54,6 +57,10 @@ class Downloader(
     private val onStored: (DownloadItem) -> Unit = {},
     private val log: (String) -> Unit = {},
     private val now: () -> Long = System::currentTimeMillis,
+    /** Whether a download may start now ("Yalnız Wi-Fi'de indir" and the network); a track waits until it may. */
+    private val allowed: () -> Boolean = { true },
+    /** How often a waiting track asks [allowed] again. */
+    private val recheckMs: Long = 2_000,
 ) {
     private class Track(val item: QItem, val batch: String) {
         var job: Job? = null
@@ -112,6 +119,11 @@ class Downloader(
     }
 
     private suspend fun run(t: Track) {
+        if (!allowed()) {
+            log("download: ${t.item.provider()}:${t.item.key} waits for Wi-Fi")
+            publish(force = true)
+            while (!allowed()) delay(recheckMs)
+        }
         slots.withPermit {
             synchronized(lock) { t.state = 1 }
             publish(force = true)
@@ -181,7 +193,8 @@ class Downloader(
         val running = b.tracks.filter { it.state == 1 }
         val partial = running.sumOf { t -> if (t.total > 0) (t.bytes.toDouble() / t.total).coerceIn(0.0, 1.0) else 0.0 }
         val progress = if (b.tracks.isEmpty()) 0f else ((done + failed + partial) / b.tracks.size).toFloat()
-        return DownloadBatch(b.id, b.name, b.cover, b.tracks.size, done, failed, running.size, progress, b.single, b.artist)
+        val waiting = running.isEmpty() && b.tracks.any { it.state == 0 } && !allowed()
+        return DownloadBatch(b.id, b.name, b.cover, b.tracks.size, done, failed, running.size, progress, b.single, b.artist, waiting)
     }
 
     private fun publish(force: Boolean = false) {

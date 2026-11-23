@@ -273,26 +273,34 @@ fun AddToSheet(
  * the next sync and cannot be undone, so the list menu asks here first, as the desktop does.
  */
 @Composable
-fun DeleteListSheet(name: String, bars: SystemBars, onCancel: () -> Unit, onDelete: () -> Unit) {
+fun DeleteListSheet(name: String, bars: SystemBars, onCancel: () -> Unit, onDelete: () -> Unit) =
+    ConfirmSheet("dellist", "Listeyi sil", "“$name” Meiro'dan silinir, bu geri alınamaz.", "Sil", bars, onCancel, onDelete)
+
+/**
+ * A question before something that cannot be undone (the mock's `SHEET.dellist` and `SHEET.clearhist`): the title, the
+ * note saying what goes, and "İptal" / [confirm]. [p] prefixes the inventory keys.
+ */
+@Composable
+fun ConfirmSheet(p: String, title: String, note: String, confirm: String, bars: SystemBars, onCancel: () -> Unit, onConfirm: () -> Unit) {
     val c = Meiro.colors
-    MenuSheetFrame("dellist", bars, onCancel, scrimKey = true) {
-        SheetTitleHead("dellist", "Listeyi sil")
+    MenuSheetFrame(p, bars, onCancel, scrimKey = true) {
+        SheetTitleHead(p, title)
         MText(
-            "“$name” Meiro'dan silinir, bu geri alınamaz.", MeiroType.Note, c.onSurfaceVariant,
-            "dellist.note", Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 6.dp, bottom = 6.dp),
+            note, MeiroType.Note, c.onSurfaceVariant,
+            "$p.note", Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 6.dp, bottom = 6.dp),
         )
         Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 14.dp), Arrangement.spacedBy(8.dp), Alignment.CenterVertically) {
             Spacer(Modifier.weight(1f))
             Box(
-                Modifier.height(40.dp).inv("dellist.cancel", radiusDp = 20f).clip(RoundedCornerShape(20.dp))
+                Modifier.height(40.dp).inv("$p.cancel", radiusDp = 20f).clip(RoundedCornerShape(20.dp))
                     .clickableNoIndication(onCancel).padding(horizontal = 12.dp),
                 Alignment.Center,
-            ) { MText("İptal", MeiroType.ButtonLabel, c.primary, "dellist.cancel.label", maxLines = 1) }
+            ) { MText("İptal", MeiroType.ButtonLabel, c.primary, "$p.cancel.label", maxLines = 1) }
             Box(
-                Modifier.height(40.dp).inv("dellist.delete", bg = c.primary, radiusDp = 20f).clip(RoundedCornerShape(20.dp))
-                    .background(c.primary).clickableNoIndication(onDelete).padding(horizontal = 20.dp),
+                Modifier.height(40.dp).inv("$p.delete", bg = c.primary, radiusDp = 20f).clip(RoundedCornerShape(20.dp))
+                    .background(c.primary).clickableNoIndication(onConfirm).padding(horizontal = 20.dp),
                 Alignment.Center,
-            ) { MText("Sil", MeiroType.ButtonLabel, c.onPrimary, "dellist.delete.label", maxLines = 1) }
+            ) { MText(confirm, MeiroType.ButtonLabel, c.onPrimary, "$p.delete.label", maxLines = 1) }
         }
     }
 }

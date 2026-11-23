@@ -18,6 +18,9 @@ import java.net.Socket
 object Online {
     private val _state = MutableStateFlow(true)
     val state: StateFlow<Boolean> = _state
+    private val _unmetered = MutableStateFlow(true)
+    /** The default network is not metered (Wi-Fi, Ethernet): what "Yalnız Wi-Fi'de indir" waits for. */
+    val unmetered: StateFlow<Boolean> = _unmetered
 
     @Volatile private var started = false
 
@@ -25,13 +28,19 @@ object Online {
         if (started) return
         started = true
         val cm = context.getSystemService(ConnectivityManager::class.java) ?: return
-        _state.value = cm.activeNetwork?.let { cm.getNetworkCapabilities(it)?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) } == true
+        val caps = cm.activeNetwork?.let { cm.getNetworkCapabilities(it) }
+        _state.value = caps?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
+        _unmetered.value = caps?.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED) == true
         cm.registerDefaultNetworkCallback(object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) { _state.value = true }
             override fun onCapabilitiesChanged(network: Network, caps: NetworkCapabilities) {
                 _state.value = caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                _unmetered.value = caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
             }
-            override fun onLost(network: Network) { _state.value = cm.activeNetwork != null && cm.activeNetwork != network }
+            override fun onLost(network: Network) {
+                _state.value = cm.activeNetwork != null && cm.activeNetwork != network
+                if (!_state.value) _unmetered.value = false
+            }
         })
     }
 

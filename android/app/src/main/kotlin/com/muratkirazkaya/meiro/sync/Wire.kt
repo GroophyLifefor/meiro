@@ -217,3 +217,30 @@ data class Links(
     fun isEmpty() = songs.size + artists.size + alternates.size == 0
     val size: Int get() = songs.size + artists.size + alternates.size
 }
+
+/** `GET /api/v1/stats/summary` (meiro-server `statsSummaryResp`): counted plays of one month or year, every device. */
+@Serializable
+data class StatsSummary(
+    val totals: StatsTotals = StatsTotals(),
+    @SerialName("top_tracks") val topTracks: List<StatsTrack> = emptyList(),
+    @SerialName("top_artists") val topArtists: List<StatsArtist> = emptyList(),
+    val series: List<StatsBucket> = emptyList(),
+)
+
+@Serializable
+data class StatsTotals(
+    @SerialName("played_ms") val playedMs: Long = 0,
+    val plays: Int = 0,
+    @SerialName("unique_tracks") val uniqueTracks: Int = 0,
+    @SerialName("unique_artists") val uniqueArtists: Int = 0,
+)
+
+@Serializable
+data class StatsTrack(val title: String = "", val artist: String = "", val plays: Int = 0, @SerialName("played_ms") val playedMs: Long = 0)
+
+@Serializable
+data class StatsArtist(val artist: String = "", val plays: Int = 0, @SerialName("played_ms") val playedMs: Long = 0)
+
+/** One day ("2026-10-05") of a month, or one month ("2026-10") of a year; buckets with no plays are left out. */
+@Serializable
+data class StatsBucket(val bucket: String = "", @SerialName("played_ms") val playedMs: Long = 0)

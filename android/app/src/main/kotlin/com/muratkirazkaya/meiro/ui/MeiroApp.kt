@@ -73,12 +73,34 @@ import kotlinx.coroutines.launch
  */
 @Composable
 fun MeiroApp(app: MeiroApplication) {
-    MeiroTheme {
+    val container by produceState<AppContainer?>(null) { value = app.container() }
+    val c = container
+    // "Tema" (Sistem / Açık / Koyu): the system's setting unless one is chosen.
+    val theme = c?.prefs?.collectAsState()?.value?.theme
+    val dark = when (theme) {
+        com.muratkirazkaya.meiro.ui.screens.ThemeChoice.Light -> false
+        com.muratkirazkaya.meiro.ui.screens.ThemeChoice.Dark -> true
+        else -> androidx.compose.foundation.isSystemInDarkTheme()
+    }
+    ThemedStatusBar(dark)
+    MeiroTheme(darkTheme = dark) {
         val sb = WindowInsets.systemBars.asPaddingValues()
         val bars = SystemBars(sb.calculateTopPadding(), sb.calculateBottomPadding())
-        val container by produceState<AppContainer?>(null) { value = app.container() }
-        val c = container
         if (c == null) Box(Modifier.fillMaxSize().background(Meiro.colors.surface)) else AppRoot(c, bars)
+    }
+}
+
+/** The status and navigation bar icons follow the theme in use (dark icons on the light theme), also when it is chosen in the settings. */
+@Composable
+private fun ThemedStatusBar(dark: Boolean) {
+    val view = androidx.compose.ui.platform.LocalView.current
+    androidx.compose.runtime.DisposableEffect(view, dark) {
+        val window = (view.context as? android.app.Activity)?.window
+        window?.let { androidx.core.view.WindowCompat.getInsetsController(it, view) }?.let {
+            it.isAppearanceLightStatusBars = !dark
+            it.isAppearanceLightNavigationBars = !dark
+        }
+        onDispose {}
     }
 }
 
@@ -89,7 +111,13 @@ private fun AppRoot(c: AppContainer, bars: SystemBars) {
     LaunchedEffect(c) { while (true) { session = c.session(); delay(500) } }
     var guest by remember { mutableStateOf(false) }
 
-    if (session.signedIn || guest) MainShell(c, bars, if (session.signedIn) session.email else "")
+    // "Çıkış yap" signs out and comes back here; without an account ("Giriş yap", the server's "Değiştir") it only leaves
+    // guest mode, so the sign-in screen shows again.
+    val scope = rememberCoroutineScope()
+    val exit: () -> Unit = {
+        if (session.signedIn) scope.launch { c.signOut(); session = c.session(); guest = false } else guest = false
+    }
+    if (session.signedIn || guest) MainShell(c, bars, if (session.signedIn) session.email else "", session.signedIn, exit)
     else SignInRoute(c, session, bars, onSkip = { guest = true })
 }
 
@@ -128,10 +156,13 @@ private const val PLAYLIST_ROUTE = "playlist/{id}"
 private const val MIX_ROUTE = "mix"
 private const val ALBUM_ROUTE = "album/{id}?tab={tab}"
 private const val ARTIST_ROUTE = "artist/{id}?tab={tab}"
+private const val HISTORY_ROUTE = "history?tab={tab}"
+private const val STATS_ROUTE = "stats?tab={tab}"
+private const val SETTINGS_ROUTE = "settings?tab={tab}"
 
 /** The shell with the four tab routes; Library lists the lists, and a list opens as `playlist/<id>`. */
 @Composable
-private fun MainShell(c: AppContainer, bars: SystemBars, email: String) {
+private fun MainShell(c: AppContainer, bars: SystemBars, email: String, signedIn: Boolean, onExit: () -> Unit) {
     val nav = rememberNavController()
     val entry by nav.currentBackStackEntryAsState()
     val ctx = LocalContext.current
@@ -142,12 +173,20 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String) {
     // does; an album or artist page carries the tab it was opened from (it can be several pages deep).
     val from = when (route) {
         PLAYLIST_ROUTE, MIX_ROUTE -> nav.previousBackStackEntry?.destination?.route
-        ALBUM_ROUTE, ARTIST_ROUTE -> entry?.arguments?.getString("tab")
+        ALBUM_ROUTE, ARTIST_ROUTE, HISTORY_ROUTE, STATS_ROUTE, SETTINGS_ROUTE -> entry?.arguments?.getString("tab")
         else -> route
     }
     val selected = Tab.entries.firstOrNull { it.route == from } ?: if (route == PLAYLIST_ROUTE) Tab.Library else Tab.Home
     val openAlbum = { id: String -> nav.navigate("album/$id?tab=${selected.route}") }
     val openArtist = { id: String -> nav.navigate("artist/$id?tab=${selected.route}") }
+    // M6b: the history, the stats and the settings keep the tab they were opened from selected.
+    val openHistory = { nav.navigate("history?tab=${selected.route}") }
+    val openStats = { nav.navigate("stats?tab=${selected.route}") }
+    val openSettings = { nav.navigate("settings?tab=${selected.route}") }
+    var accountOpen by rememberSaveable { mutableStateOf(false) }
+    var histMenu by rememberSaveable { mutableStateOf(false) }
+    var clearAsk by rememberSaveable { mutableStateOf(false) }
+    var syncing by remember { mutableStateOf(false) }
     var sheet by remember { mutableStateOf(false) }
     var newName by remember { mutableStateOf("") }
     var snack by remember { mutableStateOf<String?>(null) }
@@ -168,6 +207,7 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String) {
 
     CompositionLocalProvider(
         LocalAvatarInitial provides avatarInitial(email), LocalOpenPlayer provides openPlayer, LocalMenus provides openers,
+        com.muratkirazkaya.meiro.ui.components.LocalOpenAccount provides { accountOpen = true },
         com.muratkirazkaya.meiro.ui.components.LocalDownloaded provides downloaded, com.muratkirazkaya.meiro.ui.components.LocalOffline provides !online,
     ) { Box(Modifier.fillMaxSize()) {
         MeiroShell(
@@ -187,7 +227,7 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String) {
         ) {
             NavHost(nav, startDestination = Tab.Home.route) {
                 composable(Tab.Home.route) {
-                    HomeRoute(c, email, onOpen = { nav.navigate("playlist/$it") }, onMix = { nav.navigate(MIX_ROUTE) }, onSnack = { snack = it })
+                    HomeRoute(c, email, onOpen = { nav.navigate("playlist/$it") }, onMix = { nav.navigate(MIX_ROUTE) }, onSnack = { snack = it }, onStats = openStats, onHistory = openHistory)
                 }
                 composable(Tab.Search.route) { SearchRoute(c, openAlbum, openArtist) }
                 composable(Tab.Library.route) {
@@ -200,7 +240,14 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String) {
                 composable(ARTIST_ROUTE, listOf(navArgument("tab") { defaultValue = Tab.Search.route })) { e ->
                     ArtistRoute(c, e.arguments?.getString("id").orEmpty(), onBack = { nav.popBackStack() }, openAlbum, openArtist)
                 }
-                composable(MIX_ROUTE) { MixRoute(c, onBack = { nav.popBackStack() }, onSnack = { snack = it }) }
+                composable(MIX_ROUTE) { MixRoute(c, onBack = { nav.popBackStack() }, onSnack = { snack = it }, onSettings = openSettings) }
+                composable(HISTORY_ROUTE, listOf(navArgument("tab") { defaultValue = Tab.Home.route })) {
+                    HistoryRoute(c, signedIn, onBack = { nav.popBackStack() }, onMenu = { histMenu = true })
+                }
+                composable(STATS_ROUTE, listOf(navArgument("tab") { defaultValue = Tab.Home.route })) { StatsRoute(c, signedIn, onBack = { nav.popBackStack() }) }
+                composable(SETTINGS_ROUTE, listOf(navArgument("tab") { defaultValue = Tab.Home.route })) {
+                    SettingsRoute(c, email, signedIn, onBack = { nav.popBackStack() }, onHistory = openHistory, onExit = onExit, onSnack = { snack = it })
+                }
                 composable(PLAYLIST_ROUTE) { e ->
                     PlaylistRoute(c, e.arguments?.getString("id").orEmpty(), onBack = { nav.popBackStack() }, onSnack = { snack = it })
                 }
@@ -229,6 +276,55 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String) {
         }
         BackHandler(enabled = npOpen) { if (sheetTab != null) sheetTab = null else npOpen = false }
         MenuLayer(c, menus, bars, MenuNav(openArtist, openAlbum, closePlayer = { sheetTab = null; npOpen = false }), snack = { snack = it })
+        // M6b: the account sheet (every tab's avatar), the history menu and the question before clearing the history.
+        if (accountOpen) {
+            BackHandler { accountOpen = false }
+            // "N dk önce" follows the clock and the sync while the sheet is open.
+            var tick by remember { mutableStateOf(0) }
+            LaunchedEffect(Unit) { while (true) { delay(5_000); tick++ } }
+            val ui = remember(email, signedIn, syncing, tick) { AccountMapping.sheet(c, email, signedIn, syncing) }
+            com.muratkirazkaya.meiro.ui.screens.AccountSheet(
+                ui, bars,
+                com.muratkirazkaya.meiro.ui.screens.AccountActions(
+                    onDismiss = { accountOpen = false },
+                    onHistory = { accountOpen = false; openHistory() },
+                    onStats = { accountOpen = false; openStats() },
+                    onSettings = { accountOpen = false; openSettings() },
+                    onSync = {
+                        if (signedIn && !syncing) {
+                            syncing = true
+                            scope.launch { try { c.sync("manual") } finally { syncing = false } }
+                        }
+                    },
+                    onSignOut = { accountOpen = false; onExit() },
+                ),
+            )
+        }
+        val prefs by c.prefs.collectAsState()
+        if (histMenu) {
+            BackHandler { histMenu = false }
+            com.muratkirazkaya.meiro.ui.screens.HistoryMenuSheet(
+                prefs.historyPaused, signedIn, bars,
+                com.muratkirazkaya.meiro.ui.screens.HistoryMenuActions(
+                    onDismiss = { histMenu = false },
+                    onPause = {
+                        histMenu = false
+                        val paused = !prefs.historyPaused
+                        c.updatePrefs { it.copy(historyPaused = paused) }
+                        snack = if (paused) "Geçmiş kaydı duraklatıldı" else "Geçmiş kaydı sürdürüldü"
+                    },
+                    onStats = { histMenu = false; openStats() },
+                    onClear = { histMenu = false; clearAsk = true },
+                ),
+            )
+        }
+        if (clearAsk) {
+            BackHandler { clearAsk = false }
+            com.muratkirazkaya.meiro.ui.screens.ClearHistorySheet(signedIn, bars, onCancel = { clearAsk = false }) {
+                clearAsk = false
+                scope.launch { c.clearHistory(); snack = "Dinleme geçmişi temizlendi" }
+            }
+        }
         snack?.let { m ->
             LaunchedEffect(m) { delay(2600); if (snack == m) snack = null }
             Snack(m, { snack = null }, Modifier.align(Alignment.BottomCenter).padding(start = 12.dp, end = 12.dp, bottom = 160.dp))
@@ -327,7 +423,7 @@ internal fun avatarInitial(email: String): String =
  * not exist yet.
  */
 @Composable
-private fun HomeRoute(c: AppContainer, email: String, onOpen: (String) -> Unit, onMix: () -> Unit, onSnack: (String) -> Unit) {
+private fun HomeRoute(c: AppContainer, email: String, onOpen: (String) -> Unit, onMix: () -> Unit, onSnack: (String) -> Unit, onStats: () -> Unit, onHistory: () -> Unit) {
     val ctx = LocalContext.current
     val menus = LocalMenus.current
     val openPlayer = LocalOpenPlayer.current
@@ -345,6 +441,8 @@ private fun HomeRoute(c: AppContainer, email: String, onOpen: (String) -> Unit, 
     HomeScreen(
         data.ui, playing = now?.playing == true,
         actions = HomeActions(
+            onStats = onStats,
+            onHistory = onHistory,
             onMix = { if (data.mixId != null) onMix() },
             onPlayMix = {
                 if (data.mixItems.isNotEmpty()) {
@@ -384,7 +482,7 @@ private fun LibraryRoute(c: AppContainer, onOpen: (String) -> Unit, onMix: () ->
  * the lists or what plays change. Rows play the mix from that track; play and shuffle play all of it.
  */
 @Composable
-private fun MixRoute(c: AppContainer, onBack: () -> Unit, onSnack: (String) -> Unit) {
+private fun MixRoute(c: AppContainer, onBack: () -> Unit, onSnack: (String) -> Unit, onSettings: () -> Unit) {
     val ctx = LocalContext.current
     val menus = LocalMenus.current
     val openPlayer = LocalOpenPlayer.current
@@ -406,6 +504,7 @@ private fun MixRoute(c: AppContainer, onBack: () -> Unit, onSnack: (String) -> U
             onMore = { i -> lib.items.getOrNull(i)?.let { menus.track(MenuTarget(it.toQItem(), listId = lib.id)) } },
             onLink = { i -> lib.items.getOrNull(i)?.let { menus.link(LinkTarget.song(it.toQItem())) } },
             onDownload = { onSnack(downloadAll(c, lib.items.map { it.toQItem() }, lib.name, lib.cover)) },
+            onSettings = onSettings,
         ),
     )
 }
@@ -600,7 +699,9 @@ private fun PlayerRoute(
                 ?: libs.asSequence().flatMap { it.items }.firstOrNull { it.activeRef() == (src to key) }?.state
         }
     }
-    val background = com.muratkirazkaya.meiro.ui.components.rememberCoverBrush(p.item.thumbnail.takeIf { it.isNotBlank() })
+    // "Rengi kapaktan al": off, the player keeps the mock's own gradient instead of the cover's colours.
+    val coverColor = c.prefs.collectAsState().value.coverColor
+    val background = com.muratkirazkaya.meiro.ui.components.rememberCoverBrush(p.item.thumbnail.takeIf { it.isNotBlank() && coverColor })
     val ui = NowPlayingMapping.player(p, linkOf(p.item.provider(), p.item.key), background)
     com.muratkirazkaya.meiro.ui.screens.NowPlayingScreen(
         ui, bars,
@@ -673,11 +774,169 @@ private const val RELATED_SOURCE = "Benzerler"
 @Composable
 private fun LightStatusBarIcons() {
     val view = androidx.compose.ui.platform.LocalView.current
-    val dark = androidx.compose.foundation.isSystemInDarkTheme()
+    val dark = Meiro.colors == com.muratkirazkaya.meiro.ui.theme.DarkMeiroColors
     androidx.compose.runtime.DisposableEffect(view, dark) {
         val window = (view.context as? android.app.Activity)?.window
         val ctl = window?.let { androidx.core.view.WindowCompat.getInsetsController(it, view) }
         ctl?.isAppearanceLightStatusBars = false
         onDispose { ctl?.isAppearanceLightStatusBars = !dark }
     }
+}
+
+/**
+ * "Dinleme geçmişi": rebuilt when the history, the lists, the links or what plays change, and every half minute (the day
+ * headings follow the clock). A row plays that one track (the desktop's `historyPlay`), ⋮ opens the track menu, the link
+ * button the link sheet; ⋮ in the top bar opens the history menu.
+ */
+@Composable
+private fun HistoryRoute(c: AppContainer, signedIn: Boolean, onBack: () -> Unit, onMenu: () -> Unit) {
+    val ctx = LocalContext.current
+    val menus = LocalMenus.current
+    val openPlayer = LocalOpenPlayer.current
+    val historyVersion by c.historyVersion.collectAsState()
+    val version by c.libraries.version.collectAsState()
+    val linkVersion by c.linker.version.collectAsState()
+    val now by PlaybackHost.ui.collectAsState()
+    var filter by rememberSaveable { mutableStateOf(HistoryMapping.ALL) }
+    var searching by rememberSaveable { mutableStateOf(false) }
+    var query by rememberSaveable { mutableStateOf("") }
+    var clock by remember { mutableStateOf(ZonedDateTime.now()) }
+    LaunchedEffect(Unit) { while (true) { delay(30_000); clock = ZonedDateTime.now() } }
+    val playingKey = now?.item?.key
+    val ui = remember(historyVersion, version, linkVersion, playingKey, filter, query, searching, clock.toLocalDate(), signedIn) {
+        HistoryMapping.build(c.engine.history(), filter, query, searching, ZonedDateTime.now(), c.engine.deviceName, c.libraries.list(), c.links, playingKey, signedIn)
+    }
+    // A device chip whose device has no plays left (after clearing) falls back to every play.
+    if (ui.chips.none { it.key == filter }) filter = HistoryMapping.ALL
+    val plays = remember(ui) { ui.lines.filterIsInstance<HistoryLine.Play>().map { it.item } }
+    val state = androidx.compose.foundation.lazy.rememberLazyListState()
+    val scope = rememberCoroutineScope()
+    com.muratkirazkaya.meiro.ui.screens.HistoryScreen(
+        ui, playing = now?.playing == true,
+        actions = com.muratkirazkaya.meiro.ui.screens.HistoryActions(
+            onBack = onBack,
+            onSearch = { searching = !searching; query = "" },
+            onQuery = { query = it },
+            onMenu = onMenu,
+            onChip = { if (it != filter) { filter = it; scope.launch { state.scrollToItem(0) } } },
+            onRow = { i -> plays.getOrNull(i)?.let { playRow(ctx, listOf(it), 0, "Dinleme geçmişi", openPlayer) } },
+            onMore = { i -> plays.getOrNull(i)?.let { menus.track(MenuTarget(it)) } },
+            onLink = { i -> plays.getOrNull(i)?.let { menus.link(LinkTarget.song(it)) } },
+        ),
+        state = state,
+    )
+}
+
+/**
+ * "Özet": the month or the year, from the server signed in (every device) and from this device's history otherwise or
+ * when the server cannot be reached. The local numbers show at once and the server's replace them when they come.
+ */
+@Composable
+private fun StatsRoute(c: AppContainer, signedIn: Boolean, onBack: () -> Unit) {
+    var period by rememberSaveable { mutableStateOf(StatsPeriod.Month) }
+    val historyVersion by c.historyVersion.collectAsState()
+    val now = remember(period) { ZonedDateTime.now() }
+    val history = remember(historyVersion) { c.engine.history() }
+    val local = remember(history, period) { StatsMapping.local(history, period, now) }
+    val summary by produceState(local, period, historyVersion) { value = c.stats(period, now).first }
+    val ui = remember(summary, history, period) {
+        StatsMapping.ui(summary, StatsMapping.newArtists(history, period, now), period, now, signedIn, StatsMapping.coverIndex(history))
+    }
+    com.muratkirazkaya.meiro.ui.screens.StatsScreen(ui, com.muratkirazkaya.meiro.ui.screens.StatsActions(onBack = onBack, onPeriod = { period = it }))
+}
+
+/**
+ * "Ayarlar": each row reads the setting or the store it shows (sizes again every few seconds) and changes it. The rows
+ * whose feature the phone does not have (YouTube Music sign-in, Last.fm, the wallpaper colour and the swatches,
+ * loudness, the source order, the quality on mobile data) show the mock's text and do nothing.
+ */
+@Composable
+private fun SettingsRoute(
+    c: AppContainer, email: String, signedIn: Boolean, onBack: () -> Unit, onHistory: () -> Unit, onExit: () -> Unit, onSnack: (String) -> Unit,
+) {
+    val scope = rememberCoroutineScope()
+    val prefs by c.prefs.collectAsState()
+    val mixBusy by c.mixBusy.collectAsState()
+    val historyVersion by c.historyVersion.collectAsState()
+    val libsVersion by c.libraries.version.collectAsState()
+    val ytv by c.ytCache.version.collectAsState()
+    val scv by c.scCache.version.collectAsState()
+    var tick by remember { mutableStateOf(0) }
+    LaunchedEffect(Unit) { while (true) { delay(5_000); tick++ } }
+    var explore by remember(prefs.explore) { mutableStateOf(prefs.explore / 100f) }
+    var ytdlp by remember { mutableStateOf("") }
+    var ytdlpBusy by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { ytdlp = c.ytdlpVersion().orEmpty() }
+    val sizes by produceState(Triple("", "", "") to "", ytv, scv, tick) {
+        value = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            val limit = com.muratkirazkaya.meiro.downloads.AudioCache.DEFAULT_LIMIT_BYTES
+            val (covers, coverCount) = c.coverCacheUsage()
+            Triple(
+                "${com.muratkirazkaya.meiro.ui.components.sizeText(c.ytCache.usage())} / ${com.muratkirazkaya.meiro.ui.components.sizeText(limit)} · ${StatsMapping.number(c.ytCache.count())} şarkı",
+                "${com.muratkirazkaya.meiro.ui.components.sizeText(c.scCache.usage())} / ${com.muratkirazkaya.meiro.ui.components.sizeText(limit)} · ${StatsMapping.number(c.scCache.count())} şarkı",
+                "${com.muratkirazkaya.meiro.ui.components.sizeText(covers)} · ${StatsMapping.number(coverCount)} kapak",
+            ) to "sanatçı 30 gün, şarkı 1 gün · ${com.muratkirazkaya.meiro.ui.components.sizeText(c.mbCacheUsage())}"
+        }
+    }
+    val ui = remember(prefs, mixBusy, historyVersion, libsVersion, sizes, tick, explore, ytdlp, ytdlpBusy, email, signedIn) {
+        val mix = HomeMapping.dailyMix(c.libraries.list(), c.engine.settings.dailyMixId)
+        val history = c.engine.history()
+        com.muratkirazkaya.meiro.ui.screens.SettingsUi(
+            accountSub = AccountMapping.settingsLine(c, email, signedIn),
+            accountButton = if (signedIn) "Çıkış" else "Giriş",
+            server = AppContainer.displayServer(c.engine.settings.syncUrl),
+            theme = prefs.theme, coverColor = prefs.coverColor, recommend = prefs.suggestions, explore = explore,
+            dailyMix = AccountMapping.dailyMixLine(
+                mix?.items?.maxOfOrNull { it.updatedAt }, c.engine.settings.dailyMixDate, mixBusy, prefs.suggestions, java.time.Instant.now(), java.time.ZoneId.systemDefault(),
+            ),
+            dailyMixBusy = mixBusy,
+            wifiOnly = prefs.wifiOnly,
+            ytCache = sizes.first.first, scCache = sizes.first.second, coverCache = sizes.first.third, mbCache = sizes.second,
+            history = "${StatsMapping.number(history.size)} çalma · 30 sn ya da yarısı sayılır",
+            version = "Meiro ${c.appVersion()}".trim(),
+            ytdlp = (if (ytdlp.isEmpty()) "" else "$ytdlp · ") + "her şarkının sesini bulur",
+            ytdlpBusy = ytdlpBusy,
+        )
+    }
+    com.muratkirazkaya.meiro.ui.screens.SettingsScreen(
+        ui,
+        com.muratkirazkaya.meiro.ui.screens.SettingsActions(
+            onBack = onBack,
+            onAccount = onExit,
+            onServer = { if (signedIn) onSnack("Sunucuyu değiştirmek için önce çıkış yap") else onExit() },
+            onTheme = { t -> c.updatePrefs { it.copy(theme = t) } },
+            onCoverColor = { c.updatePrefs { it.copy(coverColor = !it.coverColor) } },
+            onRecommend = {
+                val on = !prefs.suggestions
+                c.updatePrefs { it.copy(suggestions = on) }
+                // On again: the desktop's `recommendTick` right away.
+                if (on) scope.launch { c.recommendTick("settings") }
+            },
+            onExplore = { explore = it },
+            onExploreDone = { val v = Math.round(explore * 100); c.updatePrefs { it.copy(explore = v) } },
+            onDailyMix = {
+                if (prefs.suggestions && !mixBusy) scope.launch {
+                    val wrote = c.recommendTick("settings: make it now", remake = true)
+                    onSnack(if (wrote) "Daily mix yenilendi" else "Daily mix yapılamadı")
+                }
+            },
+            onWifiOnly = { c.updatePrefs { it.copy(wifiOnly = !it.wifiOnly) } },
+            onClearYt = { scope.launch(kotlinx.coroutines.Dispatchers.IO) { c.ytCache.clear() }; onSnack("YouTube Music önbelleği temizlendi") },
+            onClearSc = { scope.launch(kotlinx.coroutines.Dispatchers.IO) { c.scCache.clear() }; onSnack("SoundCloud önbelleği temizlendi") },
+            onClearCovers = { scope.launch(kotlinx.coroutines.Dispatchers.IO) { c.clearCoverCache(); tick++ }; onSnack("Kapak önbelleği temizlendi") },
+            onClearMb = { scope.launch(kotlinx.coroutines.Dispatchers.IO) { c.clearMbCache(); tick++ }; onSnack("MusicBrainz önbelleği temizlendi") },
+            onHistory = onHistory,
+            onYtdlp = {
+                if (!ytdlpBusy) {
+                    ytdlpBusy = true
+                    scope.launch {
+                        val msg = c.updateYtdlp()
+                        ytdlp = c.ytdlpVersion().orEmpty()
+                        ytdlpBusy = false
+                        onSnack(msg)
+                    }
+                }
+            },
+        ),
+    )
 }

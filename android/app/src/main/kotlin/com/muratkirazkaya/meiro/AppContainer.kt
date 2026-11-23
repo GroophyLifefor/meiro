@@ -53,6 +53,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.util.concurrent.TimeUnit
 
+/** The phone's own settings screen values that change behaviour (theme, colour from the cover, recommendations, Wi-Fi only, pausing the history). */
+data class AppPrefs(
+    val theme: com.muratkirazkaya.meiro.ui.screens.ThemeChoice = com.muratkirazkaya.meiro.ui.screens.ThemeChoice.System,
+    val coverColor: Boolean = true,
+    val suggestions: Boolean = true,
+    /** Percent of the Daily mix by artists never played (desktop `Explore`, 30). */
+    val explore: Int = 30,
+    val wifiOnly: Boolean = true,
+    val historyPaused: Boolean = false,
+)
+
 /** What the UI needs to know about the account, read from the engine. */
 data class Session(val signedIn: Boolean, val expired: Boolean, val email: String, val server: String)
 
@@ -134,6 +145,8 @@ class AppContainer(private val context: Context) {
     private val playStore = object : PlayStore {
         // The history is written to Room, which must not happen on the main thread; one writer keeps the order.
         override fun begin(entry: HistoryEntry) {
+            // "Kaydı duraklat": while paused a play is not filed at all (not in the history, not sent).
+            if (prefs.value.historyPaused) { Log.i(TAG, "play: not recorded (history paused) ${entry.source}:${entry.videoId}"); return }
             playWriter.execute {
                 engine.beginPlay(entry)
                 _historyVersion.value += 1
@@ -211,6 +224,7 @@ class AppContainer(private val context: Context) {
                 if (rec.thumbnail.startsWith("http")) coil.Coil.imageLoader(context).enqueue(coil.request.ImageRequest.Builder(context).data(rec.thumbnail).build())
             },
             log = { Log.i(DL_TAG, it) },
+            allowed = { downloadAllowed() },
         )
     }
 
@@ -378,7 +392,7 @@ class AppContainer(private val context: Context) {
      * the day's ranking in memory; the phone ranks only when it makes the mix, so the mix is the ranking it keeps.
      */
     fun suggestionPicks(): List<com.muratkirazkaya.meiro.playback.QItem> =
-        com.muratkirazkaya.meiro.ui.HomeMapping.dailyMix(libraries.list(), engine.settings.dailyMixId)?.items?.map { it.toQItem() }.orEmpty()
+        if (!_prefs.value.suggestions) emptyList() else com.muratkirazkaya.meiro.ui.HomeMapping.dailyMix(libraries.list(), engine.settings.dailyMixId)?.items?.map { it.toQItem() }.orEmpty()
 
     private val playPrefs = context.getSharedPreferences("meiro-playback", Context.MODE_PRIVATE)
     /** Auto-play (`settings.AutoPlay`), on unless turned off; kept on this device only (the desktop keeps it in its settings file). */
@@ -441,6 +455,9 @@ class AppContainer(private val context: Context) {
 
     private val recScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val recBusy = java.util.concurrent.atomic.AtomicBoolean(false)
+    private val _mixBusy = MutableStateFlow(false)
+    /** A Daily mix run is on its way (the settings say so and keep "Şimdi yap" from asking twice). */
+    val mixBusy: StateFlow<Boolean> = _mixBusy
 
     /** Makes the Daily mix (recommendations.go): related songs from YouTube Music and SoundCloud, kept for a day on disk. */
     val dailyMix: DailyMixMaker by lazy {
@@ -466,9 +483,11 @@ class AppContainer(private val context: Context) {
      * One run (`refreshRecommendations` + `writeDailyMix`): nothing when today's mix is made or a run is on its way;
      * otherwise gather, rank, write the mix when there are at least 5 picks and (signed in) send it. True when it wrote.
      */
-    suspend fun recommendTick(reason: String): Boolean = withContext(Dispatchers.IO) {
-        if (engine.dailyMixMadeToday()) { Log.i(MIX_TAG, "daily mix ($reason): today's mix is made (${engine.settings.dailyMixDate})"); return@withContext false }
+    suspend fun recommendTick(reason: String, remake: Boolean = false): Boolean = withContext(Dispatchers.IO) {
+        if (!_prefs.value.suggestions) { Log.i(MIX_TAG, "daily mix ($reason): recommendations are off"); return@withContext false }
+        if (!remake && engine.dailyMixMadeToday()) { Log.i(MIX_TAG, "daily mix ($reason): today's mix is made (${engine.settings.dailyMixDate})"); return@withContext false }
         if (!recBusy.compareAndSet(false, true)) return@withContext false
+        _mixBusy.value = true
         try {
             val t0 = System.nanoTime()
             val items = kotlinx.coroutines.withTimeoutOrNull(DailyMixMaker.RUN_TIMEOUT.toMillis()) {
@@ -478,10 +497,11 @@ class AppContainer(private val context: Context) {
                         dailyMix.profile(engine.history(), libraries.list(), engine.settings.dailyMixId, java.time.Instant.now(), dl)
                     },
                     history = { engine.history() }, now = java.time.Instant.now(), zone = java.time.ZoneId.systemDefault(),
+                    explore = _prefs.value.explore / 100.0,
                 )
             }
             if (items == null) { Log.i(MIX_TAG, "daily mix ($reason): gave up after ${DailyMixMaker.RUN_TIMEOUT.toMinutes()} min"); return@withContext false }
-            val wrote = engine.writeDailyMix(items)
+            val wrote = engine.writeDailyMix(items, remake)
             Log.i(MIX_TAG, "daily mix ($reason): ${items.size} picks in ${(System.nanoTime() - t0) / 1_000_000} ms, written=$wrote")
             if (wrote && session().signedIn) {
                 engine.syncSnapshot().queue(engine.outbox)
@@ -491,6 +511,7 @@ class AppContainer(private val context: Context) {
             wrote
         } finally {
             recBusy.set(false)
+            _mixBusy.value = false
         }
     }
 
@@ -509,6 +530,122 @@ class AppContainer(private val context: Context) {
                 "error=${engine.lastError.ifEmpty { "none" }} sessionEnded=${engine.expired}",
         )
     }
+
+    // ---- M6b: settings, history, stats, account ---------------------------------------------------------------
+
+    private val settingsPrefs = context.getSharedPreferences("meiro-settings", Context.MODE_PRIVATE)
+    private val _prefs = MutableStateFlow(loadPrefs())
+
+    /** The phone's own settings (the desktop keeps the same ones in its settings file; none of them is synced). */
+    val prefs: StateFlow<AppPrefs> = _prefs
+
+    private fun loadPrefs() = AppPrefs(
+        theme = com.muratkirazkaya.meiro.ui.screens.ThemeChoice.entries.getOrElse(settingsPrefs.getInt("theme", 0)) { com.muratkirazkaya.meiro.ui.screens.ThemeChoice.System },
+        coverColor = settingsPrefs.getBoolean("coverColor", true),
+        suggestions = settingsPrefs.getBoolean("suggestions", true),
+        explore = settingsPrefs.getInt("explore", 30),
+        wifiOnly = settingsPrefs.getBoolean("wifiOnly", true),
+        historyPaused = settingsPrefs.getBoolean("historyPaused", false),
+    )
+
+    /** Changes the settings and writes them at once. */
+    fun updatePrefs(f: (AppPrefs) -> AppPrefs) {
+        val p = f(_prefs.value)
+        _prefs.value = p
+        settingsPrefs.edit().putInt("theme", p.theme.ordinal).putBoolean("coverColor", p.coverColor).putBoolean("suggestions", p.suggestions)
+            .putInt("explore", p.explore).putBoolean("wifiOnly", p.wifiOnly).putBoolean("historyPaused", p.historyPaused).apply()
+        Log.i(TAG, "settings: $p")
+    }
+
+    /** "Yalnız Wi-Fi'de indir": a download may start only on an unmetered network while it is on. */
+    fun downloadAllowed(): Boolean = !_prefs.value.wifiOnly || com.muratkirazkaya.meiro.downloads.Online.unmetered.value
+
+    /** "Geçmişi temizle" (`clearHistory`): every play goes here; signed in, the account's history on every device. */
+    suspend fun clearHistory() = withContext(Dispatchers.IO) {
+        engine.clearHistory()
+        _historyVersion.value += 1
+        Log.i(TAG, "history: cleared (signed in: ${session().signedIn}), pending clear=${engine.settings.historyClearPending}")
+        if (session().signedIn) {
+            engine.settled()
+            Log.i(TAG, "history: clear pushed, pending clear=${engine.settings.historyClearPending} clearedAt=${engine.settings.historyClearedAt} error=${engine.lastError.ifEmpty { "none" }}")
+        }
+    }
+
+    /**
+     * "Özet" for [period]: the server's summary signed in (every device), else the one folded from this device's history.
+     * The second value says where it came from ("server" or "local"); a server that cannot be reached falls back to local.
+     */
+    suspend fun stats(period: com.muratkirazkaya.meiro.ui.StatsPeriod, now: java.time.ZonedDateTime): Pair<com.muratkirazkaya.meiro.sync.StatsSummary, String> = withContext(Dispatchers.IO) {
+        val anchor = com.muratkirazkaya.meiro.ui.StatsMapping.anchor(period, now)
+        if (session().signedIn && engine.token.isNotEmpty()) {
+            try {
+                val s = com.muratkirazkaya.meiro.sync.MeiroClient(engine.settings.syncUrl, engine.token).statsSummary(if (period == com.muratkirazkaya.meiro.ui.StatsPeriod.Year) "year" else "month", anchor)
+                Log.i(TAG, "stats: server $anchor plays=${s.totals.plays} playedMs=${s.totals.playedMs} tracks=${s.totals.uniqueTracks} artists=${s.totals.uniqueArtists}")
+                return@withContext s to "server"
+            } catch (e: kotlinx.coroutines.CancellationException) { throw e } catch (e: Exception) {
+                Log.i(TAG, "stats: server failed ($e), folding the local history")
+            }
+        }
+        val s = com.muratkirazkaya.meiro.ui.StatsMapping.local(engine.history(), period, now)
+        Log.i(TAG, "stats: local $anchor plays=${s.totals.plays} playedMs=${s.totals.playedMs}")
+        s to "local"
+    }
+
+    /** "Çıkış yap" (`signOutSync`): the account is forgotten (its token leaves the disk); the lists and plays here stay. */
+    suspend fun signOut() = withContext(Dispatchers.IO) {
+        // The engine writes its settings to Room, which must not happen on the main thread.
+        engine.signOut()
+        WorkManager.getInstance(context).cancelUniqueWork(SyncScheduler.NAME)
+        _historyVersion.value += 1
+        Log.i(TAG, "sign-out: done, account=${engine.settings.syncEmail.ifEmpty { "none" }}")
+    }
+
+    /** The playback caches' and the other caches' sizes, for the settings ("480 MB / 512 MB · 112 şarkı"). */
+    fun coverCacheUsage(): Pair<Long, Int> {
+        val dir = java.io.File(context.cacheDir, "covers")
+        val files = dir.walkTopDown().filter { it.isFile }.toList()
+        // Coil keeps each picture as a ".1" data file beside its ".0" metadata file.
+        return files.sumOf { it.length() } to files.count { it.name.endsWith(".1") }
+    }
+
+    fun clearCoverCache() {
+        val loader = coil.Coil.imageLoader(context)
+        loader.diskCache?.clear(); loader.memoryCache?.clear()
+        Log.i(TAG, "settings: cover cache cleared")
+    }
+
+    private val mbDir get() = java.io.File(context.cacheDir, "musicbrainz")
+    fun mbCacheUsage(): Long = mbDir.walkTopDown().filter { it.isFile }.sumOf { it.length() }
+    fun clearMbCache() {
+        val n = mbDir.listFiles()?.count { it.isFile && it.delete() } ?: 0
+        Log.i(TAG, "settings: MusicBrainz cache cleared ($n files)")
+    }
+
+    /** The bundled yt-dlp's version ("2026.10.12"), null when it cannot be read. */
+    suspend fun ytdlpVersion(): String? = withContext(Dispatchers.IO) {
+        try {
+            YtdlpSetup.ensure(context) { Log.i(TAG, it) }
+            YoutubeDL.getInstance().version(context.applicationContext)
+                ?: YoutubeDL.getInstance().execute(YoutubeDLRequest(emptyList()).apply { addOption("--version") }).out.trim().takeIf { it.isNotEmpty() }
+        } catch (e: Throwable) { Log.i(TAG, "yt-dlp version: $e"); null }
+    }
+
+    /** "Güncelle": yt-dlp is updated now (it is also updated once a day by itself). Returns the snack. */
+    suspend fun updateYtdlp(): String = withContext(Dispatchers.IO) {
+        try {
+            YtdlpSetup.ensure(context) { Log.i(TAG, it) }
+            val status = YoutubeDL.getInstance().updateYoutubeDL(context.applicationContext, YoutubeDL.UpdateChannel.STABLE)
+            context.getSharedPreferences("meiro-ytdlp", Context.MODE_PRIVATE).edit().putLong("updatedAt", System.currentTimeMillis()).apply()
+            Log.i(TAG, "yt-dlp update (settings): $status")
+            if (status == YoutubeDL.UpdateStatus.ALREADY_UP_TO_DATE) "yt-dlp güncel" else "yt-dlp güncellendi"
+        } catch (e: Throwable) {
+            Log.i(TAG, "yt-dlp update (settings) failed: $e")
+            "yt-dlp güncellenemedi"
+        }
+    }
+
+    /** The app's own version, as the package names it. */
+    fun appVersion(): String = try { context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "" } catch (e: Exception) { "" }
 
     companion object {
         const val TAG = "MeiroSync"

@@ -1,0 +1,351 @@
+{
+ "screen": "histmenu",
+ "systemNote": "Status bar row (y 0..36) and the gesture pill are system UI on Android: not drawn by the app, excluded from element and pixel comparison.",
+ "elements": [
+  {
+   "path": "#box>div.app:nth-child(1)>div.statusbar:nth-child(1)>span#clock:nth-child(1)",
+   "system": true
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div.statusbar:nth-child(1)>span.sys:nth-child(2)>span#netIcon:nth-child(1)",
+   "system": true
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div.statusbar:nth-child(1)>span.sys:nth-child(2)>i:nth-child(2)",
+   "system": true
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)",
+   "key": "mini"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.cv:nth-child(1)",
+   "key": "mini.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "mini.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>span:nth-child(2)",
+   "key": "mini.artist",
+   "styleFrom": "mini.artist.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>span:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "key": "mini.src.ytm"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>span:nth-child(2)>span.src:nth-child(1)>span.dim:nth-child(2)>svg:nth-child(1)",
+   "key": "mini.src.sc"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(3)",
+   "key": "mini.playBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "key": "mini.play.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(4)",
+   "key": "mini.nextBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(4)>svg:nth-child(1)",
+   "key": "mini.next.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.bar:nth-child(5)",
+   "key": "mini.bar"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.bar:nth-child(5)>i:nth-child(1)",
+   "key": "mini.bar.fill"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)",
+   "key": "nav"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(1)",
+   "key": "nav.home",
+   "styleFrom": "nav.home.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(1)>span.pill:nth-child(1)",
+   "key": "nav.home.pill"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(1)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "key": "nav.home.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(2)",
+   "key": "nav.search",
+   "styleFrom": "nav.search.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(2)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "key": "nav.search.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(3)",
+   "key": "nav.library",
+   "styleFrom": "nav.library.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(3)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "key": "nav.library.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(4)",
+   "key": "nav.downloads",
+   "styleFrom": "nav.downloads.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(4)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "key": "nav.downloads.icon"
+  },
+  {
+   "path": "#box>div#scrim.scrim.open:nth-child(4)",
+   "key": "histmenu.scrim"
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)",
+   "key": "histmenu.sheet"
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)>div.handle:nth-child(1)",
+   "key": "histmenu.handle"
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)>div.shead:nth-child(2)>h3:nth-child(1)",
+   "key": "histmenu.title"
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)>div.div:nth-child(3)",
+   "key": "histmenu.div"
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)>button.mi:nth-child(4)",
+   "key": "histmenu.pause",
+   "styleFrom": "histmenu.pause.label"
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)>button.mi:nth-child(4)>svg:nth-child(1)",
+   "key": "histmenu.pause.icon"
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)>button.mi:nth-child(5)",
+   "key": "histmenu.stats",
+   "styleFrom": "histmenu.stats.label"
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)>button.mi:nth-child(5)>svg:nth-child(1)",
+   "key": "histmenu.stats.icon"
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)>button.mi.warn:nth-child(6)",
+   "key": "histmenu.clear",
+   "styleFrom": "histmenu.clear.label"
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)>button.mi.warn:nth-child(6)>svg:nth-child(1)",
+   "key": "histmenu.clear.icon"
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)>button.mi.warn:nth-child(6)>span.r:nth-child(2)",
+   "key": "histmenu.clear.where"
+  },
+  {
+   "path": "#box>div.gesture:nth-child(7)",
+   "system": true
+  }
+ ],
+ "aux": [
+  "chip.all",
+  "chip.all.check",
+  "chip.all.label",
+  "chip.counted",
+  "chip.counted.label",
+  "chip.dev1",
+  "chip.dev1.label",
+  "chip.dev2",
+  "chip.dev2.label",
+  "chip.skipped",
+  "chip.skipped.label",
+  "day1.sub",
+  "day1.title",
+  "day2.sub",
+  "day2.title",
+  "day3.sub",
+  "day3.title",
+  "histmenu.clear.label",
+  "histmenu.pause.label",
+  "histmenu.stats.label",
+  "mini",
+  "mini.artist",
+  "mini.artist.label",
+  "mini.bar",
+  "mini.bar.fill",
+  "mini.cover",
+  "mini.next.icon",
+  "mini.nextBtn",
+  "mini.play.icon",
+  "mini.playBtn",
+  "mini.src.sc",
+  "mini.src.ytm",
+  "mini.title",
+  "nav",
+  "nav.downloads",
+  "nav.downloads.icon",
+  "nav.downloads.label",
+  "nav.downloads.pill",
+  "nav.home",
+  "nav.home.icon",
+  "nav.home.label",
+  "nav.library",
+  "nav.library.icon",
+  "nav.library.label",
+  "nav.search",
+  "nav.search.icon",
+  "nav.search.label",
+  "note",
+  "song1.cv",
+  "song1.eq",
+  "song1.meta",
+  "song1.more.icon",
+  "song1.moreBtn",
+  "song1.note",
+  "song1.src.sc",
+  "song1.src.ytm",
+  "song1.title",
+  "song10.cover",
+  "song10.meta",
+  "song10.more.icon",
+  "song10.moreBtn",
+  "song10.note",
+  "song10.preview",
+  "song10.preview.label",
+  "song10.src.sc",
+  "song10.title",
+  "song2.cover",
+  "song2.dl",
+  "song2.link",
+  "song2.link.icon",
+  "song2.meta",
+  "song2.more.icon",
+  "song2.moreBtn",
+  "song2.note",
+  "song2.src.ytm",
+  "song2.title",
+  "song3.cover",
+  "song3.meta",
+  "song3.more.icon",
+  "song3.moreBtn",
+  "song3.note",
+  "song3.src.ytm",
+  "song3.title",
+  "song4.cover",
+  "song4.meta",
+  "song4.more.icon",
+  "song4.moreBtn",
+  "song4.note",
+  "song4.src.sc",
+  "song4.src.ytm",
+  "song4.title",
+  "song5.cover",
+  "song5.dl",
+  "song5.meta",
+  "song5.more.icon",
+  "song5.moreBtn",
+  "song5.note",
+  "song5.src.sc",
+  "song5.title",
+  "song6.cover",
+  "song6.meta",
+  "song6.more.icon",
+  "song6.moreBtn",
+  "song6.note",
+  "song6.src.ytm",
+  "song6.title",
+  "song7.cover",
+  "song7.link",
+  "song7.link.icon",
+  "song7.meta",
+  "song7.more.icon",
+  "song7.moreBtn",
+  "song7.note",
+  "song7.src.sc",
+  "song7.title",
+  "song8.cover",
+  "song8.link",
+  "song8.link.icon",
+  "song8.meta",
+  "song8.more.icon",
+  "song8.moreBtn",
+  "song8.note",
+  "song8.src.ytm",
+  "song8.title",
+  "song9.cover",
+  "song9.meta",
+  "song9.more.icon",
+  "song9.moreBtn",
+  "song9.note",
+  "song9.src.sc",
+  "song9.src.ytm",
+  "song9.title",
+  "topbar",
+  "topbar.back.icon",
+  "topbar.backBtn",
+  "topbar.more.icon",
+  "topbar.moreBtn",
+  "topbar.search.icon",
+  "topbar.searchBtn",
+  "topbar.title"
+ ],
+ "centered": [
+  {
+   "child": "histmenu.pause.icon",
+   "parent": "histmenu.pause",
+   "axes": "y"
+  },
+  {
+   "child": "histmenu.stats.icon",
+   "parent": "histmenu.stats",
+   "axes": "y"
+  },
+  {
+   "child": "histmenu.clear.icon",
+   "parent": "histmenu.clear",
+   "axes": "y"
+  }
+ ],
+ "rows": [
+  {
+   "name": "clear item",
+   "keys": [
+    "histmenu.clear.icon",
+    "histmenu.clear.where"
+   ],
+   "edges": [
+    "centerY"
+   ]
+  }
+ ],
+ "noOverlap": [
+  [
+   "histmenu.clear.label",
+   "histmenu.clear.where"
+  ]
+ ],
+ "ellipsis": [],
+ "toleranceNote": "Chrome (mock reference) lays text out with integer-rounded glyph advances, Skia with fractional ones: 12-14px text is 2-4% wider in the reference. Only boxes whose width is the text (wrap-content: the meta lines, the FAB, the sort button) depend on that, and what is aligned to their right edge moves with them; every other box is fill/fixed and held to 1px. Search: the chips, the \"Temizle\" button and the \"önizleme\" chip are wrap-content too; the chips after the first move by the sum of the earlier ones' differences, and a title that ends where such a chip starts changes width with it. History menu: '.mi .r' (\"bütün cihazlarda\") is wrap-content and right-aligned (x and w move together).",
+ "tolerance": {
+  "histmenu.clear.where": {
+   "x": 3.0,
+   "w": 3.0
+  }
+ }
+}

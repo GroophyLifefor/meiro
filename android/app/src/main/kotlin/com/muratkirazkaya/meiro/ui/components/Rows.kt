@@ -127,6 +127,10 @@ data class SongRowData(
     val preview: Boolean = false,
     /** Why the Daily mix recommends the track (the mock's `.why` line under the meta); empty elsewhere. */
     val why: String = "",
+    /** The history's line under the meta (the mock's `.why.muted`: when, which device, how much was heard); empty elsewhere. */
+    val note: String = "",
+    /** A play the stats do not count, faded to 55% (the mock's `.hrow.skip .row`). */
+    val dim: Boolean = false,
 )
 
 /**
@@ -147,7 +151,7 @@ fun SongRow(
 ) {
     val c = Meiro.colors
     Row(
-        modifier.fillMaxWidth().heightIn(min = 64.dp)
+        modifier.fillMaxWidth().heightIn(min = 64.dp).then(if (row.dim) Modifier.alpha(0.55f) else Modifier)
             .then(if (row.now) Modifier.background(c.primary.copy(alpha = 0.12f)) else Modifier)
             .clickableNoIndication(onClick).padding(start = 16.dp, end = 4.dp, top = 8.dp, bottom = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -172,6 +176,7 @@ fun SongRow(
                 MText(row.subtitle, MeiroType.ListMeta, c.onSurfaceVariant, "$p.meta", Modifier.weight(1f, fill = false), maxLines = 1)
             }
             if (row.why.isNotEmpty()) MText(row.why, MeiroType.Why, c.primary, "$p.why", Modifier.fillMaxWidth(), maxLines = 1)
+            if (row.note.isNotEmpty()) MText(row.note, MeiroType.WhyMuted, c.onSurfaceVariant, "$p.note", Modifier.fillMaxWidth(), maxLines = 1)
         }
         if (row.preview) PreviewChip("$p.preview")
         if (row.link != LinkBadge.None) LinkButton(p, row.link == LinkBadge.Other, onLink)

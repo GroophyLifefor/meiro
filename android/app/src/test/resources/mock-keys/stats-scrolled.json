@@ -1,0 +1,466 @@
+{
+ "screen": "stats",
+ "systemNote": "Status bar row (y 0..36) and the gesture pill are system UI on Android: not drawn by the app, excluded from element and pixel comparison.",
+ "elements": [
+  {
+   "path": "#box>div.app:nth-child(1)>div.statusbar:nth-child(1)>span#clock:nth-child(1)",
+   "system": true
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div.statusbar:nth-child(1)>span.sys:nth-child(2)>span#netIcon:nth-child(1)",
+   "system": true
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div.statusbar:nth-child(1)>span.sys:nth-child(2)>i:nth-child(2)",
+   "system": true
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar.withback:nth-child(1)",
+   "key": "topbar"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar.withback:nth-child(1)>button.ibtn:nth-child(1)",
+   "key": "topbar.backBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar.withback:nth-child(1)>button.ibtn:nth-child(1)>svg:nth-child(1)",
+   "key": "topbar.back.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar.withback:nth-child(1)>h1:nth-child(2)",
+   "key": "topbar.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.seg:nth-child(2)",
+   "key": "seg"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.seg:nth-child(2)>button.on:nth-child(1)",
+   "key": "seg.month",
+   "styleFrom": "seg.month.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.seg:nth-child(2)>button:nth-child(2)",
+   "key": "seg.year",
+   "styleFrom": "seg.year.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.stat:nth-child(3)>div:nth-child(1)",
+   "key": "tile1"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.stat:nth-child(3)>div:nth-child(1)>b:nth-child(1)",
+   "key": "tile1.value"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.stat:nth-child(3)>div:nth-child(1)>span:nth-child(2)",
+   "key": "tile1.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.stat:nth-child(3)>div:nth-child(2)",
+   "key": "tile2"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.stat:nth-child(3)>div:nth-child(2)>b:nth-child(1)",
+   "key": "tile2.value"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.stat:nth-child(3)>div:nth-child(2)>span:nth-child(2)",
+   "key": "tile2.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.stat:nth-child(3)>div:nth-child(3)",
+   "key": "tile3"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.stat:nth-child(3)>div:nth-child(3)>b:nth-child(1)",
+   "key": "tile3.value"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.stat:nth-child(3)>div:nth-child(3)>span:nth-child(2)",
+   "key": "tile3.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.stat:nth-child(3)>div:nth-child(4)",
+   "key": "tile4"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.stat:nth-child(3)>div:nth-child(4)>b:nth-child(1)",
+   "key": "tile4.value"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.stat:nth-child(3)>div:nth-child(4)>span:nth-child(2)",
+   "key": "tile4.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.h-sec:nth-child(4)>h2:nth-child(1)",
+   "key": "bars.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.bars:nth-child(5)",
+   "key": "bars"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.bars:nth-child(5)>i.lo:nth-child(1)",
+   "key": "bar1"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.bars:nth-child(5)>i:nth-child(2)",
+   "key": "bar2"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.bars:nth-child(5)>i:nth-child(3)",
+   "key": "bar3"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.bars:nth-child(5)>i.lo:nth-child(4)",
+   "key": "bar4"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.bars:nth-child(5)>i:nth-child(5)",
+   "key": "bar5"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.bars:nth-child(5)>i:nth-child(6)",
+   "key": "bar6"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.bars:nth-child(5)>i.lo:nth-child(7)",
+   "key": "bar7"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.bars:nth-child(5)>i:nth-child(8)",
+   "key": "bar8"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.bars:nth-child(5)>i:nth-child(9)",
+   "key": "bar9"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.bars:nth-child(5)>i.lo:nth-child(10)",
+   "key": "bar10"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.bars:nth-child(5)>i:nth-child(11)",
+   "key": "bar11"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.bars:nth-child(5)>i:nth-child(12)",
+   "key": "bar12"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.bars:nth-child(5)>i.lo:nth-child(13)",
+   "key": "bar13"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.bars:nth-child(5)>i:nth-child(14)",
+   "key": "bar14"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.h-sec:nth-child(6)>h2:nth-child(1)",
+   "key": "artists.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.rank:nth-child(7)>span.n:nth-child(1)",
+   "key": "artist1.n"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.rank:nth-child(7)>div.cv.round:nth-child(2)",
+   "key": "artist1.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.rank:nth-child(7)>div.t:nth-child(3)>b:nth-child(1)",
+   "key": "artist1.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.rank:nth-child(7)>div.t:nth-child(3)>span:nth-child(2)",
+   "key": "artist1.sub"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.rank:nth-child(8)>span.n:nth-child(1)",
+   "key": "artist2.n"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.rank:nth-child(8)>div.cv.round:nth-child(2)",
+   "key": "artist2.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.rank:nth-child(8)>div.t:nth-child(3)>b:nth-child(1)",
+   "key": "artist2.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.rank:nth-child(8)>div.t:nth-child(3)>span:nth-child(2)",
+   "key": "artist2.sub"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.rank:nth-child(9)>span.n:nth-child(1)",
+   "key": "artist3.n"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.rank:nth-child(9)>div.cv.round:nth-child(2)",
+   "key": "artist3.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.rank:nth-child(9)>div.t:nth-child(3)>b:nth-child(1)",
+   "key": "artist3.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.rank:nth-child(9)>div.t:nth-child(3)>span:nth-child(2)",
+   "key": "artist3.sub"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.h-sec:nth-child(10)>h2:nth-child(1)",
+   "key": "tracks.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.rank:nth-child(11)>span.n:nth-child(1)",
+   "key": "track1.n"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.rank:nth-child(11)>div.cv:nth-child(2)",
+   "key": "track1.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.rank:nth-child(11)>div.t:nth-child(3)>b:nth-child(1)",
+   "key": "track1.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.rank:nth-child(11)>div.t:nth-child(3)>span:nth-child(2)",
+   "key": "track1.sub"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.rank:nth-child(12)>span.n:nth-child(1)",
+   "key": "track2.n"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.rank:nth-child(12)>div.cv:nth-child(2)",
+   "key": "track2.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.rank:nth-child(12)>div.t:nth-child(3)>b:nth-child(1)",
+   "key": "track2.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.rank:nth-child(12)>div.t:nth-child(3)>span:nth-child(2)",
+   "key": "track2.sub"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.rank:nth-child(13)>span.n:nth-child(1)",
+   "key": "track3.n"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.rank:nth-child(13)>div.cv:nth-child(2)",
+   "key": "track3.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.rank:nth-child(13)>div.t:nth-child(3)>b:nth-child(1)",
+   "key": "track3.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.rank:nth-child(13)>div.t:nth-child(3)>span:nth-child(2)",
+   "key": "track3.sub"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.note:nth-child(14)",
+   "key": "note"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div:nth-child(15)",
+   "spacer": true
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)",
+   "key": "mini"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.cv:nth-child(1)",
+   "key": "mini.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "mini.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>span:nth-child(2)",
+   "key": "mini.artist",
+   "styleFrom": "mini.artist.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>span:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "key": "mini.src.ytm"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>span:nth-child(2)>span.src:nth-child(1)>span.dim:nth-child(2)>svg:nth-child(1)",
+   "key": "mini.src.sc"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(3)",
+   "key": "mini.playBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "key": "mini.play.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(4)",
+   "key": "mini.nextBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(4)>svg:nth-child(1)",
+   "key": "mini.next.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.bar:nth-child(5)",
+   "key": "mini.bar"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.bar:nth-child(5)>i:nth-child(1)",
+   "key": "mini.bar.fill"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)",
+   "key": "nav"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(1)",
+   "key": "nav.home",
+   "styleFrom": "nav.home.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(1)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "key": "nav.home.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(2)",
+   "key": "nav.search",
+   "styleFrom": "nav.search.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(2)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "key": "nav.search.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(3)",
+   "key": "nav.library",
+   "styleFrom": "nav.library.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(3)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "key": "nav.library.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(4)",
+   "key": "nav.downloads",
+   "styleFrom": "nav.downloads.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(4)>span.pill:nth-child(1)",
+   "key": "nav.downloads.pill"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(4)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "key": "nav.downloads.icon"
+  },
+  {
+   "path": "#box>div.gesture:nth-child(7)",
+   "system": true
+  }
+ ],
+ "aux": [
+  "mini.artist.label",
+  "nav.downloads.label",
+  "nav.home.label",
+  "nav.library.label",
+  "nav.search.label",
+  "seg.month.label",
+  "seg.year.label"
+ ],
+ "centered": [],
+ "rows": [
+  {
+   "name": "rank1",
+   "keys": [
+    "artist1.n",
+    "artist1.cover"
+   ],
+   "edges": [
+    "centerY"
+   ]
+  },
+  {
+   "name": "rank2",
+   "keys": [
+    "artist2.n",
+    "artist2.cover"
+   ],
+   "edges": [
+    "centerY"
+   ]
+  },
+  {
+   "name": "rank3",
+   "keys": [
+    "artist3.n",
+    "artist3.cover"
+   ],
+   "edges": [
+    "centerY"
+   ]
+  },
+  {
+   "name": "trank1",
+   "keys": [
+    "track1.n",
+    "track1.cover"
+   ],
+   "edges": [
+    "centerY"
+   ]
+  },
+  {
+   "name": "trank2",
+   "keys": [
+    "track2.n",
+    "track2.cover"
+   ],
+   "edges": [
+    "centerY"
+   ]
+  },
+  {
+   "name": "trank3",
+   "keys": [
+    "track3.n",
+    "track3.cover"
+   ],
+   "edges": [
+    "centerY"
+   ]
+  }
+ ],
+ "noOverlap": [],
+ "ellipsis": [],
+ "toleranceNote": "Chrome (mock reference) lays text out with integer-rounded glyph advances, Skia with fractional ones: 12-14px text is 2-4% wider in the reference. Only boxes whose width is the text (wrap-content: the meta lines, the FAB, the sort button) depend on that, and what is aligned to their right edge moves with them; every other box is fill/fixed and held to 1px. Search: the chips, the \"Temizle\" button and the \"önizleme\" chip are wrap-content too; the chips after the first move by the sum of the earlier ones' differences, and a title that ends where such a chip starts changes width with it. Stats: a tile's label is an inline <span> in a 21px line box (the body's 14px strut); Chrome's box is the 12px font's 15px content area, the app's the 20px line set in the 21px box.",
+ "tolerance": {
+  "tile1.label": {
+   "y": 2.0,
+   "h": 5.0,
+   "w": 1.5
+  },
+  "tile2.label": {
+   "y": 2.0,
+   "h": 5.0,
+   "w": 1.5
+  },
+  "tile3.label": {
+   "y": 2.0,
+   "h": 5.0,
+   "w": 1.5
+  },
+  "tile4.label": {
+   "y": 2.0,
+   "h": 5.0,
+   "w": 1.5
+  }
+ }
+}

@@ -134,6 +134,20 @@ class AudioCache(
     /** The bytes the cache takes. */
     fun usage(): Long = files().sumOf { it.length() }
 
+    /** How many tracks the cache holds. */
+    fun count(): Int = files().size
+
+    /** "Temizle" (`Clear`): every cached file goes; downloads are not touched. Returns the bytes freed. */
+    fun clear(): Long {
+        val all = files()
+        val bytes = all.sumOf { it.length() }
+        all.forEach { it.delete() }
+        synchronized(lock) { meta = emptyMap(); saveMeta() }
+        log("cache: cleared ${all.size} files, $bytes bytes")
+        _version.value += 1
+        return bytes
+    }
+
     private fun saveMeta() {
         val tmp = File(dir, "meta.json.tmp")
         tmp.writeText(JSON.encodeToString(MapSerializer(String.serializer(), CachedMeta.serializer()), meta))

@@ -25,6 +25,9 @@ import com.muratkirazkaya.meiro.ui.theme.MeiroType
 /** The account avatar's letter, provided by the signed-in shell; "M" (the mock's) when nothing provides one. */
 val LocalAvatarInitial = staticCompositionLocalOf { "M" }
 
+/** Opens the account sheet (`SHEET.account`), provided by the shell; nothing when nothing provides it. */
+val LocalOpenAccount = staticCompositionLocalOf<() -> Unit> { {} }
+
 /**
  * The mock's topbar: 64dp, an optional back button (then 4dp start padding instead of 16), the title (flex 1; the
  * playlist's is empty), [actions] (icon buttons), and the account avatar button (its letter is [LocalAvatarInitial])
@@ -50,7 +53,8 @@ fun TopBar(
         else Spacer(Modifier.weight(1f))
         actions()
         if (avatar) {
-            Box(Modifier.size(48.dp).clip(CircleShape).inv("topbar.avatarBtn", radiusDp = 24f), Alignment.Center) {
+            val openAccount = LocalOpenAccount.current
+            Box(Modifier.size(48.dp).clip(CircleShape).inv("topbar.avatarBtn", radiusDp = 24f).clickableNoIndication(openAccount), Alignment.Center) {
                 Box(
                     Modifier.size(32.dp).inv("topbar.avatar", bg = c.primaryContainer, radiusDp = 16f)
                         .clip(CircleShape).background(c.primaryContainer),

@@ -60,6 +60,8 @@ class DetailActions(
     val onArtistLink: () -> Unit = {},
     /** Album and Daily mix: the hero's download button ("Hepsini indir" for the page's tracks). */
     val onDownload: () -> Unit = {},
+    /** Daily mix: the hero's settings button (the settings screen, where the recommendations are). */
+    val onSettings: () -> Unit = {},
 )
 
 /**

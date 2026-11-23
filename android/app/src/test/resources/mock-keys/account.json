@@ -1,0 +1,438 @@
+{
+ "screen": "account",
+ "systemNote": "Status bar row (y 0..36) and the gesture pill are system UI on Android: not drawn by the app, excluded from element and pixel comparison.",
+ "elements": [
+  {
+   "path": "#box>div.app:nth-child(1)>div.statusbar:nth-child(1)>span#clock:nth-child(1)",
+   "system": true
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div.statusbar:nth-child(1)>span.sys:nth-child(2)>span#netIcon:nth-child(1)",
+   "system": true
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div.statusbar:nth-child(1)>span.sys:nth-child(2)>i:nth-child(2)",
+   "system": true
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)",
+   "key": "mini"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.cv:nth-child(1)",
+   "key": "mini.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "mini.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>span:nth-child(2)",
+   "key": "mini.artist",
+   "styleFrom": "mini.artist.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>span:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "key": "mini.src.ytm"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>span:nth-child(2)>span.src:nth-child(1)>span.dim:nth-child(2)>svg:nth-child(1)",
+   "key": "mini.src.sc"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(3)",
+   "key": "mini.playBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "key": "mini.play.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(4)",
+   "key": "mini.nextBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(4)>svg:nth-child(1)",
+   "key": "mini.next.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.bar:nth-child(5)",
+   "key": "mini.bar"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.bar:nth-child(5)>i:nth-child(1)",
+   "key": "mini.bar.fill"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)",
+   "key": "nav"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(1)",
+   "key": "nav.home",
+   "styleFrom": "nav.home.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(1)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "key": "nav.home.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(2)",
+   "key": "nav.search",
+   "styleFrom": "nav.search.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(2)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "key": "nav.search.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(3)",
+   "key": "nav.library",
+   "styleFrom": "nav.library.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(3)>span.pill:nth-child(1)",
+   "key": "nav.library.pill"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(3)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "key": "nav.library.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(4)",
+   "key": "nav.downloads",
+   "styleFrom": "nav.downloads.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(4)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "key": "nav.downloads.icon"
+  },
+  {
+   "path": "#box>div#scrim.scrim.open:nth-child(4)",
+   "key": "account.scrim"
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)",
+   "key": "account.sheet"
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)>div.handle:nth-child(1)",
+   "key": "account.handle"
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)>div.shead:nth-child(2)>span.avatar:nth-child(1)",
+   "key": "account.avatar",
+   "styleFrom": "account.avatar.label"
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)>div.shead:nth-child(2)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "account.name"
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)>div.shead:nth-child(2)>div.t:nth-child(2)>span:nth-child(2)",
+   "key": "account.sub"
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)>div.div:nth-child(3)",
+   "key": "account.div1"
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)>button.mi:nth-child(4)",
+   "key": "account.history",
+   "styleFrom": "account.history.label"
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)>button.mi:nth-child(4)>svg:nth-child(1)",
+   "key": "account.history.icon"
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)>button.mi:nth-child(5)",
+   "key": "account.stats",
+   "styleFrom": "account.stats.label"
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)>button.mi:nth-child(5)>svg:nth-child(1)",
+   "key": "account.stats.icon"
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)>button.mi:nth-child(6)",
+   "key": "account.settings",
+   "styleFrom": "account.settings.label"
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)>button.mi:nth-child(6)>svg:nth-child(1)",
+   "key": "account.settings.icon"
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)>button.mi:nth-child(7)",
+   "key": "account.sync",
+   "styleFrom": "account.sync.label"
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)>button.mi:nth-child(7)>svg:nth-child(1)",
+   "key": "account.sync.icon"
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)>button.mi:nth-child(7)>span.r:nth-child(2)",
+   "key": "account.sync.state"
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)>div.div:nth-child(8)",
+   "key": "account.div2"
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)>button.mi:nth-child(9)",
+   "key": "account.signout",
+   "styleFrom": "account.signout.label"
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)>button.mi:nth-child(9)>svg:nth-child(1)",
+   "key": "account.signout.icon"
+  },
+  {
+   "path": "#box>div.gesture:nth-child(7)",
+   "system": true
+  }
+ ],
+ "aux": [
+  "account.avatar.label",
+  "account.history.label",
+  "account.settings.label",
+  "account.signout.label",
+  "account.stats.label",
+  "account.sync.label",
+  "fab",
+  "fab.icon",
+  "fab.label",
+  "hero.cover",
+  "hero.download.icon",
+  "hero.downloadBtn",
+  "hero.edit.icon",
+  "hero.editBtn",
+  "hero.kind",
+  "hero.kind.label",
+  "hero.kind.logo",
+  "hero.play.icon",
+  "hero.playBtn",
+  "hero.share.icon",
+  "hero.shareBtn",
+  "hero.shuffle.icon",
+  "hero.shuffleBtn",
+  "hero.title",
+  "mini",
+  "mini.artist",
+  "mini.artist.label",
+  "mini.bar",
+  "mini.bar.fill",
+  "mini.cover",
+  "mini.next.icon",
+  "mini.nextBtn",
+  "mini.play.icon",
+  "mini.playBtn",
+  "mini.src.sc",
+  "mini.src.ytm",
+  "mini.title",
+  "nav",
+  "nav.downloads",
+  "nav.downloads.icon",
+  "nav.downloads.label",
+  "nav.downloads.pill",
+  "nav.home",
+  "nav.home.icon",
+  "nav.home.label",
+  "nav.library",
+  "nav.library.icon",
+  "nav.library.label",
+  "nav.library.pill",
+  "nav.search",
+  "nav.search.icon",
+  "nav.search.label",
+  "note",
+  "row1.cover",
+  "row1.logo",
+  "row1.meta",
+  "row1.more.icon",
+  "row1.moreBtn",
+  "row1.title",
+  "row2.cover",
+  "row2.logo",
+  "row2.meta",
+  "row2.more.icon",
+  "row2.moreBtn",
+  "row2.title",
+  "row3.cover",
+  "row3.logo",
+  "row3.meta",
+  "row3.more.icon",
+  "row3.moreBtn",
+  "row3.title",
+  "row4.cover",
+  "row4.logo",
+  "row4.meta",
+  "row4.more.icon",
+  "row4.moreBtn",
+  "row4.title",
+  "similar.title",
+  "similar1.cover",
+  "similar1.meta",
+  "similar1.more.icon",
+  "similar1.moreBtn",
+  "similar1.src.sc",
+  "similar1.src.ytm",
+  "similar1.title",
+  "similar2.cover",
+  "similar2.link",
+  "similar2.link.icon",
+  "similar2.meta",
+  "similar2.more.icon",
+  "similar2.moreBtn",
+  "similar2.src.ytm",
+  "similar2.title",
+  "song1.cover",
+  "song1.cv",
+  "song1.meta",
+  "song1.more.icon",
+  "song1.moreBtn",
+  "song1.src.sc",
+  "song1.src.ytm",
+  "song1.title",
+  "song2.cover",
+  "song2.cv",
+  "song2.dl",
+  "song2.meta",
+  "song2.more.icon",
+  "song2.moreBtn",
+  "song2.src.sc",
+  "song2.title",
+  "song3.cover",
+  "song3.cv",
+  "song3.meta",
+  "song3.more.icon",
+  "song3.moreBtn",
+  "song3.src.ytm",
+  "song3.title",
+  "song4.cover",
+  "song4.cv",
+  "song4.link",
+  "song4.link.icon",
+  "song4.meta",
+  "song4.more.icon",
+  "song4.moreBtn",
+  "song4.src.sc",
+  "song4.title",
+  "song5.cover",
+  "song5.cv",
+  "song5.link",
+  "song5.link.icon",
+  "song5.meta",
+  "song5.more.icon",
+  "song5.moreBtn",
+  "song5.src.sc",
+  "song5.title",
+  "song6.cv",
+  "song6.eq",
+  "song6.meta",
+  "song6.more.icon",
+  "song6.moreBtn",
+  "song6.src.sc",
+  "song6.src.ytm",
+  "song6.title",
+  "song7.cover",
+  "song7.cv",
+  "song7.meta",
+  "song7.more.icon",
+  "song7.moreBtn",
+  "song7.src.ytm",
+  "song7.title",
+  "tabs",
+  "tabs.meiro",
+  "tabs.meiro.indicator",
+  "tabs.meiro.label",
+  "tabs.ytm",
+  "tabs.ytm.label",
+  "tools.sort",
+  "tools.sort.icon",
+  "tools.sort.label",
+  "tools.summary",
+  "topbar",
+  "topbar.avatar",
+  "topbar.avatar.label",
+  "topbar.avatarBtn",
+  "topbar.back.icon",
+  "topbar.backBtn",
+  "topbar.more.icon",
+  "topbar.moreBtn",
+  "topbar.search.icon",
+  "topbar.searchBtn",
+  "topbar.sort.icon",
+  "topbar.sortBtn",
+  "topbar.title"
+ ],
+ "centered": [
+  {
+   "child": "account.avatar.label",
+   "parent": "account.avatar",
+   "axes": "xy"
+  },
+  {
+   "child": "account.history.icon",
+   "parent": "account.history",
+   "axes": "y"
+  },
+  {
+   "child": "account.stats.icon",
+   "parent": "account.stats",
+   "axes": "y"
+  },
+  {
+   "child": "account.settings.icon",
+   "parent": "account.settings",
+   "axes": "y"
+  },
+  {
+   "child": "account.sync.icon",
+   "parent": "account.sync",
+   "axes": "y"
+  },
+  {
+   "child": "account.signout.icon",
+   "parent": "account.signout",
+   "axes": "y"
+  }
+ ],
+ "rows": [
+  {
+   "name": "account head",
+   "keys": [
+    "account.avatar"
+   ],
+   "edges": [
+    "centerY"
+   ]
+  },
+  {
+   "name": "sync item",
+   "keys": [
+    "account.sync.icon",
+    "account.sync.state"
+   ],
+   "edges": [
+    "centerY"
+   ]
+  }
+ ],
+ "noOverlap": [
+  [
+   "account.sync.label",
+   "account.sync.state"
+  ]
+ ],
+ "ellipsis": [],
+ "toleranceNote": "Chrome (mock reference) lays text out with integer-rounded glyph advances, Skia with fractional ones: 12-14px text is 2-4% wider in the reference. Only boxes whose width is the text (wrap-content: the meta lines, the FAB, the sort button) depend on that, and what is aligned to their right edge moves with them; every other box is fill/fixed and held to 1px. Search: the chips, the \"Temizle\" button and the \"önizleme\" chip are wrap-content too; the chips after the first move by the sum of the earlier ones' differences, and a title that ends where such a chip starts changes width with it. Account: the line under \"Meiro hesabı\" is an inline <span> in the mock, so Chrome's box is the font's 17px content area set 1.5px into the 20px line; the app's text box is the line itself (y, h). '.mi .r' (\"2 dk önce\") is wrap-content and right-aligned (x and w move together).",
+ "tolerance": {
+  "account.sub": {
+   "y": 1.5,
+   "h": 3.0
+  }
+ }
+}

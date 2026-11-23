@@ -48,6 +48,8 @@ data class MeiroText(
     val sizeSp: Float, val weight: Int, val lineHeightSp: Float, val letterSpacingSp: Float,
     /** True when the CSS line-height is smaller than the font's natural height (Compose then needs Trim.Both to honour it). */
     val tightLine: Boolean = false,
+    /** `font-variant-numeric: tabular-nums` (digits of one width). */
+    val tabular: Boolean = false,
 ) {
     fun toStyle(color: Color) = TextStyle(
         color = color,
@@ -58,6 +60,7 @@ data class MeiroText(
         letterSpacing = letterSpacingSp.sp,
         lineHeightStyle = LineHeightStyle(LineHeightStyle.Alignment.Center, if (tightLine) LineHeightStyle.Trim.Both else LineHeightStyle.Trim.None),
         platformStyle = PlatformTextStyle(includeFontPadding = false),
+        fontFeatureSettings = if (tabular) "tnum" else null,
     )
 }
 
@@ -90,6 +93,22 @@ object MeiroType {
     val Legend = MeiroText(12f, 400, BodyLineHeightSp, Ls)
     /** The `.why` line of a recommended track (primary, one line with an ellipsis). */
     val Why = MeiroText(12f, 400, 16f, Ls)
+    /** The history's `.why.muted` note: the `.why` line in on-surface-variant with tabular digits. */
+    val WhyMuted = MeiroText(12f, 400, 16f, Ls, tabular = true)
+    // History, stats and settings (M6b): `.stat b` 26/600/32 and `.stat span` 12 on the body's line; `.rank .n` 600 and
+    // `.rank .t b` on the body's 15/20; `.rank .t span` 12; `.seg button` 13/500; `.sgroup` 13/500; `.srow .k b` 16/22,
+    // `.srow .k span` 13/18 (it also sizes the `.tag` inside the title).
+    val StatValue = MeiroText(26f, 600, 32f, Ls)
+    val StatLabel = MeiroText(12f, 400, BodyLineHeightSp, Ls)
+    val RankNum = MeiroText(BodyFontSizeSp, 600, BodyLineHeightSp, Ls)
+    val RankTitle = MeiroText(BodyFontSizeSp, 400, BodyLineHeightSp, Ls)
+    val RankSub = MeiroText(12f, 400, BodyLineHeightSp, Ls)
+    val Segment = MeiroText(13f, 500, BodyLineHeightSp, 0f)
+    val SettingsGroup = MeiroText(13f, 500, BodyLineHeightSp, Ls)
+    val SettingTitle = MeiroText(16f, 400, 22f, Ls)
+    val SettingSub = MeiroText(13f, 400, 18f, Ls)
+    /** The account sheet's 48px avatar letter (`.shead .avatar`, 18/600). */
+    val AvatarLarge = MeiroText(18f, 600, BodyLineHeightSp, Ls)
     val HeroTitle = MeiroText(24f, 600, 30f, Ls)
     val HeroKind = MeiroText(13f, 400, 20f, Ls)
     val SectionTitle = MeiroText(20f, 500, 26f, Ls)

@@ -150,6 +150,13 @@ class MeiroClient(
     /** Asks the server to forget every play of the account; returns the time it forgot them at. */
     suspend fun clearEvents(): Instant = delete("/api/v1/events", ClearResp.serializer()).clearedAt
 
+    /**
+     * The account's listening summary for one month (`period=month`, [anchor] "2026-10") or one year (`period=year`,
+     * [anchor] "2026"), counted plays only, from every device (`GET /api/v1/stats/summary`, the dashboard's numbers).
+     */
+    suspend fun statsSummary(period: String, anchor: String): StatsSummary =
+        get("/api/v1/stats/summary?period=$period&anchor=$anchor", StatsSummary.serializer())
+
     companion object {
         const val MAX_CHANGES = 1000
         const val MAX_PLAYS = 1000

@@ -42,7 +42,7 @@ val MixCover = CoverSpec(brush = MixBrush)
 /**
  * Mock screen `mix`: top bar (back and ⋮; no avatar), the hero (the mix's gradient, "Daily mix", Meiro logo and kind
  * line; download, shuffle, play, settings, share), the note, and the tracks, each with why it was recommended under its
- * meta. Download, settings, share, the top bar's ⋮ (the mock opens nothing) are inert; a track's ⋮ opens the track menu, its link button the link sheet.
+ * meta. Download plays the downloads, settings opens the settings; share and the top bar's ⋮ (the mock opens nothing) are inert; a track's ⋮ opens the track menu, its link button the link sheet.
  */
 @Composable
 fun MixScreen(
@@ -62,7 +62,7 @@ fun MixScreen(
                     IconButton("hero.downloadBtn", "hero.download.icon", MeiroIcons.Download, c.onSurfaceVariant, actions.onDownload)
                     IconButton("hero.shuffleBtn", "hero.shuffle.icon", MeiroIcons.Shuffle, c.onSurfaceVariant, actions.onShuffle)
                     HeroPlayButton(actions.onPlay)
-                    IconButton("hero.settingsBtn", "hero.settings.icon", MeiroIcons.Settings, c.onSurfaceVariant)
+                    IconButton("hero.settingsBtn", "hero.settings.icon", MeiroIcons.Settings, c.onSurfaceVariant, actions.onSettings)
                     IconButton("hero.shareBtn", "hero.share.icon", MeiroIcons.Share, c.onSurfaceVariant)
                 }
             }
