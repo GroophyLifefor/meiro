@@ -15,6 +15,11 @@ class CssColor(val r: Int, val g: Int, val b: Int, val a: Double) {
     companion object {
         fun parse(s: String): CssColor {
             val p = Regex("[0-9.]+").findAll(s).map { it.value.toDouble() }.toList()
+            // Chrome writes a `color-mix()` result as "color(srgb r g b / a)" with channels from 0 to 1.
+            if (s.trimStart().startsWith("color(srgb")) {
+                fun ch(v: Double) = Math.round(v * 255).toInt()
+                return CssColor(ch(p[0]), ch(p[1]), ch(p[2]), p.getOrElse(3) { 1.0 })
+            }
             return CssColor(p[0].toInt(), p[1].toInt(), p[2].toInt(), p.getOrElse(3) { 1.0 })
         }
     }
