@@ -320,8 +320,8 @@
   .res{display:flex; align-items:center; gap:12px; padding:10px 16px; border:0; background:transparent; width:100%; text-align:left}
   .res .cv{width:44px; height:44px; border-radius:8px; flex:none}
   .res .t{flex:1; min-width:0}
-  .res .t b{display:block; font-weight:500}
-  .res .t span{display:block; font-size:12px; color:var(--on-surface-variant)}
+  .res .t b{display:block; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .res .t span{display:block; font-size:12px; color:var(--on-surface-variant); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
   .res .sim{font-size:12px; color:var(--on-surface-variant); flex:none}
   .res .radio{width:20px; height:20px; border-radius:50%; border:2px solid var(--outline); flex:none; position:relative}
   .res.sel .radio{border-color:var(--primary)}

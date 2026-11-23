@@ -12,7 +12,7 @@
  "note": "Mock self-audit. Heuristic-based; false positives are possible, each finding names the heuristic. The mock is NOT modified.",
  "checkedTotals": {
   "elements": 7874,
-  "overflowHidden": 5816,
+  "overflowHidden": 5840,
   "centringContainers": 3152,
   "centringIntended": 2598,
   "pseudo": 28,
