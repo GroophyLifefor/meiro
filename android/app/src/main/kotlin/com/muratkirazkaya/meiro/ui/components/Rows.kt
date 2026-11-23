@@ -88,9 +88,9 @@ enum class Provider { Ytm, Sc, Meiro }
 /** What the library list shows for one list. [meta] is the line under the name (the [logo] is added before it). */
 data class ListRowData(val id: String, val name: String, val meta: String, val cover: CoverSpec, val logo: Provider = Provider.Meiro)
 
-/** The mock's `listRow`: 48dp cover (8dp radius), name, Meiro logo and meta line, a (for now inert) ⋮ button. */
+/** The mock's `listRow`: 48dp cover (8dp radius), name, logo and meta line, the ⋮ button ([onMore]: the list menu). */
 @Composable
-fun ListRow(p: String, row: ListRowData, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun ListRow(p: String, row: ListRowData, onClick: () -> Unit, modifier: Modifier = Modifier, onMore: () -> Unit = {}) {
     val c = Meiro.colors
     Row(
         modifier.fillMaxWidth().heightIn(min = 64.dp).clickableNoIndication(onClick).padding(start = 16.dp, end = 4.dp, top = 8.dp, bottom = 8.dp),
@@ -105,7 +105,7 @@ fun ListRow(p: String, row: ListRowData, onClick: () -> Unit, modifier: Modifier
                 MText(row.meta, MeiroType.ListMeta, c.onSurfaceVariant, "$p.meta", Modifier.weight(1f, fill = false), maxLines = 1)
             }
         }
-        IconButton("$p.moreBtn", "$p.more.icon", MeiroIcons.More, c.onSurfaceVariant)
+        IconButton("$p.moreBtn", "$p.more.icon", MeiroIcons.More, c.onSurfaceVariant, onMore)
     }
 }
 
@@ -140,6 +140,8 @@ fun SongRow(
     p: String, row: SongRowData, playing: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier, num: String? = null,
     /** The up-next list's drag handle (the mock's `.drag` glyph first in the row), with the gesture that moves the row. */
     dragHandle: Modifier? = null,
+    /** The ⋮ button: the track menu. */
+    onMore: () -> Unit = {},
 ) {
     val c = Meiro.colors
     Row(
@@ -169,7 +171,7 @@ fun SongRow(
         }
         if (row.preview) PreviewChip("$p.preview")
         if (row.link != LinkBadge.None) LinkButton(p, row.link == LinkBadge.Other)
-        IconButton("$p.moreBtn", "$p.more.icon", MeiroIcons.More, c.onSurfaceVariant)
+        IconButton("$p.moreBtn", "$p.more.icon", MeiroIcons.More, c.onSurfaceVariant, onMore)
     }
 }
 

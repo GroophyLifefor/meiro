@@ -50,12 +50,16 @@ class DetailActions(
     val onAlbum: (Int) -> Unit = {},
     val onArtist: (Int) -> Unit = {},
     val onRetry: () -> Unit = {},
+    /** ⋮ of the track at that place: the track menu. */
+    val onMore: (Int) -> Unit = {},
+    /** ⋮ in the top bar: the list menu (album; the mix page's ⋮ opens nothing in the mock). */
+    val onListMenu: () -> Unit = {},
 )
 
 /**
  * Mock screen `album`: top bar (back and ⋮), the hero (cover, name, YouTube Music logo and kind line; download,
  * shuffle, play, "Meiro listesi olarak kopyala", share), the tracks with their numbers, and the note. Download, share,
- * ⋮ and the track ⋮ / link buttons are inert in this milestone. [ui] null: the page is loading (only the top bar);
+ * and the link buttons are inert (⋮ opens the list menu, a track's ⋮ the track menu). [ui] null: the page is loading (only the top bar);
  * [error] set: YouTube Music did not answer (the mock's `error` block with "Tekrar dene").
  */
 @Composable
@@ -69,7 +73,7 @@ fun AlbumScreen(
     val c = Meiro.colors
     Column(Modifier.fillMaxSize()) {
         TopBar("", onBack = actions.onBack, avatar = false) {
-            IconButton("topbar.moreBtn", "topbar.more.icon", MeiroIcons.More, c.onSurfaceVariant)
+            IconButton("topbar.moreBtn", "topbar.more.icon", MeiroIcons.More, c.onSurfaceVariant, actions.onListMenu)
         }
         if (ui == null) {
             if (error != null) EmptyState("YouTube Music cevap vermedi", error, "Tekrar dene", onButton = actions.onRetry, error = true)
@@ -86,7 +90,7 @@ fun AlbumScreen(
                 }
             }
             itemsIndexed(ui.rows, key = { i, r -> "$i/${r.key}" }) { i, r ->
-                SongRow("song${i + 1}", r, playing, { actions.onRow(i) }, num = ui.nums.getOrElse(i) { "${i + 1}" })
+                SongRow("song${i + 1}", r, playing, { actions.onRow(i) }, num = ui.nums.getOrElse(i) { "${i + 1}" }, onMore = { actions.onMore(i) })
             }
             item {
                 MText(ALBUM_NOTE, MeiroType.Note, c.onSurfaceVariant, "note", Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp))

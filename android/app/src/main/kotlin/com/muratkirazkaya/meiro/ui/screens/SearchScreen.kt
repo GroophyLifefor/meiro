@@ -75,6 +75,8 @@ class SearchActions(
     val onChip: (SearchChip) -> Unit = {},
     val onProvider: (Provider) -> Unit = {},
     val onSong: (Int) -> Unit = {},
+    /** ⋮ of the track at that place: the track menu. */
+    val onSongMore: (Int) -> Unit = {},
     /** The list was scrolled to its end (the next page of a filtered search is asked for). */
     val onEnd: () -> Unit = {},
     /** An artist row and an album tile: they open the artist and the album page. */
@@ -85,7 +87,7 @@ class SearchActions(
 /**
  * Mock screens `search` and `search-done` (`V.search`): top bar "Ara" with the avatar, the search bar, then either
  * "Son aramalar" or the results: filter chips, provider chips, Sanatçılar, Şarkılar, Albümler (a shelf) and Listeler.
- * Artist, album and list taps, the ⋮ buttons and the link buttons are inert in this milestone.
+ * List taps, the lists' ⋮ and the link buttons are inert; a track's ⋮ opens the track menu.
  */
 @Composable
 fun SearchScreen(ui: SearchUi, playing: Boolean, actions: SearchActions, state: LazyListState = rememberLazyListState()) {
@@ -136,7 +138,7 @@ fun SearchScreen(ui: SearchUi, playing: Boolean, actions: SearchActions, state: 
             if (ui.songs.isNotEmpty()) {
                 // The offline note stands over its rows without a section title, as in the mock's offline state.
                 if (ui.note == null) item(key = "songs.head") { SectionHead("Şarkılar", "songs.title") }
-                itemsIndexed(ui.songs, key = { i, s -> "s$i/${s.key}" }) { i, s -> SongRow("song${i + 1}", s, playing, { actions.onSong(i) }) }
+                itemsIndexed(ui.songs, key = { i, s -> "s$i/${s.key}" }) { i, s -> SongRow("song${i + 1}", s, playing, { actions.onSong(i) }, onMore = { actions.onSongMore(i) }) }
             }
             if (ui.albums.isNotEmpty()) {
                 item(key = "albums.head") { SectionHead("Albümler", "albums.title") }

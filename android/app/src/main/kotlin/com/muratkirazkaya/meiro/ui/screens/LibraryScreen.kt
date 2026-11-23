@@ -35,6 +35,8 @@ fun LibraryScreen(
     onOpen: (String) -> Unit,
     onNew: () -> Unit,
     ytmTab: Boolean = false,
+    /** ⋮ of a list: the list menu. */
+    onMore: (String) -> Unit = {},
 ) {
     val c = Meiro.colors
     Box(Modifier.fillMaxSize()) {
@@ -43,7 +45,7 @@ fun LibraryScreen(
             LibraryTabs(ytmTab = ytmTab)
             LazyColumn(Modifier.fillMaxSize()) {
                 item { Spacer(Modifier.height(8.dp)) }
-                itemsIndexed(rows, key = { _, r -> r.id }) { i, r -> ListRow("row${i + 1}", r, { onOpen(r.id) }) }
+                itemsIndexed(rows, key = { _, r -> r.id }) { i, r -> ListRow("row${i + 1}", r, { onOpen(r.id) }, onMore = { onMore(r.id) }) }
                 item {
                     MText(
                         "Listeler Meiro hesabında tutulur, masaüstüyle iki yönlü eşitlenir.", MeiroType.Note, c.onSurfaceVariant, "note",

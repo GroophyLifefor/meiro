@@ -96,6 +96,8 @@ class NowPlayingActions(
     val onRepeat: () -> Unit = {},
     val onSource: (Provider) -> Unit = {},
     val onTab: (PlayerTab) -> Unit = {},
+    /** ⋮ in the top row: the track menu of the track playing. */
+    val onMore: () -> Unit = {},
 )
 
 private val White = Color.White
@@ -134,7 +136,7 @@ fun NowPlayingScreen(ui: NowPlayingUi, bars: SystemBars, actions: NowPlayingActi
                     MText("Çalınıyor".uppercase(TR), MeiroType.NpKicker, White, "np.ctx.kicker", Modifier.fillMaxWidth().alpha(0.75f), maxLines = 1, textAlign = TextAlign.Center)
                     if (ui.context.isNotEmpty()) MText(ui.context, MeiroType.NpContext, White, "np.ctx.label", Modifier.fillMaxWidth(), maxLines = 1, textAlign = TextAlign.Center)
                 }
-                IconButton("np.moreBtn", "np.more.icon", MeiroIcons.More, White)
+                IconButton("np.moreBtn", "np.more.icon", MeiroIcons.More, White, actions.onMore)
             }
             Spacer(Modifier.height(18.dp))
             val artShape = RoundedCornerShape(22.dp)

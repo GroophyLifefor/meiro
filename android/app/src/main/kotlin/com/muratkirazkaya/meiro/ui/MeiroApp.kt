@@ -45,6 +45,7 @@ import com.muratkirazkaya.meiro.ui.screens.DetailActions
 import com.muratkirazkaya.meiro.youtube.BrowsePage
 import com.muratkirazkaya.meiro.ui.screens.SearchActions
 import com.muratkirazkaya.meiro.ui.screens.SearchScreen
+import com.muratkirazkaya.meiro.ui.screens.ListMenuUi
 import com.muratkirazkaya.meiro.ui.components.Snack
 import com.muratkirazkaya.meiro.ui.components.LocalAvatarInitial
 import androidx.compose.runtime.CompositionLocalProvider
@@ -156,8 +157,11 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String) {
     var sheetTab by rememberSaveable { mutableStateOf<com.muratkirazkaya.meiro.ui.screens.PlayerTab?>(null) }
     LaunchedEffect(playing == null) { if (playing == null) { npOpen = false; sheetTab = null } }
     val openPlayer = { if (PlaybackHost.ui.value != null) npOpen = true }
+    // The track menu, the list menu and the sheets they open (M4h), over everything else.
+    val menus = remember { MenuState() }
+    val openers = remember { MenuOpeners({ menus.track = it }, { menus.list = it }) }
 
-    CompositionLocalProvider(LocalAvatarInitial provides avatarInitial(email), LocalOpenPlayer provides openPlayer) { Box(Modifier.fillMaxSize()) {
+    CompositionLocalProvider(LocalAvatarInitial provides avatarInitial(email), LocalOpenPlayer provides openPlayer, LocalMenus provides openers) { Box(Modifier.fillMaxSize()) {
         MeiroShell(
             selected = selected,
             onSelect = { tab ->
@@ -216,6 +220,7 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String) {
             }
         }
         BackHandler(enabled = npOpen) { if (sheetTab != null) sheetTab = null else npOpen = false }
+        MenuLayer(c, menus, bars, MenuNav(openArtist, openAlbum, closePlayer = { sheetTab = null; npOpen = false }), snack = { snack = it })
         snack?.let { m ->
             LaunchedEffect(m) { delay(2600); if (snack == m) snack = null }
             Snack(m, { snack = null }, Modifier.align(Alignment.BottomCenter).padding(start = 12.dp, end = 12.dp, bottom = 160.dp))
@@ -249,6 +254,7 @@ internal fun avatarInitial(email: String): String =
 @Composable
 private fun HomeRoute(c: AppContainer, email: String, onOpen: (String) -> Unit, onMix: () -> Unit, onSnack: (String) -> Unit) {
     val ctx = LocalContext.current
+    val menus = LocalMenus.current
     val openPlayer = LocalOpenPlayer.current
     val version by c.libraries.version.collectAsState()
     val historyVersion by c.historyVersion.collectAsState()
@@ -273,6 +279,7 @@ private fun HomeRoute(c: AppContainer, email: String, onOpen: (String) -> Unit, 
             onPick = { i -> data.pickIds.getOrNull(i)?.let(onOpen) },
             // The desktop plays a history row on its own (`historyPlay`).
             onResume = { i -> data.resume.getOrNull(i)?.let { playRow(ctx, listOf(it), 0, "Dinleme geçmişi", openPlayer) } },
+            onResumeMore = { i -> data.resume.getOrNull(i)?.let { menus.track(MenuTarget(it)) } },
         ),
     )
 }
@@ -287,7 +294,12 @@ private fun LibraryRoute(c: AppContainer, onOpen: (String) -> Unit, onMix: () ->
         // The Daily mix is the mock's "Daily mix" row ("Meiro · bugün · 30 parça"), which opens the mix page.
         libs.map { if (it.id == mix?.id) MixMapping.libraryRow(it, now.toLocalDate(), now.zone) else it.toRow() } to mix?.id
     }
-    if (rows.isEmpty()) LibraryEmptyScreen(onNew) else LibraryScreen(rows, { id -> if (id == mixId) onMix() else onOpen(id) }, onNew)
+    val menus = LocalMenus.current
+    if (rows.isEmpty()) LibraryEmptyScreen(onNew)
+    else LibraryScreen(
+        rows, { id -> if (id == mixId) onMix() else onOpen(id) }, onNew,
+        onMore = { id -> c.libraries.get(id)?.let { menus.list(ListMenuTarget.own(it)) } },
+    )
 }
 
 /**
@@ -297,6 +309,7 @@ private fun LibraryRoute(c: AppContainer, onOpen: (String) -> Unit, onMix: () ->
 @Composable
 private fun MixRoute(c: AppContainer, onBack: () -> Unit) {
     val ctx = LocalContext.current
+    val menus = LocalMenus.current
     val openPlayer = LocalOpenPlayer.current
     val version by c.libraries.version.collectAsState()
     val now by PlaybackHost.ui.collectAsState()
@@ -313,6 +326,7 @@ private fun MixRoute(c: AppContainer, onBack: () -> Unit) {
             onPlay = { play(0, lib.items.map { it.toQItem() }) },
             onShuffle = { play(0, lib.items.map { it.toQItem() }.shuffled()) },
             onRow = { i -> lib.items.map { it.toQItem() }.let { q -> if (!openIfPlaying(q, i, openPlayer)) play(i, q) } },
+            onMore = { i -> lib.items.getOrNull(i)?.let { menus.track(MenuTarget(it.toQItem(), listId = lib.id)) } },
         ),
     )
 }
@@ -320,6 +334,7 @@ private fun MixRoute(c: AppContainer, onBack: () -> Unit) {
 @Composable
 private fun SearchRoute(c: AppContainer, onAlbum: (String) -> Unit, onArtist: (String) -> Unit) {
     val ctx = LocalContext.current
+    val menus = LocalMenus.current
     val openPlayer = LocalOpenPlayer.current
     val ctl = c.search
     val s by ctl.state.collectAsState()
@@ -344,6 +359,7 @@ private fun SearchRoute(c: AppContainer, onAlbum: (String) -> Unit, onArtist: (S
                 val items = SearchMapping.songs(ctl.state.value)
                 with(SearchMapping) { playRow(ctx, items.map { it.toQItem() }, i, "\u201C${s.submitted}\u201D araması", openPlayer) }
             },
+            onSongMore = { i -> with(SearchMapping) { SearchMapping.songs(ctl.state.value).getOrNull(i)?.let { menus.track(MenuTarget(it.toQItem())) } } },
             onEnd = ctl::loadMore,
             onArtist = { i -> ui.artists.getOrNull(i)?.let { onArtist(it.key) } },
             onAlbum = { i -> ui.albums.getOrNull(i)?.let { onAlbum(it.key) } },
@@ -354,6 +370,7 @@ private fun SearchRoute(c: AppContainer, onAlbum: (String) -> Unit, onArtist: (S
 @Composable
 private fun PlaylistRoute(c: AppContainer, id: String, onBack: () -> Unit) {
     val ctx = LocalContext.current
+    val menus = LocalMenus.current
     val openPlayer = LocalOpenPlayer.current
     val version by c.libraries.version.collectAsState()
     val now by PlaybackHost.ui.collectAsState()
@@ -368,6 +385,8 @@ private fun PlaylistRoute(c: AppContainer, id: String, onBack: () -> Unit) {
         onPlay = { play(0, lib.items.map { it.toQItem() }) },
         onShuffle = { play(0, lib.items.map { it.toQItem() }.shuffled()) },
         onRow = { i -> lib.items.map { it.toQItem() }.let { q -> if (!openIfPlaying(q, i, openPlayer)) play(i, q) } },
+        onMore = { i -> lib.items.getOrNull(i)?.let { menus.track(MenuTarget(it.toQItem(), listId = lib.id)) } },
+        onListMenu = { menus.list(ListMenuTarget.own(lib)) },
     )
 }
 
@@ -396,6 +415,7 @@ private fun rememberBrowsePage(c: AppContainer, id: String, retry: Int): Loaded?
 @Composable
 private fun AlbumRoute(c: AppContainer, id: String, onBack: () -> Unit, onSnack: (String) -> Unit) {
     val ctx = LocalContext.current
+    val menus = LocalMenus.current
     val openPlayer = LocalOpenPlayer.current
     val scope = rememberCoroutineScope()
     val now by PlaybackHost.ui.collectAsState()
@@ -423,6 +443,10 @@ private fun AlbumRoute(c: AppContainer, id: String, onBack: () -> Unit, onSnack:
                 }
             },
             onRetry = { retry++ },
+            onMore = { i -> data?.let { d -> d.queue.getOrNull(i)?.let { menus.track(MenuTarget(it, albumId = id, albumArt = d.cover)) } } },
+            onListMenu = {
+                data?.let { d -> menus.list(ListMenuTarget(null, ListMenuUi(d.tracks.size, own = false), d.ui.title, d.cover, d.listItems())) }
+            },
         ),
         error = loaded?.error,
     )
@@ -432,6 +456,7 @@ private fun AlbumRoute(c: AppContainer, id: String, onBack: () -> Unit, onSnack:
 @Composable
 private fun ArtistRoute(c: AppContainer, id: String, onBack: () -> Unit, onAlbum: (String) -> Unit, onArtist: (String) -> Unit) {
     val ctx = LocalContext.current
+    val menus = LocalMenus.current
     val openPlayer = LocalOpenPlayer.current
     val now by PlaybackHost.ui.collectAsState()
     val version by c.libraries.version.collectAsState()
@@ -452,6 +477,7 @@ private fun ArtistRoute(c: AppContainer, id: String, onBack: () -> Unit, onAlbum
             onAlbum = { i -> data?.albumIds?.getOrNull(i)?.let(onAlbum) },
             onArtist = { i -> data?.artistIds?.getOrNull(i)?.let(onArtist) },
             onRetry = { retry++ },
+            onMore = { i -> data?.queue?.getOrNull(i)?.let { menus.track(MenuTarget(it)) } },
         ),
         error = loaded?.error,
     )
@@ -472,6 +498,7 @@ private fun PlayerRoute(
 ) {
     val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
+    val menus = LocalMenus.current
     val version by c.libraries.version.collectAsState()
     LightStatusBarIcons()
     val linkOf: (String, String) -> String? = remember(version) {
@@ -503,6 +530,7 @@ private fun PlayerRoute(
                 }
             },
             onTab = { onSheet(it) },
+            onMore = { menus.track(MenuTarget(p.item)) },
         ),
     )
     if (sheetTab != null) {
@@ -535,6 +563,8 @@ private fun PlayerRoute(
                 // The desktop's related rows (`directQueue`, source "Related"): the related list becomes the queue from
                 // that track. The playing track's row does nothing (the player is already open).
                 onRelated = { i -> if (relatedQueue.getOrNull(i)?.key != key) PlaybackHost.playQueue(ctx, relatedQueue, i, RELATED_SOURCE) },
+                onRowMore = { i -> p.queue.items.getOrNull(i)?.let { menus.track(MenuTarget(it)) } },
+                onRelatedMore = { i -> relatedQueue.getOrNull(i)?.let { menus.track(MenuTarget(it)) } },
             ),
             tab = sheetTab, lyrics = lyrics, related = related, positionMs = p.positionMs,
         )

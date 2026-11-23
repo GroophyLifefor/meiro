@@ -40,7 +40,7 @@ data class ArtistUi(
 /**
  * Mock screen `artist`: top bar (back only), the hero (round picture, name, kind line; "Karıştır", play, "Bağı
  * değiştir"), "Popüler" tracks, the "Albümler" shelf and the "Benzer sanatçılar" shelf; a section with nothing in it
- * is left out. "Bağı değiştir" (link sheet) and the track ⋮ / link buttons are inert in this milestone. [ui] null:
+ * is left out. "Bağı değiştir" (link sheet) and the link buttons are inert; a track's ⋮ opens the track menu. [ui] null:
  * loading (only the top bar), or [error].
  */
 @Composable
@@ -68,7 +68,7 @@ fun ArtistScreen(
             }
             if (ui.popular.isNotEmpty()) {
                 item { SectionHead("Popüler", "popular.title") }
-                itemsIndexed(ui.popular, key = { i, r -> "p$i/${r.key}" }) { i, r -> SongRow("song${i + 1}", r, playing, { actions.onRow(i) }) }
+                itemsIndexed(ui.popular, key = { i, r -> "p$i/${r.key}" }) { i, r -> SongRow("song${i + 1}", r, playing, { actions.onRow(i) }, onMore = { actions.onMore(i) }) }
             }
             if (ui.albums.isNotEmpty()) {
                 item { SectionHead("Albümler", "albums.title") }

@@ -185,6 +185,64 @@ class AppContainer(private val context: Context) {
         lib.id to added
     }
 
+    /** Signed in, the lists' changes are queued in the outbox and sent (as [createList] does); [what] names them in the log. */
+    private suspend fun pushLists(what: String) {
+        if (!session().signedIn) return
+        engine.syncSnapshot().queue(engine.outbox)
+        engine.syncNow(); engine.settled()
+        Log.i(TAG, "list: $what pushed, outbox pending=${engine.outbox.pending()} error=${engine.lastError.ifEmpty { "none" }}")
+    }
+
+    /**
+     * `addItemToLibrary`: puts [item] in the list [id] unless it holds it already (the same track, or the same recording
+     * from the other provider). True when it was added. Signed in, the change goes to the server.
+     */
+    suspend fun addToList(id: String, item: com.muratkirazkaya.meiro.data.Item): Boolean = withContext(Dispatchers.IO) {
+        val added = libraries.addItem(id, item)
+        Log.i(TAG, "list: add ${item.source}:${item.key} to id=$id added=$added")
+        if (added) pushLists("add")
+        added
+    }
+
+    /** `removeFromLibrary`: takes the track with [key] out of the list [id] (a tombstone the server is told of). */
+    suspend fun removeFromList(id: String, key: String) = withContext(Dispatchers.IO) {
+        libraries.removeItem(id, key)
+        Log.i(TAG, "list: removed $key from id=$id")
+        pushLists("remove")
+    }
+
+    suspend fun renameList(id: String, name: String) = withContext(Dispatchers.IO) {
+        libraries.rename(id, name)
+        Log.i(TAG, "list: renamed id=$id to $name")
+        pushLists("rename")
+    }
+
+    suspend fun deleteList(id: String) = withContext(Dispatchers.IO) {
+        libraries.delete(id)
+        Log.i(TAG, "list: deleted id=$id")
+        pushLists("delete")
+    }
+
+    /** "Sanatçıya git" for a track whose artist page is not known: YouTube Music's search for the artist's name. */
+    suspend fun findArtist(name: String): String? = withContext(Dispatchers.IO) {
+        com.muratkirazkaya.meiro.ui.TrackMenuMapping.pickArtist(ytm.search(name), name)
+            .also { Log.i(TAG, "menu: artist \"$name\" -> ${it ?: "none"}") }
+    }
+
+    /** "Albüme git": YouTube Music's search for the album's name and the artist. */
+    suspend fun findAlbum(album: String, artist: String): String? = withContext(Dispatchers.IO) {
+        com.muratkirazkaya.meiro.ui.TrackMenuMapping.pickAlbum(ytm.search("$album $artist".trim()), album)
+            .also { Log.i(TAG, "menu: album \"$album\" -> ${it ?: "none"}") }
+    }
+
+    /** "Kaynağı değiştir" on a row of the list [id]: the list plays the track at [key] from [source] from now on. */
+    suspend fun setListSource(id: String, key: String, source: String): Boolean = withContext(Dispatchers.IO) {
+        val changed = libraries.setSource(id, key, source)
+        Log.i(TAG, "list: source of $key in id=$id -> $source changed=$changed")
+        if (changed) pushLists("source")
+        changed
+    }
+
     /** The anonymous YouTube Music client the album and artist pages read (the search has its own). */
     val ytm: YtmClient by lazy { YtmClient() }
 

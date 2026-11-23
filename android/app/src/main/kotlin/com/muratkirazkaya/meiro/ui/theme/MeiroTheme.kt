@@ -127,6 +127,12 @@ object MeiroType {
     val LyricSource = MeiroText(13f, 400, BodyLineHeightSp, Ls)
     // `.lyrsrc .chip`: a <button>, so the body's letter-spacing does not reach it.
     val LyricChip = MeiroText(12f, 400, BodyLineHeightSp, 0f)
+    // Menu sheets: `.shead b` 16/500 and `.shead span` 13 on the body's 20 line; `.mi` 15 and its `.r` 12 (buttons:
+    // spacing normal).
+    val SheetHeadTitle = MeiroText(16f, 500, BodyLineHeightSp, Ls)
+    val SheetHeadSub = MeiroText(13f, 400, BodyLineHeightSp, Ls)
+    val MenuItem = MeiroText(15f, 400, BodyLineHeightSp, 0f)
+    val MenuRight = MeiroText(12f, 400, BodyLineHeightSp, 0f)
 }
 
 object MeiroShapes {

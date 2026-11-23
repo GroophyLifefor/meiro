@@ -49,6 +49,10 @@ fun NewListSheet(
     onCancel: () -> Unit,
     onCreate: () -> Unit,
     bars: SystemBars,
+    /** The rename sheet (not in the mock) reuses this one: its own title and button, no note. */
+    title: String = "Yeni liste",
+    action: String = "Oluştur",
+    note: Boolean = true,
 ) {
     val c = Meiro.colors
     val focus = remember { FocusRequester() }
@@ -62,7 +66,7 @@ fun NewListSheet(
         ) {
             Box(Modifier.align(Alignment.CenterHorizontally).padding(top = 16.dp, bottom = 8.dp).size(width = 32.dp, height = 4.dp).clip(RoundedCornerShape(2.dp)).background(c.outline))
             Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 12.dp)) {
-                MText("Yeni liste", MeiroType.SheetTitle, c.onSurface, "sheet.title", Modifier.weight(1f))
+                MText(title, MeiroType.SheetTitle, c.onSurface, "sheet.title", Modifier.weight(1f))
             }
             Box(Modifier.padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 10.dp)) {
                 Box(
@@ -82,7 +86,7 @@ fun NewListSheet(
                     MText("Ad", MeiroType.FieldLabel, c.primary, "sheet.label")
                 }
             }
-            MText(
+            if (note) MText(
                 "Meiro hesabında tutulur. İçine YouTube Music ve SoundCloud şarkıları birlikte eklenebilir.", MeiroType.Note, c.onSurfaceVariant,
                 "sheet.note", Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 6.dp, bottom = 6.dp),
             )
@@ -94,7 +98,7 @@ fun NewListSheet(
                 Box(
                     Modifier.height(40.dp).clip(RoundedCornerShape(20.dp)).background(c.primary).clickableNoIndication(onCreate).padding(horizontal = 20.dp),
                     Alignment.Center,
-                ) { MText("Oluştur", MeiroType.ButtonLabel, c.onPrimary, "sheet.create") }
+                ) { MText(action, MeiroType.ButtonLabel, c.onPrimary, "sheet.create") }
             }
         }
     }

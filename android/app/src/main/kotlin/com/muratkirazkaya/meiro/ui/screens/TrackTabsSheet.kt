@@ -138,6 +138,6 @@ fun RelatedTab(ui: RelatedUi, playing: Boolean, actions: UpNextActions, modifier
     LazyColumn(modifier.fillMaxWidth(), state = state) {
         item("note") { MText(RELATED_NOTE, MeiroType.Note, c.onSurfaceVariant, "q.rel.note", Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp)) }
         ui.message?.let { m -> item("message") { MText(m, MeiroType.Note, c.onSurfaceVariant, "q.rel.message", Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp)) } }
-        itemsIndexed(ui.rows, key = { i, r -> "$i:${r.key}" }) { i, r -> SongRow("q.rel${i + 1}", r, playing, { actions.onRelated(i) }) }
+        itemsIndexed(ui.rows, key = { i, r -> "$i:${r.key}" }) { i, r -> SongRow("q.rel${i + 1}", r, playing, { actions.onRelated(i) }, onMore = { actions.onRelatedMore(i) }) }
     }
 }

@@ -49,7 +49,7 @@ data class PlaylistUi(
 /**
  * Mock screen `playlist`: top bar (back, search and ⋮; no avatar), the hero (cover, name, kind line, five actions),
  * the summary row with the sort button, the tracks, and "Benzer şarkılar" with its tracks when there are any.
- * Download, edit, share, search, sort, ⋮ and the link buttons are inert in this milestone.
+ * Download, edit, share, search, sort and the link buttons are inert; ⋮ opens the list menu, a track's ⋮ the track menu.
  */
 @Composable
 fun PlaylistScreen(
@@ -60,12 +60,16 @@ fun PlaylistScreen(
     onShuffle: () -> Unit,
     onRow: (Int) -> Unit,
     state: LazyListState = rememberLazyListState(),
+    /** ⋮ of the track at that place: the track menu. */
+    onMore: (Int) -> Unit = {},
+    /** ⋮ in the top bar: the list menu. */
+    onListMenu: () -> Unit = {},
 ) {
     val c = Meiro.colors
     Column(Modifier.fillMaxSize()) {
         TopBar("", onBack = onBack, avatar = false) {
             IconButton("topbar.searchBtn", "topbar.search.icon", MeiroIcons.Search, c.onSurfaceVariant)
-            IconButton("topbar.moreBtn", "topbar.more.icon", MeiroIcons.More, c.onSurfaceVariant)
+            IconButton("topbar.moreBtn", "topbar.more.icon", MeiroIcons.More, c.onSurfaceVariant, onListMenu)
         }
         LazyColumn(Modifier.fillMaxSize(), state) {
             item { Hero(ui, onPlay, onShuffle) }
@@ -78,7 +82,7 @@ fun PlaylistScreen(
                     SortButton()
                 }
             }
-            itemsIndexed(ui.rows, key = { i, r -> "$i/${r.key}" }) { i, r -> SongRow("song${i + 1}", r, playing, { onRow(i) }) }
+            itemsIndexed(ui.rows, key = { i, r -> "$i/${r.key}" }) { i, r -> SongRow("song${i + 1}", r, playing, { onRow(i) }, onMore = { onMore(i) }) }
             if (ui.similar.isNotEmpty()) {
                 item {
                     Box(Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 10.dp)) {

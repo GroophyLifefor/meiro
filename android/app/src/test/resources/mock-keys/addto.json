@@ -1,0 +1,685 @@
+{
+ "screen": "addto",
+ "systemNote": "Status bar row (y 0..36) and the gesture pill are system UI on Android: not drawn by the app, excluded from element and pixel comparison.",
+ "elements": [
+  {
+   "path": "#box>div.app:nth-child(1)>div.statusbar:nth-child(1)>span#clock:nth-child(1)",
+   "system": true
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div.statusbar:nth-child(1)>span.sys:nth-child(2)>span#netIcon:nth-child(1)",
+   "system": true
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div.statusbar:nth-child(1)>span.sys:nth-child(2)>i:nth-child(2)",
+   "system": true
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar.withback:nth-child(1)",
+   "key": "topbar"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar.withback:nth-child(1)>button.ibtn:nth-child(1)",
+   "key": "topbar.backBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar.withback:nth-child(1)>button.ibtn:nth-child(1)>svg:nth-child(1)",
+   "key": "topbar.back.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar.withback:nth-child(1)>button.ibtn:nth-child(3)",
+   "key": "topbar.searchBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar.withback:nth-child(1)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "key": "topbar.search.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar.withback:nth-child(1)>button.ibtn:nth-child(4)",
+   "key": "topbar.moreBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar.withback:nth-child(1)>button.ibtn:nth-child(4)>svg:nth-child(1)",
+   "key": "topbar.more.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hero:nth-child(2)>div.big:nth-child(1)",
+   "key": "hero.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hero:nth-child(2)>h2:nth-child(2)",
+   "key": "hero.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hero:nth-child(2)>div.kind:nth-child(3)",
+   "key": "hero.kind",
+   "styleFrom": "hero.kind.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hero:nth-child(2)>div.kind:nth-child(3)>span.src:nth-child(1)>svg:nth-child(1)",
+   "key": "hero.kind.logo"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hero:nth-child(2)>div.hero.actions:nth-child(4)>button.ibtn:nth-child(1)",
+   "key": "hero.downloadBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hero:nth-child(2)>div.hero.actions:nth-child(4)>button.ibtn:nth-child(1)>svg:nth-child(1)",
+   "key": "hero.download.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hero:nth-child(2)>div.hero.actions:nth-child(4)>button.ibtn:nth-child(2)",
+   "key": "hero.shuffleBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hero:nth-child(2)>div.hero.actions:nth-child(4)>button.ibtn:nth-child(2)>svg:nth-child(1)",
+   "key": "hero.shuffle.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hero:nth-child(2)>div.hero.actions:nth-child(4)>button.play:nth-child(3)",
+   "key": "hero.playBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hero:nth-child(2)>div.hero.actions:nth-child(4)>button.play:nth-child(3)>svg:nth-child(1)",
+   "key": "hero.play.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hero:nth-child(2)>div.hero.actions:nth-child(4)>button.ibtn:nth-child(4)",
+   "key": "hero.editBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hero:nth-child(2)>div.hero.actions:nth-child(4)>button.ibtn:nth-child(4)>svg:nth-child(1)",
+   "key": "hero.edit.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hero:nth-child(2)>div.hero.actions:nth-child(4)>button.ibtn:nth-child(5)",
+   "key": "hero.shareBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hero:nth-child(2)>div.hero.actions:nth-child(4)>button.ibtn:nth-child(5)>svg:nth-child(1)",
+   "key": "hero.share.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.tools:nth-child(3)>span.sub.grow:nth-child(1)",
+   "key": "tools.summary"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.tools:nth-child(3)>button.btn.text:nth-child(2)",
+   "key": "tools.sort",
+   "styleFrom": "tools.sort.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.tools:nth-child(3)>button.btn.text:nth-child(2)>svg:nth-child(1)",
+   "key": "tools.sort.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(4)>div.cv:nth-child(1)",
+   "key": "song1.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(4)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "song1.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(4)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "key": "song1.src.ytm"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(4)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span.dim:nth-child(2)>svg:nth-child(1)",
+   "key": "song1.src.sc"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(4)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(2)",
+   "key": "song1.meta"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(4)>button.ibtn:nth-child(3)",
+   "key": "song1.moreBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(4)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "key": "song1.more.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(5)>div.cv:nth-child(1)",
+   "key": "song2.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(5)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "song2.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(5)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "key": "song2.src.sc"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(5)>div.t:nth-child(2)>span.meta:nth-child(2)>svg.dl:nth-child(2)",
+   "key": "song2.dl"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(5)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(3)",
+   "key": "song2.meta"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(5)>button.ibtn:nth-child(3)",
+   "key": "song2.moreBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(5)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "key": "song2.more.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(6)>div.cv:nth-child(1)",
+   "key": "song3.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(6)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "song3.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(6)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "key": "song3.src.ytm"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(6)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(2)",
+   "key": "song3.meta"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(6)>button.ibtn:nth-child(3)",
+   "key": "song3.moreBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(6)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "key": "song3.more.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(7)>div.cv:nth-child(1)",
+   "key": "song4.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(7)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "song4.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(7)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "key": "song4.src.sc"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(7)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(2)",
+   "key": "song4.meta"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(7)>button.linkbtn:nth-child(3)",
+   "key": "song4.link"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(7)>button.linkbtn:nth-child(3)>svg:nth-child(1)",
+   "key": "song4.link.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(7)>button.ibtn:nth-child(4)",
+   "key": "song4.moreBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(7)>button.ibtn:nth-child(4)>svg:nth-child(1)",
+   "key": "song4.more.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(8)>div.cv:nth-child(1)",
+   "key": "song5.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(8)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "song5.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(8)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "key": "song5.src.sc"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(8)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(2)",
+   "key": "song5.meta"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(8)>button.linkbtn.other:nth-child(3)",
+   "key": "song5.link"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(8)>button.linkbtn.other:nth-child(3)>svg:nth-child(1)",
+   "key": "song5.link.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(8)>button.ibtn:nth-child(4)",
+   "key": "song5.moreBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(8)>button.ibtn:nth-child(4)>svg:nth-child(1)",
+   "key": "song5.more.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row.now:nth-child(9)>div.cv:nth-child(1)>span.eq:nth-child(1)",
+   "key": "song6.eq"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row.now:nth-child(9)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "song6.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row.now:nth-child(9)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "key": "song6.src.ytm"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row.now:nth-child(9)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span.dim:nth-child(2)>svg:nth-child(1)",
+   "key": "song6.src.sc"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row.now:nth-child(9)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(2)",
+   "key": "song6.meta"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row.now:nth-child(9)>button.ibtn:nth-child(3)",
+   "key": "song6.moreBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row.now:nth-child(9)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "key": "song6.more.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(10)>div.cv:nth-child(1)",
+   "key": "song7.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(10)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "song7.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(10)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "key": "song7.src.ytm"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(10)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(2)",
+   "key": "song7.meta"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(10)>button.ibtn:nth-child(3)",
+   "key": "song7.moreBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(10)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "key": "song7.more.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.h-sec:nth-child(11)>h2:nth-child(1)",
+   "key": "similar.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(12)>div.cv:nth-child(1)",
+   "key": "similar1.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(12)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "similar1.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(12)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "key": "similar1.src.ytm"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(12)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span.dim:nth-child(2)>svg:nth-child(1)",
+   "key": "similar1.src.sc"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(12)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(2)",
+   "key": "similar1.meta"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(12)>button.ibtn:nth-child(3)",
+   "key": "similar1.moreBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(12)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "key": "similar1.more.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(13)>div.cv:nth-child(1)",
+   "key": "similar2.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(13)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "similar2.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(13)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "key": "similar2.src.ytm"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(13)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(2)",
+   "key": "similar2.meta"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(13)>button.linkbtn:nth-child(3)",
+   "key": "similar2.link"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(13)>button.linkbtn:nth-child(3)>svg:nth-child(1)",
+   "key": "similar2.link.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(13)>button.ibtn:nth-child(4)",
+   "key": "similar2.moreBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(13)>button.ibtn:nth-child(4)>svg:nth-child(1)",
+   "key": "similar2.more.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)",
+   "key": "mini"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.cv:nth-child(1)",
+   "key": "mini.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "mini.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>span:nth-child(2)",
+   "key": "mini.artist",
+   "styleFrom": "mini.artist.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>span:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "key": "mini.src.ytm"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>span:nth-child(2)>span.src:nth-child(1)>span.dim:nth-child(2)>svg:nth-child(1)",
+   "key": "mini.src.sc"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(3)",
+   "key": "mini.playBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "key": "mini.play.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(4)",
+   "key": "mini.nextBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(4)>svg:nth-child(1)",
+   "key": "mini.next.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.bar:nth-child(5)",
+   "key": "mini.bar"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.bar:nth-child(5)>i:nth-child(1)",
+   "key": "mini.bar.fill"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)",
+   "key": "nav"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(1)",
+   "key": "nav.home",
+   "styleFrom": "nav.home.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(1)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "key": "nav.home.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(2)",
+   "key": "nav.search",
+   "styleFrom": "nav.search.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(2)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "key": "nav.search.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(3)",
+   "key": "nav.library",
+   "styleFrom": "nav.library.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(3)>span.pill:nth-child(1)",
+   "key": "nav.library.pill"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(3)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "key": "nav.library.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(4)",
+   "key": "nav.downloads",
+   "styleFrom": "nav.downloads.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(4)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "key": "nav.downloads.icon"
+  },
+  {
+   "path": "#box>div#sheet.sheet.tall.open:nth-child(5)",
+   "key": "addto.sheet"
+  },
+  {
+   "path": "#box>div#sheet.sheet.tall.open:nth-child(5)>div.handle:nth-child(1)",
+   "key": "addto.handle"
+  },
+  {
+   "path": "#box>div#sheet.sheet.tall.open:nth-child(5)>div.shead:nth-child(2)>h3:nth-child(1)",
+   "key": "addto.title"
+  },
+  {
+   "path": "#box>div#sheet.sheet.tall.open:nth-child(5)>div.shead:nth-child(2)>button.ibtn:nth-child(2)",
+   "key": "addto.closeBtn"
+  },
+  {
+   "path": "#box>div#sheet.sheet.tall.open:nth-child(5)>div.shead:nth-child(2)>button.ibtn:nth-child(2)>svg:nth-child(1)",
+   "key": "addto.close.icon"
+  },
+  {
+   "path": "#box>div#sheet.sheet.tall.open:nth-child(5)>div.sbody:nth-child(3)>button.mi:nth-child(1)",
+   "key": "addto.new",
+   "styleFrom": "addto.new.label"
+  },
+  {
+   "path": "#box>div#sheet.sheet.tall.open:nth-child(5)>div.sbody:nth-child(3)>button.mi:nth-child(1)>svg:nth-child(1)",
+   "key": "addto.new.icon"
+  },
+  {
+   "path": "#box>div#sheet.sheet.tall.open:nth-child(5)>div.sbody:nth-child(3)>div.div:nth-child(2)",
+   "key": "addto.div"
+  },
+  {
+   "path": "#box>div#sheet.sheet.tall.open:nth-child(5)>div.sbody:nth-child(3)>div.row:nth-child(3)>div.cv:nth-child(1)",
+   "key": "addto.row1.cover"
+  },
+  {
+   "path": "#box>div#sheet.sheet.tall.open:nth-child(5)>div.sbody:nth-child(3)>div.row:nth-child(3)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "addto.row1.title"
+  },
+  {
+   "path": "#box>div#sheet.sheet.tall.open:nth-child(5)>div.sbody:nth-child(3)>div.row:nth-child(3)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>svg:nth-child(1)",
+   "key": "addto.row1.logo"
+  },
+  {
+   "path": "#box>div#sheet.sheet.tall.open:nth-child(5)>div.sbody:nth-child(3)>div.row:nth-child(3)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(2)",
+   "key": "addto.row1.meta"
+  },
+  {
+   "path": "#box>div#sheet.sheet.tall.open:nth-child(5)>div.sbody:nth-child(3)>div.row:nth-child(4)>div.cv:nth-child(1)",
+   "key": "addto.row2.cover"
+  },
+  {
+   "path": "#box>div#sheet.sheet.tall.open:nth-child(5)>div.sbody:nth-child(3)>div.row:nth-child(4)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "addto.row2.title"
+  },
+  {
+   "path": "#box>div#sheet.sheet.tall.open:nth-child(5)>div.sbody:nth-child(3)>div.row:nth-child(4)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>svg:nth-child(1)",
+   "key": "addto.row2.logo"
+  },
+  {
+   "path": "#box>div#sheet.sheet.tall.open:nth-child(5)>div.sbody:nth-child(3)>div.row:nth-child(4)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(2)",
+   "key": "addto.row2.meta"
+  },
+  {
+   "path": "#box>div#sheet.sheet.tall.open:nth-child(5)>div.sbody:nth-child(3)>div.row:nth-child(5)>div.cv:nth-child(1)",
+   "key": "addto.row3.cover"
+  },
+  {
+   "path": "#box>div#sheet.sheet.tall.open:nth-child(5)>div.sbody:nth-child(3)>div.row:nth-child(5)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "addto.row3.title"
+  },
+  {
+   "path": "#box>div#sheet.sheet.tall.open:nth-child(5)>div.sbody:nth-child(3)>div.row:nth-child(5)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>svg:nth-child(1)",
+   "key": "addto.row3.logo"
+  },
+  {
+   "path": "#box>div#sheet.sheet.tall.open:nth-child(5)>div.sbody:nth-child(3)>div.row:nth-child(5)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(2)",
+   "key": "addto.row3.meta"
+  },
+  {
+   "path": "#box>div.gesture:nth-child(7)",
+   "system": true
+  }
+ ],
+ "aux": [
+  "addto.new.label",
+  "fab",
+  "fab.icon",
+  "fab.label",
+  "hero.kind.label",
+  "mini.artist.label",
+  "nav.downloads.label",
+  "nav.downloads.pill",
+  "nav.home.label",
+  "nav.library.label",
+  "nav.search.label",
+  "note",
+  "row1.cover",
+  "row1.logo",
+  "row1.meta",
+  "row1.more.icon",
+  "row1.moreBtn",
+  "row1.title",
+  "row2.cover",
+  "row2.logo",
+  "row2.meta",
+  "row2.more.icon",
+  "row2.moreBtn",
+  "row2.title",
+  "row3.cover",
+  "row3.logo",
+  "row3.meta",
+  "row3.more.icon",
+  "row3.moreBtn",
+  "row3.title",
+  "row4.cover",
+  "row4.logo",
+  "row4.meta",
+  "row4.more.icon",
+  "row4.moreBtn",
+  "row4.title",
+  "song1.cv",
+  "song2.cv",
+  "song3.cv",
+  "song4.cv",
+  "song5.cv",
+  "song6.cv",
+  "song7.cv",
+  "tabs",
+  "tabs.meiro",
+  "tabs.meiro.indicator",
+  "tabs.meiro.label",
+  "tabs.ytm",
+  "tabs.ytm.label",
+  "tools.sort.label",
+  "topbar.avatar",
+  "topbar.avatar.label",
+  "topbar.avatarBtn",
+  "topbar.sort.icon",
+  "topbar.sortBtn",
+  "topbar.title"
+ ],
+ "centered": [
+  {
+   "child": "addto.close.icon",
+   "parent": "addto.closeBtn",
+   "axes": "xy"
+  },
+  {
+   "child": "addto.new.icon",
+   "parent": "addto.new",
+   "axes": "y"
+  }
+ ],
+ "rows": [
+  {
+   "name": "addto head",
+   "keys": [
+    "addto.title",
+    "addto.closeBtn"
+   ],
+   "edges": [
+    "centerY"
+   ]
+  },
+  {
+   "name": "addto row1 meta",
+   "keys": [
+    "addto.row1.logo",
+    "addto.row1.meta"
+   ],
+   "edges": [
+    "centerY"
+   ]
+  },
+  {
+   "name": "addto row2 meta",
+   "keys": [
+    "addto.row2.logo",
+    "addto.row2.meta"
+   ],
+   "edges": [
+    "centerY"
+   ]
+  },
+  {
+   "name": "addto row3 meta",
+   "keys": [
+    "addto.row3.logo",
+    "addto.row3.meta"
+   ],
+   "edges": [
+    "centerY"
+   ]
+  }
+ ],
+ "noOverlap": [
+  [
+   "addto.title",
+   "addto.closeBtn"
+  ]
+ ],
+ "ellipsis": [],
+ "toleranceNote": "Chrome (mock reference) lays text out with integer-rounded glyph advances, Skia with fractional ones: 12-14px text is 2-4% wider in the reference. Only boxes whose width is the text (wrap-content) depend on that, and what is aligned to their right edge moves with them; every other box is fill/fixed and held to 1px.",
+ "tolerance": {
+  "addto.row1.meta": {
+   "w": 5.0
+  },
+  "addto.row2.meta": {
+   "w": 5.0
+  },
+  "addto.row3.meta": {
+   "w": 5.0
+  }
+ }
+}

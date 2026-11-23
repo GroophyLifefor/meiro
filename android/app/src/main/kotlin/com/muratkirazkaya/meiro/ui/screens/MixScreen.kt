@@ -42,7 +42,7 @@ val MixCover = CoverSpec(brush = MixBrush)
 /**
  * Mock screen `mix`: top bar (back and ⋮; no avatar), the hero (the mix's gradient, "Daily mix", Meiro logo and kind
  * line; download, shuffle, play, settings, share), the note, and the tracks, each with why it was recommended under its
- * meta. Download, settings, share, ⋮ and the track ⋮ / link buttons are inert in this milestone.
+ * meta. Download, settings, share, the top bar's ⋮ (the mock opens nothing) and the link buttons are inert; a track's ⋮ opens the track menu.
  */
 @Composable
 fun MixScreen(
@@ -71,7 +71,7 @@ fun MixScreen(
                 MText(MIX_NOTE, MeiroType.Note, c.onSurfaceVariant, "note", Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 6.dp, bottom = 8.dp))
             }
             itemsIndexed(ui.rows, key = { i, r -> "$i/${r.key}" }) { i, r ->
-                SongRow("song${i + 1}", r, playing, { actions.onRow(i) })
+                SongRow("song${i + 1}", r, playing, { actions.onRow(i) }, onMore = { actions.onMore(i) })
             }
             item(key = "end") { Spacer(Modifier.height(24.dp)) }
         }
