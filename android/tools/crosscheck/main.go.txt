@@ -101,5 +101,17 @@ func main() {
 		links, err := c.FetchLinks(ctx)
 		must(err)
 		fmt.Printf("VERIFY links songs=%d artists=%d alternates=%d\n", len(links.Songs), len(links.Artists), len(links.Alternates))
+		// M6a: each link as the desktop's client reads it.
+		for _, s := range links.Songs {
+			checked := ""
+			if s.CheckedAt != nil {
+				checked = s.CheckedAt.UTC().Format(time.RFC3339Nano)
+			}
+			fmt.Printf("VERIFY song-link %s:%s state=%s mbid=%s artist=%q artist_state=%s artist_mbid=%s checked=%s updated=%s\n",
+				s.Provider, s.ProviderTrackID, s.State, s.MBID, s.Artist, s.ArtistState, s.ArtistMBID, checked, s.UpdatedAt.UTC().Format(time.RFC3339Nano))
+		}
+		for _, a := range links.Artists {
+			fmt.Printf("VERIFY artist-link key=%q name=%q state=%s mbid=%s updated=%s\n", a.ArtistKey, a.Name, a.State, a.MBID, a.UpdatedAt.UTC().Format(time.RFC3339Nano))
+		}
 	}
 }
