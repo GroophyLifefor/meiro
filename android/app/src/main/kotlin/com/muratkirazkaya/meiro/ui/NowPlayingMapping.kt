@@ -16,6 +16,10 @@ import com.muratkirazkaya.meiro.ui.screens.NpLink
 import com.muratkirazkaya.meiro.ui.screens.QueueRow
 import com.muratkirazkaya.meiro.ui.screens.SuggestionKind
 import com.muratkirazkaya.meiro.ui.screens.UpNextUi
+import com.muratkirazkaya.meiro.ui.screens.LyricsUi
+import com.muratkirazkaya.meiro.ui.screens.RelatedUi
+import com.muratkirazkaya.meiro.lyrics.LyricsState
+import com.muratkirazkaya.meiro.lyrics.RelatedState
 import java.util.Locale
 
 /** The full player and its up-next list, from what the playback engine publishes. */
@@ -79,6 +83,46 @@ object NowPlayingMapping {
             now = now,
             why = if (suggested) item.why else "",
         )
+    }
+
+    const val LYRICS_NONE = "Bu şarkının sözleri bulunamadı."
+    const val LYRICS_INSTRUMENTAL = "Enstrümantal bir parça: sözü yok."
+    const val LYRICS_FAILED = "Sözler yüklenemedi. Sekmeyi yeniden açınca tekrar denenir."
+    const val RELATED_NONE = "Bu şarkıya benzer şarkı bulunamadı."
+    const val RELATED_FAILED = "Benzer şarkılar yüklenemedi. Sekmeyi yeniden açınca tekrar denenir."
+
+    /**
+     * The lyrics tab of the track [key] from what the loader has ([state], null or another track's: loading). Timed
+     * lines are shown synced unless [static] ("Düz", the desktop's `StaticLyrics`); plain, the text line by line.
+     * The source line is the footer with "Source: " in Turkish ("Kaynak: LRCLIB", "Kaynak: LyricFind").
+     */
+    fun lyrics(key: String, state: Pair<String, LyricsState>?, static: Boolean): LyricsUi {
+        val s = state?.takeIf { it.first == key }?.second ?: return LyricsUi()
+        return when (s) {
+            LyricsState.Loading -> LyricsUi()
+            LyricsState.Failed -> LyricsUi(message = LYRICS_FAILED)
+            is LyricsState.None -> LyricsUi(message = if (s.instrumental) LYRICS_INSTRUMENTAL else LYRICS_NONE)
+            is LyricsState.Found -> {
+                val l = s.lyrics
+                val source = l.footer.trim().removePrefix("Source:").trim().let { if (it.isEmpty()) "" else "Kaynak: $it" }
+                val timed = l.synced.isNotEmpty()
+                if (timed && !static) LyricsUi(l.synced.map { it.text }, l.synced.map { it.atMs }, true, source)
+                else LyricsUi(l.text.trim().split('\n').map { it.trim() }, null, timed, source)
+            }
+        }
+    }
+
+    /** The related tab of the track [key]: the tracks as song rows (the playing one marked), or a message in their place. */
+    fun related(key: String, state: Pair<String, RelatedState>?, playingKey: String?, linkState: (String, String) -> String?): Pair<RelatedUi, List<QItem>> {
+        val s = state?.takeIf { it.first == key }?.second ?: return RelatedUi() to emptyList()
+        return when (s) {
+            RelatedState.Loading -> RelatedUi() to emptyList()
+            RelatedState.Failed -> RelatedUi(message = RELATED_FAILED) to emptyList()
+            RelatedState.None -> RelatedUi(message = RELATED_NONE) to emptyList()
+            is RelatedState.Found -> with(SearchMapping) {
+                RelatedUi(s.items.map { it.toSongRow(linkState, playingKey) }) to s.items.map { it.toQItem() }
+            }
+        }
     }
 
     /** "Gece Sürüşü'nden çalıyor · 2 sırada" (the chosen tracks after the one playing); "2 sırada" with no list named. */

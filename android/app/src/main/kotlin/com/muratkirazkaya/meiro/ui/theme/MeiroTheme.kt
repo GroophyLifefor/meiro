@@ -122,6 +122,11 @@ object MeiroType {
     val QHeadSub = MeiroText(12f, 400, BodyLineHeightSp, Ls)
     val QLabel = MeiroText(13f, 500, BodyLineHeightSp, Ls)
     val QTag = MeiroText(11f, 500, 16f, Ls)
+    // Lyrics tab: `.lyrics` 24/34/600, `.lyrsrc .sub` 13 on the body's 20 line.
+    val Lyric = MeiroText(24f, 600, 34f, Ls)
+    val LyricSource = MeiroText(13f, 400, BodyLineHeightSp, Ls)
+    // `.lyrsrc .chip`: a <button>, so the body's letter-spacing does not reach it.
+    val LyricChip = MeiroText(12f, 400, BodyLineHeightSp, 0f)
 }
 
 object MeiroShapes {

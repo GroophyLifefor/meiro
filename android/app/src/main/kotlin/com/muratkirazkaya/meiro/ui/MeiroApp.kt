@@ -152,8 +152,9 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String) {
     val openSheet = { newName = ""; sheet = true }
     // The full player (the mock's `.np`, opened by the mini player or the playing track's row) and its queue sheet.
     var npOpen by rememberSaveable { mutableStateOf(false) }
-    var queueOpen by rememberSaveable { mutableStateOf(false) }
-    LaunchedEffect(playing == null) { if (playing == null) { npOpen = false; queueOpen = false } }
+    // The tab the queue sheet shows ("Sıradakiler", "Sözler", "Benzerler"), null while it is closed.
+    var sheetTab by rememberSaveable { mutableStateOf<com.muratkirazkaya.meiro.ui.screens.PlayerTab?>(null) }
+    LaunchedEffect(playing == null) { if (playing == null) { npOpen = false; sheetTab = null } }
     val openPlayer = { if (PlaybackHost.ui.value != null) npOpen = true }
 
     CompositionLocalProvider(LocalAvatarInitial provides avatarInitial(email), LocalOpenPlayer provides openPlayer) { Box(Modifier.fillMaxSize()) {
@@ -211,10 +212,10 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String) {
             enter = slideInVertically(tween(320)) { it }, exit = slideOutVertically(tween(320)) { it },
         ) {
             shown.value?.let { p ->
-                PlayerRoute(c, p, bars, queueOpen, { queueOpen = it }, onClose = { queueOpen = false; npOpen = false }, onSnack = { snack = it })
+                PlayerRoute(c, p, bars, sheetTab, { sheetTab = it }, onClose = { sheetTab = null; npOpen = false }, onSnack = { snack = it })
             }
         }
-        BackHandler(enabled = npOpen) { if (queueOpen) queueOpen = false else npOpen = false }
+        BackHandler(enabled = npOpen) { if (sheetTab != null) sheetTab = null else npOpen = false }
         snack?.let { m ->
             LaunchedEffect(m) { delay(2600); if (snack == m) snack = null }
             Snack(m, { snack = null }, Modifier.align(Alignment.BottomCenter).padding(start = 12.dp, end = 12.dp, bottom = 160.dp))
@@ -457,14 +458,16 @@ private fun ArtistRoute(c: AppContainer, id: String, onBack: () -> Unit, onAlbum
 }
 
 /**
- * The full player over the shell, and its queue sheet when [queueOpen]: what plays, the seek bar, the controls (shuffle
- * and repeat change the queue's behaviour), the source buttons (a switch plays on from the other provider at the same
- * place, and the lists holding the track follow it), and the up-next list. The status bar turns light over its dark
- * background.
+ * The full player over the shell, and its queue sheet on tab [sheetTab] (null: closed): what plays, the seek bar, the
+ * controls (shuffle and repeat change the queue's behaviour), the source buttons (a switch plays on from the other
+ * provider at the same place, and the lists holding the track follow it), the up-next list, the lyrics (loaded when the
+ * tab shows, again for each new track while it shows) and the related tracks (a tap plays the related list from that
+ * track). The status bar turns light over its dark background.
  */
 @Composable
 private fun PlayerRoute(
-    c: AppContainer, p: com.muratkirazkaya.meiro.playback.PlayerUi, bars: SystemBars, queueOpen: Boolean, onQueue: (Boolean) -> Unit,
+    c: AppContainer, p: com.muratkirazkaya.meiro.playback.PlayerUi, bars: SystemBars, sheetTab: com.muratkirazkaya.meiro.ui.screens.PlayerTab?,
+    onSheet: (com.muratkirazkaya.meiro.ui.screens.PlayerTab?) -> Unit,
     onClose: () -> Unit, onSnack: (String) -> Unit,
 ) {
     val ctx = LocalContext.current
@@ -499,23 +502,47 @@ private fun PlayerRoute(
                     else -> PlaybackHost.switchSource(ctx, src) { old -> scope.launch { c.switchListSource(old, src) } }
                 }
             },
-            // Lyrics and related tracks are the next milestone: their tabs do nothing yet.
-            onTab = { if (it == com.muratkirazkaya.meiro.ui.screens.PlayerTab.UpNext) onQueue(true) },
+            onTab = { onSheet(it) },
         ),
     )
-    if (queueOpen) {
+    if (sheetTab != null) {
+        val tabs = c.trackTabs
+        val key = p.item.key
+        // The tab's load starts when it shows and again when the track changes under it (`loadPanel`).
+        LaunchedEffect(sheetTab, key) {
+            when (sheetTab) {
+                com.muratkirazkaya.meiro.ui.screens.PlayerTab.Lyrics -> tabs.loadLyrics(p.item, p.durationMs)
+                com.muratkirazkaya.meiro.ui.screens.PlayerTab.Related -> tabs.loadRelated(p.item)
+                else -> {}
+            }
+        }
+        val lyricsState by tabs.lyrics.collectAsState()
+        val relatedState by tabs.related.collectAsState()
+        val static by c.staticLyrics.collectAsState()
+        val lyrics = remember(key, lyricsState, static) { NowPlayingMapping.lyrics(key, lyricsState, static) }
+        val (related, relatedQueue) = remember(key, relatedState, version) { NowPlayingMapping.related(key, relatedState, key, linkOf) }
         com.muratkirazkaya.meiro.ui.screens.UpNextSheet(
             NowPlayingMapping.upNext(p, linkOf), p.playing, bars,
             com.muratkirazkaya.meiro.ui.screens.UpNextActions(
-                onClose = { onQueue(false) },
+                onClose = { onSheet(null) },
                 onAutoPlay = { PlaybackHost.setAutoPlay(ctx, it) },
                 onClear = { PlaybackHost.clearUpcoming(ctx) },
                 onRow = { PlaybackHost.playFromQueue(ctx, it) },
                 onMove = { from, to -> PlaybackHost.moveQueueItem(ctx, from, to) },
+                onTab = { onSheet(it) },
+                onLyricsSynced = { c.saveStaticLyrics(!it) },
+                onLyricSeek = { PlaybackHost.seekTo(ctx, it) },
+                // The desktop's related rows (`directQueue`, source "Related"): the related list becomes the queue from
+                // that track. The playing track's row does nothing (the player is already open).
+                onRelated = { i -> if (relatedQueue.getOrNull(i)?.key != key) PlaybackHost.playQueue(ctx, relatedQueue, i, RELATED_SOURCE) },
             ),
+            tab = sheetTab, lyrics = lyrics, related = related, positionMs = p.positionMs,
         )
     }
 }
+
+/** The name of a queue played from the related tab (the player's "Çalınıyor" line). */
+private const val RELATED_SOURCE = "Benzerler"
 
 /** Light status bar icons while the full player (dark, whatever the theme) is shown; the theme's own afterwards. */
 @Composable

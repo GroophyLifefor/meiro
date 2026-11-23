@@ -123,7 +123,7 @@ class UpNextScreenTest {
     @Test fun light() = check("light")
     @Test fun dark() = check("dark")
 
-    /** A row plays its place in the queue, the switch and "Temizle" reach theirs, the scrim closes; lyrics/related tabs are inert. */
+    /** A row plays its place in the queue, the switch and "Temizle" reach theirs; the other tabs reach onTab (not set here), ⋮ is inert. */
     @Test fun rowsAndControlsCallTheirActions() {
         val calls = mutableListOf<String>()
         rule.setContent {

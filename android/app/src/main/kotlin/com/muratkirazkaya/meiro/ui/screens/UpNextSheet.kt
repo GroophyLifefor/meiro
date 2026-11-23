@@ -62,16 +62,25 @@ class UpNextActions(
     /** A drag moved the track at the first place of the queue to the second. */
     val onMove: (Int, Int) -> Unit = { _, _ -> },
     val onTab: (PlayerTab) -> Unit = {},
+    /** "Senkron" (true) or "Düz" (false) chosen for timed lyrics. */
+    val onLyricsSynced: (Boolean) -> Unit = {},
+    /** A tap on a timed lyric line: seek to when it is sung. */
+    val onLyricSeek: (Long) -> Unit = {},
+    /** A tap on the related track at that place of the related list. */
+    val onRelated: (Int) -> Unit = {},
 )
 
 /**
- * The mock's queue sheet (`.sheet.tall`, 88% of the screen) over the full player: the handle, the three tabs (only
- * "Sıradakiler" has content now; "Sözler" and "Benzerler" are drawn and do nothing yet), "Otomatik devam" with its
- * switch, "<list>'nden çalıyor · N sırada" with "Temizle", and the queue's rows with drag handles; generated tracks
- * sit under "Önerilenler" with the tag of where they came from.
+ * The mock's queue sheet (`.sheet.tall`, 88% of the screen) over the full player: the handle, the three tabs and the
+ * chosen tab's content. "Sıradakiler": "Otomatik devam" with its switch, "<list>'nden çalıyor · N sırada" with
+ * "Temizle", and the queue's rows with drag handles; generated tracks sit under "Önerilenler" with the tag of where
+ * they came from. "Sözler": [lyrics] ([LyricsTab]). "Benzerler": [related] ([RelatedTab]).
  */
 @Composable
-fun UpNextSheet(ui: UpNextUi, playing: Boolean, bars: SystemBars, actions: UpNextActions = UpNextActions(), state: LazyListState = rememberLazyListState()) {
+fun UpNextSheet(
+    ui: UpNextUi, playing: Boolean, bars: SystemBars, actions: UpNextActions = UpNextActions(), state: LazyListState = rememberLazyListState(),
+    tab: PlayerTab = PlayerTab.UpNext, lyrics: LyricsUi = LyricsUi(), related: RelatedUi = RelatedUi(), positionMs: Long = 0,
+) {
     val c = Meiro.colors
     BoxWithConstraints(Modifier.fillMaxSize()) {
         Box(Modifier.fillMaxSize().background(c.scrim).clickableNoIndication(actions.onClose))
@@ -89,12 +98,15 @@ fun UpNextSheet(ui: UpNextUi, playing: Boolean, bars: SystemBars, actions: UpNex
                 Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp).fillMaxWidth()
                     .inv("q.tabs", bg = c.surfaceContainerHigh, radiusDp = 22f).clip(RoundedCornerShape(22.dp)).background(c.surfaceContainerHigh).padding(4.dp),
             ) {
-                QTab("q.tab.upnext", "Sıradakiler", true, Modifier.weight(1f)) {}
-                // Lyrics and related tracks are the next milestone: the tabs are drawn and do nothing yet.
-                QTab("q.tab.lyrics", "Sözler", false, Modifier.weight(1f)) {}
-                QTab("q.tab.related", "Benzerler", false, Modifier.weight(1f)) {}
+                QTab("q.tab.upnext", "Sıradakiler", tab == PlayerTab.UpNext, Modifier.weight(1f)) { actions.onTab(PlayerTab.UpNext) }
+                QTab("q.tab.lyrics", "Sözler", tab == PlayerTab.Lyrics, Modifier.weight(1f)) { actions.onTab(PlayerTab.Lyrics) }
+                QTab("q.tab.related", "Benzerler", tab == PlayerTab.Related, Modifier.weight(1f)) { actions.onTab(PlayerTab.Related) }
             }
-            QueueList(ui, playing, actions, state, Modifier.weight(1f))
+            when (tab) {
+                PlayerTab.UpNext -> QueueList(ui, playing, actions, state, Modifier.weight(1f))
+                PlayerTab.Lyrics -> LyricsTab(lyrics, positionMs, actions, Modifier.weight(1f))
+                PlayerTab.Related -> RelatedTab(related, playing, actions, Modifier.weight(1f))
+            }
         }
     }
 }

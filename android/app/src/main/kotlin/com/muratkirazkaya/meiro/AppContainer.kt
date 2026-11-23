@@ -210,6 +210,25 @@ class AppContainer(private val context: Context) {
     fun autoPlay(): Boolean = playPrefs.getBoolean("autoPlay", true)
     fun saveAutoPlay(on: Boolean) { playPrefs.edit().putBoolean("autoPlay", on).apply() }
 
+    private val _staticLyrics = MutableStateFlow(playPrefs.getBoolean("staticLyrics", false))
+    /** "Düz" chosen over "Senkron" for timed lyrics (`settings.StaticLyrics`); kept on this device only. */
+    val staticLyrics: StateFlow<Boolean> = _staticLyrics
+    fun saveStaticLyrics(on: Boolean) { _staticLyrics.value = on; playPrefs.edit().putBoolean("staticLyrics", on).apply() }
+
+    /** The loads behind the player's "Sözler" and "Benzerler" tabs: YouTube Music then LRCLIB, and YouTube Music's related tab. */
+    val trackTabs: com.muratkirazkaya.meiro.lyrics.TrackTabs by lazy {
+        val lrclib = com.muratkirazkaya.meiro.lyrics.LrclibClient(log = { Log.i(TAG, it) })
+        com.muratkirazkaya.meiro.lyrics.TrackTabs(
+            CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate),
+            com.muratkirazkaya.meiro.lyrics.LyricsFinder({ ytm.lyrics(it) { m -> Log.i(TAG, m) } }, { lrclib.get(it) }, { Log.i(TAG, it) }),
+            { videoId ->
+                val t0 = System.nanoTime()
+                YtmRelated.tracks(ytm.related(videoId)).distinctBy { it.videoId }
+                    .also { Log.i(TAG, "related: $videoId ${it.size} tracks in ${(System.nanoTime() - t0) / 1_000_000} ms") }
+            },
+        )
+    }
+
     /**
      * `setLibrarySource`: the lists that hold the track that played under [oldKey] and also hold it at [source] play it
      * from [source] from now on; signed in, the change is queued and sent.

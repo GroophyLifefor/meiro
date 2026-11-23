@@ -123,7 +123,7 @@ object SearchMapping {
             source = if (ytm) Source.YTM else Source.SOUNDCLOUD,
             key = if (ytm) videoId else scUrl(),
             title = title, artist = artists.ifEmpty { artist.ifEmpty { bylineText(this) } }, duration = duration,
-            thumbnail = url(thumbnail).orEmpty(), sources = providers,
+            thumbnail = url(thumbnail).orEmpty(), sources = providers, album = album,
             refs = buildMap { if (hasYtm()) put(Source.YTM, videoId); if (hasSc() && scUrl().isNotEmpty()) put(Source.SOUNDCLOUD, scUrl()) },
         )
     }
