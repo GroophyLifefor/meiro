@@ -55,7 +55,21 @@ fun Item.toQItem(): QItem {
     return QItem(
         src, id, title, artist, if (durationMs > 0) clockText(durationMs) else "", picture().orEmpty(),
         sources = providers().toList(),
+        refs = refs(),
+        why = why,
     )
+}
+
+/** The track's key at each provider it holds a ref for: the video ID for YouTube Music, the page URL for SoundCloud. */
+fun Item.refs(): Map<String, String> {
+    val m = LinkedHashMap<String, String>()
+    for (r in sources) {
+        val k = if (r.source == Source.SOUNDCLOUD) r.url else r.id
+        if (k.isNotEmpty()) m[r.source] = k
+    }
+    val (src, id) = activeRef()
+    if (id.isNotEmpty()) m[src] = id
+    return m
 }
 
 /** The providers a track is available from: its source refs plus the one it plays from. */

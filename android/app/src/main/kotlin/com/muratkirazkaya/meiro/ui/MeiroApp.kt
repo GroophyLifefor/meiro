@@ -15,6 +15,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -144,8 +150,13 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String) {
     var newName by remember { mutableStateOf("") }
     var snack by remember { mutableStateOf<String?>(null) }
     val openSheet = { newName = ""; sheet = true }
+    // The full player (the mock's `.np`, opened by the mini player or the playing track's row) and its queue sheet.
+    var npOpen by rememberSaveable { mutableStateOf(false) }
+    var queueOpen by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(playing == null) { if (playing == null) { npOpen = false; queueOpen = false } }
+    val openPlayer = { if (PlaybackHost.ui.value != null) npOpen = true }
 
-    CompositionLocalProvider(LocalAvatarInitial provides avatarInitial(email)) { Box(Modifier.fillMaxSize()) {
+    CompositionLocalProvider(LocalAvatarInitial provides avatarInitial(email), LocalOpenPlayer provides openPlayer) { Box(Modifier.fillMaxSize()) {
         MeiroShell(
             selected = selected,
             onSelect = { tab ->
@@ -159,6 +170,7 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String) {
             mini = playing?.toMini(),
             onPlayPause = { PlaybackHost.togglePlay(ctx) },
             onNext = { PlaybackHost.next(ctx) },
+            onOpenPlayer = openPlayer,
         ) {
             NavHost(nav, startDestination = Tab.Home.route) {
                 composable(Tab.Home.route) {
@@ -191,11 +203,37 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String) {
             }
             NewListSheet(newName, { newName = it }, { sheet = false }, create, bars)
         }
+        // The last state stays drawn while the player slides away after playback stopped.
+        val shown = remember { mutableStateOf<com.muratkirazkaya.meiro.playback.PlayerUi?>(null) }
+        if (playing != null) shown.value = playing
+        AnimatedVisibility(
+            visible = npOpen && playing != null,
+            enter = slideInVertically(tween(320)) { it }, exit = slideOutVertically(tween(320)) { it },
+        ) {
+            shown.value?.let { p ->
+                PlayerRoute(c, p, bars, queueOpen, { queueOpen = it }, onClose = { queueOpen = false; npOpen = false }, onSnack = { snack = it })
+            }
+        }
+        BackHandler(enabled = npOpen) { if (queueOpen) queueOpen = false else npOpen = false }
         snack?.let { m ->
             LaunchedEffect(m) { delay(2600); if (snack == m) snack = null }
             Snack(m, { snack = null }, Modifier.align(Alignment.BottomCenter).padding(start = 12.dp, end = 12.dp, bottom = 160.dp))
         }
     } }
+}
+
+/** Opens the full player (the mini player's tap, or the mock's `play` on the track already playing). */
+internal val LocalOpenPlayer = androidx.compose.runtime.staticCompositionLocalOf<() -> Unit> { {} }
+
+/** The mock's `play` on the track that is playing opens the full player instead of starting the track again. */
+private fun openIfPlaying(items: List<com.muratkirazkaya.meiro.playback.QItem>, i: Int, open: () -> Unit): Boolean {
+    val k = items.getOrNull(i)?.key ?: return false
+    if (PlaybackHost.ui.value?.item?.key != k) return false
+    open(); return true
+}
+
+private fun playRow(ctx: android.content.Context, items: List<com.muratkirazkaya.meiro.playback.QItem>, i: Int, source: String, open: () -> Unit) {
+    if (!openIfPlaying(items, i, open)) PlaybackHost.playQueue(ctx, items, i, source)
 }
 
 /** The account avatar's letter: the first letter of the greeting's name, "M" without an account. */
@@ -210,6 +248,7 @@ internal fun avatarInitial(email: String): String =
 @Composable
 private fun HomeRoute(c: AppContainer, email: String, onOpen: (String) -> Unit, onMix: () -> Unit, onSnack: (String) -> Unit) {
     val ctx = LocalContext.current
+    val openPlayer = LocalOpenPlayer.current
     val version by c.libraries.version.collectAsState()
     val historyVersion by c.historyVersion.collectAsState()
     val now by PlaybackHost.ui.collectAsState()
@@ -232,7 +271,7 @@ private fun HomeRoute(c: AppContainer, email: String, onOpen: (String) -> Unit, 
             },
             onPick = { i -> data.pickIds.getOrNull(i)?.let(onOpen) },
             // The desktop plays a history row on its own (`historyPlay`).
-            onResume = { i -> data.resume.getOrNull(i)?.let { PlaybackHost.playQueue(ctx, listOf(it), 0, "history") } },
+            onResume = { i -> data.resume.getOrNull(i)?.let { playRow(ctx, listOf(it), 0, "Dinleme geçmişi", openPlayer) } },
         ),
     )
 }
@@ -257,6 +296,7 @@ private fun LibraryRoute(c: AppContainer, onOpen: (String) -> Unit, onMix: () ->
 @Composable
 private fun MixRoute(c: AppContainer, onBack: () -> Unit) {
     val ctx = LocalContext.current
+    val openPlayer = LocalOpenPlayer.current
     val version by c.libraries.version.collectAsState()
     val now by PlaybackHost.ui.collectAsState()
     val lib = remember(version) { HomeMapping.dailyMix(c.libraries.list(), c.engine.settings.dailyMixId) }
@@ -271,7 +311,7 @@ private fun MixRoute(c: AppContainer, onBack: () -> Unit) {
             onBack = onBack,
             onPlay = { play(0, lib.items.map { it.toQItem() }) },
             onShuffle = { play(0, lib.items.map { it.toQItem() }.shuffled()) },
-            onRow = { i -> play(i, lib.items.map { it.toQItem() }) },
+            onRow = { i -> lib.items.map { it.toQItem() }.let { q -> if (!openIfPlaying(q, i, openPlayer)) play(i, q) } },
         ),
     )
 }
@@ -279,6 +319,7 @@ private fun MixRoute(c: AppContainer, onBack: () -> Unit) {
 @Composable
 private fun SearchRoute(c: AppContainer, onAlbum: (String) -> Unit, onArtist: (String) -> Unit) {
     val ctx = LocalContext.current
+    val openPlayer = LocalOpenPlayer.current
     val ctl = c.search
     val s by ctl.state.collectAsState()
     val now by PlaybackHost.ui.collectAsState()
@@ -300,7 +341,7 @@ private fun SearchRoute(c: AppContainer, onAlbum: (String) -> Unit, onArtist: (S
             onProvider = ctl::toggleProvider,
             onSong = { i ->
                 val items = SearchMapping.songs(ctl.state.value)
-                with(SearchMapping) { PlaybackHost.playQueue(ctx, items.map { it.toQItem() }, i, "search: ${s.submitted}") }
+                with(SearchMapping) { playRow(ctx, items.map { it.toQItem() }, i, "\u201C${s.submitted}\u201D araması", openPlayer) }
             },
             onEnd = ctl::loadMore,
             onArtist = { i -> ui.artists.getOrNull(i)?.let { onArtist(it.key) } },
@@ -312,6 +353,7 @@ private fun SearchRoute(c: AppContainer, onAlbum: (String) -> Unit, onArtist: (S
 @Composable
 private fun PlaylistRoute(c: AppContainer, id: String, onBack: () -> Unit) {
     val ctx = LocalContext.current
+    val openPlayer = LocalOpenPlayer.current
     val version by c.libraries.version.collectAsState()
     val now by PlaybackHost.ui.collectAsState()
     val lib = remember(version, id) { c.libraries.get(id) }
@@ -324,7 +366,7 @@ private fun PlaylistRoute(c: AppContainer, id: String, onBack: () -> Unit) {
         ui, playing = now?.playing == true, onBack = onBack,
         onPlay = { play(0, lib.items.map { it.toQItem() }) },
         onShuffle = { play(0, lib.items.map { it.toQItem() }.shuffled()) },
-        onRow = { i -> play(i, lib.items.map { it.toQItem() }) },
+        onRow = { i -> lib.items.map { it.toQItem() }.let { q -> if (!openIfPlaying(q, i, openPlayer)) play(i, q) } },
     )
 }
 
@@ -353,6 +395,7 @@ private fun rememberBrowsePage(c: AppContainer, id: String, retry: Int): Loaded?
 @Composable
 private fun AlbumRoute(c: AppContainer, id: String, onBack: () -> Unit, onSnack: (String) -> Unit) {
     val ctx = LocalContext.current
+    val openPlayer = LocalOpenPlayer.current
     val scope = rememberCoroutineScope()
     val now by PlaybackHost.ui.collectAsState()
     val version by c.libraries.version.collectAsState()
@@ -369,7 +412,7 @@ private fun AlbumRoute(c: AppContainer, id: String, onBack: () -> Unit, onSnack:
             onBack = onBack,
             onPlay = { data?.let { if (it.tracks.isNotEmpty()) play(0, it.queue) } },
             onShuffle = { data?.let { if (it.tracks.isNotEmpty()) play(0, it.queue.shuffled()) } },
-            onRow = { i -> data?.let { play(i, it.queue) } },
+            onRow = { i -> data?.let { if (!openIfPlaying(it.queue, i, openPlayer)) play(i, it.queue) } },
             onCopy = {
                 data?.let { d ->
                     if (d.tracks.isNotEmpty()) scope.launch {
@@ -388,6 +431,7 @@ private fun AlbumRoute(c: AppContainer, id: String, onBack: () -> Unit, onSnack:
 @Composable
 private fun ArtistRoute(c: AppContainer, id: String, onBack: () -> Unit, onAlbum: (String) -> Unit, onArtist: (String) -> Unit) {
     val ctx = LocalContext.current
+    val openPlayer = LocalOpenPlayer.current
     val now by PlaybackHost.ui.collectAsState()
     val version by c.libraries.version.collectAsState()
     var retry by remember { mutableStateOf(0) }
@@ -403,11 +447,85 @@ private fun ArtistRoute(c: AppContainer, id: String, onBack: () -> Unit, onAlbum
             onBack = onBack,
             onPlay = { data?.let { if (it.tracks.isNotEmpty()) play(0, it.queue) } },
             onShuffle = { data?.let { if (it.tracks.isNotEmpty()) play(0, it.queue.shuffled()) } },
-            onRow = { i -> data?.let { play(i, it.queue) } },
+            onRow = { i -> data?.let { if (!openIfPlaying(it.queue, i, openPlayer)) play(i, it.queue) } },
             onAlbum = { i -> data?.albumIds?.getOrNull(i)?.let(onAlbum) },
             onArtist = { i -> data?.artistIds?.getOrNull(i)?.let(onArtist) },
             onRetry = { retry++ },
         ),
         error = loaded?.error,
     )
+}
+
+/**
+ * The full player over the shell, and its queue sheet when [queueOpen]: what plays, the seek bar, the controls (shuffle
+ * and repeat change the queue's behaviour), the source buttons (a switch plays on from the other provider at the same
+ * place, and the lists holding the track follow it), and the up-next list. The status bar turns light over its dark
+ * background.
+ */
+@Composable
+private fun PlayerRoute(
+    c: AppContainer, p: com.muratkirazkaya.meiro.playback.PlayerUi, bars: SystemBars, queueOpen: Boolean, onQueue: (Boolean) -> Unit,
+    onClose: () -> Unit, onSnack: (String) -> Unit,
+) {
+    val ctx = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val version by c.libraries.version.collectAsState()
+    LightStatusBarIcons()
+    val linkOf: (String, String) -> String? = remember(version) {
+        val libs = c.libraries.list();
+        { src: String, key: String ->
+            c.links.song(src, key)?.state?.takeIf { it.isNotEmpty() }
+                ?: libs.asSequence().flatMap { it.items }.firstOrNull { it.activeRef() == (src to key) }?.state
+        }
+    }
+    val background = com.muratkirazkaya.meiro.ui.components.rememberCoverBrush(p.item.thumbnail.takeIf { it.isNotBlank() })
+    val ui = NowPlayingMapping.player(p, linkOf(p.item.provider(), p.item.key), background)
+    com.muratkirazkaya.meiro.ui.screens.NowPlayingScreen(
+        ui, bars,
+        com.muratkirazkaya.meiro.ui.screens.NowPlayingActions(
+            onClose = onClose,
+            onSeek = { PlaybackHost.seekTo(ctx, it) },
+            onToggle = { if (!p.loading) PlaybackHost.togglePlay(ctx) },
+            onPrev = { PlaybackHost.previous(ctx) },
+            onNext = { PlaybackHost.next(ctx) },
+            onShuffle = { PlaybackHost.setShuffle(ctx, !p.shuffle) },
+            onRepeat = { PlaybackHost.cycleRepeat(ctx) },
+            onSource = { prov ->
+                val src = if (prov == com.muratkirazkaya.meiro.ui.components.Provider.Sc) com.muratkirazkaya.meiro.data.Source.SOUNDCLOUD else com.muratkirazkaya.meiro.data.Source.YTM
+                val name = if (src == com.muratkirazkaya.meiro.data.Source.SOUNDCLOUD) "SoundCloud" else "YouTube Music"
+                when {
+                    src == p.item.provider() -> {}
+                    p.item.refFor(src) == null -> onSnack("$name'da bu şarkı bulunamadı")
+                    else -> PlaybackHost.switchSource(ctx, src) { old -> scope.launch { c.switchListSource(old, src) } }
+                }
+            },
+            // Lyrics and related tracks are the next milestone: their tabs do nothing yet.
+            onTab = { if (it == com.muratkirazkaya.meiro.ui.screens.PlayerTab.UpNext) onQueue(true) },
+        ),
+    )
+    if (queueOpen) {
+        com.muratkirazkaya.meiro.ui.screens.UpNextSheet(
+            NowPlayingMapping.upNext(p, linkOf), p.playing, bars,
+            com.muratkirazkaya.meiro.ui.screens.UpNextActions(
+                onClose = { onQueue(false) },
+                onAutoPlay = { PlaybackHost.setAutoPlay(ctx, it) },
+                onClear = { PlaybackHost.clearUpcoming(ctx) },
+                onRow = { PlaybackHost.playFromQueue(ctx, it) },
+                onMove = { from, to -> PlaybackHost.moveQueueItem(ctx, from, to) },
+            ),
+        )
+    }
+}
+
+/** Light status bar icons while the full player (dark, whatever the theme) is shown; the theme's own afterwards. */
+@Composable
+private fun LightStatusBarIcons() {
+    val view = androidx.compose.ui.platform.LocalView.current
+    val dark = androidx.compose.foundation.isSystemInDarkTheme()
+    androidx.compose.runtime.DisposableEffect(view, dark) {
+        val window = (view.context as? android.app.Activity)?.window
+        val ctl = window?.let { androidx.core.view.WindowCompat.getInsetsController(it, view) }
+        ctl?.isAppearanceLightStatusBars = false
+        onDispose { ctl?.isAppearanceLightStatusBars = !dark }
+    }
 }

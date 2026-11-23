@@ -33,13 +33,15 @@ fun MeiroShell(
     mini: MiniState?,
     onPlayPause: () -> Unit = {},
     onNext: () -> Unit = {},
+    /** A tap on the mini player: the full player opens. */
+    onOpenPlayer: () -> Unit = {},
     content: @Composable () -> Unit,
 ) {
     Column(Modifier.fillMaxSize().background(Meiro.colors.surface)) {
         Spacer(Modifier.height(bars.top))
         Box(Modifier.weight(1f).fillMaxWidth()) { content() }
         // The mock draws the mini player over a song that plays; with nothing queued there is no mock for it, so it is hidden.
-        if (mini != null) MiniPlayer(mini, Modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp), onPlayPause, onNext)
+        if (mini != null) MiniPlayer(mini, Modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp), onPlayPause, onNext, onOpenPlayer)
         NavBar(selected, onSelect, bars.bottom)
     }
 }

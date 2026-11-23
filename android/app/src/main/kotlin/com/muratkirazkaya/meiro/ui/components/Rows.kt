@@ -136,7 +136,11 @@ data class SongRowData(
  * number an album page puts first.
  */
 @Composable
-fun SongRow(p: String, row: SongRowData, playing: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier, num: String? = null) {
+fun SongRow(
+    p: String, row: SongRowData, playing: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier, num: String? = null,
+    /** The up-next list's drag handle (the mock's `.drag` glyph first in the row), with the gesture that moves the row. */
+    dragHandle: Modifier? = null,
+) {
     val c = Meiro.colors
     Row(
         modifier.fillMaxWidth().heightIn(min = 64.dp)
@@ -147,6 +151,7 @@ fun SongRow(p: String, row: SongRowData, playing: Boolean, onClick: () -> Unit, 
     ) {
         // The mock's `.num` (an album's track number): 24dp wide, centred.
         if (num != null) MText(num, MeiroType.Body, c.onSurfaceVariant, "$p.num", Modifier.width(24.dp), maxLines = 1, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+        if (dragHandle != null) MIcon(MeiroIcons.Drag, c.onSurfaceVariant, "$p.drag", dragHandle)
         // The mock's inventory lists the equaliser (not the cover under it) for the playing row.
         val eq = row.now && playing
         Cover(row.cover, 8.dp, if (eq) "$p.cv" else "$p.cover", Modifier.size(48.dp)) { if (eq) Equaliser("$p.eq") }

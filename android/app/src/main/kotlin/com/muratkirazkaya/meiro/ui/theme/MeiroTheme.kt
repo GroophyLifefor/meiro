@@ -103,6 +103,25 @@ object MeiroType {
     val MixKicker = MeiroText(12f, 400, 20f, 0.6f)
     val MixTitle = MeiroText(22f, 600, 28f, Ls)
     val MixBody = MeiroText(13f, 400, 18f, Ls)
+
+    // Full player (`.np`): the context line's kicker 11/16 (.6 spacing, upper case) and list 12/16, `h2` 22/600/28,
+    // `.a` 15/20, the link chip and source buttons 12 (buttons: spacing normal), times 12, low tabs 13/500 (.4, upper
+    // case), the preparing note 13 and its second line 12.
+    val NpKicker = MeiroText(11f, 400, 16f, 0.6f)
+    val NpContext = MeiroText(12f, 400, 16f, Ls)
+    val NpTitle = MeiroText(22f, 600, 28f, Ls)
+    val NpArtist = MeiroText(15f, 400, 20f, Ls)
+    val NpButton = MeiroText(12f, 400, BodyLineHeightSp, 0f)
+    val NpTime = MeiroText(12f, 400, BodyLineHeightSp, Ls)
+    val NpTab = MeiroText(13f, 500, BodyLineHeightSp, 0.4f)
+    val NpPrep = MeiroText(13f, 400, BodyLineHeightSp, Ls)
+    val NpPrepNote = MeiroText(12f, 400, BodyLineHeightSp, Ls)
+    // Up next sheet: `.qtabs button` 14/500, `.qhead b` 14/500, `.qhead span` 12, `.qlabel` 13/500, `.tag` 11/500/16.
+    val QTab = MeiroText(14f, 500, BodyLineHeightSp, 0f)
+    val QHeadTitle = MeiroText(14f, 500, BodyLineHeightSp, Ls)
+    val QHeadSub = MeiroText(12f, 400, BodyLineHeightSp, Ls)
+    val QLabel = MeiroText(13f, 500, BodyLineHeightSp, Ls)
+    val QTag = MeiroText(11f, 500, 16f, Ls)
 }
 
 object MeiroShapes {

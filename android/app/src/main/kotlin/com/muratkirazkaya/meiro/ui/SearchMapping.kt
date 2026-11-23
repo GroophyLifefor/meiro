@@ -124,6 +124,7 @@ object SearchMapping {
             key = if (ytm) videoId else scUrl(),
             title = title, artist = artists.ifEmpty { artist.ifEmpty { bylineText(this) } }, duration = duration,
             thumbnail = url(thumbnail).orEmpty(), sources = providers,
+            refs = buildMap { if (hasYtm()) put(Source.YTM, videoId); if (hasSc() && scUrl().isNotEmpty()) put(Source.SOUNDCLOUD, scUrl()) },
         )
     }
 }

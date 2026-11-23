@@ -33,6 +33,7 @@ import com.muratkirazkaya.meiro.search.SoundCloudSearch
 import com.muratkirazkaya.meiro.youtube.MusicItem
 import com.muratkirazkaya.meiro.youtube.SearchResult
 import com.muratkirazkaya.meiro.youtube.YtmClient
+import com.muratkirazkaya.meiro.ui.toQItem
 import com.muratkirazkaya.meiro.youtube.BrowsePage
 import com.muratkirazkaya.meiro.youtube.YtmRelated
 import com.muratkirazkaya.meiro.recommend.DailyMixMaker
@@ -186,6 +187,46 @@ class AppContainer(private val context: Context) {
 
     /** The anonymous YouTube Music client the album and artist pages read (the search has its own). */
     val ytm: YtmClient by lazy { YtmClient() }
+
+    /** Auto-play's generated queue (`GetUpNext`): YouTube Music's tracks after a video, as queue items. */
+    val upNextSource = com.muratkirazkaya.meiro.playback.UpNextSource { videoId, playlistId, continuation ->
+        val page = ytm.upNext(videoId, playlistId, continuation)
+        val items = page.items.filter { it.videoId.isNotEmpty() }.map { m ->
+            with(com.muratkirazkaya.meiro.ui.SearchMapping) { m.toQItem() }
+                .copy(kind = if (m.kind == com.muratkirazkaya.meiro.youtube.ItemKind.Video) com.muratkirazkaya.meiro.playback.Kind.Video else com.muratkirazkaya.meiro.playback.Kind.Track)
+        }
+        com.muratkirazkaya.meiro.playback.GeneratedPage(items, page.continuation, page.playlistId)
+    }
+
+    /**
+     * Meiro's own picks for the queue (`recs.picks`): the stored Daily mix's tracks, with their reasons. The desktop keeps
+     * the day's ranking in memory; the phone ranks only when it makes the mix, so the mix is the ranking it keeps.
+     */
+    fun suggestionPicks(): List<com.muratkirazkaya.meiro.playback.QItem> =
+        com.muratkirazkaya.meiro.ui.HomeMapping.dailyMix(libraries.list(), engine.settings.dailyMixId)?.items?.map { it.toQItem() }.orEmpty()
+
+    private val playPrefs = context.getSharedPreferences("meiro-playback", Context.MODE_PRIVATE)
+    /** Auto-play (`settings.AutoPlay`), on unless turned off; kept on this device only (the desktop keeps it in its settings file). */
+    fun autoPlay(): Boolean = playPrefs.getBoolean("autoPlay", true)
+    fun saveAutoPlay(on: Boolean) { playPrefs.edit().putBoolean("autoPlay", on).apply() }
+
+    /**
+     * `setLibrarySource`: the lists that hold the track that played under [oldKey] and also hold it at [source] play it
+     * from [source] from now on; signed in, the change is queued and sent.
+     */
+    suspend fun switchListSource(oldKey: String, source: String) = withContext(Dispatchers.IO) {
+        var changed = 0
+        for (lib in libraries.list()) for (item in lib.items) {
+            val holds = item.sources.any { it.source == source } || item.source == source
+            val same = item.key == oldKey || item.sources.any { it.id == oldKey || it.url == oldKey }
+            if (holds && same && libraries.setSource(lib.id, item.key, source)) changed++
+        }
+        Log.i(TAG, "source: $changed list tracks now play from $source")
+        if (changed > 0 && session().signedIn) {
+            engine.syncSnapshot().queue(engine.outbox)
+            engine.syncNow(); engine.settled()
+        }
+    }
 
     private val pages = object : LinkedHashMap<String, BrowsePage>(16, 0.75f, true) {
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, BrowsePage>?) = size > 20

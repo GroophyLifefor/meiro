@@ -1,6 +1,8 @@
 package com.muratkirazkaya.meiro.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,6 +37,8 @@ import com.muratkirazkaya.meiro.ui.theme.MeiroType
 data class MiniState(
     val title: String, val artist: String, val cover: CoverSpec, val sources: List<Provider>, val active: Provider, val progress: Float,
     val playing: Boolean = true,
+    /** The track's audio is being found (the mock's "Hazırlanıyor…" with spinners). */
+    val preparing: Boolean = false,
 )
 
 /**
@@ -52,6 +56,7 @@ fun com.muratkirazkaya.meiro.playback.PlayerUi.toMini(): MiniState {
         active = active,
         progress = progress,
         playing = playing,
+        preparing = loading,
     )
 }
 
@@ -65,11 +70,13 @@ fun coverBrush(hue: Int, spread: Int = 50) = Brush.linearGradient(
 )
 
 @Composable
-fun MiniPlayer(state: MiniState, modifier: Modifier = Modifier, onPlayPause: () -> Unit = {}, onNext: () -> Unit = {}) {
+fun MiniPlayer(state: MiniState, modifier: Modifier = Modifier, onPlayPause: () -> Unit = {}, onNext: () -> Unit = {}, onOpen: () -> Unit = {}) {
     val c = Meiro.colors
     Box(
         modifier.fillMaxWidth().height(64.dp).inv("mini", bg = c.surfaceContainerHigh, radiusDp = 16f)
-            .clip(MeiroShapes.Mini).background(c.surfaceContainerHigh),
+            .clip(MeiroShapes.Mini).background(c.surfaceContainerHigh)
+            // A tap opens the full player; a plain tap detector, so the semantics of the parts stay their own (not merged).
+            .pointerInput(onOpen) { detectTapGestures { onOpen() } },
     ) {
         Row(
             Modifier.fillMaxWidth().fillMaxHeight().padding(start = 8.dp, end = 4.dp),
@@ -84,14 +91,22 @@ fun MiniPlayer(state: MiniState, modifier: Modifier = Modifier, onPlayPause: () 
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-                        if (Provider.Ytm in state.sources) SourceLogo("mini.src.ytm", Provider.Ytm, dim = state.active != Provider.Ytm)
-                        if (Provider.Sc in state.sources) SourceLogo("mini.src.sc", Provider.Sc, dim = state.active != Provider.Sc)
+                    if (state.preparing) {
+                        // The mock's `mini()` while preparing: a 12px spinner (2px ring) and "Hazırlanıyor…".
+                        Spinner("mini.prep.spinner", 12, 2f, c.outlineVariant, c.primary)
+                        MText("Hazırlanıyor…", MeiroType.MiniArtist, c.onSurfaceVariant, "mini.prep.label", maxLines = 1)
+                    } else {
+                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+                            if (Provider.Ytm in state.sources) SourceLogo("mini.src.ytm", Provider.Ytm, dim = state.active != Provider.Ytm)
+                            if (Provider.Sc in state.sources) SourceLogo("mini.src.sc", Provider.Sc, dim = state.active != Provider.Sc)
+                        }
+                        MText(state.artist, MeiroType.MiniArtist, c.onSurfaceVariant, "mini.artist.label", maxLines = 1)
                     }
-                    MText(state.artist, MeiroType.MiniArtist, c.onSurfaceVariant, "mini.artist.label", maxLines = 1)
                 }
             }
-            IconButton("mini.playBtn", "mini.play.icon", if (state.playing) MeiroIcons.Pause else MeiroIcons.Play, c.onSurface, onPlayPause)
+            if (state.preparing) {
+                Box(Modifier.size(48.dp).inv("mini.playBtn", radiusDp = 24f), Alignment.Center) { Spinner("mini.play.spinner", 22, 3f, c.outlineVariant, c.primary) }
+            } else IconButton("mini.playBtn", "mini.play.icon", if (state.playing) MeiroIcons.Pause else MeiroIcons.Play, c.onSurface, onPlayPause)
             IconButton("mini.nextBtn", "mini.next.icon", MeiroIcons.Next, c.onSurface, onNext)
         }
         Box(
@@ -110,9 +125,9 @@ fun MiniPlayer(state: MiniState, modifier: Modifier = Modifier, onPlayPause: () 
 
 /** The mock's 48dp circular icon button around a 24dp glyph. */
 @Composable
-fun IconButton(key: String, iconKey: String, icon: androidx.compose.ui.graphics.vector.ImageVector, tint: Color, onClick: () -> Unit = {}, iconSize: Int = 24) {
+fun IconButton(key: String, iconKey: String, icon: androidx.compose.ui.graphics.vector.ImageVector, tint: Color, onClick: () -> Unit = {}, iconSize: Int = 24, modifier: Modifier = Modifier) {
     Box(
-        Modifier.size(48.dp).inv(key, radiusDp = 24f).clip(CircleShape).clickableNoIndication(onClick),
+        modifier.size(48.dp).inv(key, radiusDp = 24f).clip(CircleShape).clickableNoIndication(onClick),
         Alignment.Center,
     ) { MIcon(icon, tint, iconKey, size = iconSize) }
 }

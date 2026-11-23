@@ -1,0 +1,350 @@
+{
+ "screen": "np",
+ "systemNote": "Status bar row (y 0..36) and the gesture pill are system UI on Android: not drawn by the app, excluded from element and pixel comparison.",
+ "elements": [
+  {
+   "path": "#box>div.app:nth-child(1)>div.statusbar:nth-child(1)>span#clock:nth-child(1)",
+   "system": true
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div.statusbar:nth-child(1)>span.sys:nth-child(2)>span#netIcon:nth-child(1)",
+   "system": true
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div.statusbar:nth-child(1)>span.sys:nth-child(2)>i:nth-child(2)",
+   "system": true
+  },
+  {
+   "path": "#box>div#np.np.open:nth-child(2)>div.bg:nth-child(1)::after",
+   "key": "np.shade"
+  },
+  {
+   "path": "#box>div#np.np.open:nth-child(2)>div.top:nth-child(2)>button.ibtn:nth-child(1)",
+   "key": "np.closeBtn"
+  },
+  {
+   "path": "#box>div#np.np.open:nth-child(2)>div.top:nth-child(2)>button.ibtn:nth-child(1)>svg:nth-child(1)",
+   "key": "np.close.icon"
+  },
+  {
+   "path": "#box>div#np.np.open:nth-child(2)>div.top:nth-child(2)>div.ctx:nth-child(2)",
+   "key": "np.ctx",
+   "styleFrom": "np.ctx.label"
+  },
+  {
+   "path": "#box>div#np.np.open:nth-child(2)>div.top:nth-child(2)>div.ctx:nth-child(2)>span:nth-child(1)",
+   "key": "np.ctx.kicker"
+  },
+  {
+   "path": "#box>div#np.np.open:nth-child(2)>div.top:nth-child(2)>button.ibtn:nth-child(3)",
+   "key": "np.moreBtn"
+  },
+  {
+   "path": "#box>div#np.np.open:nth-child(2)>div.top:nth-child(2)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "key": "np.more.icon"
+  },
+  {
+   "path": "#box>div#np.np.open:nth-child(2)>div.art:nth-child(3)",
+   "key": "np.art"
+  },
+  {
+   "path": "#box>div#np.np.open:nth-child(2)>div.info:nth-child(4)>div.t:nth-child(1)>h2:nth-child(1)",
+   "key": "np.title"
+  },
+  {
+   "path": "#box>div#np.np.open:nth-child(2)>div.info:nth-child(4)>div.t:nth-child(1)>div.a:nth-child(2)",
+   "key": "np.artist"
+  },
+  {
+   "path": "#box>div#np.np.open:nth-child(2)>div.info:nth-child(4)>div.t:nth-child(1)>div.linkchip:nth-child(3)>button.chip:nth-child(1)",
+   "key": "np.link",
+   "styleFrom": "np.link.label"
+  },
+  {
+   "path": "#box>div#np.np.open:nth-child(2)>div.info:nth-child(4)>div.t:nth-child(1)>div.linkchip:nth-child(3)>button.chip:nth-child(1)>svg:nth-child(1)",
+   "key": "np.link.icon"
+  },
+  {
+   "path": "#box>div#np.np.open:nth-child(2)>div.info:nth-child(4)>button.ibtn:nth-child(2)",
+   "key": "np.likeBtn"
+  },
+  {
+   "path": "#box>div#np.np.open:nth-child(2)>div.info:nth-child(4)>button.ibtn:nth-child(2)>svg:nth-child(1)",
+   "key": "np.like.icon"
+  },
+  {
+   "path": "#box>div#np.np.open:nth-child(2)>div.provsw:nth-child(5)>button.on:nth-child(1)",
+   "key": "np.src.ytm",
+   "styleFrom": "np.src.ytm.label"
+  },
+  {
+   "path": "#box>div#np.np.open:nth-child(2)>div.provsw:nth-child(5)>button.on:nth-child(1)>svg:nth-child(1)",
+   "key": "np.src.ytm.icon"
+  },
+  {
+   "path": "#box>div#np.np.open:nth-child(2)>div.provsw:nth-child(5)>button:nth-child(2)",
+   "key": "np.src.sc",
+   "styleFrom": "np.src.sc.label"
+  },
+  {
+   "path": "#box>div#np.np.open:nth-child(2)>div.provsw:nth-child(5)>button:nth-child(2)>svg:nth-child(1)",
+   "key": "np.src.sc.icon"
+  },
+  {
+   "path": "#box>div#np.np.open:nth-child(2)>div.seek:nth-child(6)>div.line:nth-child(1)",
+   "key": "np.seek.line"
+  },
+  {
+   "path": "#box>div#np.np.open:nth-child(2)>div.seek:nth-child(6)>div.line:nth-child(1)>i:nth-child(1)",
+   "key": "np.seek.fill"
+  },
+  {
+   "path": "#box>div#np.np.open:nth-child(2)>div.seek:nth-child(6)>div.line:nth-child(1)>b:nth-child(2)",
+   "key": "np.seek.thumb"
+  },
+  {
+   "path": "#box>div#np.np.open:nth-child(2)>div.seek:nth-child(6)>div.times:nth-child(2)>span:nth-child(1)",
+   "key": "np.seek.pos"
+  },
+  {
+   "path": "#box>div#np.np.open:nth-child(2)>div.seek:nth-child(6)>div.times:nth-child(2)>span:nth-child(2)",
+   "key": "np.seek.dur"
+  },
+  {
+   "path": "#box>div#np.np.open:nth-child(2)>div.ctrls:nth-child(7)>button.ibtn.small.off:nth-child(1)",
+   "key": "np.shuffleBtn"
+  },
+  {
+   "path": "#box>div#np.np.open:nth-child(2)>div.ctrls:nth-child(7)>button.ibtn.small.off:nth-child(1)>svg:nth-child(1)",
+   "key": "np.shuffle.icon"
+  },
+  {
+   "path": "#box>div#np.np.open:nth-child(2)>div.ctrls:nth-child(7)>button.ibtn.act:nth-child(2)",
+   "key": "np.prevBtn"
+  },
+  {
+   "path": "#box>div#np.np.open:nth-child(2)>div.ctrls:nth-child(7)>button.ibtn.act:nth-child(2)>svg:nth-child(1)",
+   "key": "np.prev.icon"
+  },
+  {
+   "path": "#box>div#np.np.open:nth-child(2)>div.ctrls:nth-child(7)>button.pp:nth-child(3)",
+   "key": "np.playBtn"
+  },
+  {
+   "path": "#box>div#np.np.open:nth-child(2)>div.ctrls:nth-child(7)>button.pp:nth-child(3)>svg:nth-child(1)",
+   "key": "np.play.icon"
+  },
+  {
+   "path": "#box>div#np.np.open:nth-child(2)>div.ctrls:nth-child(7)>button.ibtn.act:nth-child(4)",
+   "key": "np.nextBtn"
+  },
+  {
+   "path": "#box>div#np.np.open:nth-child(2)>div.ctrls:nth-child(7)>button.ibtn.act:nth-child(4)>svg:nth-child(1)",
+   "key": "np.next.icon"
+  },
+  {
+   "path": "#box>div#np.np.open:nth-child(2)>div.ctrls:nth-child(7)>button.ibtn.small.off:nth-child(5)",
+   "key": "np.repeatBtn"
+  },
+  {
+   "path": "#box>div#np.np.open:nth-child(2)>div.ctrls:nth-child(7)>button.ibtn.small.off:nth-child(5)>svg:nth-child(1)",
+   "key": "np.repeat.icon"
+  },
+  {
+   "path": "#box>div#np.np.open:nth-child(2)>div.lowtabs:nth-child(8)>button:nth-child(1)",
+   "key": "np.tab.upnext",
+   "styleFrom": "np.tab.upnext.label"
+  },
+  {
+   "path": "#box>div#np.np.open:nth-child(2)>div.lowtabs:nth-child(8)>button:nth-child(2)",
+   "key": "np.tab.lyrics",
+   "styleFrom": "np.tab.lyrics.label"
+  },
+  {
+   "path": "#box>div#np.np.open:nth-child(2)>div.lowtabs:nth-child(8)>button:nth-child(3)",
+   "key": "np.tab.related",
+   "styleFrom": "np.tab.related.label"
+  }
+ ],
+ "aux": [
+  "np.ctx.label",
+  "np.link.label",
+  "np.src.sc.label",
+  "np.src.ytm.label",
+  "np.tab.lyrics.label",
+  "np.tab.related.label",
+  "np.tab.upnext.label"
+ ],
+ "centered": [
+  {
+   "child": "np.close.icon",
+   "parent": "np.closeBtn",
+   "axes": "xy"
+  },
+  {
+   "child": "np.more.icon",
+   "parent": "np.moreBtn",
+   "axes": "xy"
+  },
+  {
+   "child": "np.like.icon",
+   "parent": "np.likeBtn",
+   "axes": "xy"
+  },
+  {
+   "child": "np.shuffle.icon",
+   "parent": "np.shuffleBtn",
+   "axes": "xy"
+  },
+  {
+   "child": "np.prev.icon",
+   "parent": "np.prevBtn",
+   "axes": "xy"
+  },
+  {
+   "child": "np.next.icon",
+   "parent": "np.nextBtn",
+   "axes": "xy"
+  },
+  {
+   "child": "np.repeat.icon",
+   "parent": "np.repeatBtn",
+   "axes": "xy"
+  },
+  {
+   "child": "np.art",
+   "parent": "root",
+   "axes": "x"
+  },
+  {
+   "child": "np.ctx",
+   "parent": "root",
+   "axes": "x"
+  },
+  {
+   "child": "np.playBtn",
+   "parent": "root",
+   "axes": "x"
+  },
+  {
+   "child": "np.play.icon",
+   "parent": "np.playBtn",
+   "axes": "xy"
+  }
+ ],
+ "rows": [
+  {
+   "name": "top row",
+   "keys": [
+    "np.closeBtn",
+    "np.ctx",
+    "np.moreBtn"
+   ],
+   "edges": [
+    "centerY"
+   ]
+  },
+  {
+   "name": "source buttons",
+   "keys": [
+    "np.src.ytm",
+    "np.src.sc"
+   ],
+   "edges": [
+    "top",
+    "bottom"
+   ]
+  },
+  {
+   "name": "controls",
+   "keys": [
+    "np.shuffleBtn",
+    "np.prevBtn",
+    "np.playBtn",
+    "np.nextBtn",
+    "np.repeatBtn"
+   ],
+   "edges": [
+    "centerY"
+   ]
+  },
+  {
+   "name": "times",
+   "keys": [
+    "np.seek.pos",
+    "np.seek.dur"
+   ],
+   "edges": [
+    "top"
+   ]
+  },
+  {
+   "name": "low tabs",
+   "keys": [
+    "np.tab.upnext",
+    "np.tab.lyrics",
+    "np.tab.related"
+   ],
+   "edges": [
+    "top",
+    "bottom"
+   ]
+  },
+  {
+   "name": "seek thumb on the line",
+   "keys": [
+    "np.seek.line",
+    "np.seek.thumb"
+   ],
+   "edges": [
+    "centerY"
+   ]
+  }
+ ],
+ "noOverlap": [
+  [
+   "np.title",
+   "np.likeBtn"
+  ],
+  [
+   "np.artist",
+   "np.likeBtn"
+  ]
+ ],
+ "ellipsis": [],
+ "toleranceNote": "Chrome (mock reference) lays text out with integer-rounded glyph advances, Skia with fractional ones: 12-14px text is 2-4% wider in the reference. Only boxes whose width is the text (wrap-content: the meta lines, the chip and source buttons, the times, the low tabs, the tags, the preparing note) depend on that, and what is aligned to their right edge moves with them; every other box is fill/fixed and held to 1px.",
+ "tolerance": {
+  "np.link": {
+   "w": 4.0
+  },
+  "np.tab.upnext": {
+   "x": 3.0,
+   "w": 4.0
+  },
+  "np.tab.lyrics": {
+   "x": 3.0,
+   "w": 4.0
+  },
+  "np.tab.related": {
+   "x": 3.0,
+   "w": 4.0
+  },
+  "np.src.ytm": {
+   "w": 4.0
+  },
+  "np.src.sc": {
+   "x": 4.0,
+   "w": 4.0
+  },
+  "np.src.sc.icon": {
+   "x": 4.0
+  },
+  "np.seek.pos": {
+   "w": 3.0
+  },
+  "np.seek.dur": {
+   "x": 3.0,
+   "w": 3.0
+  }
+ }
+}
