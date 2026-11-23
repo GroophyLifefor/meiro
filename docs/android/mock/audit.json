@@ -8,16 +8,16 @@
   "light",
   "dark"
  ],
- "screens": 29,
+ "screens": 31,
  "note": "Mock self-audit. Heuristic-based; false positives are possible, each finding names the heuristic. The mock is NOT modified.",
  "checkedTotals": {
-  "elements": 8260,
-  "overflowHidden": 6150,
-  "centringContainers": 3312,
-  "centringIntended": 2728,
+  "elements": 9150,
+  "overflowHidden": 6894,
+  "centringContainers": 3752,
+  "centringIntended": 3058,
   "pseudo": 28,
-  "flexRowsCentre": 1080,
-  "flexRowsLines": 136
+  "flexRowsCentre": 1206,
+  "flexRowsLines": 144
  },
  "summary": {},
  "fontLoadStatus": [

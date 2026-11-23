@@ -1,0 +1,7456 @@
+{
+ "screen": "histmenu",
+ "phoneScreenCssSize": {
+  "w": 370,
+  "h": 824
+ },
+ "deviceScaleFactor": 1,
+ "themes": [
+  "light",
+  "dark"
+ ],
+ "note": "bbox is relative to the phone screen (#box), CSS px, rounded to 0.5. offscreen=true: below/right of a scroll container viewport (natural position at scrollTop 0). color/backgroundColor/borderColor/fill carry per-theme values.",
+ "elementCount": 142,
+ "elements": [
+  {
+   "path": "#box>div.app:nth-child(1)>div.statusbar:nth-child(1)>span#clock:nth-child(1)",
+   "tag": "span",
+   "classes": [],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "14:51",
+   "icon": null,
+   "bbox": {
+    "x": 26,
+    "y": 11,
+    "w": 32,
+    "h": 20
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "500",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div.statusbar:nth-child(1)>span.sys:nth-child(2)>span#netIcon:nth-child(1)",
+   "tag": "span",
+   "classes": [],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "5G",
+   "icon": null,
+   "bbox": {
+    "x": 304.5,
+    "y": 11,
+    "w": 17.5,
+    "h": 20
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "500",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div.statusbar:nth-child(1)>span.sys:nth-child(2)>i:nth-child(2)",
+   "tag": "i",
+   "classes": [],
+   "kind": "leaf",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 328,
+    "y": 16,
+    "w": 16,
+    "h": 10
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "500",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "2px",
+    "opacity": "0.85",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar.withback:nth-child(1)",
+   "tag": "div",
+   "classes": [
+    "topbar",
+    "withback"
+   ],
+   "kind": "surface",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 0,
+    "y": 36,
+    "w": 370,
+    "h": 64
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgb(249, 248, 254)",
+     "dark": "rgb(19, 19, 23)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar.withback:nth-child(1)>button.ibtn:nth-child(1)",
+   "tag": "button",
+   "classes": [
+    "ibtn"
+   ],
+   "kind": "control",
+   "role": null,
+   "ariaLabel": "Geri",
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 4,
+    "y": 44,
+    "w": 48,
+    "h": 48
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "50%",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar.withback:nth-child(1)>button.ibtn:nth-child(1)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "back",
+   "bbox": {
+    "x": 16,
+    "y": 56,
+    "w": 24,
+    "h": 24
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar.withback:nth-child(1)>h1:nth-child(2)",
+   "tag": "h1",
+   "classes": [],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Dinleme geçmişi",
+   "icon": null,
+   "bbox": {
+    "x": 58,
+    "y": 54,
+    "w": 196,
+    "h": 28
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "22px",
+    "fontWeight": "500",
+    "lineHeight": "28px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar.withback:nth-child(1)>button.ibtn:nth-child(3)",
+   "tag": "button",
+   "classes": [
+    "ibtn"
+   ],
+   "kind": "control",
+   "role": null,
+   "ariaLabel": "Geçmişte ara",
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 260,
+    "y": 44,
+    "w": 48,
+    "h": 48
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "50%",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar.withback:nth-child(1)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "search",
+   "bbox": {
+    "x": 272,
+    "y": 56,
+    "w": 24,
+    "h": 24
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar.withback:nth-child(1)>button.ibtn:nth-child(4)",
+   "tag": "button",
+   "classes": [
+    "ibtn"
+   ],
+   "kind": "control",
+   "role": null,
+   "ariaLabel": "Seçenekler",
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 314,
+    "y": 44,
+    "w": 48,
+    "h": 48
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "50%",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar.withback:nth-child(1)>button.ibtn:nth-child(4)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "more",
+   "bbox": {
+    "x": 326,
+    "y": 56,
+    "w": 24,
+    "h": 24
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.chips:nth-child(2)>button.chip.sel:nth-child(1)",
+   "tag": "button",
+   "classes": [
+    "chip",
+    "sel"
+   ],
+   "kind": "control",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Hepsi",
+   "icon": null,
+   "bbox": {
+    "x": 16,
+    "y": 104,
+    "w": 81,
+    "h": 32
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "8px",
+    "opacity": "1",
+    "borderWidth": "1px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(29, 23, 45)",
+     "dark": "rgb(227, 222, 253)"
+    },
+    "backgroundColor": {
+     "light": "rgb(227, 222, 253)",
+     "dark": "rgb(72, 67, 92)"
+    },
+    "borderColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.chips:nth-child(2)>button.chip.sel:nth-child(1)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "check",
+   "bbox": {
+    "x": 31,
+    "y": 113,
+    "w": 14,
+    "h": 14
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(29, 23, 45)",
+     "dark": "rgb(227, 222, 253)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(29, 23, 45)",
+     "dark": "rgb(227, 222, 253)"
+    },
+    "fill": {
+     "light": "rgb(29, 23, 45)",
+     "dark": "rgb(227, 222, 253)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.chips:nth-child(2)>button.chip:nth-child(2)",
+   "tag": "button",
+   "classes": [
+    "chip"
+   ],
+   "kind": "control",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Sayılanlar",
+   "icon": null,
+   "bbox": {
+    "x": 105,
+    "y": 104,
+    "w": 87,
+    "h": 32
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "8px",
+    "opacity": "1",
+    "borderWidth": "1px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(199, 197, 209)",
+     "dark": "rgb(71, 69, 79)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.chips:nth-child(2)>button.chip:nth-child(3)",
+   "tag": "button",
+   "classes": [
+    "chip"
+   ],
+   "kind": "control",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Geçilenler",
+   "icon": null,
+   "bbox": {
+    "x": 200,
+    "y": 104,
+    "w": 89,
+    "h": 32
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "8px",
+    "opacity": "1",
+    "borderWidth": "1px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(199, 197, 209)",
+     "dark": "rgb(71, 69, 79)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.chips:nth-child(2)>button.chip:nth-child(4)",
+   "tag": "button",
+   "classes": [
+    "chip"
+   ],
+   "kind": "control",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Telefon",
+   "icon": null,
+   "bbox": {
+    "x": 297,
+    "y": 104,
+    "w": 73,
+    "h": 32
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "8px",
+    "opacity": "1",
+    "borderWidth": "1px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(199, 197, 209)",
+     "dark": "rgb(71, 69, 79)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.chips:nth-child(2)>button.chip:nth-child(5)",
+   "tag": "button",
+   "classes": [
+    "chip"
+   ],
+   "kind": "control",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Masaüstü",
+   "icon": null,
+   "bbox": {
+    "x": 378,
+    "y": 104,
+    "w": 86,
+    "h": 32
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "8px",
+    "opacity": "1",
+    "borderWidth": "1px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(199, 197, 209)",
+     "dark": "rgb(71, 69, 79)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.h-sec:nth-child(3)>h2:nth-child(1)",
+   "tag": "h2",
+   "classes": [],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Bugün",
+   "icon": null,
+   "bbox": {
+    "x": 16,
+    "y": 164,
+    "w": 61,
+    "h": 26
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "20px",
+    "fontWeight": "500",
+    "lineHeight": "26px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.h-sec:nth-child(3)>span.sub:nth-child(2)",
+   "tag": "span",
+   "classes": [
+    "sub"
+   ],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "5 çalma · ~16 dk",
+   "icon": null,
+   "bbox": {
+    "x": 261,
+    "y": 167,
+    "w": 93,
+    "h": 20
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(4)>div.row.now:nth-child(1)>div.cv:nth-child(1)>span.eq:nth-child(1)",
+   "tag": "span",
+   "classes": [
+    "eq"
+   ],
+   "kind": "surface",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 16,
+    "y": 212,
+    "w": 48,
+    "h": 48
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "8px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0.45)",
+     "dark": "rgba(0, 0, 0, 0.45)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(4)>div.row.now:nth-child(1)>div.t:nth-child(2)>b:nth-child(1)",
+   "tag": "b",
+   "classes": [],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Bu Kalp Seni Unutur mu",
+   "icon": null,
+   "bbox": {
+    "x": 76,
+    "y": 208,
+    "w": 230,
+    "h": 22
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "16px",
+    "fontWeight": "400",
+    "lineHeight": "22px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(99, 77, 157)",
+     "dark": "rgb(201, 187, 255)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(99, 77, 157)",
+     "dark": "rgb(201, 187, 255)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(4)>div.row.now:nth-child(1)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "logo:ytm",
+   "bbox": {
+    "x": 76,
+    "y": 232,
+    "w": 14,
+    "h": 14
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "400",
+    "lineHeight": "18px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(4)>div.row.now:nth-child(1)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span.dim:nth-child(2)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "logo:sc",
+   "bbox": {
+    "x": 92,
+    "y": 232,
+    "w": 14,
+    "h": 14
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "400",
+    "lineHeight": "18px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(4)>div.row.now:nth-child(1)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(2)",
+   "tag": "span",
+   "classes": [
+    "txt"
+   ],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Fikret Kızılok",
+   "icon": null,
+   "bbox": {
+    "x": 112,
+    "y": 230,
+    "w": 76,
+    "h": 18
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "400",
+    "lineHeight": "18px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(4)>div.row.now:nth-child(1)>div.t:nth-child(2)>span.why.muted:nth-child(3)",
+   "tag": "span",
+   "classes": [
+    "why",
+    "muted"
+   ],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "14:48 · telefon · tamamı",
+   "icon": null,
+   "bbox": {
+    "x": 76,
+    "y": 248,
+    "w": 230,
+    "h": 16
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "12px",
+    "fontWeight": "400",
+    "lineHeight": "16px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(4)>div.row.now:nth-child(1)>button.ibtn:nth-child(3)",
+   "tag": "button",
+   "classes": [
+    "ibtn"
+   ],
+   "kind": "control",
+   "role": null,
+   "ariaLabel": "Seçenekler",
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 318,
+    "y": 212,
+    "w": 48,
+    "h": 48
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "50%",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(4)>div.row.now:nth-child(1)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "more",
+   "bbox": {
+    "x": 330,
+    "y": 224,
+    "w": 24,
+    "h": 24
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(5)>div.row:nth-child(1)>div.cv:nth-child(1)",
+   "tag": "div",
+   "classes": [
+    "cv"
+   ],
+   "kind": "leaf",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 16,
+    "y": 284,
+    "w": 48,
+    "h": 48
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "8px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(5)>div.row:nth-child(1)>div.t:nth-child(2)>b:nth-child(1)",
+   "tag": "b",
+   "classes": [],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Son Arzum",
+   "icon": null,
+   "bbox": {
+    "x": 76,
+    "y": 280,
+    "w": 186,
+    "h": 22
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "16px",
+    "fontWeight": "400",
+    "lineHeight": "22px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(5)>div.row:nth-child(1)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "logo:ytm",
+   "bbox": {
+    "x": 76,
+    "y": 304,
+    "w": 14,
+    "h": 14
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "400",
+    "lineHeight": "18px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(5)>div.row:nth-child(1)>div.t:nth-child(2)>span.meta:nth-child(2)>svg.dl:nth-child(2)",
+   "tag": "svg",
+   "classes": [
+    "dl"
+   ],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "done",
+   "bbox": {
+    "x": 96,
+    "y": 304,
+    "w": 14,
+    "h": 14
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "400",
+    "lineHeight": "18px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(99, 77, 157)",
+     "dark": "rgb(201, 187, 255)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(5)>div.row:nth-child(1)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(3)",
+   "tag": "span",
+   "classes": [
+    "txt"
+   ],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Nilüfer",
+   "icon": null,
+   "bbox": {
+    "x": 116,
+    "y": 302,
+    "w": 40.5,
+    "h": 18
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "400",
+    "lineHeight": "18px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(5)>div.row:nth-child(1)>div.t:nth-child(2)>span.why.muted:nth-child(3)",
+   "tag": "span",
+   "classes": [
+    "why",
+    "muted"
+   ],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "14:44 · telefon · tamamı",
+   "icon": null,
+   "bbox": {
+    "x": 76,
+    "y": 320,
+    "w": 186,
+    "h": 16
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "12px",
+    "fontWeight": "400",
+    "lineHeight": "16px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(5)>div.row:nth-child(1)>button.linkbtn:nth-child(3)",
+   "tag": "button",
+   "classes": [
+    "linkbtn"
+   ],
+   "kind": "control",
+   "role": null,
+   "ariaLabel": "MusicBrainz'e bağla",
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 274,
+    "y": 292,
+    "w": 32,
+    "h": 32
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "50%",
+    "opacity": "1",
+    "borderWidth": "1px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(119, 117, 128)",
+     "dark": "rgb(145, 143, 154)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(5)>div.row:nth-child(1)>button.linkbtn:nth-child(3)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "link",
+   "bbox": {
+    "x": 281,
+    "y": 299,
+    "w": 18,
+    "h": 18
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(5)>div.row:nth-child(1)>button.ibtn:nth-child(4)",
+   "tag": "button",
+   "classes": [
+    "ibtn"
+   ],
+   "kind": "control",
+   "role": null,
+   "ariaLabel": "Seçenekler",
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 318,
+    "y": 284,
+    "w": 48,
+    "h": 48
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "50%",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(5)>div.row:nth-child(1)>button.ibtn:nth-child(4)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "more",
+   "bbox": {
+    "x": 330,
+    "y": 296,
+    "w": 24,
+    "h": 24
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow.skip:nth-child(6)>div.row:nth-child(1)>div.cv:nth-child(1)",
+   "tag": "div",
+   "classes": [
+    "cv"
+   ],
+   "kind": "leaf",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 16,
+    "y": 356,
+    "w": 48,
+    "h": 48
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "8px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow.skip:nth-child(6)>div.row:nth-child(1)>div.t:nth-child(2)>b:nth-child(1)",
+   "tag": "b",
+   "classes": [],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Yolla",
+   "icon": null,
+   "bbox": {
+    "x": 76,
+    "y": 352,
+    "w": 230,
+    "h": 22
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "16px",
+    "fontWeight": "400",
+    "lineHeight": "22px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow.skip:nth-child(6)>div.row:nth-child(1)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "logo:ytm",
+   "bbox": {
+    "x": 76,
+    "y": 376,
+    "w": 14,
+    "h": 14
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "400",
+    "lineHeight": "18px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow.skip:nth-child(6)>div.row:nth-child(1)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(2)",
+   "tag": "span",
+   "classes": [
+    "txt"
+   ],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Tarkan",
+   "icon": null,
+   "bbox": {
+    "x": 96,
+    "y": 374,
+    "w": 39,
+    "h": 18
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "400",
+    "lineHeight": "18px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow.skip:nth-child(6)>div.row:nth-child(1)>div.t:nth-child(2)>span.why.muted:nth-child(3)",
+   "tag": "span",
+   "classes": [
+    "why",
+    "muted"
+   ],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "14:40 · telefon · geçildi · 0:12",
+   "icon": null,
+   "bbox": {
+    "x": 76,
+    "y": 392,
+    "w": 230,
+    "h": 16
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "12px",
+    "fontWeight": "400",
+    "lineHeight": "16px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow.skip:nth-child(6)>div.row:nth-child(1)>button.ibtn:nth-child(3)",
+   "tag": "button",
+   "classes": [
+    "ibtn"
+   ],
+   "kind": "control",
+   "role": null,
+   "ariaLabel": "Seçenekler",
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 318,
+    "y": 356,
+    "w": 48,
+    "h": 48
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "50%",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow.skip:nth-child(6)>div.row:nth-child(1)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "more",
+   "bbox": {
+    "x": 330,
+    "y": 368,
+    "w": 24,
+    "h": 24
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(7)>div.row:nth-child(1)>div.cv:nth-child(1)",
+   "tag": "div",
+   "classes": [
+    "cv"
+   ],
+   "kind": "leaf",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 16,
+    "y": 428,
+    "w": 48,
+    "h": 48
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "8px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(7)>div.row:nth-child(1)>div.t:nth-child(2)>b:nth-child(1)",
+   "tag": "b",
+   "classes": [],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Nightcall",
+   "icon": null,
+   "bbox": {
+    "x": 76,
+    "y": 424,
+    "w": 230,
+    "h": 22
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "16px",
+    "fontWeight": "400",
+    "lineHeight": "22px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(7)>div.row:nth-child(1)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "logo:ytm",
+   "bbox": {
+    "x": 76,
+    "y": 448,
+    "w": 14,
+    "h": 14
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "400",
+    "lineHeight": "18px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(7)>div.row:nth-child(1)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span.dim:nth-child(2)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "logo:sc",
+   "bbox": {
+    "x": 92,
+    "y": 448,
+    "w": 14,
+    "h": 14
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "400",
+    "lineHeight": "18px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(7)>div.row:nth-child(1)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(2)",
+   "tag": "span",
+   "classes": [
+    "txt"
+   ],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Kavinsky",
+   "icon": null,
+   "bbox": {
+    "x": 112,
+    "y": 446,
+    "w": 51.5,
+    "h": 18
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "400",
+    "lineHeight": "18px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(7)>div.row:nth-child(1)>div.t:nth-child(2)>span.why.muted:nth-child(3)",
+   "tag": "span",
+   "classes": [
+    "why",
+    "muted"
+   ],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "14:31 · masaüstü · 2:05 / 4:18",
+   "icon": null,
+   "bbox": {
+    "x": 76,
+    "y": 464,
+    "w": 230,
+    "h": 16
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "12px",
+    "fontWeight": "400",
+    "lineHeight": "16px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(7)>div.row:nth-child(1)>button.ibtn:nth-child(3)",
+   "tag": "button",
+   "classes": [
+    "ibtn"
+   ],
+   "kind": "control",
+   "role": null,
+   "ariaLabel": "Seçenekler",
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 318,
+    "y": 428,
+    "w": 48,
+    "h": 48
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "50%",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(7)>div.row:nth-child(1)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "more",
+   "bbox": {
+    "x": 330,
+    "y": 440,
+    "w": 24,
+    "h": 24
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(8)>div.row:nth-child(1)>div.cv:nth-child(1)",
+   "tag": "div",
+   "classes": [
+    "cv"
+   ],
+   "kind": "leaf",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 16,
+    "y": 500,
+    "w": 48,
+    "h": 48
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "8px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(8)>div.row:nth-child(1)>div.t:nth-child(2)>b:nth-child(1)",
+   "tag": "b",
+   "classes": [],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Stolen Dance",
+   "icon": null,
+   "bbox": {
+    "x": 76,
+    "y": 496,
+    "w": 230,
+    "h": 22
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "16px",
+    "fontWeight": "400",
+    "lineHeight": "22px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(8)>div.row:nth-child(1)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "logo:sc",
+   "bbox": {
+    "x": 76,
+    "y": 520,
+    "w": 14,
+    "h": 14
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "400",
+    "lineHeight": "18px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(8)>div.row:nth-child(1)>div.t:nth-child(2)>span.meta:nth-child(2)>svg.dl:nth-child(2)",
+   "tag": "svg",
+   "classes": [
+    "dl"
+   ],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "done",
+   "bbox": {
+    "x": 96,
+    "y": 520,
+    "w": 14,
+    "h": 14
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "400",
+    "lineHeight": "18px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(99, 77, 157)",
+     "dark": "rgb(201, 187, 255)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(8)>div.row:nth-child(1)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(3)",
+   "tag": "span",
+   "classes": [
+    "txt"
+   ],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Milky Chance",
+   "icon": null,
+   "bbox": {
+    "x": 116,
+    "y": 518,
+    "w": 79.5,
+    "h": 18
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "400",
+    "lineHeight": "18px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(8)>div.row:nth-child(1)>div.t:nth-child(2)>span.why.muted:nth-child(3)",
+   "tag": "span",
+   "classes": [
+    "why",
+    "muted"
+   ],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "10:02 · masaüstü · tamamı",
+   "icon": null,
+   "bbox": {
+    "x": 76,
+    "y": 536,
+    "w": 230,
+    "h": 16
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "12px",
+    "fontWeight": "400",
+    "lineHeight": "16px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(8)>div.row:nth-child(1)>button.ibtn:nth-child(3)",
+   "tag": "button",
+   "classes": [
+    "ibtn"
+   ],
+   "kind": "control",
+   "role": null,
+   "ariaLabel": "Seçenekler",
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 318,
+    "y": 500,
+    "w": 48,
+    "h": 48
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "50%",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(8)>div.row:nth-child(1)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "more",
+   "bbox": {
+    "x": 330,
+    "y": 512,
+    "w": 24,
+    "h": 24
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.h-sec:nth-child(9)>h2:nth-child(1)",
+   "tag": "h2",
+   "classes": [],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Dün",
+   "icon": null,
+   "bbox": {
+    "x": 16,
+    "y": 580,
+    "w": 38.5,
+    "h": 26
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "20px",
+    "fontWeight": "500",
+    "lineHeight": "26px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.h-sec:nth-child(9)>span.sub:nth-child(2)",
+   "tag": "span",
+   "classes": [
+    "sub"
+   ],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "3 çalma · ~8 dk",
+   "icon": null,
+   "bbox": {
+    "x": 266,
+    "y": 583,
+    "w": 88,
+    "h": 20
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(10)>div.row:nth-child(1)>div.cv:nth-child(1)",
+   "tag": "div",
+   "classes": [
+    "cv"
+   ],
+   "kind": "leaf",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 16,
+    "y": 628,
+    "w": 48,
+    "h": 48
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "8px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(10)>div.row:nth-child(1)>div.t:nth-child(2)>b:nth-child(1)",
+   "tag": "b",
+   "classes": [],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "After Dark",
+   "icon": null,
+   "bbox": {
+    "x": 76,
+    "y": 624,
+    "w": 230,
+    "h": 22
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "16px",
+    "fontWeight": "400",
+    "lineHeight": "22px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(10)>div.row:nth-child(1)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "logo:ytm",
+   "bbox": {
+    "x": 76,
+    "y": 648,
+    "w": 14,
+    "h": 14
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "400",
+    "lineHeight": "18px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(10)>div.row:nth-child(1)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(2)",
+   "tag": "span",
+   "classes": [
+    "txt"
+   ],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Mr.Kitty",
+   "icon": null,
+   "bbox": {
+    "x": 96,
+    "y": 646,
+    "w": 47.5,
+    "h": 18
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "400",
+    "lineHeight": "18px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(10)>div.row:nth-child(1)>div.t:nth-child(2)>span.why.muted:nth-child(3)",
+   "tag": "span",
+   "classes": [
+    "why",
+    "muted"
+   ],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "23:17 · masaüstü · tamamı",
+   "icon": null,
+   "bbox": {
+    "x": 76,
+    "y": 664,
+    "w": 230,
+    "h": 16
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "12px",
+    "fontWeight": "400",
+    "lineHeight": "16px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(10)>div.row:nth-child(1)>button.ibtn:nth-child(3)",
+   "tag": "button",
+   "classes": [
+    "ibtn"
+   ],
+   "kind": "control",
+   "role": null,
+   "ariaLabel": "Seçenekler",
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 318,
+    "y": 628,
+    "w": 48,
+    "h": 48
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "50%",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(10)>div.row:nth-child(1)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "more",
+   "bbox": {
+    "x": 330,
+    "y": 640,
+    "w": 24,
+    "h": 24
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow.skip:nth-child(11)>div.row:nth-child(1)>div.cv:nth-child(1)",
+   "tag": "div",
+   "classes": [
+    "cv"
+   ],
+   "kind": "leaf",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 16,
+    "y": 700,
+    "w": 48,
+    "h": 48
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "8px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow.skip:nth-child(11)>div.row:nth-child(1)>div.t:nth-child(2)>b:nth-child(1)",
+   "tag": "b",
+   "classes": [],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Gece Yarısı (canlı)",
+   "icon": null,
+   "bbox": {
+    "x": 76,
+    "y": 696,
+    "w": 186,
+    "h": 22
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "16px",
+    "fontWeight": "400",
+    "lineHeight": "22px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow.skip:nth-child(11)>div.row:nth-child(1)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "logo:sc",
+   "bbox": {
+    "x": 76,
+    "y": 720,
+    "w": 14,
+    "h": 14
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "400",
+    "lineHeight": "18px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow.skip:nth-child(11)>div.row:nth-child(1)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(2)",
+   "tag": "span",
+   "classes": [
+    "txt"
+   ],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Anıl Kaya",
+   "icon": null,
+   "bbox": {
+    "x": 96,
+    "y": 718,
+    "w": 55,
+    "h": 18
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "400",
+    "lineHeight": "18px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow.skip:nth-child(11)>div.row:nth-child(1)>div.t:nth-child(2)>span.why.muted:nth-child(3)",
+   "tag": "span",
+   "classes": [
+    "why",
+    "muted"
+   ],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "23:12 · masaüstü · geçildi · 0:08",
+   "icon": null,
+   "bbox": {
+    "x": 76,
+    "y": 736,
+    "w": 186,
+    "h": 16
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "12px",
+    "fontWeight": "400",
+    "lineHeight": "16px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow.skip:nth-child(11)>div.row:nth-child(1)>button.linkbtn:nth-child(3)",
+   "tag": "button",
+   "classes": [
+    "linkbtn"
+   ],
+   "kind": "control",
+   "role": null,
+   "ariaLabel": "MusicBrainz'e bağla",
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 274,
+    "y": 708,
+    "w": 32,
+    "h": 32
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "50%",
+    "opacity": "1",
+    "borderWidth": "1px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(119, 117, 128)",
+     "dark": "rgb(145, 143, 154)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow.skip:nth-child(11)>div.row:nth-child(1)>button.linkbtn:nth-child(3)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "link",
+   "bbox": {
+    "x": 281,
+    "y": 715,
+    "w": 18,
+    "h": 18
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow.skip:nth-child(11)>div.row:nth-child(1)>button.ibtn:nth-child(4)",
+   "tag": "button",
+   "classes": [
+    "ibtn"
+   ],
+   "kind": "control",
+   "role": null,
+   "ariaLabel": "Seçenekler",
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 318,
+    "y": 700,
+    "w": 48,
+    "h": 48
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "50%",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow.skip:nth-child(11)>div.row:nth-child(1)>button.ibtn:nth-child(4)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "more",
+   "bbox": {
+    "x": 330,
+    "y": 712,
+    "w": 24,
+    "h": 24
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(12)>div.row:nth-child(1)>div.cv:nth-child(1)",
+   "tag": "div",
+   "classes": [
+    "cv"
+   ],
+   "kind": "leaf",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 16,
+    "y": 772,
+    "w": 48,
+    "h": 48
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "8px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(12)>div.row:nth-child(1)>div.t:nth-child(2)>b:nth-child(1)",
+   "tag": "b",
+   "classes": [],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Cesaretin Var mı Aşka",
+   "icon": null,
+   "bbox": {
+    "x": 76,
+    "y": 768,
+    "w": 186,
+    "h": 22
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "16px",
+    "fontWeight": "400",
+    "lineHeight": "22px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(12)>div.row:nth-child(1)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "logo:ytm",
+   "bbox": {
+    "x": 76,
+    "y": 792,
+    "w": 14,
+    "h": 14
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "400",
+    "lineHeight": "18px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(12)>div.row:nth-child(1)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(2)",
+   "tag": "span",
+   "classes": [
+    "txt"
+   ],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Gülay",
+   "icon": null,
+   "bbox": {
+    "x": 96,
+    "y": 790,
+    "w": 35,
+    "h": 18
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "400",
+    "lineHeight": "18px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(12)>div.row:nth-child(1)>div.t:nth-child(2)>span.why.muted:nth-child(3)",
+   "tag": "span",
+   "classes": [
+    "why",
+    "muted"
+   ],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "22:58 · telefon · tamamı",
+   "icon": null,
+   "bbox": {
+    "x": 76,
+    "y": 808,
+    "w": 186,
+    "h": 16
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "12px",
+    "fontWeight": "400",
+    "lineHeight": "16px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(12)>div.row:nth-child(1)>button.linkbtn:nth-child(3)",
+   "tag": "button",
+   "classes": [
+    "linkbtn"
+   ],
+   "kind": "control",
+   "role": null,
+   "ariaLabel": "MusicBrainz'e bağla",
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 274,
+    "y": 780,
+    "w": 32,
+    "h": 32
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "50%",
+    "opacity": "1",
+    "borderWidth": "1px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(119, 117, 128)",
+     "dark": "rgb(145, 143, 154)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(12)>div.row:nth-child(1)>button.linkbtn:nth-child(3)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "link",
+   "bbox": {
+    "x": 281,
+    "y": 787,
+    "w": 18,
+    "h": 18
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(12)>div.row:nth-child(1)>button.ibtn:nth-child(4)",
+   "tag": "button",
+   "classes": [
+    "ibtn"
+   ],
+   "kind": "control",
+   "role": null,
+   "ariaLabel": "Seçenekler",
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 318,
+    "y": 772,
+    "w": 48,
+    "h": 48
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "50%",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(12)>div.row:nth-child(1)>button.ibtn:nth-child(4)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "more",
+   "bbox": {
+    "x": 330,
+    "y": 784,
+    "w": 24,
+    "h": 24
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.h-sec:nth-child(13)>h2:nth-child(1)",
+   "tag": "h2",
+   "classes": [],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "27 Ekim Salı",
+   "icon": null,
+   "bbox": {
+    "x": 16,
+    "y": 852,
+    "w": 111.5,
+    "h": 26
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "20px",
+    "fontWeight": "500",
+    "lineHeight": "26px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.h-sec:nth-child(13)>span.sub:nth-child(2)",
+   "tag": "span",
+   "classes": [
+    "sub"
+   ],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "2 çalma · ~8 dk",
+   "icon": null,
+   "bbox": {
+    "x": 266,
+    "y": 855,
+    "w": 88,
+    "h": 20
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(14)>div.row:nth-child(1)>div.cv:nth-child(1)",
+   "tag": "div",
+   "classes": [
+    "cv"
+   ],
+   "kind": "leaf",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 16,
+    "y": 900,
+    "w": 48,
+    "h": 48
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "8px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(14)>div.row:nth-child(1)>div.t:nth-child(2)>b:nth-child(1)",
+   "tag": "b",
+   "classes": [],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Get Lucky",
+   "icon": null,
+   "bbox": {
+    "x": 76,
+    "y": 896,
+    "w": 230,
+    "h": 22
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "16px",
+    "fontWeight": "400",
+    "lineHeight": "22px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(14)>div.row:nth-child(1)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "logo:ytm",
+   "bbox": {
+    "x": 76,
+    "y": 920,
+    "w": 14,
+    "h": 14
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "400",
+    "lineHeight": "18px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(14)>div.row:nth-child(1)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span.dim:nth-child(2)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "logo:sc",
+   "bbox": {
+    "x": 92,
+    "y": 920,
+    "w": 14,
+    "h": 14
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "400",
+    "lineHeight": "18px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(14)>div.row:nth-child(1)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(2)",
+   "tag": "span",
+   "classes": [
+    "txt"
+   ],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Daft Punk, Pharrell Williams",
+   "icon": null,
+   "bbox": {
+    "x": 112,
+    "y": 918,
+    "w": 164.5,
+    "h": 18
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "400",
+    "lineHeight": "18px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(14)>div.row:nth-child(1)>div.t:nth-child(2)>span.why.muted:nth-child(3)",
+   "tag": "span",
+   "classes": [
+    "why",
+    "muted"
+   ],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "19:40 · telefon · tamamı",
+   "icon": null,
+   "bbox": {
+    "x": 76,
+    "y": 936,
+    "w": 230,
+    "h": 16
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "12px",
+    "fontWeight": "400",
+    "lineHeight": "16px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(14)>div.row:nth-child(1)>button.ibtn:nth-child(3)",
+   "tag": "button",
+   "classes": [
+    "ibtn"
+   ],
+   "kind": "control",
+   "role": null,
+   "ariaLabel": "Seçenekler",
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 318,
+    "y": 900,
+    "w": 48,
+    "h": 48
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "50%",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(14)>div.row:nth-child(1)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "more",
+   "bbox": {
+    "x": 330,
+    "y": 912,
+    "w": 24,
+    "h": 24
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(15)>div.row:nth-child(1)>div.cv:nth-child(1)",
+   "tag": "div",
+   "classes": [
+    "cv"
+   ],
+   "kind": "leaf",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 16,
+    "y": 972,
+    "w": 48,
+    "h": 48
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "8px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(15)>div.row:nth-child(1)>div.t:nth-child(2)>b:nth-child(1)",
+   "tag": "b",
+   "classes": [],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Starboy",
+   "icon": null,
+   "bbox": {
+    "x": 76,
+    "y": 968,
+    "w": 144.5,
+    "h": 22
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "16px",
+    "fontWeight": "400",
+    "lineHeight": "22px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(15)>div.row:nth-child(1)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "logo:sc",
+   "bbox": {
+    "x": 76,
+    "y": 992,
+    "w": 14,
+    "h": 14
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "400",
+    "lineHeight": "18px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(15)>div.row:nth-child(1)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(2)",
+   "tag": "span",
+   "classes": [
+    "txt"
+   ],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "The Weeknd, Daft Punk",
+   "icon": null,
+   "bbox": {
+    "x": 96,
+    "y": 990,
+    "w": 124.5,
+    "h": 18
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "400",
+    "lineHeight": "18px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(15)>div.row:nth-child(1)>div.t:nth-child(2)>span.why.muted:nth-child(3)",
+   "tag": "span",
+   "classes": [
+    "why",
+    "muted"
+   ],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "19:36 · telefon · 0:30",
+   "icon": null,
+   "bbox": {
+    "x": 76,
+    "y": 1008,
+    "w": 144.5,
+    "h": 16
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "12px",
+    "fontWeight": "400",
+    "lineHeight": "16px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(15)>div.row:nth-child(1)>span.chip:nth-child(3)",
+   "tag": "span",
+   "classes": [
+    "chip"
+   ],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "önizleme",
+   "icon": null,
+   "bbox": {
+    "x": 232.5,
+    "y": 984,
+    "w": 73.5,
+    "h": 24
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "12px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "8px",
+    "opacity": "1",
+    "borderWidth": "1px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(199, 197, 209)",
+     "dark": "rgb(71, 69, 79)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(15)>div.row:nth-child(1)>button.ibtn:nth-child(4)",
+   "tag": "button",
+   "classes": [
+    "ibtn"
+   ],
+   "kind": "control",
+   "role": null,
+   "ariaLabel": "Seçenekler",
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 318,
+    "y": 972,
+    "w": 48,
+    "h": 48
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "50%",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(15)>div.row:nth-child(1)>button.ibtn:nth-child(4)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "more",
+   "bbox": {
+    "x": 330,
+    "y": 984,
+    "w": 24,
+    "h": 24
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.note:nth-child(16)",
+   "tag": "div",
+   "classes": [
+    "note"
+   ],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Bütün cihazlardaki çalmalar, Meiro hesabından. 30 saniyeden kısa ya da yarısından az dinlenenler soluk: geçmişte durur ama Özet'e ve önerilere sayılmaz.",
+   "icon": null,
+   "bbox": {
+    "x": 16,
+    "y": 1038,
+    "w": 338,
+    "h": 51
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "12px",
+    "fontWeight": "400",
+    "lineHeight": "17px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div:nth-child(17)",
+   "tag": "div",
+   "classes": [],
+   "kind": "leaf",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 0,
+    "y": 1095,
+    "w": 370,
+    "h": 24
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)",
+   "tag": "div",
+   "classes": [
+    "mini"
+   ],
+   "kind": "surface",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 8,
+    "y": 672,
+    "w": 354,
+    "h": 64
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "16px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgb(232, 231, 237)",
+     "dark": "rgb(42, 41, 46)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.cv:nth-child(1)",
+   "tag": "div",
+   "classes": [
+    "cv"
+   ],
+   "kind": "leaf",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 16,
+    "y": 680,
+    "w": 48,
+    "h": 48
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "10px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>b:nth-child(1)",
+   "tag": "b",
+   "classes": [],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Bu Kalp Seni Unutur mu",
+   "icon": null,
+   "bbox": {
+    "x": 76,
+    "y": 684,
+    "w": 162,
+    "h": 20
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "500",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>span:nth-child(2)",
+   "tag": "span",
+   "classes": [],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Fikret Kızılok",
+   "icon": null,
+   "bbox": {
+    "x": 76,
+    "y": 704,
+    "w": 162,
+    "h": 20
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "12px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>span:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "logo:ytm",
+   "bbox": {
+    "x": 76,
+    "y": 707,
+    "w": 14,
+    "h": 14
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "12px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>span:nth-child(2)>span.src:nth-child(1)>span.dim:nth-child(2)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "logo:sc",
+   "bbox": {
+    "x": 96,
+    "y": 707,
+    "w": 14,
+    "h": 14
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "12px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(3)",
+   "tag": "button",
+   "classes": [
+    "ibtn"
+   ],
+   "kind": "control",
+   "role": null,
+   "ariaLabel": "Çal/duraklat",
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 250,
+    "y": 680,
+    "w": 48,
+    "h": 48
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "50%",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "pause",
+   "bbox": {
+    "x": 262,
+    "y": 692,
+    "w": 24,
+    "h": 24
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(4)",
+   "tag": "button",
+   "classes": [
+    "ibtn"
+   ],
+   "kind": "control",
+   "role": null,
+   "ariaLabel": "Sonraki",
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 310,
+    "y": 680,
+    "w": 48,
+    "h": 48
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "50%",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(4)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "next",
+   "bbox": {
+    "x": 322,
+    "y": 692,
+    "w": 24,
+    "h": 24
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.bar:nth-child(5)",
+   "tag": "div",
+   "classes": [
+    "bar"
+   ],
+   "kind": "surface",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 20,
+    "y": 734,
+    "w": 330,
+    "h": 2
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "1px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgb(199, 197, 209)",
+     "dark": "rgb(71, 69, 79)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.bar:nth-child(5)>i:nth-child(1)",
+   "tag": "i",
+   "classes": [],
+   "kind": "leaf",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 20,
+    "y": 734,
+    "w": 125.5,
+    "h": 2
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "1px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgb(99, 77, 157)",
+     "dark": "rgb(201, 187, 255)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)",
+   "tag": "nav",
+   "classes": [
+    "navbar"
+   ],
+   "kind": "surface",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 0,
+    "y": 744,
+    "w": 370,
+    "h": 80
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgb(238, 237, 243)",
+     "dark": "rgb(32, 31, 35)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(1)",
+   "tag": "button",
+   "classes": [
+    "nav",
+    "on"
+   ],
+   "kind": "control",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Ana sayfa",
+   "icon": null,
+   "bbox": {
+    "x": 0,
+    "y": 756,
+    "w": 92.5,
+    "h": 52
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "12px",
+    "fontWeight": "500",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(1)>span.pill:nth-child(1)",
+   "tag": "span",
+   "classes": [
+    "pill"
+   ],
+   "kind": "surface",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 14.5,
+    "y": 757,
+    "w": 64,
+    "h": 26
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "12px",
+    "fontWeight": "500",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "16px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(29, 23, 45)",
+     "dark": "rgb(227, 222, 253)"
+    },
+    "backgroundColor": {
+     "light": "rgb(227, 222, 253)",
+     "dark": "rgb(72, 67, 92)"
+    },
+    "borderColor": {
+     "light": "rgb(29, 23, 45)",
+     "dark": "rgb(227, 222, 253)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(1)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "home",
+   "bbox": {
+    "x": 34.5,
+    "y": 758,
+    "w": 24,
+    "h": 24
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "12px",
+    "fontWeight": "500",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(29, 23, 45)",
+     "dark": "rgb(227, 222, 253)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(29, 23, 45)",
+     "dark": "rgb(227, 222, 253)"
+    },
+    "fill": {
+     "light": "rgb(29, 23, 45)",
+     "dark": "rgb(227, 222, 253)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(2)",
+   "tag": "button",
+   "classes": [
+    "nav"
+   ],
+   "kind": "control",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Ara",
+   "icon": null,
+   "bbox": {
+    "x": 92.5,
+    "y": 756,
+    "w": 92.5,
+    "h": 52
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "12px",
+    "fontWeight": "500",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(2)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "search",
+   "bbox": {
+    "x": 127,
+    "y": 758,
+    "w": 24,
+    "h": 24
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "12px",
+    "fontWeight": "500",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(3)",
+   "tag": "button",
+   "classes": [
+    "nav"
+   ],
+   "kind": "control",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Kütüphane",
+   "icon": null,
+   "bbox": {
+    "x": 185,
+    "y": 756,
+    "w": 92.5,
+    "h": 52
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "12px",
+    "fontWeight": "500",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(3)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "library",
+   "bbox": {
+    "x": 219.5,
+    "y": 758,
+    "w": 24,
+    "h": 24
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "12px",
+    "fontWeight": "500",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(4)",
+   "tag": "button",
+   "classes": [
+    "nav"
+   ],
+   "kind": "control",
+   "role": null,
+   "ariaLabel": null,
+   "text": "İndirilenler",
+   "icon": null,
+   "bbox": {
+    "x": 277.5,
+    "y": 756,
+    "w": 92.5,
+    "h": 52
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "12px",
+    "fontWeight": "500",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(4)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "download",
+   "bbox": {
+    "x": 312,
+    "y": 758,
+    "w": 24,
+    "h": 24
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "12px",
+    "fontWeight": "500",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div#scrim.scrim.open:nth-child(4)",
+   "tag": "div",
+   "classes": [
+    "scrim",
+    "open"
+   ],
+   "kind": "leaf",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 0,
+    "y": 0,
+    "w": 370,
+    "h": 824
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0.35)",
+     "dark": "rgba(0, 0, 0, 0.55)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)",
+   "tag": "div",
+   "classes": [
+    "sheet",
+    "open"
+   ],
+   "kind": "surface",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 0,
+    "y": 569,
+    "w": 370,
+    "h": 255
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "28px 28px 0px 0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgb(244, 243, 249)",
+     "dark": "rgb(28, 27, 31)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)>div.handle:nth-child(1)",
+   "tag": "div",
+   "classes": [
+    "handle"
+   ],
+   "kind": "leaf",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 169,
+    "y": 585,
+    "w": 32,
+    "h": 4
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "2px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgb(119, 117, 128)",
+     "dark": "rgb(145, 143, 154)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)>div.shead:nth-child(2)>h3:nth-child(1)",
+   "tag": "h3",
+   "classes": [],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Dinleme geçmişi",
+   "icon": null,
+   "bbox": {
+    "x": 16,
+    "y": 601,
+    "w": 338,
+    "h": 26
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "20px",
+    "fontWeight": "500",
+    "lineHeight": "26px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)>div.div:nth-child(3)",
+   "tag": "div",
+   "classes": [
+    "div"
+   ],
+   "kind": "leaf",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 0,
+    "y": 643,
+    "w": 370,
+    "h": 1
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgb(199, 197, 209)",
+     "dark": "rgb(71, 69, 79)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)>button.mi:nth-child(4)",
+   "tag": "button",
+   "classes": [
+    "mi"
+   ],
+   "kind": "control",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Kaydı duraklat",
+   "icon": null,
+   "bbox": {
+    "x": 0,
+    "y": 648,
+    "w": 370,
+    "h": 52
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "15px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "left",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)>button.mi:nth-child(4)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "pause",
+   "bbox": {
+    "x": 20,
+    "y": 662,
+    "w": 24,
+    "h": 24
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "15px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "left",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)>button.mi:nth-child(5)",
+   "tag": "button",
+   "classes": [
+    "mi"
+   ],
+   "kind": "control",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Özet'i aç",
+   "icon": null,
+   "bbox": {
+    "x": 0,
+    "y": 700,
+    "w": 370,
+    "h": 52
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "15px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "left",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)>button.mi:nth-child(5)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "stats",
+   "bbox": {
+    "x": 20,
+    "y": 714,
+    "w": 24,
+    "h": 24
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "15px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "left",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)>button.mi.warn:nth-child(6)",
+   "tag": "button",
+   "classes": [
+    "mi",
+    "warn"
+   ],
+   "kind": "control",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Geçmişi temizle",
+   "icon": null,
+   "bbox": {
+    "x": 0,
+    "y": 752,
+    "w": 370,
+    "h": 52
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "15px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "left",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(186, 26, 26)",
+     "dark": "rgb(255, 180, 171)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(186, 26, 26)",
+     "dark": "rgb(255, 180, 171)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)>button.mi.warn:nth-child(6)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "del",
+   "bbox": {
+    "x": 20,
+    "y": 766,
+    "w": 24,
+    "h": 24
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "15px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "left",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(186, 26, 26)",
+     "dark": "rgb(255, 180, 171)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(186, 26, 26)",
+     "dark": "rgb(255, 180, 171)"
+    },
+    "fill": {
+     "light": "rgb(186, 26, 26)",
+     "dark": "rgb(255, 180, 171)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div#sheet.sheet.open:nth-child(5)>button.mi.warn:nth-child(6)>span.r:nth-child(2)",
+   "tag": "span",
+   "classes": [
+    "r"
+   ],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "bütün cihazlarda",
+   "icon": null,
+   "bbox": {
+    "x": 258,
+    "y": 768,
+    "w": 92,
+    "h": 20
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "12px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "left",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.gesture:nth-child(7)",
+   "tag": "div",
+   "classes": [
+    "gesture"
+   ],
+   "kind": "leaf",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 131,
+    "y": 814,
+    "w": 108,
+    "h": 4
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "2px",
+    "opacity": "0.45",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": true,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  }
+ ],
+ "clippedText": [
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow.skip:nth-child(11)>div.row:nth-child(1)>div.t:nth-child(2)>span.why.muted:nth-child(3)",
+   "text": "23:12 · masaüstü · geçildi · 0:08",
+   "reason": "ellipsis",
+   "overflowPx": 1,
+   "axis": "x",
+   "themes": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.hrow:nth-child(15)>div.row:nth-child(1)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(2)",
+   "text": "The Weeknd, Daft Punk",
+   "reason": "ellipsis",
+   "overflowPx": 14,
+   "axis": "x",
+   "themes": [
+    "light",
+    "dark"
+   ]
+  }
+ ]
+}

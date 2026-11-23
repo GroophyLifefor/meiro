@@ -255,7 +255,7 @@
   .rank .cv.round{border-radius:50%}
   .rank .t{flex:1; min-width:0}
   .rank .t b{display:block; font-weight:400; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-  .rank .t span{font-size:12px; color:var(--on-surface-variant)}
+  .rank .t span{display:block; font-size:12px; color:var(--on-surface-variant); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 
   /* ---------- tam oynatici ---------- */
   .np{position:absolute; inset:0; z-index:10; display:flex; flex-direction:column; transform:translateY(100%); transition:transform .32s cubic-bezier(.2,0,0,1); color:#fff; overflow:hidden}
@@ -674,8 +674,10 @@ const HIST = [
 const DEV = { phone:'telefon', desktop:'masaüstü' };
 V.history = () => {
   const f = st.histFilter;
-  const keep = e => f === 'Hepsi' || (f === 'Sayılanlar' ? e[3] !== 'skip' : f === 'Geçilenler' ? e[3] === 'skip' : f === DEV[e[2]] );
-  let h = topbar('Dinleme geçmişi', {back:true, noAvatar:true, right:'<button class="ibtn" aria-label="Geçmişte ara">' + I('search') + '</button><button class="ibtn" data-act="sheet" data-k="histmenu" aria-label="Seçenekler">' + I('more') + '</button>'}) +
+  const q = (st.histQ || '').toLocaleLowerCase('tr');
+  const keep = e => (!q || (DB[e[1]].t + ' ' + DB[e[1]].a).toLocaleLowerCase('tr').includes(q)) && (f === 'Hepsi' || (f === 'Sayılanlar' ? e[3] !== 'skip' : f === 'Geçilenler' ? e[3] === 'skip' : f === DEV[e[2]] ));
+  let h = topbar('Dinleme geçmişi', {back:true, noAvatar:true, right:'<button class="ibtn" data-act="hsearch" aria-label="Geçmişte ara">' + I('search') + '</button><button class="ibtn" data-act="sheet" data-k="histmenu" aria-label="Seçenekler">' + I('more') + '</button>'}) +
+    (st.histSearch ? '<label class="searchbar">' + I('search') + '<input id="hq" placeholder="Geçmişte ara" value="' + (st.histQ || '') + '"><button class="ibtn" data-act="hsearch" aria-label="Kapat">' + I('close') + '</button></label>' : '') +
     '<div class="chips">' + ['Hepsi','Sayılanlar','Geçilenler','telefon','masaüstü'].map(x => '<button class="chip' + (f === x ? ' sel' : '') + '" data-act="hfilter" data-f="' + x + '">' + (f === x ? I('check') : '') + (x === 'telefon' ? 'Telefon' : x === 'masaüstü' ? 'Masaüstü' : x) + '</button>').join('') + '</div>';
   for (const [day, list] of HIST) {
     const rows = list.filter(keep);
@@ -789,6 +791,8 @@ const SCREENS = [
     ['link','MusicBrainz bağlama','Benzerlik yüzdesiyle sonuçlar; "diğer" işareti.'],
     ['addto','Listeye ekle','Mevcut listeler ve yeni liste.'],
     ['dellist','Liste silme','Silmeden önce sorar; geri alınamaz.'],
+    ['histmenu','Geçmiş menüsü','Kaydı duraklat, Özet, geçmişi temizle.'],
+    ['clearhist','Geçmişi temizleme','Silmeden önce sorar; geri alınamaz.'],
     ['account','Hesap menüsü','Avatar: Özet, Ayarlar, eşitleme durumu.']]],
   ['Durumlar', [
     ['offline','Çevrimdışı','Bant, arama cihazdan sonuç verir.'],
@@ -851,9 +855,9 @@ function openSheet(kind, id){
 function closeSheet(){ $('sheet').classList.remove('open'); $('scrim').classList.remove('open'); st.sheetKind = null; }
 const SHEET = {};
 SHEET.histmenu = () => '<div class="shead"><h3>Dinleme geçmişi</h3></div><div class="div"></div>' +
-  '<button class="mi" data-act="snack" data-m="Geçmiş kaydı duraklatıldı">' + I('pause') + 'Kaydı duraklat</button>' +
+  (st.histPaused ? '<button class="mi" data-act="hpause">' + I('play') + 'Kaydı sürdür</button>' : '<button class="mi" data-act="hpause">' + I('pause') + 'Kaydı duraklat</button>') +
   '<button class="mi" data-act="go-close" data-to="stats">' + I('stats') + 'Özet\'i aç</button>' +
-  '<button class="mi warn">' + I('del') + 'Geçmişi temizle<span class="r">bütün cihazlarda</span></button>';
+  '<button class="mi warn" data-act="sheet" data-k="clearhist">' + I('del') + 'Geçmişi temizle<span class="r">bütün cihazlarda</span></button>';
 SHEET.menu = id => {
   const s = DB[id];
   return '<div class="shead"><div class="cv" style="' + cov(s.h) + '"></div><div class="t"><b>' + s.t + '</b><span>' + s.a + '</span></div><button class="ibtn" data-act="like-in">' + I(st.liked[id] ? 'heartf' : 'heart') + '</button></div><div class="div"></div><div class="sbody">' +
@@ -912,6 +916,10 @@ SHEET.qsheet = () => {
 SHEET.dellist = () => '<div class="shead"><h3>Listeyi sil</h3></div>' +
   '<div class="note">“Gece Sürüşü” Meiro\'dan silinir, bu geri alınamaz.</div>' +
   '<div class="acts"><span class="sp"></span><button class="btn text" data-act="close-sheet">İptal</button><button class="btn filled" data-act="snack" data-m="“Gece Sürüşü” silindi">Sil</button></div>';
+// Clearing the history cannot be undone and reaches every device, so it asks first (as the desktop does).
+SHEET.clearhist = () => '<div class="shead"><h3>Geçmişi temizle</h3></div>' +
+  '<div class="note">Bütün cihazlardaki çalmalar Meiro hesabından silinir, bu geri alınamaz.</div>' +
+  '<div class="acts"><span class="sp"></span><button class="btn text" data-act="close-sheet">İptal</button><button class="btn filled" data-act="snack" data-m="Dinleme geçmişi temizlendi">Temizle</button></div>';
 SHEET.newlist = () => '<div class="shead"><h3>Yeni liste</h3></div><div class="field focus" style="margin:10px 16px"><label style="background:var(--surface-container-low)">Ad</label><input value="Yaz akşamları"></div>' +
   '<div class="note">Meiro hesabında tutulur. İçine YouTube Music ve SoundCloud şarkıları birlikte eklenebilir.</div>' +
   '<div class="acts"><span class="sp"></span><button class="btn text" data-act="close-sheet">İptal</button><button class="btn filled" data-act="snack" data-m="“Yaz akşamları” oluşturuldu">Oluştur</button></div>';
@@ -944,6 +952,7 @@ function goTo(key){
     st.npOpen = true; st.preparing = key === 'np-prep';
     if (['upnext','lyrics','related'].includes(key)) { st.qTab = key; render(); openSheet('qsheet'); return; }
   }
+  else if (key === 'histmenu' || key === 'clearhist') { st.tab = 'home'; st.histFilter = 'Hepsi'; st.stack = ['history']; render(); openSheet(key); return; }
   else if (key === 'lock') { render(); renderLock(); $('lock').classList.add('open'); return; }
   else if (['menu','link','addto','account','dellist'].includes(key)) { st.tab = 'library'; st.stack = ['playlist']; render(); openSheet(key, key === 'account' ? null : 's7'); return; }
   else {
@@ -964,7 +973,7 @@ document.addEventListener('click', e => {
   switch (a){
     case 'tab': st.tab = el.dataset.t; st.stack = []; st.searchDone = false; current = el.dataset.t; render(); $('content').scrollTop = 0; break;
     case 'back': st.stack.pop(); render(); break;
-    case 'go': if (el.dataset.to === 'history') st.histFilter = 'Hepsi'; st.stack.push(el.dataset.to); current = el.dataset.to; st.npOpen = false; render(); $('content').scrollTop = 0; break;
+    case 'go': if (el.dataset.to === 'history') { st.histFilter = 'Hepsi'; st.histSearch = false; st.histQ = ''; } st.stack.push(el.dataset.to); current = el.dataset.to; st.npOpen = false; render(); $('content').scrollTop = 0; break;
     case 'go-close': closeSheet(); st.npOpen = false; st.stack.push(el.dataset.to); render(); $('content').scrollTop = 0; break;
     case 'open-playlist': st.stack.push('playlist'); render(); $('content').scrollTop = 0; break;
     case 'open-mix': st.stack.push('mix'); render(); $('content').scrollTop = 0; break;
@@ -1004,6 +1013,8 @@ document.addEventListener('click', e => {
     case 'do-search': st.search = el.dataset.q; st.searchDone = true; render(); break;
     case 'clear-search': st.search = ''; st.searchDone = false; render(); break;
     case 'period': st.statsPeriod = el.dataset.p; render(); break;
+    case 'hsearch': st.histSearch = !st.histSearch; st.histQ = ''; render(); if (st.histSearch) $('hq').focus(); break;
+    case 'hpause': st.histPaused = !st.histPaused; closeSheet(); snack(st.histPaused ? 'Geçmiş kaydı duraklatıldı' : 'Geçmiş kaydı sürdürüldü'); break;
     case 'dup': snack('“Random Access Memories” Meiro listesi olarak kopyalandı'); break;
     case 'signin-ok': goTo('home'); break;
     case 'unlock': $('lock').classList.remove('open'); break;
@@ -1012,6 +1023,7 @@ document.addEventListener('click', e => {
 });
 document.addEventListener('keydown', e => {
   if (e.target.id === 'q' && e.key === 'Enter') { st.search = e.target.value; st.searchDone = !!st.search; render(); }
+  if (e.target.id === 'hq' && e.key === 'Enter') { st.histQ = e.target.value; render(); }
 });
 $('scrim').addEventListener('click', closeSheet);
 
