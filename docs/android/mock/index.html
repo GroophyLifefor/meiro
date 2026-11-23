@@ -788,6 +788,7 @@ const SCREENS = [
     ['menu','Şarkı menüsü','Sıradaki, listeye ekle, indir, bağla, kaynak, paylaş.'],
     ['link','MusicBrainz bağlama','Benzerlik yüzdesiyle sonuçlar; "diğer" işareti.'],
     ['addto','Listeye ekle','Mevcut listeler ve yeni liste.'],
+    ['dellist','Liste silme','Silmeden önce sorar; geri alınamaz.'],
     ['account','Hesap menüsü','Avatar: Özet, Ayarlar, eşitleme durumu.']]],
   ['Durumlar', [
     ['offline','Çevrimdışı','Bant, arama cihazdan sonuç verir.'],
@@ -889,7 +890,7 @@ SHEET.listmenu = () => '<div class="shead"><h3>Liste</h3></div><div class="div">
   '<button class="mi" data-act="snack" data-m="Meiro listesi olarak kopyalandı">' + I('copy') + 'Meiro listesi olarak kopyala</button>' +
   '<button class="mi">' + I('download') + 'Hepsini indir</button><button class="mi">' + I('edit') + 'Yeniden adlandır</button>' +
   '<button class="mi">' + I('link') + 'Hepsini MusicBrainz\'e bağla<span class="r">4 unknown</span></button>' +
-  '<button class="mi warn">' + I('del') + 'Listeyi sil</button>';
+  '<button class="mi warn" data-act="sheet" data-k="dellist">' + I('del') + 'Listeyi sil</button>';
 SHEET.qsheet = () => {
   const t = st.qTab;
   let body = '';
@@ -907,6 +908,10 @@ SHEET.qsheet = () => {
   }
   return '<div class="qtabs">' + [['upnext','Sıradakiler'],['lyrics','Sözler'],['related','Benzerler']].map(x => '<button class="' + (t === x[0] ? 'on' : '') + '" data-act="qtab" data-q="' + x[0] + '">' + x[1] + '</button>').join('') + '</div><div class="sbody">' + body + '</div>';
 };
+// Deleting a list cannot be undone and reaches every device, so it asks first (as the desktop does).
+SHEET.dellist = () => '<div class="shead"><h3>Listeyi sil</h3></div>' +
+  '<div class="note">“Gece Sürüşü” Meiro\'dan silinir, bu geri alınamaz.</div>' +
+  '<div class="acts"><span class="sp"></span><button class="btn text" data-act="close-sheet">İptal</button><button class="btn filled" data-act="snack" data-m="“Gece Sürüşü” silindi">Sil</button></div>';
 SHEET.newlist = () => '<div class="shead"><h3>Yeni liste</h3></div><div class="field focus" style="margin:10px 16px"><label style="background:var(--surface-container-low)">Ad</label><input value="Yaz akşamları"></div>' +
   '<div class="note">Meiro hesabında tutulur. İçine YouTube Music ve SoundCloud şarkıları birlikte eklenebilir.</div>' +
   '<div class="acts"><span class="sp"></span><button class="btn text" data-act="close-sheet">İptal</button><button class="btn filled" data-act="snack" data-m="“Yaz akşamları” oluşturuldu">Oluştur</button></div>';
@@ -940,7 +945,7 @@ function goTo(key){
     if (['upnext','lyrics','related'].includes(key)) { st.qTab = key; render(); openSheet('qsheet'); return; }
   }
   else if (key === 'lock') { render(); renderLock(); $('lock').classList.add('open'); return; }
-  else if (['menu','link','addto','account'].includes(key)) { st.tab = 'library'; st.stack = ['playlist']; render(); openSheet(key, key === 'account' ? null : 's7'); return; }
+  else if (['menu','link','addto','account','dellist'].includes(key)) { st.tab = 'library'; st.stack = ['playlist']; render(); openSheet(key, key === 'account' ? null : 's7'); return; }
   else {
     // A state screen belongs to the tab it stands in for.
     if (key === 'empty') st.tab = 'library';
