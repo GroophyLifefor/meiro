@@ -10,7 +10,7 @@
   "dark"
  ],
  "note": "bbox is relative to the phone screen (#box), CSS px, rounded to 0.5. offscreen=true: below/right of a scroll container viewport (natural position at scrollTop 0). color/backgroundColor/borderColor/fill carry per-theme values.",
- "elementCount": 45,
+ "elementCount": 47,
  "elements": [
   {
    "path": "#box>div.app:nth-child(1)>div.statusbar:nth-child(1)>span#clock:nth-child(1)",
@@ -491,7 +491,7 @@
    "bbox": {
     "x": 68,
     "y": 125,
-    "w": 282,
+    "w": 230,
     "h": 22
    },
    "offscreen": false,
@@ -526,6 +526,110 @@
    },
    "value": "hidra",
    "placeholder": null,
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>label.searchbar:nth-child(2)>button.ibtn:nth-child(3)",
+   "tag": "button",
+   "classes": [
+    "ibtn"
+   ],
+   "kind": "control",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 302,
+    "y": 112,
+    "w": 48,
+    "h": 48
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "50%",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>label.searchbar:nth-child(2)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "close",
+   "bbox": {
+    "x": 314,
+    "y": 124,
+    "w": 24,
+    "h": 24
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    }
+   },
    "occluded": false,
    "visibleIn": [
     "light",

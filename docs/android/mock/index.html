@@ -94,6 +94,10 @@
   .mini .t span{display:flex; align-items:center; gap:6px; font-size:12px; color:var(--on-surface-variant); white-space:nowrap; overflow:hidden}
   .mini .bar{position:absolute; left:12px; right:12px; bottom:0; height:2px; background:var(--outline-variant); border-radius:1px}
   .mini .bar i{display:block; height:100%; width:38%; background:var(--primary); border-radius:1px}
+  /* calinamayan sarki: nedeni sanatcinin yerinde, hata renginde; cubuk bos */
+  .mini .t span.err{color:var(--error)}
+  .mini .t span.err em{font-style:normal; min-width:0; overflow:hidden; text-overflow:ellipsis}
+  .mini .bar i.z{width:0}
   .mini .ibtn{color:var(--on-surface)}
   .spinner{width:22px; height:22px; border-radius:50%; border:3px solid var(--outline-variant); border-top-color:var(--primary); animation:spin 1s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
@@ -483,7 +487,7 @@ const DB = {
   s9:{t:'Son Arzum', a:'Nilüfer', d:'3:47', srcs:['ytm'], st:'unknown', h:24, dl:true},
   s10:{t:'Bu Kalp Seni Unutur mu', a:'Fikret Kızılok', d:'4:22', srcs:['ytm','sc'], st:'matched', h:10},
   s11:{t:'Cesaretin Var mı Aşka', a:'Gülay', d:'3:35', srcs:['ytm'], st:'unknown', h:170},
-  s12:{t:'Yolla', a:'Tarkan', d:'4:05', srcs:['ytm'], st:'matched', h:270},
+  s12:{t:'Yolla', a:'Tarkan', d:'4:05', srcs:['ytm'], st:'matched', h:270, bad:'Bu şarkı artık yok.'},
   s13:{t:'Starboy', a:'The Weeknd, Daft Punk', d:'0:30', srcs:['sc'], st:'matched', h:0, preview:true}
 };
 const MIX = [
@@ -504,7 +508,7 @@ const LYR = ['Gece çöktü, şehir sustu', 'Farlar yanıyor yol boyunca', 'Bir 
 const st = {
   tab:'home', stack:[], now:'s10', playing:true, preparing:false, online:true, ytm:true, signedIn:true,
   npOpen:false, npTab:null, src:{}, liked:{s10:true}, qTab:'upnext', libTab:'meiro', search:'', searchDone:false,
-  filter:'Hepsi', histFilter:'Hepsi', mbSel:0, statsPeriod:'month', sheetKind:null
+  filter:'Hepsi', histFilter:'Hepsi', mbSel:0, statsPeriod:'month', sheetKind:null, err:''
 };
 const activeSrc = id => st.src[id] && DB[id].srcs.includes(st.src[id]) ? st.src[id] : DB[id].srcs[0];
 
@@ -758,7 +762,8 @@ V.loading = () => topbar('Meiro') + '<div style="padding:8px 16px">' +
   [1,2,3,4].map(() => '<div style="display:flex;gap:12px;align-items:center;margin-bottom:16px"><div class="skel" style="width:48px;height:48px"></div><div style="flex:1"><div class="skel" style="height:14px;width:70%;margin-bottom:8px"></div><div class="skel" style="height:12px;width:45%"></div></div></div>').join('') + '</div>';
 V.empty = () => topbar('Kütüphane') + '<div class="tabs"><button class="on">Meiro listeleri</button></div>' +
   '<div class="empty">' + I('library') + '<b>Henüz liste yok</b><p>Bir şarkının ⋮ menüsünden "Listeye ekle" ya da bir albümü Meiro listesine kopyala.</p><button class="btn filled" data-act="new-playlist">' + I('add') + 'Yeni liste</button></div>';
-V.error = () => topbar('Ara') + '<label class="searchbar">' + I('search') + '<input value="hidra"></label>' +
+// The search bar as V.search draws it with a query in it (its clear button too).
+V.error = () => topbar('Ara') + '<label class="searchbar">' + I('search') + '<input value="hidra"><button class="ibtn" data-act="clear-search">' + I('close') + '</button></label>' +
   '<div class="empty">' + I('info') + '<b>YouTube Music cevap vermedi</b><p>SoundCloud sonuçları aşağıda. Biraz sonra tekrar denenecek.</p><button class="btn tonal">Tekrar dene</button></div>' + songRow('s7');
 
 const SCREENS = [
@@ -798,7 +803,8 @@ const SCREENS = [
     ['offline','Çevrimdışı','Bant, arama cihazdan sonuç verir.'],
     ['loading','Yükleniyor','İskelet ekran.'],
     ['empty','Boş kütüphane','İlk kullanım.'],
-    ['error','Hata','Bir sağlayıcı düşünce öbürü yine sonuç verir.']]]
+    ['error','Hata','Bir sağlayıcı düşünce öbürü yine sonuç verir.'],
+    ['playerr','Çalınamayan şarkı','Neden sanatçının yerinde. Sırada şarkı varsa ona geçilir ve haber verilir.']]]
 ];
 
 /* ---------- cizim ---------- */
@@ -817,12 +823,16 @@ function render(){
   renderNP();
   document.querySelectorAll('.jump').forEach(b => b.classList.toggle('on', b.dataset.s === current));
 }
+// A track that cannot play keeps its place with the reason where the artist was (the desktop's player bar); the
+// reason is the desktop's play error in Turkish. With a track after it in the queue the player moves on instead and
+// a snack names the track it passed over (see 'play').
 function mini(){
   const s = DB[st.now];
-  return '<div class="mini" data-act="open-np"><div class="cv" style="' + cov(s.h) + '"></div><div class="t"><b>' + s.t + '</b><span>' +
-    (st.preparing ? '<span class="spinner" style="width:12px;height:12px;border-width:2px"></span>Hazırlanıyor…' : srcIcons(st.now) + s.a) + '</span></div>' +
+  return '<div class="mini" data-act="open-np"><div class="cv" style="' + cov(s.h) + '"></div><div class="t"><b>' + s.t + '</b>' +
+    (st.err ? '<span class="err"><em>' + st.err + '</em></span>' : '<span>' +
+    (st.preparing ? '<span class="spinner" style="width:12px;height:12px;border-width:2px"></span>Hazırlanıyor…' : srcIcons(st.now) + s.a) + '</span>') + '</div>' +
     '<button class="ibtn" data-act="toggle" aria-label="Çal/duraklat">' + (st.preparing ? '<span class="spinner"></span>' : I(st.playing ? 'pause' : 'play')) + '</button>' +
-    '<button class="ibtn" data-act="next" aria-label="Sonraki">' + I('next') + '</button><div class="bar"><i></i></div></div>';
+    '<button class="ibtn" data-act="next" aria-label="Sonraki">' + I('next') + '</button><div class="bar"><i' + (st.err ? ' class="z"' : '') + '></i></div></div>';
 }
 function renderNP(){
   const s = DB[st.now], id = st.now, act = activeSrc(id);
@@ -831,7 +841,7 @@ function renderNP(){
   $('np').innerHTML = '<div class="bg" style="' + cov(s.h, 70) + '"></div>' +
     '<div class="top"><button class="ibtn" data-act="close-np" aria-label="Kapat">' + I('down') + '</button><div class="ctx"><span>Çalınıyor</span>Gece Sürüşü</div><button class="ibtn" data-act="menu" data-id="' + id + '">' + I('more') + '</button></div>' +
     '<div class="art" style="' + cov(s.h) + '">' + (st.preparing ? '<div class="prep"><div><div class="spinner"></div>Ses hazırlanıyor…<br><span style="opacity:.7;font-size:12px">ilk çalmada birkaç saniye sürebilir</span></div></div>' : '') + '</div>' +
-    '<div class="info"><div class="t"><h2>' + s.t + '</h2><div class="a">' + s.a + '</div><div class="linkchip">' + linkPart + '</div></div>' +
+    '<div class="info"><div class="t"><h2>' + s.t + '</h2><div class="a">' + (st.err || s.a) + '</div><div class="linkchip">' + linkPart + '</div></div>' +
     '<button class="ibtn" data-act="like" style="color:#fff">' + I(st.liked[id] ? 'heartf' : 'heart') + '</button></div>' +
     '<div class="provsw">' + ['ytm','sc'].map(x => '<button class="' + (x === act ? 'on' : '') + (s.srcs.includes(x) ? '' : ' na') + '" data-act="src" data-src="' + x + '">' + LOGO[x] + NAMES[x] + '</button>').join('') + '</div>' +
     '<div class="seek"><div class="line"><i></i><b></b></div><div class="times"><span>1:40</span><span>' + s.d + '</span></div></div>' +
@@ -938,7 +948,7 @@ let snackT;
 function snack(m){ const s = $('snack'); s.innerHTML = m + '<button data-act="hide-snack">Tamam</button>'; s.classList.add('open'); clearTimeout(snackT); snackT = setTimeout(() => s.classList.remove('open'), 2600); }
 
 /* ---------- gezinme ---------- */
-function reset(){ st.npOpen = false; st.preparing = false; closeSheet(); $('lock').classList.remove('open'); }
+function reset(){ st.npOpen = false; st.preparing = false; if (st.err) { st.err = ''; st.now = 's10'; st.playing = true; } closeSheet(); $('lock').classList.remove('open'); }
 function goTo(key){
   current = key;
   reset();
@@ -954,6 +964,8 @@ function goTo(key){
   }
   else if (key === 'histmenu' || key === 'clearhist') { st.tab = 'home'; st.histFilter = 'Hepsi'; st.stack = ['history']; render(); openSheet(key); return; }
   else if (key === 'lock') { render(); renderLock(); $('lock').classList.add('open'); return; }
+  // Nothing after it in the queue (or 3 tracks in a row failed): the track stays, with its reason.
+  else if (key === 'playerr') { st.tab = 'library'; st.stack = ['empty']; st.now = 's12'; st.err = DB.s12.bad; st.playing = false; }
   else if (['menu','link','addto','account','dellist'].includes(key)) { st.tab = 'library'; st.stack = ['playlist']; render(); openSheet(key, key === 'account' ? null : 's7'); return; }
   else {
     // A state screen belongs to the tab it stands in for.
@@ -981,6 +993,8 @@ document.addEventListener('click', e => {
     case 'open-artist': st.stack.push('artist'); render(); $('content').scrollTop = 0; break;
     case 'play':
       if (st.now === id) { st.npOpen = true; render(); break; }
+      // A track that cannot play is passed over for the next one, and a snack says why (the desktop's notice).
+      if (DB[id].bad) { st.err = ''; snack('“' + DB[id].t + '” geçildi: ' + DB[id].bad.replace(/\.$/, '')); break; }
       st.now = id; st.playing = true; st.preparing = !DB[id].dl && st.online;
       render();
       if (st.preparing) setTimeout(() => { st.preparing = false; render(); }, 1800);
