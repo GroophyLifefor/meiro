@@ -97,6 +97,46 @@ object YtmRelated {
     fun tracks(page: BrowsePage): List<MusicItem> = page.items.filter { it.isTrack() } + page.sections.flatMap { s -> s.items.filter { it.isTrack() } }
 }
 
+/** `youtube.Lyrics`: the lyrics tab's plain text and its footer ("Source: …"), and the timed lines when there are any. */
+data class YtmLyrics(val description: String, val footer: String, val timed: List<com.muratkirazkaya.meiro.lyrics.LyricLine>)
+
+/** Reading a track's lyrics page (`tracktabs.go` `GetLyrics`, `parseTimedLyrics`). */
+object YtmLyricsParse {
+    const val LYRICS_PAGE = "MUSIC_PAGE_TYPE_TRACK_LYRICS"
+
+    /** The web client's page: `musicDescriptionShelfRenderer` description and footer; a page without one gives "". */
+    fun plain(text: String): Pair<String, String> {
+        val r = Renderers.findRenderer(OrderedJson.parse(text), "musicDescriptionShelfRenderer") ?: return "" to ""
+        return Renderers.rendererText(r["description"]) to Renderers.rendererText(r["footer"])
+    }
+
+    /** The ANDROID_MUSIC page: the first `timedLyricsData` array, `[{lyricLine, cueRange.startTimeMilliseconds}]` (ms as a number or a string). */
+    fun timed(text: String): List<com.muratkirazkaya.meiro.lyrics.LyricLine> {
+        fun walk(v: Any?): List<com.muratkirazkaya.meiro.lyrics.LyricLine>? {
+            when (v) {
+                is List<*> -> for (c in v) walk(c)?.let { return it }
+                is JObj -> {
+                    val data = v["timedLyricsData"]
+                    if (data is List<*>) {
+                        return data.mapNotNull { item ->
+                            val e = item as? JObj ?: return@mapNotNull null
+                            val start = when (val ms = e.obj("cueRange")?.get("startTimeMilliseconds")) {
+                                is Double -> ms.toLong()
+                                is String -> ms.toLongOrNull()
+                                else -> null
+                            } ?: return@mapNotNull null
+                            com.muratkirazkaya.meiro.lyrics.LyricLine(start, (e["lyricLine"] as? String).orEmpty().trim())
+                        }
+                    }
+                    for ((_, m) in v.members) walk(m)?.let { return it }
+                }
+            }
+            return null
+        }
+        return walk(OrderedJson.parse(text)).orEmpty()
+    }
+}
+
 /**
  * The anonymous YouTube Music InnerTube client (`youtube/client.go`, PORTING.md 2.1): WEB_REMIX, `hl=en`, `gl=US`, no
  * cookie. The visitor id is learned from the first response and sent from then on, kept only in memory.
@@ -149,6 +189,28 @@ class YtmClient(
     }
 
     /**
+     * `GetLyrics` (`tracktabs.go:34`): `next` names the lyrics tab's browse id; the web client's page gives the plain
+     * text, and the same page asked as ANDROID_MUSIC the timed lines. A failure of that second request leaves the plain
+     * text alone. A track with no lyrics tab throws.
+     */
+    suspend fun lyrics(videoId: String, log: (String) -> Unit = {}): YtmLyrics {
+        require(videoId.isNotBlank()) { "youtube: video ID is required" }
+        val browseId = YtmRelated.tabBrowseId(execute("next", JSONObject().put("videoId", videoId)), YtmLyricsParse.LYRICS_PAGE)
+        if (browseId.isEmpty()) throw YtmException("youtube: track response has no ${YtmLyricsParse.LYRICS_PAGE} tab")
+        val (description, footer) = YtmLyricsParse.plain(execute("browse", JSONObject().put("browseId", browseId)))
+        val timed = try {
+            YtmLyricsParse.timed(execute("browse", JSONObject().put("browseId", browseId), android = true))
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            log("lyrics: youtube video_id=$videoId browse_id=$browseId: android browse failed: $e")
+            emptyList()
+        }
+        log("lyrics: youtube video_id=$videoId browse_id=$browseId plain_chars=${description.length} timed_lines=${timed.size}")
+        return YtmLyrics(description, footer, timed)
+    }
+
+    /**
      * `GetUpNext` / `ContinueUpNext` (`upnext.go`): the queue YouTube Music generates after [videoId]. With no
      * [playlistId] the track is seeded with its own mix (`RDAMVM<id>`); a first page that names no queue playlist is
      * asked again through its automix link, as the desktop does.
@@ -167,15 +229,23 @@ class YtmClient(
         return YtmUpNext.parse(execute("next", again))
     }
 
-    private suspend fun execute(endpoint: String, payload: JSONObject): String = withContext(Dispatchers.IO) {
-        val client = JSONObject().put("hl", "en").put("gl", "US").put("clientName", CLIENT_NAME).put("clientVersion", CLIENT_VERSION)
+    /**
+     * One InnerTube request as the web app, or with [android] as the YouTube Music Android app (`executeAs`
+     * `androidMusicClient`: ANDROID_MUSIC 7.21.50, client id 21, its own user agent, not audio-only), the only client
+     * given timed lyrics.
+     */
+    private suspend fun execute(endpoint: String, payload: JSONObject, android: Boolean = false): String = withContext(Dispatchers.IO) {
+        val name = if (android) ANDROID_NAME else CLIENT_NAME
+        val version = if (android) ANDROID_VERSION else CLIENT_VERSION
+        val client = JSONObject().put("hl", "en").put("gl", "US").put("clientName", name).put("clientVersion", version)
         val vd = visitorData
         if (vd.isNotEmpty()) client.put("visitorData", vd)
-        payload.put("context", JSONObject().put("client", client)).put("isAudioOnly", true)
+        payload.put("context", JSONObject().put("client", client))
+        if (!android) payload.put("isAudioOnly", true)
         val req = Request.Builder().url(base + endpoint)
             .header("Content-Type", "application/json").header("Accept", "application/json")
-            .header("User-Agent", CHROME_UA).header("Origin", "https://music.youtube.com").header("Referer", "https://music.youtube.com/")
-            .header("X-YouTube-Client-Name", "67").header("X-YouTube-Client-Version", CLIENT_VERSION)
+            .header("User-Agent", if (android) ANDROID_UA else CHROME_UA).header("Origin", "https://music.youtube.com").header("Referer", "https://music.youtube.com/")
+            .header("X-YouTube-Client-Name", if (android) "21" else "67").header("X-YouTube-Client-Version", version)
             .apply { if (vd.isNotEmpty()) header("X-Goog-Visitor-Id", vd) }
             .post(payload.toString().toRequestBody("application/json".toMediaType()))
             .build()
@@ -193,6 +263,9 @@ class YtmClient(
     companion object {
         const val CLIENT_NAME = "WEB_REMIX"
         const val CLIENT_VERSION = "1.20250219.01.00"
+        const val ANDROID_NAME = "ANDROID_MUSIC"
+        const val ANDROID_VERSION = "7.21.50"
+        const val ANDROID_UA = "com.google.android.apps.youtube.music/$ANDROID_VERSION (Linux; U; Android 14) gzip"
 
         fun defaultHttp(): OkHttpClient = OkHttpClient.Builder()
             .connectTimeout(15, TimeUnit.SECONDS).readTimeout(30, TimeUnit.SECONDS).build()

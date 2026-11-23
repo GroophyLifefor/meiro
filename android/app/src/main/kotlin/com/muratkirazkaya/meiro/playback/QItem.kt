@@ -22,6 +22,8 @@ data class QItem(
     val refs: Map<String, String> = emptyMap(),
     /** Why Meiro suggests the track (a Daily mix pick's reason) when the queue gained it as a suggestion; else "". */
     val why: String = "",
+    /** The album the row names, when it names one (LRCLIB's exact lookup takes it); "" otherwise. */
+    val album: String = "",
 ) {
     /** The queue's identity of a track (`Key()`): empty names no track. */
     fun queueKey(): String = key
