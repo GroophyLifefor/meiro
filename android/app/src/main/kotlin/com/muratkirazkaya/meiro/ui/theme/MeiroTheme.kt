@@ -83,6 +83,11 @@ object MeiroType {
     val ListTitle = MeiroText(16f, 400, 22f, Ls)
     val ListMeta = MeiroText(13f, 400, 18f, Ls)
     val Note = MeiroText(12f, 400, 17f, Ls)
+    // M5: the offline banner (`.banner`), the storage meter (`.meter` b, `.sub`, `.legend`).
+    val Banner = MeiroText(13f, 400, BodyLineHeightSp, Ls)
+    val MeterUsed = MeiroText(14f, 700, BodyLineHeightSp, Ls)
+    val MeterSub = MeiroText(13f, 400, BodyLineHeightSp, Ls)
+    val Legend = MeiroText(12f, 400, BodyLineHeightSp, Ls)
     /** The `.why` line of a recommended track (primary, one line with an ellipsis). */
     val Why = MeiroText(12f, 400, 16f, Ls)
     val HeroTitle = MeiroText(24f, 600, 30f, Ls)

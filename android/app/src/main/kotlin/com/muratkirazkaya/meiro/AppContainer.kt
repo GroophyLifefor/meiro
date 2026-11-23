@@ -64,11 +64,22 @@ class AppContainer(private val context: Context) {
     val links = LinksStore(persistence)
     val engine: SyncEngine
 
+    /** The downloads (`internal/downloads`): kept in the app's own files, never evicted, removed only by the user. */
+    val downloads = com.muratkirazkaya.meiro.downloads.DownloadStore(java.io.File(context.filesDir, "downloads"))
+    private val dlScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val fetch = com.muratkirazkaya.meiro.downloads.AudioFetch()
+
+    /** The playback caches, one per provider (`YouTubeCacheMB`, `SoundCloudCacheMB`: 512 MB each). */
+    val ytCache = com.muratkirazkaya.meiro.downloads.AudioCache(java.io.File(context.cacheDir, "audio/ytm"), fetch = fetch, scope = dlScope, log = { Log.i(DL_TAG, it) })
+    val scCache = com.muratkirazkaya.meiro.downloads.AudioCache(java.io.File(context.cacheDir, "audio/soundcloud"), fetch = fetch, scope = dlScope, log = { Log.i(DL_TAG, it) })
+    fun cacheFor(source: String) = if (source == Source.SOUNDCLOUD) scCache else ytCache
+
     init {
         SyncLog.sink = { Log.i(TAG, it) }
         engine = SyncEngine(
             libraries, Outbox(persistence), EncryptedTokenStore(context), persistence, links,
             deviceName = Build.MODEL,
+            downloads = { downloadSnapshot() },
         )
         // Reads the saved session token (this is the first use of the Keystore) and sends/reads what waits.
         val s = engine.settings
@@ -150,16 +161,86 @@ class AppContainer(private val context: Context) {
             AppSearchProviders(context),
             PrefsRecentStore(context),
             localItems = { localTracks() },
+            online = { com.muratkirazkaya.meiro.downloads.Online.state.value },
             log = { Log.i(SEARCH_TAG, it) },
         )
     }
 
-    /** The tracks this device holds for a search without a network: until downloads and the audio cache exist (M5), the tracks of the stored lists. */
-    private fun localTracks(): List<MusicItem> = libraries.list().flatMap { it.items }.map { i ->
-        val (src, key) = i.activeRef()
-        if (src == Source.SOUNDCLOUD) MusicItem(source = Source.SOUNDCLOUD, url = key, title = i.title, subtitle = i.artist, artist = i.artist, artists = i.artist, duration = if (i.durationMs > 0) clockText(i.durationMs) else "", thumbnail = i.thumbnail)
-        else MusicItem(source = Source.YTM, videoId = key, id = key, title = i.title, subtitle = i.artist, artist = i.artist, artists = i.artist, duration = if (i.durationMs > 0) clockText(i.durationMs) else "", thumbnail = i.thumbnail)
-    }.distinctBy { it.key() }
+    /**
+     * The tracks this device holds for a search without a network (`localItems`): the downloads, then what the playback
+     * caches hold (YouTube Music, then SoundCloud), each once.
+     */
+    fun localTracks(): List<MusicItem> =
+        (downloads.list().map { it.toQItem() } + ytCache.metas().map { it.toQItem() } + scCache.metas().map { it.toQItem() })
+            .map { q ->
+                if (q.provider() == Source.SOUNDCLOUD) MusicItem(source = Source.SOUNDCLOUD, url = q.key, title = q.title, subtitle = q.artist, artist = q.artist, artists = q.artist, duration = q.duration, thumbnail = q.thumbnail)
+                else MusicItem(source = Source.YTM, videoId = q.key, id = q.key, title = q.title, subtitle = q.artist, artist = q.artist, artists = q.artist, duration = q.duration, thumbnail = q.thumbnail)
+            }.distinctBy { it.source + ":" + it.key() }
+
+    /** `findAudio`'s local places: the downloaded file, then the provider's playback cache. */
+    fun localAudio(item: com.muratkirazkaya.meiro.playback.QItem): java.io.File? =
+        downloads.file(item.provider(), item.key) ?: cacheFor(item.provider()).get(item.key)
+
+    /** Once audio plays: a downloaded track is marked as listened now; a streamed one is cached from its URL (`audioStarted`). */
+    val audioHooks = com.muratkirazkaya.meiro.playback.AudioHooks { item, r ->
+        if (downloads.get(item.provider(), item.key) != null) { downloads.touch(item.provider(), item.key); pushDownloadsLater() }
+        else if (!r.local) cacheFor(item.provider()).add(item, r.url, r.hls)
+    }
+
+    /** The resolver the downloads use (yt-dlp on the phone, its own URL cache). */
+    private val dlResolver by lazy { com.muratkirazkaya.meiro.playback.AudioResolver(context, dlScope, log = { Log.i(DL_TAG, it) }) }
+
+    private val _downloadEvents = kotlinx.coroutines.flow.MutableSharedFlow<String>(extraBufferCapacity = 8)
+    /** Snacks the downloads ask for (a failure, mostly); the shell shows them. */
+    val downloadEvents: kotlinx.coroutines.flow.SharedFlow<String> = _downloadEvents
+
+    /** The download queue: 2 at a time, 30 minutes each, a batch per list or track asked for. */
+    val downloader: com.muratkirazkaya.meiro.downloads.Downloader by lazy {
+        com.muratkirazkaya.meiro.downloads.Downloader(
+            downloads, dlScope,
+            resolve = { YtdlpSetup.ensure(context) { m -> Log.i(DL_TAG, m) }; dlResolver.network(it) },
+            fetch = fetch,
+            cached = { cacheFor(it.provider()).get(it.key) },
+            onFinished = { b ->
+                Log.i(DL_TAG, "download: \"${b.name}\" ended, ${b.done} kept, ${b.failed} failed")
+                if (b.failed > 0) _downloadEvents.tryEmit(if (b.single) "\u201C${b.name}\u201D indirilemedi" else "${b.failed} şarkı indirilemedi")
+            },
+            onStored = { rec ->
+                pushDownloadsLater()
+                // The cover is kept with the file: fetched now into the cover cache, so it shows offline.
+                if (rec.thumbnail.startsWith("http")) coil.Coil.imageLoader(context).enqueue(coil.request.ImageRequest.Builder(context).data(rec.thumbnail).build())
+            },
+            log = { Log.i(DL_TAG, it) },
+        )
+    }
+
+    /** Takes a download out (its file goes); signed in, the removal is sent as `deleted` (`removeDownload`). */
+    fun removeDownload(source: String, key: String) {
+        val gone = downloads.remove(source, key)
+        Log.i(DL_TAG, "download: removed $source:$key ${if (gone == null) "(was not kept)" else gone.file}")
+        pushDownloadsLater()
+    }
+
+    /** The downloads as the server wants them (`syncSnapshot`'s downloads): every kept track and every removal. */
+    private fun downloadSnapshot(): List<com.muratkirazkaya.meiro.sync.Download> = com.muratkirazkaya.meiro.downloads.DownloadSync.snapshot(downloads, Build.MODEL)
+
+    private val pushes = kotlinx.coroutines.channels.Channel<Unit>(kotlinx.coroutines.channels.Channel.CONFLATED).also { ch ->
+        dlScope.launch {
+            for (u in ch) {
+                try {
+                    delay(500)
+                    engine.syncSnapshot().queue(engine.outbox)
+                    engine.syncNow(); engine.settled()
+                    Log.i(DL_TAG, "download: pushed, outbox pending=${engine.outbox.pending()} error=${engine.lastError.ifEmpty { "none" }}")
+                } catch (e: kotlinx.coroutines.CancellationException) { throw e } catch (e: Exception) { Log.i(DL_TAG, "download: push failed: $e") }
+            }
+        }
+    }
+
+    /** Signed in, the downloads are queued and sent (the desktop sends them with its next sync); changes close together go once. */
+    fun pushDownloadsLater() {
+        if (session().signedIn) pushes.trySend(Unit)
+    }
 
     /** Where the playback engine files plays: the history and the sync outbox (`recordHistory`, `queueEvent`). */
     fun playStore(): PlayStore = playStore
@@ -392,7 +473,10 @@ class AppContainer(private val context: Context) {
             val t0 = System.nanoTime()
             val items = kotlinx.coroutines.withTimeoutOrNull(DailyMixMaker.RUN_TIMEOUT.toMillis()) {
                 dailyMix.make(
-                    profileNow = { dailyMix.profile(engine.history(), libraries.list(), engine.settings.dailyMixId, java.time.Instant.now()) },
+                    profileNow = {
+                        val dl = downloads.list().map { com.muratkirazkaya.meiro.recommend.Signal(it.source, it.key, it.title, it.artist, com.muratkirazkaya.meiro.recommend.SignalKind.Downloaded, java.time.Instant.ofEpochMilli(it.downloadedAt)) }
+                        dailyMix.profile(engine.history(), libraries.list(), engine.settings.dailyMixId, java.time.Instant.now(), dl)
+                    },
                     history = { engine.history() }, now = java.time.Instant.now(), zone = java.time.ZoneId.systemDefault(),
                 )
             }
@@ -431,6 +515,7 @@ class AppContainer(private val context: Context) {
         const val SEARCH_TAG = "MeiroSearch"
         const val MIX_TAG = "MeiroMix"
         const val LINK_TAG = "MeiroLink"
+        const val DL_TAG = "MeiroDownload"
 
         /** The server field takes a bare host as the mock shows it; anything with a scheme is kept. */
         fun normalizeServer(s: String): String {

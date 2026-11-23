@@ -67,6 +67,8 @@ fun PlaylistScreen(
     onListMenu: () -> Unit = {},
     /** The link button of the track at that place: the link sheet. */
     onLink: (Int) -> Unit = {},
+    /** The hero's download button: the list's tracks are downloaded. */
+    onDownload: () -> Unit = {},
 ) {
     val c = Meiro.colors
     Column(Modifier.fillMaxSize()) {
@@ -75,7 +77,7 @@ fun PlaylistScreen(
             IconButton("topbar.moreBtn", "topbar.more.icon", MeiroIcons.More, c.onSurfaceVariant, onListMenu)
         }
         LazyColumn(Modifier.fillMaxSize(), state) {
-            item { Hero(ui, onPlay, onShuffle) }
+            item { Hero(ui, onPlay, onShuffle, onDownload) }
             item {
                 Row(
                     Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 6.dp, bottom = 6.dp),
@@ -100,10 +102,10 @@ fun PlaylistScreen(
 }
 
 @Composable
-private fun Hero(ui: PlaylistUi, onPlay: () -> Unit, onShuffle: () -> Unit) {
+private fun Hero(ui: PlaylistUi, onPlay: () -> Unit, onShuffle: () -> Unit, onDownload: () -> Unit = {}) {
     val c = Meiro.colors
     DetailHero(ui.cover, ui.title, ui.kind, Provider.Meiro) {
-        IconButton("hero.downloadBtn", "hero.download.icon", MeiroIcons.Download, c.onSurfaceVariant)
+        IconButton("hero.downloadBtn", "hero.download.icon", MeiroIcons.Download, c.onSurfaceVariant, onDownload)
         IconButton("hero.shuffleBtn", "hero.shuffle.icon", MeiroIcons.Shuffle, c.onSurfaceVariant, onShuffle)
         HeroPlayButton(onPlay)
         IconButton("hero.editBtn", "hero.edit.icon", MeiroIcons.Edit, c.onSurfaceVariant)

@@ -43,7 +43,9 @@ fun LibraryScreen(
         Column(Modifier.fillMaxSize()) {
             TopBar("Kütüphane") { IconButton("topbar.sortBtn", "topbar.sort.icon", MeiroIcons.Sort, c.onSurfaceVariant) }
             LibraryTabs(ytmTab = ytmTab)
+            val offline = com.muratkirazkaya.meiro.ui.components.LocalOffline.current
             LazyColumn(Modifier.fillMaxSize()) {
+                if (offline) item { com.muratkirazkaya.meiro.ui.components.OfflineBanner() }
                 item { Spacer(Modifier.height(8.dp)) }
                 itemsIndexed(rows, key = { _, r -> r.id }) { i, r -> ListRow("row${i + 1}", r, { onOpen(r.id) }, onMore = { onMore(r.id) }) }
                 item {

@@ -58,6 +58,8 @@ class DetailActions(
     val onLink: (Int) -> Unit = {},
     /** Artist: "Bağı değiştir", the artist's link sheet. */
     val onArtistLink: () -> Unit = {},
+    /** Album and Daily mix: the hero's download button ("Hepsini indir" for the page's tracks). */
+    val onDownload: () -> Unit = {},
 )
 
 /**
@@ -86,7 +88,7 @@ fun AlbumScreen(
         LazyColumn(Modifier.fillMaxSize(), state) {
             item {
                 DetailHero(ui.cover, ui.title, ui.kind, Provider.Ytm) {
-                    IconButton("hero.downloadBtn", "hero.download.icon", MeiroIcons.Download, c.onSurfaceVariant)
+                    IconButton("hero.downloadBtn", "hero.download.icon", MeiroIcons.Download, c.onSurfaceVariant, actions.onDownload)
                     IconButton("hero.shuffleBtn", "hero.shuffle.icon", MeiroIcons.Shuffle, c.onSurfaceVariant, actions.onShuffle)
                     HeroPlayButton(actions.onPlay)
                     IconButton("hero.copyBtn", "hero.copy.icon", MeiroIcons.Copy, c.onSurfaceVariant, actions.onCopy)

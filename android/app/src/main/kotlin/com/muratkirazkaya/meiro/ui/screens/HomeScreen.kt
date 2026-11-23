@@ -91,7 +91,9 @@ fun HomeScreen(ui: HomeUi, playing: Boolean, actions: HomeActions, state: LazyLi
     val c = Meiro.colors
     Column(Modifier.fillMaxSize()) {
         TopBar("Meiro") { IconButton("topbar.statsBtn", "topbar.stats.icon", MeiroIcons.Stats, c.onSurfaceVariant, actions.onStats) }
+        val offline = com.muratkirazkaya.meiro.ui.components.LocalOffline.current
         LazyColumn(Modifier.fillMaxSize(), state) {
+            if (offline) item(key = "banner") { com.muratkirazkaya.meiro.ui.components.OfflineBanner() }
             item(key = "hello") {
                 Box(Modifier.fillMaxWidth().inv("hello")) {
                     MText(ui.greeting, MeiroType.Greeting, c.onSurface, "hello.label", Modifier.padding(horizontal = 16.dp, vertical = 4.dp))

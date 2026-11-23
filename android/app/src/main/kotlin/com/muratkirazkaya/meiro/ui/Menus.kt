@@ -122,13 +122,27 @@ fun MenuLayer(c: AppContainer, m: MenuState, bars: SystemBars, nav: MenuNav, sna
         val item = t.item
         val held = t.listId?.let { id -> libs.firstOrNull { it.id == id }?.items?.firstOrNull { it.activeRef() == (item.provider() to item.key) } }
         val state = remember(version, linkVersion, item) { c.linker.stateOf(item).ifEmpty { held?.state.orEmpty() } }
+        val keptVersion by c.downloads.version.collectAsState()
+        val kept = remember(keptVersion, item) { c.downloads.has(item) }
         TrackMenuSheet(
-            TrackMenuMapping.menu(t, state), bars,
+            TrackMenuMapping.menu(t, state).copy(downloaded = kept), bars,
             TrackMenuActions(
                 onDismiss = { m.track = null },
                 onPlayNext = { PlaybackHost.enqueue(ctx, item, true); m.track = null; snack("Sıradaki olarak eklendi") },
                 onQueue = { PlaybackHost.enqueue(ctx, item, false); m.track = null; snack("Kuyruğun sonuna eklendi") },
                 onAddTo = { m.track = null; m.addTo = t },
+                // "İndir" asks for the track's download (`startDownload`); "İndirildi · kaldır" takes it out (`removeDownloadItem`).
+                onDownload = {
+                    m.track = null
+                    if (kept) launch("remove download") {
+                        withContext(Dispatchers.IO) { c.removeDownload(item.provider(), item.key) }
+                        snack("“${item.title}” indirilenlerden kaldırıldı")
+                    } else {
+                        val target = if (item.thumbnail.isEmpty() && t.albumArt.isNotEmpty()) item.copy(thumbnail = t.albumArt) else item
+                        val ask = c.downloader.download(listOf(target), null)
+                        snack(if (ask.started > 0) DOWNLOAD_STARTED else "“${item.title}” zaten iniyor")
+                    }
+                },
                 onLink = { m.track = null; m.link = LinkTarget.song(item) },
                 onSource = { source(ctx, c, t, held, m, snack, ::launch) },
                 onArtist = {
@@ -207,6 +221,7 @@ fun MenuLayer(c: AppContainer, m: MenuState, bars: SystemBars, nav: MenuNav, sna
                     }
                 },
                 onRename = { m.list = null; l.listId?.let { m.rename = it to l.copyName } },
+                onDownload = { m.list = null; snack(downloadAll(c, l.copyItems.map { it.toQItem() }, l.copyName, l.copyCover)) },
                 onLinkAll = {
                     m.list = null
                     val items = l.copyItems.map { it.toQItem() }

@@ -101,7 +101,10 @@ fun SearchScreen(ui: SearchUi, playing: Boolean, actions: SearchActions, state: 
     LaunchedEffect(atEnd, ui.songs.size) { if (atEnd && ui.results) actions.onEnd() }
     Column(Modifier.fillMaxSize()) {
         TopBar("Ara")
+        val offline = com.muratkirazkaya.meiro.ui.components.LocalOffline.current
         LazyColumn(Modifier.fillMaxSize(), state) {
+            // The search bar's own 8dp top margin collapses into the banner's 8dp bottom margin (the mock's CSS).
+            if (offline) item(key = "banner") { com.muratkirazkaya.meiro.ui.components.OfflineBanner(bottom = 0.dp) }
             item(key = "field") { SearchField(ui.query, actions.onQuery, actions.onSubmit, actions.onClear) }
             if (!ui.results) {
                 if (ui.recent.isNotEmpty()) {

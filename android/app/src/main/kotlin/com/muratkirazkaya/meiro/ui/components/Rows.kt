@@ -166,7 +166,9 @@ fun SongRow(
                     if (row.ytm) SourceLogo("$p.src.ytm", Provider.Ytm, !row.activeYtm)
                     if (row.sc) SourceLogo("$p.src.sc", Provider.Sc, row.activeYtm)
                 }
-                if (row.downloaded) MIcon(MeiroIcons.Done, c.primary, "$p.dl", size = 14)
+                // The downloaded mark: the row's own flag, or (in the app) the downloads store holding the track it plays.
+                val dl = row.downloaded || "${if (row.activeYtm) com.muratkirazkaya.meiro.data.Source.YTM else com.muratkirazkaya.meiro.data.Source.SOUNDCLOUD}:${row.key}" in LocalDownloaded.current
+                if (dl) MIcon(MeiroIcons.Done, c.primary, "$p.dl", size = 14)
                 MText(row.subtitle, MeiroType.ListMeta, c.onSurfaceVariant, "$p.meta", Modifier.weight(1f, fill = false), maxLines = 1)
             }
             if (row.why.isNotEmpty()) MText(row.why, MeiroType.Why, c.primary, "$p.why", Modifier.fillMaxWidth(), maxLines = 1)

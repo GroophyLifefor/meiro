@@ -59,7 +59,7 @@ fun MixScreen(
         LazyColumn(Modifier.fillMaxSize(), state) {
             item(key = "hero") {
                 DetailHero(MixCover, "Daily mix", ui.kind, Provider.Meiro) {
-                    IconButton("hero.downloadBtn", "hero.download.icon", MeiroIcons.Download, c.onSurfaceVariant)
+                    IconButton("hero.downloadBtn", "hero.download.icon", MeiroIcons.Download, c.onSurfaceVariant, actions.onDownload)
                     IconButton("hero.shuffleBtn", "hero.shuffle.icon", MeiroIcons.Shuffle, c.onSurfaceVariant, actions.onShuffle)
                     HeroPlayButton(actions.onPlay)
                     IconButton("hero.settingsBtn", "hero.settings.icon", MeiroIcons.Settings, c.onSurfaceVariant)

@@ -161,8 +161,15 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String) {
     // The track menu, the list menu and the sheets they open (M4h), over everything else.
     val menus = remember { MenuState() }
     val openers = remember { MenuOpeners({ menus.track = it }, { menus.list = it }, { menus.link = it }) }
+    // M5: the downloaded marks, the offline banner, and the downloads' own snacks (a download that failed).
+    val downloaded by c.downloads.keys.collectAsState()
+    val online by com.muratkirazkaya.meiro.downloads.Online.state.collectAsState()
+    LaunchedEffect(c) { c.downloadEvents.collect { snack = it } }
 
-    CompositionLocalProvider(LocalAvatarInitial provides avatarInitial(email), LocalOpenPlayer provides openPlayer, LocalMenus provides openers) { Box(Modifier.fillMaxSize()) {
+    CompositionLocalProvider(
+        LocalAvatarInitial provides avatarInitial(email), LocalOpenPlayer provides openPlayer, LocalMenus provides openers,
+        com.muratkirazkaya.meiro.ui.components.LocalDownloaded provides downloaded, com.muratkirazkaya.meiro.ui.components.LocalOffline provides !online,
+    ) { Box(Modifier.fillMaxSize()) {
         MeiroShell(
             selected = selected,
             onSelect = { tab ->
@@ -186,16 +193,16 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String) {
                 composable(Tab.Library.route) {
                     LibraryRoute(c, onOpen = { nav.navigate("playlist/$it") }, onMix = { nav.navigate(MIX_ROUTE) }, onNew = openSheet)
                 }
-                composable(Tab.Downloads.route) { PlaceholderScreen("İndirilenler") }
+                composable(Tab.Downloads.route) { DownloadsRoute(c, onSnack = { snack = it }) }
                 composable(ALBUM_ROUTE, listOf(navArgument("tab") { defaultValue = Tab.Search.route })) { e ->
                     AlbumRoute(c, e.arguments?.getString("id").orEmpty(), onBack = { nav.popBackStack() }, onSnack = { snack = it })
                 }
                 composable(ARTIST_ROUTE, listOf(navArgument("tab") { defaultValue = Tab.Search.route })) { e ->
                     ArtistRoute(c, e.arguments?.getString("id").orEmpty(), onBack = { nav.popBackStack() }, openAlbum, openArtist)
                 }
-                composable(MIX_ROUTE) { MixRoute(c, onBack = { nav.popBackStack() }) }
+                composable(MIX_ROUTE) { MixRoute(c, onBack = { nav.popBackStack() }, onSnack = { snack = it }) }
                 composable(PLAYLIST_ROUTE) { e ->
-                    PlaylistRoute(c, e.arguments?.getString("id").orEmpty(), onBack = { nav.popBackStack() })
+                    PlaylistRoute(c, e.arguments?.getString("id").orEmpty(), onBack = { nav.popBackStack() }, onSnack = { snack = it })
                 }
             }
         }
@@ -227,6 +234,73 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String) {
             Snack(m, { snack = null }, Modifier.align(Alignment.BottomCenter).padding(start = 12.dp, end = 12.dp, bottom = 160.dp))
         }
     } }
+}
+
+/**
+ * `downloadCollection`: the list's tracks that are not kept or on their way go to the download queue as one batch;
+ * returns the snack: the mock's "İndirme başladı", or why nothing started.
+ */
+internal fun downloadAll(c: AppContainer, items: List<com.muratkirazkaya.meiro.playback.QItem>, name: String, cover: String): String {
+    val ask = c.downloader.download(items, name, cover)
+    return when {
+        ask.started > 0 -> DOWNLOAD_STARTED
+        ask.kept > 0 && ask.pending == 0 -> "\u201C$name\u201D zaten indirildi"
+        ask.pending > 0 -> "\u201C$name\u201D zaten iniyor"
+        else -> "\u201C$name\u201D içinde indirilecek şarkı yok"
+    }
+}
+
+/** The mock's snack when a download starts (`SHEET.menu` "İndir"). */
+const val DOWNLOAD_STARTED = "İndirme başladı"
+
+/**
+ * The downloads tab: the storage summary (read again every few seconds and on every change), the batches on their way,
+ * the kept tracks in the chosen order. A row plays the downloads from that track; ⋮ opens the track menu; × stops a
+ * batch; "Sırala" goes round newest, title and size.
+ */
+@Composable
+private fun DownloadsRoute(c: AppContainer, onSnack: (String) -> Unit) {
+    val ctx = LocalContext.current
+    val menus = LocalMenus.current
+    val openPlayer = LocalOpenPlayer.current
+    val version by c.downloads.version.collectAsState()
+    val ytv by c.ytCache.version.collectAsState()
+    val scv by c.scCache.version.collectAsState()
+    val batches by c.downloader.state.collectAsState()
+    val linkVersion by c.linker.version.collectAsState()
+    val online by com.muratkirazkaya.meiro.downloads.Online.state.collectAsState()
+    val now by PlaybackHost.ui.collectAsState()
+    var sort by rememberSaveable { mutableStateOf(DownloadSort.Newest) }
+    var tick by remember { mutableStateOf(0) }
+    LaunchedEffect(Unit) { while (true) { delay(5_000); tick++ } }
+    val meter by produceState<com.muratkirazkaya.meiro.ui.screens.MeterUi?>(null, version, ytv, scv, tick) {
+        value = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            val (dlBytes, n) = c.downloads.usage()
+            val free = try { android.os.StatFs(ctx.filesDir.path).availableBytes } catch (e: Exception) { 0L }
+            DownloadsMapping.meter(dlBytes, n, c.ytCache.usage(), c.scCache.usage(), free)
+        }
+    }
+    val items = remember(version, sort) { DownloadsMapping.sorted(c.downloads.list(), sort) }
+    val playingKey = now?.item?.key
+    val m = meter ?: DownloadsMapping.meter(0, 0, 0, 0, 0)
+    val ui = remember(items, batches, m, linkVersion, playingKey, online) {
+        DownloadsMapping.build(items, batches, m, { src, key -> c.links.song(src, key)?.state }, playingKey, !online)
+    }
+    val queue = remember(items) { items.map { it.toQItem() } }
+    com.muratkirazkaya.meiro.ui.screens.DownloadsScreen(
+        ui, playing = now?.playing == true,
+        actions = com.muratkirazkaya.meiro.ui.screens.DownloadsActions(
+            onStopAll = { c.downloader.cancelAll() },
+            onStop = { c.downloader.cancel(it) },
+            onSort = {
+                sort = DownloadSort.entries[(sort.ordinal + 1) % DownloadSort.entries.size]
+                onSnack("Sıralama: ${sort.label}")
+            },
+            onRow = { i -> if (!openIfPlaying(queue, i, openPlayer)) PlaybackHost.playQueue(ctx, queue, i, "İndirilenler") },
+            onMore = { i -> queue.getOrNull(i)?.let { menus.track(MenuTarget(it)) } },
+            onLink = { i -> queue.getOrNull(i)?.let { menus.link(LinkTarget.song(it)) } },
+        ),
+    )
 }
 
 /** Opens the full player (the mini player's tap, or the mock's `play` on the track already playing). */
@@ -310,7 +384,7 @@ private fun LibraryRoute(c: AppContainer, onOpen: (String) -> Unit, onMix: () ->
  * the lists or what plays change. Rows play the mix from that track; play and shuffle play all of it.
  */
 @Composable
-private fun MixRoute(c: AppContainer, onBack: () -> Unit) {
+private fun MixRoute(c: AppContainer, onBack: () -> Unit, onSnack: (String) -> Unit) {
     val ctx = LocalContext.current
     val menus = LocalMenus.current
     val openPlayer = LocalOpenPlayer.current
@@ -331,6 +405,7 @@ private fun MixRoute(c: AppContainer, onBack: () -> Unit) {
             onRow = { i -> lib.items.map { it.toQItem() }.let { q -> if (!openIfPlaying(q, i, openPlayer)) play(i, q) } },
             onMore = { i -> lib.items.getOrNull(i)?.let { menus.track(MenuTarget(it.toQItem(), listId = lib.id)) } },
             onLink = { i -> lib.items.getOrNull(i)?.let { menus.link(LinkTarget.song(it.toQItem())) } },
+            onDownload = { onSnack(downloadAll(c, lib.items.map { it.toQItem() }, lib.name, lib.cover)) },
         ),
     )
 }
@@ -375,7 +450,7 @@ private fun SearchRoute(c: AppContainer, onAlbum: (String) -> Unit, onArtist: (S
 }
 
 @Composable
-private fun PlaylistRoute(c: AppContainer, id: String, onBack: () -> Unit) {
+private fun PlaylistRoute(c: AppContainer, id: String, onBack: () -> Unit, onSnack: (String) -> Unit) {
     val ctx = LocalContext.current
     val menus = LocalMenus.current
     val openPlayer = LocalOpenPlayer.current
@@ -395,6 +470,7 @@ private fun PlaylistRoute(c: AppContainer, id: String, onBack: () -> Unit) {
         onMore = { i -> lib.items.getOrNull(i)?.let { menus.track(MenuTarget(it.toQItem(), listId = lib.id)) } },
         onListMenu = { menus.list(ListMenuTarget.own(lib)) },
         onLink = { i -> lib.items.getOrNull(i)?.let { menus.link(LinkTarget.song(it.toQItem())) } },
+        onDownload = { onSnack(downloadAll(c, lib.items.map { it.toQItem() }, lib.name, lib.cover)) },
     )
 }
 
@@ -457,6 +533,8 @@ private fun AlbumRoute(c: AppContainer, id: String, onBack: () -> Unit, onSnack:
             onListMenu = {
                 data?.let { d -> menus.list(ListMenuTarget(null, ListMenuUi(d.queue.count { c.linker.stateOf(it).let { s -> s != LinkState.MATCHED && s != LinkState.OTHER } }, own = false), d.ui.title, d.cover, d.listItems())) }
             },
+            // An album's songs carry no cover of their own: the album's is what they are kept with (`pageArt`).
+            onDownload = { data?.let { d -> onSnack(downloadAll(c, d.queue.map { q -> if (q.thumbnail.isEmpty()) q.copy(thumbnail = d.cover) else q }, d.ui.title, d.cover)) } },
         ),
         error = loaded?.error,
     )
