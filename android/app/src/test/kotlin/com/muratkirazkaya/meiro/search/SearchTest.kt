@@ -193,6 +193,17 @@ class SearchControllerTest {
         assertTrue(ui.artists.isEmpty() && ui.albums.isEmpty())
     }
 
+    /** M5: without a network neither provider is asked; the results come from this device at once. */
+    @Test fun offlineGoesStraightToThisDevice() = runBlocking {
+        ctl = SearchController(this, p, recent, { local }, online = { false }, timeoutMs = TIMEOUT, scTimeoutMs = TIMEOUT)
+        ctl.submit("gece")
+        val ui = SearchMapping.toUi(ctl.state.value)
+        assertEquals(SearchMapping.LOCAL_NOTE, ui.note)
+        assertEquals(listOf("Gece"), ui.songs.map { it.title })
+        assertTrue(p.ytmCalls.isEmpty()); assertEquals(0, p.scCalls)
+        coroutineContext.cancelChildren()
+    }
+
     @Test fun songsChipSearchesWithItsParamsKeepsSoundCloudAndLoadsMore() = test {
         ctl.submit("daft punk")
         p.ytmAnswer.complete(YtmSearch.parseSearch(fixture("ytm_search_daft_punk.json")))

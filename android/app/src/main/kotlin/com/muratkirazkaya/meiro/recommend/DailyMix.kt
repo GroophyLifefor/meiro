@@ -120,8 +120,9 @@ class DailyMixMaker(
         .filterNot { it.id == dailyMixId || libraryServerId(it.id, it.serverId) == Ids.dailyMixId() }
         .flatMap { lib -> lib.items.map { Signal(it.source, it.key, it.title, it.artist, SignalKind.Saved, it.addedAt) } }
 
-    fun profile(history: List<HistoryEntry>, libs: List<Library>, dailyMixId: String, now: Instant): Profile =
-        Taste.build(tastePlays(history), tasteSignals(libs, dailyMixId), now)
+    /** [downloads] adds every download as `Downloaded` at its time (`tasteSignals`, M5). */
+    fun profile(history: List<HistoryEntry>, libs: List<Library>, dailyMixId: String, now: Instant, downloads: List<Signal> = emptyList()): Profile =
+        Taste.build(tastePlays(history), tasteSignals(libs, dailyMixId) + downloads, now)
 
     /** `recSeedTracks`: for each of the top [SEEDS] artists, the latest played song by that artist that has an id. */
     fun seeds(profile: Profile, history: List<HistoryEntry>): List<SeedTrack> = profile.topArtists(SEEDS).mapNotNull { artist ->

@@ -73,6 +73,8 @@ class SearchController(
     private val providers: SearchProviders,
     private val recentStore: RecentStore,
     private val localItems: () -> List<MusicItem> = { emptyList() },
+    /** Whether the phone has a network; without one the search goes straight to this device's tracks. */
+    private val online: () -> Boolean = { true },
     private val timeoutMs: Long = SEARCH_TIMEOUT_MS,
     private val scTimeoutMs: Long = SOUNDCLOUD_TIMEOUT_MS,
     private val log: (String) -> Unit = {},
@@ -161,6 +163,13 @@ class SearchController(
     private fun start(q: String, params: String, soundCloud: Boolean) {
         stop()
         val gen = generation
+        if (!online()) {
+            // No network: neither provider can answer, so the results come from this device at once.
+            val off = ProviderAnswer(done = true, failed = true, error = "offline")
+            _state.update { it.copy(ytm = off, sc = off) }
+            fallBack(gen, q)
+            return
+        }
         val t0 = System.nanoTime()
         fun ms() = (System.nanoTime() - t0) / 1_000_000
         ytmJob = scope.launch {

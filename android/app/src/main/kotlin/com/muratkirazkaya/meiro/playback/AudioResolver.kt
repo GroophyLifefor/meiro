@@ -19,8 +19,11 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.util.concurrent.atomic.AtomicLong
 
-/** A resolved track: a direct audio URL, its length (0 unknown) and whether it is an HLS manifest. */
-data class Resolved(val url: String, val durationMs: Long, val hls: Boolean)
+/**
+ * A resolved track: a direct audio URL, its length (0 unknown) and whether it is an HLS manifest. [local] is a file on
+ * the phone (a download or the playback cache), which needs no network and never goes stale.
+ */
+data class Resolved(val url: String, val durationMs: Long, val hls: Boolean, val local: Boolean = false)
 
 /** A resolve that failed; [message] is the raw reason (yt-dlp's last ERROR line), for [PlayError.message]. */
 class ResolveException(message: String) : Exception(message)
@@ -31,7 +34,11 @@ class ResolveException(message: String) : Exception(message)
  * if that fails (`ytdlp.Resolve`); SoundCloud resolves the page URL to JSON (`ResolveSoundCloud`). Each resolve is
  * bounded by 90 s.
  */
-class AudioResolver(private val context: Context, scope: CoroutineScope, private val log: (String) -> Unit = { Log.i(TAG, it) }) {
+class AudioResolver(
+    private val context: Context, scope: CoroutineScope, private val log: (String) -> Unit = { Log.i(TAG, it) },
+    /** `findAudio`'s first two places: the downloaded file, then the playback cache's (M5). */
+    private val local: (QItem) -> java.io.File? = { null },
+) {
     private val pids = AtomicLong()
 
     private val ytm = UrlCache<Resolved>(scope) { id -> resolveYtm(id) }
@@ -39,10 +46,19 @@ class AudioResolver(private val context: Context, scope: CoroutineScope, private
 
     private fun cacheFor(item: QItem) = if (item.provider() == Source.SOUNDCLOUD) sc else ytm
 
-    suspend fun get(item: QItem): Resolved = cacheFor(item).get(item.key)
+    /** `findAudio`: the downloaded file, then the playback cache, then a resolve over the network. */
+    suspend fun get(item: QItem): Resolved = localFile(item) ?: cacheFor(item).get(item.key)
 
-    /** The URL already in the cache, if any (no resolve is started). */
-    fun cached(item: QItem): Resolved? = cacheFor(item).cached(item.key)
+    /** Only the network (a download or the cache's copy needs the stream URL, never the local file). */
+    suspend fun network(item: QItem): Resolved = cacheFor(item).get(item.key)
+
+    /** The URL already in the cache or a local file, if any (no resolve is started). */
+    fun cached(item: QItem): Resolved? = localFile(item) ?: cacheFor(item).cached(item.key)
+
+    private fun localFile(item: QItem): Resolved? {
+        val f = try { local(item) } catch (e: Exception) { null } ?: return null
+        return Resolved(android.net.Uri.fromFile(f).toString(), item.durationMs(), false, local = true)
+    }
 
     /** Drops a track's URL so the next [get] resolves again (it stopped working, or the network changed). */
     fun forget(item: QItem) = cacheFor(item).forget(item.key)

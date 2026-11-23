@@ -41,6 +41,8 @@ class UpNext(
     private val used = HashSet<String>()
     val suggested = HashSet<String>()
     private var job: Job? = null
+    /** The track playing when the last request failed. */
+    private var failedFor = ""
     private var generation = 0
 
     fun busy() = job?.isActive == true
@@ -71,6 +73,9 @@ class UpNext(
         val src = source ?: return
         // A SoundCloud track has no video ID (the desktop's `a.current.VideoID == ""`): YouTube Music cannot follow it.
         if (!autoPlay || current == null || current.provider() != Source.YTM || current.key.isEmpty() || busy() || queue.size == 0) return
+        // A request that failed for this track is not asked again until another track plays (M5: offline, the engine's
+        // ticks would ask several times a second).
+        if (error.isNotEmpty() && failedFor == current.key) return
         var continuation = ""
         if (fetched) {
             when {
@@ -99,7 +104,7 @@ class UpNext(
                 if (e is CancellationException && gen != generation) throw e
                 if (gen != generation) return@launch
                 job = null
-                error = e.message ?: e.javaClass.simpleName; token = ""
+                error = e.message ?: e.javaClass.simpleName; token = ""; failedFor = current.key
                 log("up next: request failed for $vid: $error")
                 onDone(continuation, true)
                 return@launch

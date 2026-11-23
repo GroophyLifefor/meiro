@@ -43,7 +43,8 @@ class PlaybackService : MediaSessionService() {
             .setReadTimeoutMs(15_000)
             .setAllowCrossProtocolRedirects(true)
         val player = ExoPlayer.Builder(this)
-            .setMediaSourceFactory(DefaultMediaSourceFactory(http))
+            // DefaultDataSource reads downloaded and cached files (file://) as well as the network.
+            .setMediaSourceFactory(DefaultMediaSourceFactory(androidx.media3.datasource.DefaultDataSource.Factory(this, http)))
             .setAudioAttributes(AudioAttributes.Builder().setUsage(C.USAGE_MEDIA).setContentType(C.AUDIO_CONTENT_TYPE_MUSIC).build(), true)
             .setHandleAudioBecomingNoisy(true)
             .setWakeMode(C.WAKE_MODE_NETWORK)
@@ -54,10 +55,11 @@ class PlaybackService : MediaSessionService() {
         scope.launch {
             val container = (application as MeiroApplication).container()
             val e = PlaybackEngine(
-                this@PlaybackService, player, AudioResolver(this@PlaybackService, scope),
+                this@PlaybackService, player, AudioResolver(this@PlaybackService, scope, local = container::localAudio),
                 container.playStore(), container.engine.deviceName, scope, PlaybackHost::publish,
                 upNextSource = container.upNextSource, suggestions = container::suggestionPicks,
                 autoPlayInitially = container.autoPlay(), saveAutoPlay = container::saveAutoPlay,
+                audio = container.audioHooks, reachable = { com.muratkirazkaya.meiro.downloads.Online.reachable() },
             )
             engine = e
             PlaybackHost.attach(e)

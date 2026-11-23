@@ -70,6 +70,11 @@ data class QueueView(
  * - A track the resolver cannot find is skipped, up to 3 in a row (`skipUnplayable`).
  * - Each play is recorded through [PlayRecorder]: begun when audio starts, filed when it ends.
  */
+/** What the app does once a track's audio plays (`audioStarted`): touches its download, or caches the stream. */
+fun interface AudioHooks {
+    fun started(item: QItem, r: Resolved)
+}
+
 @OptIn(UnstableApi::class)
 class PlaybackEngine(
     private val context: Context,
@@ -86,6 +91,10 @@ class PlaybackEngine(
     /** Auto-play as the settings hold it, and where a change is kept (`settings.AutoPlay`, on by default). */
     autoPlayInitially: Boolean = true,
     private val saveAutoPlay: (Boolean) -> Unit = {},
+    /** What happens once a track's audio plays (M5): a downloaded track is marked as listened, a streamed one cached. */
+    private val audio: AudioHooks? = null,
+    /** `networkOnline`, asked only after a resolve failed. */
+    private val reachable: suspend () -> Boolean = { true },
 ) {
     val queue = Queue()
     var repeat = RepeatMode.Off; private set
@@ -107,6 +116,8 @@ class PlaybackEngine(
     private var awaitingAudio = false
     private var startJob: Job? = null
     private var startedAt = 0L
+    /** Where the current track's audio comes from (a local file or a stream URL), once found. */
+    private var resolvedNow: Resolved? = null
 
     private var skipped = 0
     private var recoveries = 0
@@ -382,14 +393,18 @@ class PlaybackEngine(
         startJob?.cancel()
         val hit = resolver.cached(item) != null
         publish()
+        resolvedNow = null
         startJob = scope.launch {
             val r = try { resolver.get(item) } catch (e: CancellationException) { throw e } catch (e: Throwable) {
-                if (gen == generation) { fail(item, "resolve failed", e.message ?: e.toString()); skipUnplayable(item) }
+                // `findAudio`: a resolve that failed with no network behind it is the offline error.
+                val raw = if (!reachable()) OFFLINE_ERROR else e.message ?: e.toString()
+                if (gen == generation) { fail(item, "resolve failed", raw); skipUnplayable(item) }
                 return@launch
             }
             if (gen != generation) return@launch
             if (r.durationMs > 0) totalMs = r.durationMs
-            log("start: ${item.provider()}:${item.key} resolved in ${SystemClock.elapsedRealtime() - startedAt} ms (cache hit=$hit)")
+            resolvedNow = r
+            log("start: ${item.provider()}:${item.key} resolved in ${SystemClock.elapsedRealtime() - startedAt} ms (cache hit=$hit${if (r.local) ", local file" else ""})")
             player.setMediaItem(mediaItem(item, r), startAt)
             player.prepare()
             loading = false
@@ -406,6 +421,7 @@ class PlaybackEngine(
         skipped = 0
         log("start: ${item.key} audio playing ${SystemClock.elapsedRealtime() - startedAt} ms after the request")
         recorder.begin(item, item.durationMs().takeIf { it > 0 } ?: totalMs)
+        resolvedNow?.let { r -> try { audio?.started(item, r) } catch (e: Exception) { log("audio hook: $e") } }
         warmNext()
     }
 
@@ -566,6 +582,7 @@ class PlaybackEngine(
             }
             if (gen != generation) return@launch
             if (r.durationMs > 0) totalMs = r.durationMs
+            resolvedNow = r
             player.setMediaItem(mediaItem(item, r), at)
             player.prepare()
             loading = false
@@ -583,6 +600,8 @@ class PlaybackEngine(
         lastNetwork = network
         if (before == null || before == network) return
         val item = current ?: return
+        // A downloaded or cached file does not care which network is up.
+        if (resolvedNow?.local == true) return
         log("network changed: ${before} -> $network")
         resolver.forget(item)
         following()?.let { resolver.forget(it) }
@@ -625,6 +644,8 @@ class PlaybackEngine(
     }
 
     companion object {
+        /** `findAudio`'s error when the resolve failed and the network is not there either. */
+        const val OFFLINE_ERROR = "offline: this track is not downloaded"
         const val PRELOAD_LEAD_MS = 20_000L
         const val MAX_RECOVERIES = 3
         const val RECOVERY_BACKOFF_MS = 500L

@@ -93,6 +93,19 @@ class UpNextTest {
         assertEquals(listOf("a"), q.items.map { it.key })
     }
 
+    /** M5: offline, a failed request is not asked again on every tick; the next track playing asks again. */
+    @Test fun aFailedRequestIsNotRepeatedForTheSameTrack() {
+        val fake = Fake(emptyMap(), fail = true)
+        val u = UpNext(scope, fake)
+        val q = queue("a", "b")
+        u.reset("a")
+        repeat(5) { u.ensure(true, q, q.current()) { _, _ -> } }
+        assertEquals(1, fake.asked.size)
+        q.moveTo(1)
+        repeat(5) { u.ensure(true, q, q.current()) { _, _ -> } }
+        assertEquals(2, fake.asked.size)
+    }
+
     @Test fun suggestionsGoFirstUpToFiveAndNeverTwice() {
         val picks = (1..7).map { t("m$it", why = "W$it") } + t("a")
         val f = Fake(mapOf("" to GeneratedPage(listOf(t("x"), t("m2")), "", "PL")))
