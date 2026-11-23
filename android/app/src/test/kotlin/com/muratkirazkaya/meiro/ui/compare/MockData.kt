@@ -31,12 +31,14 @@ class InvEl(val json: JSONObject, val theme: String, shiftY: Double = 0.0) {
     val icon: String? = json.optString("icon").takeIf { it.isNotEmpty() && it != "null" }
     val text: String? = json.optString("text").takeIf { it.isNotEmpty() && it != "null" }
     private val scrolls = shiftY != 0.0 && path.contains("div#content.content:nth-child(2)>") && !path.contains("div.topbar")
-    val x = json.getJSONObject("bbox").getDouble("x")
-    val y = json.getJSONObject("bbox").getDouble("y") - (if (scrolls) shiftY else 0.0)
-    val w = json.getJSONObject("bbox").getDouble("w")
-    val h = json.getJSONObject("bbox").getDouble("h")
+    // A pseudo element the mock does not draw (a `::before` of a page under the full player) has no box at all.
+    private val box = json.optJSONObject("bbox")
+    val x = box?.getDouble("x") ?: 0.0
+    val y = (box?.getDouble("y") ?: 0.0) - (if (scrolls) shiftY else 0.0)
+    val w = box?.getDouble("w") ?: 0.0
+    val h = box?.getDouble("h") ?: 0.0
     // Scrolled vertically, an element of a horizontal shelf that lies right of the screen stays off screen.
-    val offscreen = if (scrolls) (y < 100.0 || y + h > 672.0 || x < 0.0 || x + w > 370.0) else json.optBoolean("offscreen")
+    val offscreen = box == null || if (scrolls) (y < 100.0 || y + h > 672.0 || x < 0.0 || x + w > 370.0) else json.optBoolean("offscreen")
     val occluded = json.optBoolean("occluded", false)
     val clipped = json.optBoolean("clipped")
     private val st = json.getJSONObject("style")

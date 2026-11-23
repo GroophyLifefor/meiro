@@ -143,7 +143,8 @@ object ElementCompare {
             // A node a vertical list has scrolled wholly out of its viewport (the list clips it to nothing) is not drawn;
             // it only counts when it also sticks out sideways.
             val vis = n.boundsInRoot
-            val scrolledAway = (vis.height <= 0f || vis.width <= 0f) && r.left >= root.left - 0.01 && r.right <= root.right + 0.01
+            val scrolledAway = (vis.height <= 0f || vis.width <= 0f) && r.left >= root.left - 0.01 && r.right <= root.right + 0.01 ||
+                (stress && partlyScrolled(n))
             if (!inHScroll && !scrolledAway && (r.left < root.left - 0.01 || r.top < root.top - 0.01 || r.right > root.right + 0.01 || r.bottom > root.bottom + 0.01))
                 fails += "CLIPPED $k: bounds $r outside screen $root"
         }
@@ -156,6 +157,7 @@ object ElementCompare {
             var p = n.parent
             while (p != null && p.config.getOrNull(SemanticsProperties.TestTag) == null) p = p.parent
             val pk = p?.config?.getOrNull(SemanticsProperties.TestTag) ?: continue
+            if (stress && partlyScrolled(n)) continue
             val encloses = p.config.getOrNull(InvBgKey) != null || p.config.getOrNull(InvRadiusKey) != null ||
                 kindByKey[pk] == "control" || kindByKey[pk] == "surface"
             if (!encloses) continue
@@ -188,6 +190,17 @@ object ElementCompare {
         return containmentChecked
     }
 
+
+    /**
+     * A node a vertical list has scrolled partly out of its viewport (the list clips its top or bottom, not its sides):
+     * the part outside is not drawn, so in a stress render it is not outside the screen or its container. A list inside
+     * a tagged sheet (the up-next list) shows such a row at its bottom edge whenever the queue is longer than the sheet.
+     */
+    private fun partlyScrolled(n: SemanticsNode): Boolean {
+        val r = layoutRect(n); val vis = n.boundsInRoot
+        if (vis.height <= 0f || vis.width <= 0f) return true // wholly scrolled out
+        return vis.height < r.height - 0.5f && abs(vis.left - r.left) < 0.5f && abs(vis.right - r.right) < 0.5f
+    }
 
     /** Layout bounds (not clipped by ancestors, unlike boundsInRoot). */
     private fun layoutRect(n: SemanticsNode) = Rect(n.positionInRoot, androidx.compose.ui.geometry.Size(n.size.width.toFloat(), n.size.height.toFloat()))
