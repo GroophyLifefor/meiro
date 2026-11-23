@@ -58,6 +58,10 @@ data class SearchState(
     val more: String = "",
     /** Set when both providers failed: the tracks this device holds that match (`localSearch`). */
     val local: List<MusicItem>? = null,
+    /** The YouTube Music filter params the results are for ("" for "Hepsi"), so "Tekrar dene" asks the same again. */
+    val params: String = "",
+    /** SoundCloud was asked for this search (no filter, or "Şarkılar"): the mock's error says its rows are below. */
+    val scAsked: Boolean = true,
     val recent: List<String> = emptyList(),
 )
 
@@ -78,11 +82,14 @@ class SearchController(
     private val timeoutMs: Long = SEARCH_TIMEOUT_MS,
     private val scTimeoutMs: Long = SOUNDCLOUD_TIMEOUT_MS,
     private val log: (String) -> Unit = {},
+    /** How long after YouTube Music failed it is asked again by itself ("Biraz sonra tekrar denenecek"). */
+    private val retryMs: Long = YTM_RETRY_MS,
 ) {
     private val _state = MutableStateFlow(SearchState(recent = recentStore.load()))
     val state: StateFlow<SearchState> = _state
 
     private var ytmJob: Job? = null
+    private var retryJob: Job? = null
     private var scJob: Job? = null
     private var moreJob: Job? = null
     private var generation = 0
@@ -157,21 +164,27 @@ class SearchController(
 
     private fun stop() {
         generation++
-        ytmJob?.cancel(); scJob?.cancel(); moreJob?.cancel()
+        ytmJob?.cancel(); scJob?.cancel(); moreJob?.cancel(); retryJob?.cancel()
     }
 
-    private fun start(q: String, params: String, soundCloud: Boolean) {
-        stop()
-        val gen = generation
-        if (!online()) {
-            // No network: neither provider can answer, so the results come from this device at once.
-            val off = ProviderAnswer(done = true, failed = true, error = "offline")
-            _state.update { it.copy(ytm = off, sc = off) }
-            fallBack(gen, q)
-            return
-        }
+    /**
+     * "Tekrar dene" of the mock's `error` state: YouTube Music is asked again for the same search (query and filter);
+     * SoundCloud's rows stay. Does nothing unless YouTube Music's last answer failed and SoundCloud's did not.
+     */
+    fun retryYtm() {
+        val s = _state.value
+        if (s.submitted.isEmpty() || !s.ytm.failed || s.local != null) return
+        retryJob?.cancel()
+        log("search: ytm \"${s.submitted}\" asked again")
+        _state.update { it.copy(ytm = ProviderAnswer()) }
+        askYtm(generation, s.submitted, s.params, auto = 0)
+    }
+
+    /** [auto]: how many times YouTube Music was asked again by itself for this search so far. */
+    private fun askYtm(gen: Int, q: String, params: String, auto: Int) {
         val t0 = System.nanoTime()
         fun ms() = (System.nanoTime() - t0) / 1_000_000
+        ytmJob?.cancel()
         ytmJob = scope.launch {
             val r = runCatching { withTimeout(timeoutMs) { providers.ytm(q, params) } }
             if (gen != generation) return@launch
@@ -186,9 +199,37 @@ class SearchController(
             }.onFailure { e ->
                 log("search: ytm \"$q\" failed in ${ms()} ms: ${e.javaClass.simpleName} ${e.message}")
                 _state.update { it.copy(ytm = ProviderAnswer(done = true, failed = true, error = e.message.orEmpty())) }
+                // "Biraz sonra tekrar denenecek": a failure is asked again after a while, up to YTM_AUTO_RETRIES times.
+                if (auto < YTM_AUTO_RETRIES) {
+                    retryJob?.cancel()
+                    retryJob = scope.launch {
+                        kotlinx.coroutines.delay(retryMs)
+                        if (gen == generation && _state.value.ytm.failed && _state.value.local == null) {
+                            log("search: ytm \"$q\" asked again by itself (${auto + 1}/$YTM_AUTO_RETRIES)")
+                            _state.update { it.copy(ytm = ProviderAnswer()) }
+                            askYtm(gen, q, params, auto + 1)
+                        }
+                    }
+                }
             }
             fallBack(gen, q)
         }
+    }
+
+    private fun start(q: String, params: String, soundCloud: Boolean) {
+        stop()
+        val gen = generation
+        _state.update { it.copy(params = params, scAsked = soundCloud) }
+        if (!online()) {
+            // No network: neither provider can answer, so the results come from this device at once.
+            val off = ProviderAnswer(done = true, failed = true, error = "offline")
+            _state.update { it.copy(ytm = off, sc = off) }
+            fallBack(gen, q)
+            return
+        }
+        val t0 = System.nanoTime()
+        fun ms() = (System.nanoTime() - t0) / 1_000_000
+        askYtm(gen, q, params, auto = 0)
         val cached = scCache?.takeIf { it.first == q }
         when {
             !soundCloud -> _state.update { it.copy(sc = ProviderAnswer(done = true)) }
@@ -235,6 +276,14 @@ class SearchController(
          */
         const val SOUNDCLOUD_TIMEOUT_MS = 45_000L
         const val MAX_RECENT = 8
+
+        /**
+         * The wait before YouTube Music is asked again by itself after it failed (the mock's "Biraz sonra tekrar
+         * denenecek"; the desktop leaves a failed provider out and never asks again), at most [YTM_AUTO_RETRIES] times per
+         * search ("Tekrar dene" starts the count again).
+         */
+        const val YTM_RETRY_MS = 30_000L
+        const val YTM_AUTO_RETRIES = 5
 
         /** `settings.Remember`. */
         fun remember(recent: List<String>, query: String): List<String> {

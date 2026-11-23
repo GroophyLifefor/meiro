@@ -51,7 +51,11 @@ class PlaybackService : MediaSessionService() {
             .build()
         exo = player
         val open = PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
-        session = MediaSession.Builder(this, QueuePlayer(player)).setSessionActivity(open).build()
+        // The notification's small icon, which the lock screen's media controls show for the app (the mock's Meiro mark).
+        setMediaNotificationProvider(androidx.media3.session.DefaultMediaNotificationProvider.Builder(this).build().apply { setSmallIcon(com.muratkirazkaya.meiro.R.drawable.ic_notification_meiro) })
+        session = MediaSession.Builder(this, QueuePlayer(player)).setSessionActivity(open)
+            .setBitmapLoader(androidx.media3.session.CacheBitmapLoader(TrimmedArtLoader(androidx.media3.datasource.DataSourceBitmapLoader(this))))
+            .build()
         scope.launch {
             val container = (application as MeiroApplication).container()
             val e = PlaybackEngine(
@@ -60,6 +64,7 @@ class PlaybackService : MediaSessionService() {
                 upNextSource = container.upNextSource, suggestions = container::suggestionPicks,
                 autoPlayInitially = container.autoPlay(), saveAutoPlay = container::saveAutoPlay,
                 audio = container.audioHooks, reachable = { com.muratkirazkaya.meiro.downloads.Online.reachable() },
+                notice = PlaybackHost::notice,
             )
             engine = e
             PlaybackHost.attach(e)
@@ -75,6 +80,22 @@ class PlaybackService : MediaSessionService() {
         exo?.release(); exo = null
         scope.cancel()
         super.onDestroy()
+    }
+
+    /** The lock screen's picture: a YouTube video thumbnail (4:3 with black bars) loses its bars, as the app's covers do. */
+    private class TrimmedArtLoader(private val inner: androidx.media3.common.util.BitmapLoader) : androidx.media3.common.util.BitmapLoader by inner {
+        override fun loadBitmap(uri: android.net.Uri): com.google.common.util.concurrent.ListenableFuture<android.graphics.Bitmap> =
+            com.google.common.util.concurrent.Futures.transform(
+                inner.loadBitmap(uri),
+                { b -> if (b != null && com.muratkirazkaya.meiro.ui.components.isVideoThumbnail(uri.toString())) trim(b) else b },
+                com.google.common.util.concurrent.MoreExecutors.directExecutor(),
+            )
+
+        private fun trim(b: android.graphics.Bitmap): android.graphics.Bitmap {
+            val (top, bottom) = com.muratkirazkaya.meiro.ui.components.LetterboxTrim.darkBands(b)
+            val h = b.height - top - bottom
+            return if ((top == 0 && bottom == 0) || h <= 0) b else android.graphics.Bitmap.createBitmap(b, 0, top, b.width, h)
+        }
     }
 
     /** What the system's controls see: a player with a next and a previous track whenever the queue has them. */

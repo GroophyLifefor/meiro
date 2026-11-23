@@ -1,0 +1,485 @@
+{
+ "screen": "lock",
+ "systemDrawn": true,
+ "systemNote": "The lock screen and its media controls are System UI, drawn from the app's media session. No element is the app's own, so there is no element comparison; each entry names its Android counterpart and where it is checked.",
+ "elements": [
+  {
+   "path": "#box>div.app:nth-child(1)>div.statusbar:nth-child(1)>span#clock:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div.statusbar:nth-child(1)>span.sys:nth-child(2)>span#netIcon:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div.statusbar:nth-child(1)>span.sys:nth-child(2)>i:nth-child(2)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar:nth-child(1)>h1:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar:nth-child(1)>button.ibtn:nth-child(2)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar:nth-child(1)>button.ibtn:nth-child(2)>span.avatar:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.meter:nth-child(2)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.meter:nth-child(2)>b:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.meter:nth-child(2)>span.sub:nth-child(2)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.meter:nth-child(2)>div.bar:nth-child(3)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.meter:nth-child(2)>div.bar:nth-child(3)>i:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.meter:nth-child(2)>div.bar:nth-child(3)>i:nth-child(2)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.meter:nth-child(2)>div.bar:nth-child(3)>i:nth-child(3)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.meter:nth-child(2)>div.legend:nth-child(4)>span:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.meter:nth-child(2)>div.legend:nth-child(4)>span:nth-child(1)::before",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.meter:nth-child(2)>div.legend:nth-child(4)>span:nth-child(2)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.meter:nth-child(2)>div.legend:nth-child(4)>span:nth-child(2)::before",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.meter:nth-child(2)>div.legend:nth-child(4)>span:nth-child(3)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.meter:nth-child(2)>div.legend:nth-child(4)>span:nth-child(3)::before",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.h-sec:nth-child(3)>h2:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.h-sec:nth-child(3)>button.more:nth-child(2)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(4)>div.cv:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(4)>div.t:nth-child(2)>b:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(4)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(4)>div.t:nth-child(2)>div.prog:nth-child(3)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(4)>div.t:nth-child(2)>div.prog:nth-child(3)>i:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(4)>button.ibtn:nth-child(3)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(4)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.h-sec:nth-child(5)>h2:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.h-sec:nth-child(5)>button.more:nth-child(2)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(6)>div.cv:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(6)>div.t:nth-child(2)>b:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(6)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(6)>div.t:nth-child(2)>span.meta:nth-child(2)>svg.dl:nth-child(2)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(6)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(3)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(6)>button.ibtn:nth-child(3)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(6)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(7)>div.cv:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(7)>div.t:nth-child(2)>b:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(7)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(7)>div.t:nth-child(2)>span.meta:nth-child(2)>svg.dl:nth-child(2)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(7)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(3)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(7)>button.linkbtn:nth-child(3)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(7)>button.linkbtn:nth-child(3)>svg:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(7)>button.ibtn:nth-child(4)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(7)>button.ibtn:nth-child(4)>svg:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(8)>div.cv:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(8)>div.t:nth-child(2)>b:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(8)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(8)>div.t:nth-child(2)>span.meta:nth-child(2)>span.src:nth-child(1)>span.dim:nth-child(2)>svg:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(8)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(2)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(8)>button.ibtn:nth-child(3)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row:nth-child(8)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.note:nth-child(9)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div:nth-child(10)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.cv:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>b:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>span:nth-child(2)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>span:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>span:nth-child(2)>span.src:nth-child(1)>span.dim:nth-child(2)>svg:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(3)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(4)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(4)>svg:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.bar:nth-child(5)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.bar:nth-child(5)>i:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(1)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(2)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(2)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(3)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(3)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(4)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(4)>span.pill:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(4)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  },
+  {
+   "path": "#box>div#lock.lock.open:nth-child(3)>div.clock:nth-child(1)",
+   "system": true,
+   "android": "System UI lock screen clock (not the app's)."
+  },
+  {
+   "path": "#box>div#lock.lock.open:nth-child(3)>div.date:nth-child(2)",
+   "system": true,
+   "android": "System UI lock screen date (not the app's)."
+  },
+  {
+   "path": "#box>div#lock.lock.open:nth-child(3)>div.media:nth-child(3)>div.app:nth-child(1)",
+   "system": true,
+   "android": "Media controls header: Android shows the app's icon and label (\"Meiro\"); the provider name (\"· YouTube Music\") has no field in Android's media controls (see PROGRESS.md M6c deviations)."
+  },
+  {
+   "path": "#box>div#lock.lock.open:nth-child(3)>div.media:nth-child(3)>div.app:nth-child(1)>span.src:nth-child(1)>svg:nth-child(1)",
+   "system": true,
+   "android": "The app's icon, drawn by Android."
+  },
+  {
+   "path": "#box>div#lock.lock.open:nth-child(3)>div.media:nth-child(3)>div.row1:nth-child(2)>div.cv:nth-child(1)",
+   "system": true,
+   "android": "MediaMetadata.artworkUri (PlaybackEngine.metadata, M6cMediaTest); emulator shot build/check/m6c/flow-lock-*.png."
+  },
+  {
+   "path": "#box>div#lock.lock.open:nth-child(3)>div.media:nth-child(3)>div.row1:nth-child(2)>div.t:nth-child(2)>b:nth-child(1)",
+   "system": true,
+   "android": "MediaMetadata.title (M6cMediaTest); dumpsys media_session description in build/check/m6c/."
+  },
+  {
+   "path": "#box>div#lock.lock.open:nth-child(3)>div.media:nth-child(3)>div.row1:nth-child(2)>div.t:nth-child(2)>span:nth-child(2)",
+   "system": true,
+   "android": "MediaMetadata.artist (M6cMediaTest); dumpsys media_session description."
+  },
+  {
+   "path": "#box>div#lock.lock.open:nth-child(3)>div.media:nth-child(3)>div.row1:nth-child(2)>svg:nth-child(3)",
+   "system": true,
+   "android": "Heart: not shown (YouTube Music likes need a YouTube Music sign-in; the app's heart is inert everywhere, M4f). Deviation."
+  },
+  {
+   "path": "#box>div#lock.lock.open:nth-child(3)>div.media:nth-child(3)>div.line:nth-child(3)",
+   "system": true,
+   "android": "Seek bar: Android draws it from the session's position and duration."
+  },
+  {
+   "path": "#box>div#lock.lock.open:nth-child(3)>div.media:nth-child(3)>div.line:nth-child(3)>i:nth-child(1)",
+   "system": true,
+   "android": "Seek bar fill: as above."
+  },
+  {
+   "path": "#box>div#lock.lock.open:nth-child(3)>div.media:nth-child(3)>div.c:nth-child(4)>svg:nth-child(1)",
+   "system": true,
+   "android": "Previous: Player.COMMAND_SEEK_TO_PREVIOUS (PlaybackService.QueuePlayer); pressed on the emulator."
+  },
+  {
+   "path": "#box>div#lock.lock.open:nth-child(3)>div.media:nth-child(3)>div.c:nth-child(4)>span.pp:nth-child(2)",
+   "system": true,
+   "android": "Play/pause: the session's play and pause (QueuePlayer.play/pause); pressed on the emulator."
+  },
+  {
+   "path": "#box>div#lock.lock.open:nth-child(3)>div.media:nth-child(3)>div.c:nth-child(4)>span.pp:nth-child(2)>svg:nth-child(1)",
+   "system": true,
+   "android": "Play/pause glyph: Android's."
+  },
+  {
+   "path": "#box>div#lock.lock.open:nth-child(3)>div.media:nth-child(3)>div.c:nth-child(4)>svg:nth-child(3)",
+   "system": true,
+   "android": "Next: Player.COMMAND_SEEK_TO_NEXT when the queue has a next track; pressed on the emulator."
+  },
+  {
+   "path": "#box>div#lock.lock.open:nth-child(3)>p:nth-child(4)",
+   "system": true,
+   "android": "The mock's note about the notification: one media notification, not dismissable while it plays (foreground service), no notification per track. Checked with dumpsys notification (flags) on the emulator."
+  },
+  {
+   "path": "#box>div#lock.lock.open:nth-child(3)>button.btn.tonal:nth-child(5)",
+   "system": true,
+   "android": "The mock's own control to close its lock overlay; on a phone that is unlocking."
+  },
+  {
+   "path": "#box>div.gesture:nth-child(7)",
+   "system": true,
+   "android": "The page under the lock overlay (occluded in the mock)."
+  }
+ ],
+ "aux": [],
+ "centered": [],
+ "rows": []
+}

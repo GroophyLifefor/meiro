@@ -33,7 +33,8 @@ object NowPlayingMapping {
         val providers = item.providers()
         return NowPlayingUi(
             title = item.title.ifEmpty { item.key },
-            artist = item.artist,
+            // A track that did not play shows why in the artist's place (the mock's `playerr`, the desktop's `trackLine`).
+            artist = p.error?.takeIf { !p.loading } ?: item.artist,
             context = p.queue.source,
             cover = CoverSpec(item.thumbnail.takeIf { it.isNotBlank() }, hue(item.key)),
             link = when (linkState) { LinkState.MATCHED -> NpLink.Matched; LinkState.OTHER -> NpLink.Other; else -> NpLink.Unknown },

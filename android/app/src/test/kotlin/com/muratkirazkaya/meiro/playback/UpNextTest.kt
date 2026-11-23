@@ -106,6 +106,20 @@ class UpNextTest {
         assertEquals(2, fake.asked.size)
     }
 
+    /** M6c: a fresh request that adds nothing is not asked again on every tick for the same track (it was 4 a second). */
+    @Test fun anEmptyAnswerIsNotRepeatedForTheSameTrack() {
+        val f = Fake(emptyMap()) // every page empty
+        val u = UpNext(scope, f)
+        val q = queue("a")
+        u.reset("a")
+        repeat(10) { u.ensure(true, q, q.current()) { _, _ -> } }
+        assertEquals(1, f.asked.size)
+        // Another track playing asks again (the queue's end asks from the track playing).
+        q.replace(t("b"), listOf(t("b")), 0, "L")
+        repeat(10) { u.ensure(true, q, q.current()) { _, _ -> } }
+        assertEquals(listOf("a", "b"), f.asked.map { it.first })
+    }
+
     @Test fun suggestionsGoFirstUpToFiveAndNeverTwice() {
         val picks = (1..7).map { t("m$it", why = "W$it") } + t("a")
         val f = Fake(mapOf("" to GeneratedPage(listOf(t("x"), t("m2")), "", "PL")))

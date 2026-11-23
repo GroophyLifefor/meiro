@@ -28,6 +28,10 @@ object SearchMapping {
     /** The mock's offline note, over results that came from this device. */
     const val LOCAL_NOTE = "Ağ yok: sonuçlar bu cihazdan, indirilenlerden ve önbellekten."
 
+    /** The mock's error line when YouTube Music did not answer; without its first sentence when SoundCloud was not asked (a filter). */
+    const val YTM_ERROR = "SoundCloud sonuçları aşağıda. Biraz sonra tekrar denenecek."
+    const val YTM_ERROR_NO_SC = "Biraz sonra tekrar denenecek."
+
     /** The kind words YouTube Music (hl=en) puts first in a result's subtitle. */
     private val kindWords = setOf("Song", "Video", "Album", "Single", "EP", "Artist", "Playlist", "Episode", "Podcast", "Profile")
 
@@ -62,6 +66,11 @@ object SearchMapping {
         if (s.submitted.isEmpty()) return base
         if (s.local != null) {
             return base.copy(note = LOCAL_NOTE, songs = s.local.map { it.toSongRow(linkState, playingKey) })
+        }
+        if (s.ytm.failed && s.ytmOn) {
+            // The mock's `error`: YouTube Music did not answer, SoundCloud's tracks follow (artists, albums and lists
+            // come from YouTube Music only, so there are none).
+            return base.copy(ytmError = if (s.scAsked) YTM_ERROR else YTM_ERROR_NO_SC, songs = songs(s).map { it.toSongRow(linkState, playingKey) })
         }
         val rows = ytmRows(s)
         val chip = s.chip

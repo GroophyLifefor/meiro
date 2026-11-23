@@ -276,6 +276,78 @@ class SearchControllerTest {
         assertFalse(ctl.state.value.ytm.done)
     }
 
+    /** M6c, the mock's `error`: YouTube Music failed, SoundCloud answered; "Tekrar dene" asks YouTube Music again. */
+    @Test fun aFailedYouTubeMusicShowsTheErrorAndTekrarDeneAsksAgain() = runBlocking {
+        ctl = SearchController(this, p, recent, { local }, timeoutMs = TIMEOUT, scTimeoutMs = TIMEOUT, retryMs = 60_000)
+        ctl.submit("hidra")
+        p.ytmAnswer.completeExceptionally(java.io.IOException("Unable to resolve host music.youtube.com"))
+        p.scAnswer.complete(listOf(sc("Gece Yarısı (canlı)", "Anıl Kaya", "3:41")))
+        runCurrent()
+        var ui = SearchMapping.toUi(ctl.state.value)
+        assertEquals(SearchMapping.YTM_ERROR, ui.ytmError)
+        assertNull(ui.note)
+        assertEquals(listOf("Gece Yarısı (canlı)"), ui.songs.map { it.title })
+        assertTrue(ui.artists.isEmpty() && ui.albums.isEmpty() && ui.lists.isEmpty())
+
+        p.ytmAnswer = CompletableDeferred()
+        ctl.retryYtm()
+        runCurrent()
+        assertEquals(listOf("hidra" to "", "hidra" to ""), p.ytmCalls)
+        assertEquals(1, p.scCalls) // SoundCloud's rows stay, it is not asked again
+        ui = SearchMapping.toUi(ctl.state.value)
+        assertNull(ui.ytmError) // while it is asked again the block goes away
+        p.ytmAnswer.complete(YtmSearch.parseSearch(fixture("ytm_search_daft_punk.json")))
+        runCurrent()
+        ui = SearchMapping.toUi(ctl.state.value)
+        assertNull(ui.ytmError)
+        assertTrue(ui.artists.isNotEmpty())
+        assertTrue(ui.songs.any { it.title == "Gece Yarısı (canlı)" })
+        coroutineContext.cancelChildren()
+    }
+
+    /** "Biraz sonra tekrar denenecek": a failure is asked again by itself, at most YTM_AUTO_RETRIES times. */
+    @Test fun aFailedYouTubeMusicIsAskedAgainByItselfAFewTimes() = runBlocking {
+        ctl = SearchController(this, p, recent, { local }, timeoutMs = TIMEOUT, scTimeoutMs = TIMEOUT, retryMs = 40)
+        ctl.submit("hidra")
+        p.ytmAnswer.completeExceptionally(java.io.IOException("timeout"))
+        p.scAnswer.complete(listOf(sc("Gece Yarısı (canlı)", "Anıl Kaya", "3:41")))
+        delay(40L * (SearchController.YTM_AUTO_RETRIES + 4) + 200)
+        assertEquals(1 + SearchController.YTM_AUTO_RETRIES, p.ytmCalls.size)
+        assertEquals(SearchMapping.YTM_ERROR, SearchMapping.toUi(ctl.state.value).ytmError)
+        assertEquals(30_000L, SearchController.YTM_RETRY_MS)
+        coroutineContext.cancelChildren()
+    }
+
+    /** A filter SoundCloud is not asked for: the error says only that it is asked again; both failing is still the offline note. */
+    @Test fun theErrorLineWithoutSoundCloudAndNoRetryWhenBothFailed() = runBlocking {
+        ctl = SearchController(this, p, recent, { local }, timeoutMs = TIMEOUT, scTimeoutMs = TIMEOUT, retryMs = 60_000)
+        ctl.submit("daft punk")
+        p.ytmAnswer.complete(YtmSearch.parseSearch(fixture("ytm_search_daft_punk.json")))
+        p.scAnswer.complete(emptyList())
+        runCurrent()
+        p.ytmAnswer = CompletableDeferred()
+        ctl.selectChip(com.muratkirazkaya.meiro.ui.screens.SearchChip.Albums)
+        p.ytmAnswer.completeExceptionally(java.io.IOException("timeout"))
+        runCurrent()
+        assertEquals(SearchMapping.YTM_ERROR_NO_SC, SearchMapping.toUi(ctl.state.value).ytmError)
+        ctl.retryYtm()
+        runCurrent()
+        assertEquals("a filter keeps its params when asked again", p.ytmCalls[1].second, p.ytmCalls.last().second)
+        coroutineContext.cancelChildren()
+
+        p.ytmAnswer = CompletableDeferred(); p.scAnswer = CompletableDeferred()
+        ctl = SearchController(this, p, recent, { local }, timeoutMs = TIMEOUT, scTimeoutMs = TIMEOUT, retryMs = 60_000)
+        ctl.submit("kavinsky")
+        p.ytmAnswer.completeExceptionally(java.io.IOException("offline"))
+        p.scAnswer.completeExceptionally(RuntimeException("yt-dlp failed"))
+        advanceUntilIdle()
+        val calls = p.ytmCalls.size
+        ctl.retryYtm() // the offline note stands; nothing is asked
+        assertEquals(calls, p.ytmCalls.size)
+        assertNull(SearchMapping.toUi(ctl.state.value).ytmError)
+        coroutineContext.cancelChildren()
+    }
+
     @Test fun queueItemsPlayFromYouTubeMusicWhenTheTrackHasIt() {
         val merged = SearchMerge.mergeProviders(listOf(yt("Get Lucky", "Daft Punk", "4:08", "abc")), listOf(sc("Get Lucky", "Daft Punk", "4:08"), sc("Solo", "DJ", "2:00")))
         val q = merged.map { it.toQItem() }

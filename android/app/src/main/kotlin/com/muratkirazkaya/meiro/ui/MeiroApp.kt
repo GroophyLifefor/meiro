@@ -35,6 +35,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.muratkirazkaya.meiro.playback.PlaybackHost
 import com.muratkirazkaya.meiro.ui.components.toMini
 import com.muratkirazkaya.meiro.ui.components.Tab
+import com.muratkirazkaya.meiro.ui.screens.HomeLoadingScreen
 import com.muratkirazkaya.meiro.ui.screens.LibraryEmptyScreen
 import com.muratkirazkaya.meiro.ui.screens.LibraryScreen
 import com.muratkirazkaya.meiro.ui.screens.NewListSheet
@@ -204,6 +205,8 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String, signedIn
     val downloaded by c.downloads.keys.collectAsState()
     val online by com.muratkirazkaya.meiro.downloads.Online.state.collectAsState()
     LaunchedEffect(c) { c.downloadEvents.collect { snack = it } }
+    // A track passed over because it did not play (the mock's `playerr` snack, the desktop's notice).
+    LaunchedEffect(c) { PlaybackHost.notices.collect { snack = it } }
 
     CompositionLocalProvider(
         LocalAvatarInitial provides avatarInitial(email), LocalOpenPlayer provides openPlayer, LocalMenus provides openers,
@@ -435,9 +438,13 @@ private fun HomeRoute(c: AppContainer, email: String, onOpen: (String) -> Unit, 
     LaunchedEffect(Unit) { while (true) { delay(30_000); clock = ZonedDateTime.now() } }
     val playingKey = now?.item?.key
     val minute = clock.withSecond(0).withNano(0)
+    val firstRead by c.firstRead.collectAsState()
     val data = remember(version, historyVersion, linkVersion, playingKey, minute, email) {
         HomeMapping.build(email, ZonedDateTime.now(), c.engine.history(), c.libraries.list(), c.links, c.engine.settings.dailyMixId, playingKey)
     }
+    // The mock's `loading`: a new account's first read is on its way and nothing of it is here yet.
+    val empty = remember(version, historyVersion) { c.libraries.list().isEmpty() && c.engine.history().isEmpty() }
+    if (firstRead && empty) { HomeLoadingScreen(); return }
     HomeScreen(
         data.ui, playing = now?.playing == true,
         actions = HomeActions(
@@ -544,6 +551,7 @@ private fun SearchRoute(c: AppContainer, onAlbum: (String) -> Unit, onArtist: (S
             onAlbum = { i -> ui.albums.getOrNull(i)?.let { onAlbum(it.key) } },
             onSongLink = { i -> with(SearchMapping) { SearchMapping.songs(ctl.state.value).getOrNull(i)?.let { menus.link(LinkTarget.song(it.toQItem())) } } },
             onArtistLink = { i -> ui.artists.getOrNull(i)?.let { menus.link(LinkTarget.artist(it.name)) } },
+            onRetry = ctl::retryYtm,
         ),
     )
 }

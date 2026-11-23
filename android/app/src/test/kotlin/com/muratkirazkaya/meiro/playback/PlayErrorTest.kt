@@ -38,6 +38,31 @@ class PlayErrorTest {
         assertEquals("This track could not be played.", m("   \nx"))
     }
 
+    /** M6c: the phone shows each reason in Turkish (the mock's `playerr`); the same rules and order decide. */
+    @Test fun turkishReasons() {
+        fun t(raw: String) = PlayError.turkish(raw)
+        assertEquals("Bu şarkı bulunduğun bölgede çalınamıyor.", t("ERROR: blocked it in your country"))
+        assertEquals("Bu şarkı yaş sınırlı. Çalmak için giriş gerekiyor.", t("ERROR: Sign in to confirm your age"))
+        assertEquals("YouTube bu şarkıyı çalmadan önce giriş istiyor.", t("ERROR: Sign in to confirm you're not a bot"))
+        assertEquals("Bu şarkı gizli.", t("ERROR: Private video"))
+        assertEquals("Bu şarkı yalnız Premium ya da kanal üyeleri için.", t("ERROR: Join this channel to get access"))
+        assertEquals("Bu şarkı artık yok.", t("ERROR: Video unavailable"))
+        assertEquals("YouTube bu şarkının sesini vermedi. Biraz sonra tekrar dene ya da Ayarlar'dan yt-dlp'yi güncelle.", t("ERROR: Requested format is not available"))
+        assertEquals("Bu şarkı parça parça geliyor, Meiro onu henüz indiremiyor.", t("this track cannot be saved as a download"))
+        assertEquals("Çevrimdışısın ve bu şarkı indirilmemiş, çalınamıyor.", t("offline: this track is not downloaded"))
+        assertEquals("Çalmak için ffmpeg ve yt-dlp gerekiyor, biri bulunamadı.", t("playing needs ffmpeg"))
+        assertEquals("YouTube'a ulaşılamadı. Bağlantını kontrol et.", t("Unable to download webpage: timed out"))
+        assertEquals("YouTube bu şarkının sesini vermeyi kesti.", t("HTTP error 403 (ERROR_CODE_IO_BAD_HTTP_STATUS)"))
+        assertEquals("Bu şarkının sesi çalınamadı.", t("Invalid data found when processing input"))
+        assertEquals("Bu şarkı yalnız Premium ya da kanal üyeleri için.", t("premium content, request timed out"))
+        assertEquals("Bu şarkı çalınamadı: something odd", t("something odd\nsecond line"))
+        assertEquals("Bu şarkı çalınamadı.", t(""))
+    }
+
+    @Test fun theSkipSnack() {
+        assertEquals("\u201CYolla\u201D geçildi: Bu şarkı artık yok", PlaybackEngine.skipNotice("Yolla", "Bu şarkı artık yok."))
+    }
+
     @Test fun formatUnavailable() {
         assertTrue(PlayError.isFormatUnavailable("ERROR: Requested format is not available. Use --list-formats"))
         assertTrue(PlayError.isFormatUnavailable("No video formats found!"))

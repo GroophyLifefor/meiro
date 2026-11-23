@@ -29,6 +29,11 @@ object PlaybackHost {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     internal fun publish(state: PlayerUi?) { _ui.value = state }
+
+    private val _notices = kotlinx.coroutines.flow.MutableSharedFlow<String>(extraBufferCapacity = 8)
+    /** What playback has to tell the listener once (a track passed over because it did not play): shown as a snack. */
+    val notices: kotlinx.coroutines.flow.SharedFlow<String> = _notices
+    internal fun notice(message: String) { _notices.tryEmit(message) }
     internal fun attach(e: PlaybackEngine) { engineFlow.value = e }
     internal fun detach(e: PlaybackEngine?) {
         if (e != null && engineFlow.value === e) { engineFlow.value = null; _ui.value = null; controller?.release(); controller = null }

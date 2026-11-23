@@ -39,6 +39,8 @@ data class MiniState(
     val playing: Boolean = true,
     /** The track's audio is being found (the mock's "Hazırlanıyor…" with spinners). */
     val preparing: Boolean = false,
+    /** Why the track did not play (the mock's `playerr`): shown where the artist was, in the error colour. */
+    val error: String? = null,
 )
 
 /**
@@ -57,6 +59,7 @@ fun com.muratkirazkaya.meiro.playback.PlayerUi.toMini(): MiniState {
         progress = progress,
         playing = playing,
         preparing = loading,
+        error = error,
     )
 }
 
@@ -86,7 +89,10 @@ fun MiniPlayer(state: MiniState, modifier: Modifier = Modifier, onPlayPause: () 
             Cover(state.cover, 10.dp, "mini.cover", Modifier.size(48.dp))
             Column(Modifier.weight(1f)) {
                 MText(state.title, MeiroType.MiniTitle, c.onSurface, "mini.title", Modifier.fillMaxWidth(), maxLines = 1)
-                Row(
+                if (state.error != null && !state.preparing) {
+                    // The mock's `span.err`: the reason, one line with an ellipsis; the full player shows all of it.
+                    MText(state.error, MeiroType.MiniArtist, c.error, "mini.err", maxLines = 1)
+                } else Row(
                     Modifier.fillMaxWidth().height(20.dp).inv("mini.artist"),
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                     verticalAlignment = Alignment.CenterVertically,

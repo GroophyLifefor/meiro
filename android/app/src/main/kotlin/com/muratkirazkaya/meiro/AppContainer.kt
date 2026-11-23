@@ -264,6 +264,14 @@ class AppContainer(private val context: Context) {
         return Session(s.syncEmail.isNotEmpty() && !engine.expired, engine.expired, s.syncEmail, s.syncUrl)
     }
 
+    private val _firstRead = MutableStateFlow(false)
+
+    /**
+     * A sign-in's first read of the account (lists, plays) is on its way. Home shows the mock's `loading` skeleton
+     * meanwhile, while the phone holds no list and no play.
+     */
+    val firstRead: StateFlow<Boolean> = _firstRead
+
     /** Signs in to [server] (a bare host means https://). Returns the error to show, or null once signed in. */
     suspend fun signIn(server: String, email: String, password: String): String? = withContext(Dispatchers.IO) {
         val url = normalizeServer(server)
@@ -273,6 +281,10 @@ class AppContainer(private val context: Context) {
         if (engine.token.isNotEmpty()) {
             Log.i(TAG, "sign-in: ok, account ${engine.settings.syncEmail}")
             SyncScheduler.schedule(context)
+            _firstRead.value = true
+            dlScope.launch {
+                try { sync("sign-in") } finally { _firstRead.value = false; Log.i(TAG, "sign-in: first read done") }
+            }
             null
         } else {
             val err = engine.lastError.ifEmpty { "Could not sign in." }

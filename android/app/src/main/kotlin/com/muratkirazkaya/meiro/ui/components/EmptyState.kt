@@ -36,7 +36,8 @@ fun EmptyState(
 ) {
     val c = Meiro.colors
     Column(
-        modifier.fillMaxWidth().padding(start = 32.dp, end = 32.dp, top = 56.dp),
+        // The mock's `.empty{padding:56px 32px}`: what follows the block (the error state's rows) starts 56dp below it.
+        modifier.fillMaxWidth().padding(start = 32.dp, end = 32.dp, top = 56.dp, bottom = 56.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         MIcon(if (error) MeiroIcons.Info else MeiroIcons.Library, c.outline, "empty.icon", size = 56)

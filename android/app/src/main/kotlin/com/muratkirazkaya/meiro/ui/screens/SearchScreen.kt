@@ -63,6 +63,11 @@ data class SearchUi(
     val songs: List<SongRowData> = emptyList(),
     val albums: List<TileData> = emptyList(),
     val lists: List<ListRowData> = emptyList(),
+    /**
+     * YouTube Music did not answer but SoundCloud did (or still may): the mock's `error` state. The line under
+     * "YouTube Music cevap vermedi"; the block stands in place of the chips, SoundCloud's rows follow it untitled.
+     */
+    val ytmError: String? = null,
 )
 
 class SearchActions(
@@ -85,6 +90,8 @@ class SearchActions(
     /** The MusicBrainz link button of the track, and of the artist, at that place: the link sheet. */
     val onSongLink: (Int) -> Unit = {},
     val onArtistLink: (Int) -> Unit = {},
+    /** "Tekrar dene" of the error block: YouTube Music is asked again. */
+    val onRetry: () -> Unit = {},
 )
 
 /**
@@ -113,6 +120,13 @@ fun SearchScreen(ui: SearchUi, playing: Boolean, actions: SearchActions, state: 
                         RecentRow("recent${i + 1}", q, { actions.onRecent(q) }, { actions.onForget(q) })
                     }
                 }
+                return@LazyColumn
+            }
+            if (ui.ytmError != null) {
+                // The mock's `V.error`: the block, then SoundCloud's rows without a section title.
+                item(key = "ytmError") { com.muratkirazkaya.meiro.ui.components.EmptyState("YouTube Music cevap vermedi", ui.ytmError, "Tekrar dene", onButton = actions.onRetry, error = true) }
+                itemsIndexed(ui.songs, key = { i, s -> "s$i/${s.key}" }) { i, s -> SongRow("song${i + 1}", s, playing, { actions.onSong(i) }, onMore = { actions.onSongMore(i) }, onLink = { actions.onSongLink(i) }) }
+                item(key = "end") { Spacer(Modifier.height(24.dp)) }
                 return@LazyColumn
             }
             item(key = "chips") {

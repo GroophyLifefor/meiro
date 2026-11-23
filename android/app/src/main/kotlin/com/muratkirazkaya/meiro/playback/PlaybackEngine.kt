@@ -31,7 +31,7 @@ data class PlayerUi(
     val positionMs: Long,
     val durationMs: Long,
     val loading: Boolean,
-    /** The reason the track did not play ([PlayError.message]); null when it plays. */
+    /** The reason the track did not play ([PlayError.turkish]); null when it plays. */
     val error: String? = null,
     val queue: QueueView = QueueView(),
     val shuffle: Boolean = false,
@@ -95,6 +95,8 @@ class PlaybackEngine(
     private val audio: AudioHooks? = null,
     /** `networkOnline`, asked only after a resolve failed. */
     private val reachable: suspend () -> Boolean = { true },
+    /** A notice for the listener (the desktop's `a.notice`): a track passed over because it did not play. */
+    private val notice: (String) -> Unit = {},
 ) {
     val queue = Queue()
     var repeat = RepeatMode.Off; private set
@@ -448,8 +450,7 @@ class PlaybackEngine(
     }
 
     private fun mediaItem(item: QItem, r: Resolved): MediaItem {
-        val b = MediaItem.Builder().setMediaId(item.queueKey()).setUri(r.url)
-            .setMediaMetadata(MediaMetadata.Builder().setTitle(item.title.ifEmpty { item.key }).setArtist(item.artist.ifEmpty { null }).build())
+        val b = MediaItem.Builder().setMediaId(item.queueKey()).setUri(r.url).setMediaMetadata(metadata(item))
         if (r.hls) b.setMimeType(MimeTypes.APPLICATION_M3U8)
         return b.build()
     }
@@ -530,7 +531,7 @@ class PlaybackEngine(
 
     private fun fail(item: QItem, what: String, raw: String) {
         log("$what ${item.provider()}:${item.key}: $raw")
-        errorText = PlayError.message(raw)
+        errorText = PlayError.turkish(raw)
         loading = false; playIntent = false
         player.stop(); player.clearMediaItems()
         recorder.finish(false)
@@ -543,6 +544,8 @@ class PlaybackEngine(
         val n = queue.next(autoPlay, repeat) ?: return
         skipped++
         log("skipped ${item.title.ifEmpty { item.key }}: ${errorText?.trimEnd('.')}")
+        // The desktop's "Skipped T: reason" toast, in the mock's words (`playerr`).
+        notice(skipNotice(item.title.ifEmpty { item.key }, errorText.orEmpty()))
         startTrack(queue.moveTo(n))
     }
 
@@ -654,5 +657,18 @@ class PlaybackEngine(
         const val MAX_SKIPS = 3
         /** The name of a queue a menu's "Sıradaki olarak çal" or "Kuyruğa ekle" started (the desktop's "Queue"). */
         const val ENQUEUE_SOURCE = "Kuyruk"
+
+        /**
+         * What the media notification and the lock screen show of a track (the mock's `lock`): its title, its artist and
+         * its picture (the session's bitmap loader fetches it; a YouTube video thumbnail loses its black bars there).
+         */
+        fun metadata(item: QItem): MediaMetadata = MediaMetadata.Builder()
+            .setTitle(item.title.ifEmpty { item.key })
+            .setArtist(item.artist.ifEmpty { null })
+            .apply { item.thumbnail.takeIf { it.startsWith("https://") || it.startsWith("http://") }?.let { setArtworkUri(android.net.Uri.parse(it)) } }
+            .build()
+
+        /** The snack for a track passed over: "“Yolla” geçildi: Bu şarkı artık yok" (the mock's `play` of a track that cannot play). */
+        fun skipNotice(title: String, reason: String) = "\u201C$title\u201D geçildi: ${reason.trimEnd('.')}"
     }
 }

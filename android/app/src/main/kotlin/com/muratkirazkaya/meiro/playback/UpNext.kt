@@ -43,6 +43,12 @@ class UpNext(
     private var job: Job? = null
     /** The track playing when the last request failed. */
     private var failedFor = ""
+    /**
+     * The track a fresh request (no continuation) was asked for and added nothing to the queue (M6c: an unknown video,
+     * or a mix of tracks the queue holds): it is not asked again until another track plays. Without this the engine's
+     * 250 ms ticks asked YouTube Music four times a second while a one-track queue played.
+     */
+    private var emptyFor = ""
     private var generation = 0
 
     fun busy() = job?.isActive == true
@@ -50,7 +56,7 @@ class UpNext(
     /** `resetUpNext`: forgets the generated pages of the queue being replaced, and drops a request on its way. */
     fun reset(videoId: String) {
         stop()
-        this.videoId = videoId; playlistId = ""; fetched = false; token = ""; error = ""; waiting = false
+        this.videoId = videoId; playlistId = ""; fetched = false; token = ""; error = ""; waiting = false; emptyFor = ""
         seen.clear()
     }
 
@@ -58,7 +64,7 @@ class UpNext(
 
     /** `setAutoPlay` turned on: a fresh first page from the track playing. */
     fun restart(videoId: String) {
-        stop(); error = ""; waiting = false
+        stop(); error = ""; waiting = false; emptyFor = ""
         fetched = false; token = ""; seen.clear(); this.videoId = videoId
     }
 
@@ -83,6 +89,8 @@ class UpNext(
                     // Everything the pages held has been played out. At the end of the queue, ask again from the track
                     // playing, which is what keeps the queue going.
                     if (queue.remaining() > 0) return
+                    // Asked already for this track and nothing came: playback waiting at the queue's end stops there.
+                    if (emptyFor == current.key) { if (waiting) onDone("", false); return }
                     seen.clear()
                     videoId = current.key
                 }
@@ -116,6 +124,7 @@ class UpNext(
             token = if (page.token == continuation) "" else page.token
             val before = queue.size
             queue.appendGenerated(withSuggestions(page.items, queue, current))
+            emptyFor = if (continuation.isEmpty() && queue.size == before) current.key else ""
             suggested.retainAll(queue.items.map { it.queueKey() }.toSet())
             log("up next: ${page.items.size} tracks from YouTube Music for $vid${if (continuation.isEmpty()) "" else " (next page)"}, queue ${before} -> ${queue.size}, more=${token.isNotEmpty()}")
             onDone(continuation, false)
