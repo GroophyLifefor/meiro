@@ -148,6 +148,25 @@ class YtmClient(
         return YtmBrowse.parse(execute("browse", JSONObject().put("browseId", browseId)))
     }
 
+    /**
+     * `GetUpNext` / `ContinueUpNext` (`upnext.go`): the queue YouTube Music generates after [videoId]. With no
+     * [playlistId] the track is seeded with its own mix (`RDAMVM<id>`); a first page that names no queue playlist is
+     * asked again through its automix link, as the desktop does.
+     */
+    suspend fun upNext(videoId: String, playlistId: String = "", continuation: String = ""): UpNextPage {
+        require(videoId.isNotBlank()) { "youtube: video ID is required" }
+        val payload = JSONObject().put("videoId", videoId).put("playlistId", playlistId.ifEmpty { "RDAMVM$videoId" })
+        if (continuation.isNotEmpty()) payload.put("continuation", continuation)
+        val root = OrderedJson.parse(execute("next", payload))
+        val result = YtmUpNext.result(root)
+        if (continuation.isNotEmpty() || result.playlistId.isNotEmpty()) return result
+        val automix = YtmUpNext.automixPayload(root) ?: return result
+        val again = JSONObject()
+        for ((k, v) in automix) if (v is String || v is Number || v is Boolean) again.put(k, v)
+        again.put("videoId", videoId)
+        return YtmUpNext.parse(execute("next", again))
+    }
+
     private suspend fun execute(endpoint: String, payload: JSONObject): String = withContext(Dispatchers.IO) {
         val client = JSONObject().put("hl", "en").put("gl", "US").put("clientName", CLIENT_NAME).put("clientVersion", CLIENT_VERSION)
         val vd = visitorData

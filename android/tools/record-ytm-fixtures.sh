@@ -9,6 +9,8 @@
 #   ytm_browse_album_ram.json        browse of the first album of that search, "Random Access Memories" (M4d album page)
 # With the argument `browse` only the two browse files are recorded, from the ids in the saved search fixture, so the
 # search fixtures (and the tests written against them) stay as they are.
+# With the argument `upnext` (M4f auto-play) only the generated queue of that seed: ytm_upnext_seed.json (`next` with
+# playlistId RDAMVM<id>) and ytm_upnext_continuation.json (its next page).
 # With the argument `related` (M4e Daily mix) only the related tab of the first song of the saved search fixture:
 #   ytm_next_related_seed.json       `next` for that video (it names the related tab's browse id)
 #   ytm_browse_related.json          browse of that related tab (MUSIC_PAGE_TYPE_TRACK_RELATED)
@@ -122,6 +124,21 @@ if sys.argv[2] == "related":
     bid = related_browse_id(nxt)
     print("related browse", bid)
     save("ytm_browse_related", call("browse", {"browseId": bid}))
+    sys.exit(0)
+
+if sys.argv[2] == "upnext":
+    # M4f auto-play: the generated queue of the same seed (`GetUpNext`: `next` with the track's own mix RDAMVM<id>)
+    # and the next page of it (`ContinueUpNext`).
+    vid = first_video(json.load(open(f"{out}/ytm_search_daft_punk.json", encoding="utf-8")))
+    print("seed video", vid)
+    first = save("ytm_upnext_seed", call("next", {"videoId": vid, "playlistId": "RDAMVM" + vid}))
+    token = None
+    for panel in find(first, "playlistPanelRenderer"):
+        for c in panel.get("continuations", []):
+            for k in ("nextRadioContinuationData", "nextContinuationData"):
+                token = token or c.get(k, {}).get("continuation")
+    assert token, "no up-next continuation"
+    save("ytm_upnext_continuation", call("next", {"videoId": vid, "playlistId": "RDAMVM" + vid, "continuation": token}))
     sys.exit(0)
 
 if sys.argv[2] == "browse":
