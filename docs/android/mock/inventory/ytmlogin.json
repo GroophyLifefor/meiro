@@ -459,11 +459,11 @@
     "textTransform": "none",
     "color": {
      "light": "rgb(32, 33, 36)",
-     "dark": "rgb(32, 33, 36)"
+     "dark": "rgb(232, 234, 237)"
     },
     "backgroundColor": {
      "light": "rgb(255, 255, 255)",
-     "dark": "rgb(255, 255, 255)"
+     "dark": "rgb(14, 14, 14)"
     },
     "borderColor": {
      "light": "rgb(199, 197, 209)",
@@ -512,15 +512,15 @@
     "textTransform": "none",
     "color": {
      "light": "rgb(95, 99, 104)",
-     "dark": "rgb(95, 99, 104)"
+     "dark": "rgb(189, 193, 198)"
     },
     "backgroundColor": {
      "light": "rgb(241, 243, 244)",
-     "dark": "rgb(241, 243, 244)"
+     "dark": "rgb(48, 49, 52)"
     },
     "borderColor": {
      "light": "rgb(95, 99, 104)",
-     "dark": "rgb(95, 99, 104)"
+     "dark": "rgb(189, 193, 198)"
     },
     "fill": {
      "light": "rgb(0, 0, 0)",
@@ -563,7 +563,7 @@
     "textTransform": "none",
     "color": {
      "light": "rgb(95, 99, 104)",
-     "dark": "rgb(95, 99, 104)"
+     "dark": "rgb(189, 193, 198)"
     },
     "backgroundColor": {
      "light": "rgba(0, 0, 0, 0)",
@@ -571,11 +571,11 @@
     },
     "borderColor": {
      "light": "rgb(95, 99, 104)",
-     "dark": "rgb(95, 99, 104)"
+     "dark": "rgb(189, 193, 198)"
     },
     "fill": {
      "light": "rgb(24, 128, 56)",
-     "dark": "rgb(24, 128, 56)"
+     "dark": "rgb(129, 201, 149)"
     }
    },
    "occluded": false,
@@ -616,7 +616,7 @@
     "textTransform": "none",
     "color": {
      "light": "rgb(32, 33, 36)",
-     "dark": "rgb(32, 33, 36)"
+     "dark": "rgb(232, 234, 237)"
     },
     "backgroundColor": {
      "light": "rgba(0, 0, 0, 0)",
@@ -624,7 +624,7 @@
     },
     "borderColor": {
      "light": "rgb(32, 33, 36)",
-     "dark": "rgb(32, 33, 36)"
+     "dark": "rgb(232, 234, 237)"
     },
     "fill": {
      "light": "rgb(0, 0, 0)",
@@ -667,7 +667,7 @@
     "textTransform": "none",
     "color": {
      "light": "rgb(95, 99, 104)",
-     "dark": "rgb(95, 99, 104)"
+     "dark": "rgb(154, 160, 166)"
     },
     "backgroundColor": {
      "light": "rgba(0, 0, 0, 0)",
@@ -675,7 +675,7 @@
     },
     "borderColor": {
      "light": "rgb(95, 99, 104)",
-     "dark": "rgb(95, 99, 104)"
+     "dark": "rgb(154, 160, 166)"
     },
     "fill": {
      "light": "rgb(0, 0, 0)",
@@ -720,7 +720,7 @@
     "textTransform": "none",
     "color": {
      "light": "rgb(95, 99, 104)",
-     "dark": "rgb(95, 99, 104)"
+     "dark": "rgb(154, 160, 166)"
     },
     "backgroundColor": {
      "light": "rgba(0, 0, 0, 0)",
@@ -728,7 +728,7 @@
     },
     "borderColor": {
      "light": "rgb(218, 220, 224)",
-     "dark": "rgb(218, 220, 224)"
+     "dark": "rgb(95, 99, 104)"
     },
     "fill": {
      "light": "rgb(0, 0, 0)",
@@ -771,7 +771,7 @@
     "textTransform": "none",
     "color": {
      "light": "rgb(26, 115, 232)",
-     "dark": "rgb(26, 115, 232)"
+     "dark": "rgb(138, 180, 248)"
     },
     "backgroundColor": {
      "light": "rgba(0, 0, 0, 0)",
@@ -779,7 +779,7 @@
     },
     "borderColor": {
      "light": "rgb(26, 115, 232)",
-     "dark": "rgb(26, 115, 232)"
+     "dark": "rgb(138, 180, 248)"
     },
     "fill": {
      "light": "rgb(0, 0, 0)",
@@ -822,15 +822,15 @@
     "textTransform": "none",
     "color": {
      "light": "rgb(255, 255, 255)",
-     "dark": "rgb(255, 255, 255)"
+     "dark": "rgb(6, 46, 111)"
     },
     "backgroundColor": {
      "light": "rgb(26, 115, 232)",
-     "dark": "rgb(26, 115, 232)"
+     "dark": "rgb(168, 199, 250)"
     },
     "borderColor": {
      "light": "rgb(255, 255, 255)",
-     "dark": "rgb(255, 255, 255)"
+     "dark": "rgb(6, 46, 111)"
     },
     "fill": {
      "light": "rgb(0, 0, 0)",

@@ -17,6 +17,8 @@
     --scrim:rgba(0,0,0,.55);
     --page:#0c0c0f;
     --shadow:0 1px 2px rgba(0,0,0,.30), 0 2px 6px rgba(0,0,0,.40);
+    /* Google's sign-in page in the ytmlogin frame (sampled from its dark page on the emulator) */
+    --w-bg:#0e0e0e; --w-text:#e8eaed; --w-sub:#9aa0a6; --w-strip:#303134; --w-url:#bdc1c6; --w-lock:#81c995; --w-line:#5f6368; --w-link:#8ab4f8; --w-btn:#a8c7fa; --w-btn-text:#062e6f;
   }
   html[data-theme="light"]{
     --surface:#f9f8fe;
@@ -28,6 +30,7 @@
     --error:#ba1a1a; --error-container:#ffdad6; --on-error-container:#410002;
     --scrim:rgba(0,0,0,.35);
     --page:#e9e8ef;
+    --w-bg:#ffffff; --w-text:#202124; --w-sub:#5f6368; --w-strip:#f1f3f4; --w-url:#5f6368; --w-lock:#188038; --w-line:#dadce0; --w-link:#1a73e8; --w-btn:#1a73e8; --w-btn-text:#ffffff;
     --shadow:0 1px 2px rgba(0,0,0,.10), 0 2px 6px rgba(0,0,0,.14);
   }
   *{box-sizing:border-box}
@@ -392,14 +395,15 @@
   .welcome p{margin:0 0 26px; color:var(--on-surface-variant)}
   .welcome .field{margin:10px 0 14px}
   .welcome .field label{background:var(--surface)}
-  .webview{margin:0 12px; border-radius:16px; border:1px solid var(--outline-variant); overflow:hidden; background:#fff; color:#202124}
-  .webview .url{display:flex; align-items:center; gap:8px; padding:10px 12px; background:#f1f3f4; font-size:12px; color:#5f6368}
-  .webview .url svg{width:14px; height:14px; fill:#188038}
+  /* Google's page follows the theme (dark in a dark app, as on the phone): its colours are the --w-* tokens */
+  .webview{margin:0 12px; border-radius:16px; border:1px solid var(--outline-variant); overflow:hidden; background:var(--w-bg); color:var(--w-text)}
+  .webview .url{display:flex; align-items:center; gap:8px; padding:10px 12px; background:var(--w-strip); font-size:12px; color:var(--w-url)}
+  .webview .url svg{width:14px; height:14px; fill:var(--w-lock)}
   .webview .body{padding:26px 22px 28px}
   .webview .g{font-size:22px; margin-bottom:6px}
-  .webview .gi{border:1px solid #dadce0; border-radius:4px; padding:14px 12px; color:#5f6368; margin:18px 0 10px}
+  .webview .gi{border:1px solid var(--w-line); border-radius:4px; padding:14px 12px; color:var(--w-sub); margin:18px 0 10px}
   .webview .gb{display:flex; justify-content:flex-end; margin-top:18px}
-  .webview .gb span{background:#1a73e8; color:#fff; border-radius:4px; padding:9px 22px; font-weight:500}
+  .webview .gb span{background:var(--w-btn); color:var(--w-btn-text); border-radius:4px; padding:9px 22px; font-weight:500}
   /* the sign-in page takes the height left between the two notes, so Google's page fits */
   .fillcol{display:flex; flex-direction:column; min-height:100%}
   .fillcol .webview{flex:1; display:flex; flex-direction:column}
@@ -764,7 +768,7 @@ V.settings = () => {
 V.ytmlogin = () => {
   return '<div class="fillcol">' + topbar('YouTube Music girişi', {back:true, noAvatar:true}) +
     '<div class="note" style="margin:0 16px 12px">Giriş Google\'ın kendi sayfasında olur. Meiro şifreni görmez, yalnızca oturum çerezini bu telefonda saklar.</div>' +
-    '<div class="webview"><div class="url">' + I('lock') + 'accounts.google.com</div><div class="body"><div class="g">Oturum açın</div><div style="color:#5f6368">YouTube Music\'e devam etmek için</div><div class="gi">E-posta veya telefon</div><div style="color:#1a73e8;font-size:13px">E-postanızı mı unuttunuz?</div><div class="gb"><span data-act="ytm-in">İleri</span></div></div></div>' +
+    '<div class="webview"><div class="url">' + I('lock') + 'accounts.google.com</div><div class="body"><div class="g">Oturum açın</div><div style="color:var(--w-sub)">YouTube Music\'e devam etmek için</div><div class="gi">E-posta veya telefon</div><div style="color:var(--w-link);font-size:13px">E-postanızı mı unuttunuz?</div><div class="gb"><span data-act="ytm-in">İleri</span></div></div></div>' +
     '<div class="note" style="margin-top:14px;margin-bottom:16px">Giriş isteğe bağlıdır: kütüphane, beğeniler ve YouTube Music listeleri için gerekir.</div></div>';
 };
 V.signin = () => {
