@@ -1,5 +1,6 @@
 package com.muratkirazkaya.meiro
 
+import kotlinx.coroutines.flow.flowOn
 import android.content.Context
 import android.os.Build
 import android.util.Log
@@ -107,13 +108,34 @@ class AppContainer(private val context: Context) {
      * (in the app's cache dir), the link store, the lists, and the sync's link queue. Links the lists held before the
      * store knew them are taken in first (`importListLinks`).
      */
-    val linker: com.muratkirazkaya.meiro.musicbrainz.Linker by lazy {
-        val client = com.muratkirazkaya.meiro.musicbrainz.MusicBrainzClient(
+    /** The one MusicBrainz client: linking, the search's artists and the artist page share its 1 request a second queue. */
+    val mbClient: com.muratkirazkaya.meiro.musicbrainz.MusicBrainzClient by lazy {
+        com.muratkirazkaya.meiro.musicbrainz.MusicBrainzClient(
             cache = com.muratkirazkaya.meiro.musicbrainz.MbCache(java.io.File(context.cacheDir, "musicbrainz")),
             log = { Log.i(LINK_TAG, it) },
         )
+    }
+
+    /** M6d: the MusicBrainz artists the search showed, by id, so their page has the country and years at once. */
+    private val mbArtistsSeen = java.util.concurrent.ConcurrentHashMap<String, com.muratkirazkaya.meiro.musicbrainz.MbArtist>()
+
+    /** M6d, `loadArtists`: the search's MusicBrainz artists (most listened first), remembered for their pages. */
+    suspend fun searchMbArtists(query: String): List<com.muratkirazkaya.meiro.musicbrainz.MbArtist> =
+        kotlinx.coroutines.withContext(Dispatchers.IO) {
+            com.muratkirazkaya.meiro.musicbrainz.Artists.search(mbClient, query).also { list -> list.forEach { mbArtistsSeen[it.id] = it } }
+        }
+
+    /** M6d, `loadMBArtist`: a MusicBrainz artist page as it loads. */
+    fun mbArtistPage(mbid: String): kotlinx.coroutines.flow.Flow<com.muratkirazkaya.meiro.musicbrainz.Artists.Page> =
+        com.muratkirazkaya.meiro.musicbrainz.Artists.load(mbClient, mbid, mbArtistsSeen[mbid]) { Log.i(LINK_TAG, it) }
+            .flowOn(Dispatchers.IO)
+
+    /** The name a MusicBrainz artist had in the search, for the page's heading while it loads. */
+    fun mbArtistName(mbid: String): String = mbArtistsSeen[mbid]?.name.orEmpty()
+
+    val linker: com.muratkirazkaya.meiro.musicbrainz.Linker by lazy {
         com.muratkirazkaya.meiro.musicbrainz.Linker(
-            client, links, libraries, { engine.queueLinks(it) }, CoroutineScope(SupervisorJob() + Dispatchers.IO), log = { Log.i(LINK_TAG, it) },
+            mbClient, links, libraries, { engine.queueLinks(it) }, CoroutineScope(SupervisorJob() + Dispatchers.IO), log = { Log.i(LINK_TAG, it) },
         ).also { it.importListLinks() }
     }
 
@@ -176,6 +198,7 @@ class AppContainer(private val context: Context) {
             localItems = { localTracks() },
             online = { com.muratkirazkaya.meiro.downloads.Online.state.value },
             log = { Log.i(SEARCH_TAG, it) },
+            mbArtists = { searchMbArtists(it) },
         )
     }
 

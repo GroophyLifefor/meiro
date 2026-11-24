@@ -75,14 +75,14 @@ object SearchMapping {
         val rows = ytmRows(s)
         val chip = s.chip
         fun shows(c: SearchChip) = chip == SearchChip.All || chip == c
-        val artists = if (shows(SearchChip.Artists)) rows.filter { isArtist(it) }.distinctBy { it.browseId }.let { if (chip == SearchChip.All) it.take(ALL_ARTISTS) else it } else emptyList()
+        val ytmArtists = if (shows(SearchChip.Artists)) rows.filter { isArtist(it) }.distinctBy { it.browseId } else emptyList()
         val albums = if (shows(SearchChip.Albums)) rows.filter { isAlbum(it) }.distinctBy { it.browseId } else emptyList()
         val lists = if (shows(SearchChip.Lists)) rows.filter { isList(it) }.distinctBy { it.target().second } else emptyList()
         val songs = if (shows(SearchChip.Songs)) songs(s) else emptyList()
         return base.copy(
-            artists = artists.map { a ->
+            artists = artistRows(s, ytmArtists.map { a ->
                 ArtistRowData(a.browseId, a.title, "YouTube Music sanatçısı", CoverSpec(url(a.thumbnail), hue(a.browseId)), Provider.Ytm, link = artistState(a.title) != LinkState.MATCHED)
-            },
+            }),
             songs = songs.map { it.toSongRow(linkState, playingKey) },
             albums = albums.map { a -> TileData(a.browseId, a.title, bylineText(a), CoverSpec(url(a.thumbnail), hue(a.browseId), 80)) },
             lists = lists.map { l ->
@@ -90,6 +90,27 @@ object SearchMapping {
                 ListRowData(id, l.title, "YouTube Music listesi", CoverSpec(url(l.thumbnail), hue(id), 80), Provider.Ytm)
             },
         )
+    }
+
+    /** An artist row's key for a MusicBrainz artist: it opens the MusicBrainz artist page, not a YouTube Music one. */
+    const val MB_ARTIST_PREFIX = "mb:"
+
+    /**
+     * "Sanatçılar" (M6d, `artistSection`): the MusicBrainz artists of the search, most listened first (at most
+     * `ARTISTS_SHOWN`), as the mock's first row ("MusicBrainz · Fransa · elektronik": country, then MusicBrainz's own
+     * disambiguation); then YouTube Music's artists whose name is not already among them. While MusicBrainz has not
+     * answered, or when it failed, YouTube Music's artists are what shows. "Hepsi" shows [ALL_ARTISTS] rows.
+     */
+    fun artistRows(s: SearchState, ytm: List<ArtistRowData>): List<ArtistRowData> {
+        if (s.chip != SearchChip.All && s.chip != SearchChip.Artists) return emptyList()
+        val mb = if (s.mb.query == s.submitted) s.mb.artists.take(com.muratkirazkaya.meiro.musicbrainz.Artists.ARTISTS_SHOWN) else emptyList()
+        val mbRows = mb.map { a ->
+            val meta = listOf("MusicBrainz", com.muratkirazkaya.meiro.musicbrainz.Artists.countryName(a.country), a.disambiguation.trim()).filter { it.isNotEmpty() }.joinToString(" · ")
+            ArtistRowData(MB_ARTIST_PREFIX + a.id, a.name, meta, CoverSpec(null, hue(a.id)))
+        }
+        val names = mb.map { com.muratkirazkaya.meiro.data.Match.normalize(it.name) }.toSet()
+        val all = mbRows + ytm.filter { com.muratkirazkaya.meiro.data.Match.normalize(it.name) !in names }
+        return if (s.chip == SearchChip.All) all.take(ALL_ARTISTS) else all
     }
 
     /** "Daft Punk · 2013" from "Album • Daft Punk • 2013": the kind word dropped, the parts joined as the mock joins them. */

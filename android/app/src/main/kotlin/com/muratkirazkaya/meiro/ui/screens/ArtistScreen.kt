@@ -42,7 +42,9 @@ data class ArtistUi(
  * değiştir"), "Popüler" tracks, the "Albümler" shelf and the "Benzer sanatçılar" shelf; a section with nothing in it
  * is left out. "Bağı değiştir" opens the artist's link sheet, a track's link button the track's; a track's ⋮ opens the
  * track menu. [ui] null:
- * loading (only the top bar), or [error].
+ * loading (only the top bar), or [error]. M6d: the same screen shows a MusicBrainz artist (`MbArtistMapping`): its top
+ * recordings, those with nothing to play faded and without menu (the mock's `naRow`), no albums, ListenBrainz's
+ * similar artists.
  */
 @Composable
 fun ArtistScreen(
@@ -51,11 +53,13 @@ fun ArtistScreen(
     actions: DetailActions,
     error: String? = null,
     state: LazyListState = rememberLazyListState(),
+    /** The error block's title: the service the page comes from did not answer. */
+    errorTitle: String = "YouTube Music cevap vermedi",
 ) {
     Column(Modifier.fillMaxSize()) {
         TopBar("", onBack = actions.onBack, avatar = false)
         if (ui == null) {
-            if (error != null) EmptyState("YouTube Music cevap vermedi", error, "Tekrar dene", onButton = actions.onRetry, error = true)
+            if (error != null) EmptyState(errorTitle, error, "Tekrar dene", onButton = actions.onRetry, error = true)
             return@Column
         }
         LazyColumn(Modifier.fillMaxSize(), state) {

@@ -129,8 +129,10 @@ data class SongRowData(
     val why: String = "",
     /** The history's line under the meta (the mock's `.why.muted`: when, which device, how much was heard); empty elsewhere. */
     val note: String = "",
-    /** A play the stats do not count, faded to 55% (the mock's `.hrow.skip .row`). */
+    /** A play the stats do not count, faded to 55% (the mock's `.hrow.skip .row`); also a recording with nothing to play (`.row.na`). */
     val dim: Boolean = false,
+    /** The ⋮ button; an artist page's recording with nothing to play has none (the mock's `naRow`, M6d). */
+    val menu: Boolean = true,
 )
 
 /**
@@ -166,7 +168,8 @@ fun SongRow(
         Column(Modifier.weight(1f)) {
             MText(row.title, MeiroType.ListTitle, if (row.now) c.primary else c.onSurface, "$p.title", Modifier.fillMaxWidth(), maxLines = 1)
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-                Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                // A row with no source (an artist page's recording with nothing to play, M6d) has no logo box, so no gap either.
+                if (row.ytm || row.sc) Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
                     if (row.ytm) SourceLogo("$p.src.ytm", Provider.Ytm, !row.activeYtm)
                     if (row.sc) SourceLogo("$p.src.sc", Provider.Sc, row.activeYtm)
                 }
@@ -180,7 +183,7 @@ fun SongRow(
         }
         if (row.preview) PreviewChip("$p.preview")
         if (row.link != LinkBadge.None) LinkButton(p, row.link == LinkBadge.Other, onLink)
-        IconButton("$p.moreBtn", "$p.more.icon", MeiroIcons.More, c.onSurfaceVariant, onMore)
+        if (row.menu) IconButton("$p.moreBtn", "$p.more.icon", MeiroIcons.More, c.onSurfaceVariant, onMore)
     }
 }
 

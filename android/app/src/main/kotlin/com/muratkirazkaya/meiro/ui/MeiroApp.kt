@@ -157,6 +157,7 @@ private const val PLAYLIST_ROUTE = "playlist/{id}"
 private const val MIX_ROUTE = "mix"
 private const val ALBUM_ROUTE = "album/{id}?tab={tab}"
 private const val ARTIST_ROUTE = "artist/{id}?tab={tab}"
+private const val MB_ARTIST_ROUTE = "mbartist/{id}?tab={tab}"
 private const val HISTORY_ROUTE = "history?tab={tab}"
 private const val STATS_ROUTE = "stats?tab={tab}"
 private const val SETTINGS_ROUTE = "settings?tab={tab}"
@@ -174,12 +175,17 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String, signedIn
     // does; an album or artist page carries the tab it was opened from (it can be several pages deep).
     val from = when (route) {
         PLAYLIST_ROUTE, MIX_ROUTE -> nav.previousBackStackEntry?.destination?.route
-        ALBUM_ROUTE, ARTIST_ROUTE, HISTORY_ROUTE, STATS_ROUTE, SETTINGS_ROUTE -> entry?.arguments?.getString("tab")
+        ALBUM_ROUTE, ARTIST_ROUTE, MB_ARTIST_ROUTE, HISTORY_ROUTE, STATS_ROUTE, SETTINGS_ROUTE -> entry?.arguments?.getString("tab")
         else -> route
     }
     val selected = Tab.entries.firstOrNull { it.route == from } ?: if (route == PLAYLIST_ROUTE) Tab.Library else Tab.Home
     val openAlbum = { id: String -> nav.navigate("album/$id?tab=${selected.route}") }
-    val openArtist = { id: String -> nav.navigate("artist/$id?tab=${selected.route}") }
+    // M6d: a search row of a MusicBrainz artist ("mb:<mbid>") opens the MusicBrainz artist page.
+    val openArtist = { id: String ->
+        if (id.startsWith(SearchMapping.MB_ARTIST_PREFIX)) nav.navigate("mbartist/${id.removePrefix(SearchMapping.MB_ARTIST_PREFIX)}?tab=${selected.route}")
+        else nav.navigate("artist/$id?tab=${selected.route}")
+    }
+    val openMbArtist = { mbid: String -> nav.navigate("mbartist/$mbid?tab=${selected.route}") }
     // M6b: the history, the stats and the settings keep the tab they were opened from selected.
     val openHistory = { nav.navigate("history?tab=${selected.route}") }
     val openStats = { nav.navigate("stats?tab=${selected.route}") }
@@ -242,6 +248,9 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String, signedIn
                 }
                 composable(ARTIST_ROUTE, listOf(navArgument("tab") { defaultValue = Tab.Search.route })) { e ->
                     ArtistRoute(c, e.arguments?.getString("id").orEmpty(), onBack = { nav.popBackStack() }, openAlbum, openArtist)
+                }
+                composable(MB_ARTIST_ROUTE, listOf(navArgument("tab") { defaultValue = Tab.Search.route })) { e ->
+                    MbArtistRoute(c, e.arguments?.getString("id").orEmpty(), onBack = { nav.popBackStack() }, openMbArtist)
                 }
                 composable(MIX_ROUTE) { MixRoute(c, onBack = { nav.popBackStack() }, onSnack = { snack = it }, onSettings = openSettings) }
                 composable(HISTORY_ROUTE, listOf(navArgument("tab") { defaultValue = Tab.Home.route })) {
@@ -678,6 +687,47 @@ private fun ArtistRoute(c: AppContainer, id: String, onBack: () -> Unit, onAlbum
             onArtistLink = { data?.ui?.name?.takeIf { it.isNotBlank() }?.let { menus.link(LinkTarget.artist(it)) } },
         ),
         error = loaded?.error,
+    )
+}
+
+/**
+ * M6d, a MusicBrainz artist page (`mbArtistPage`): the top recordings as they load and light up, a playable one plays
+ * the artist's playable recordings from it (the desktop's `playFrom`), one with nothing to play does nothing; play and
+ * shuffle play the playable ones; a similar artist opens its own page; "Bağı değiştir" opens the artist's link sheet.
+ */
+@Composable
+private fun MbArtistRoute(c: AppContainer, mbid: String, onBack: () -> Unit, onArtist: (String) -> Unit) {
+    val ctx = LocalContext.current
+    val menus = LocalMenus.current
+    val openPlayer = LocalOpenPlayer.current
+    val now by PlaybackHost.ui.collectAsState()
+    val version by c.libraries.version.collectAsState()
+    val linkVersion by c.linker.version.collectAsState()
+    var retry by remember { mutableStateOf(0) }
+    val page by produceState<com.muratkirazkaya.meiro.musicbrainz.Artists.Page?>(null, mbid, retry) {
+        c.mbArtistPage(mbid).collect { value = it }
+    }
+    val playingKey = now?.item?.key
+    val p = page
+    val data = remember(p, playingKey, version, linkVersion) {
+        p?.takeIf { !it.loading && it.error.isEmpty() }?.let { MbArtistMapping.page(it, c.mbArtistName(mbid), { src, key -> c.links.song(src, key)?.state }, playingKey) }
+    }
+    fun play(from: Int, items: List<com.muratkirazkaya.meiro.playback.QItem>) { if (items.isNotEmpty()) PlaybackHost.playQueue(ctx, items, from, data?.ui?.name.orEmpty()) }
+    ArtistScreen(
+        data?.ui, playing = now?.playing == true,
+        actions = DetailActions(
+            onBack = onBack,
+            onPlay = { data?.let { play(0, it.queue) } },
+            onShuffle = { data?.let { play(0, it.queue.shuffled()) } },
+            onRow = { i -> data?.let { d -> d.queueIndex(i).takeIf { it >= 0 }?.let { q -> if (!openIfPlaying(d.queue, q, openPlayer)) play(q, d.queue) } } },
+            onArtist = { i -> data?.similarIds?.getOrNull(i)?.let(onArtist) },
+            onRetry = { retry++ },
+            onMore = { i -> data?.let { d -> d.queue.getOrNull(d.queueIndex(i))?.let { menus.track(MenuTarget(it)) } } },
+            onLink = { i -> data?.let { d -> d.queue.getOrNull(d.queueIndex(i))?.let { menus.link(LinkTarget.song(it)) } } },
+            onArtistLink = { data?.ui?.name?.takeIf { it.isNotBlank() }?.let { menus.link(LinkTarget.artist(it)) } },
+        ),
+        error = p?.error?.takeIf { it.isNotEmpty() },
+        errorTitle = "MusicBrainz cevap vermedi",
     )
 }
 

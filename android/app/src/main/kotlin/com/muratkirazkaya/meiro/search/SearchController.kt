@@ -38,6 +38,15 @@ class PrefsRecentStore(context: Context) : RecentStore {
     override fun save(queries: List<String>) { prefs.edit().putString("recent", JSONArray(queries).toString()).apply() }
 }
 
+/**
+ * `artistSection`: the MusicBrainz artists a submitted [query] matched, most listened to first; [error] when MusicBrainz
+ * could not be read (the search shows YouTube Music's artists then, see `SearchMapping`).
+ */
+data class MbArtistsAnswer(
+    val query: String = "", val loading: Boolean = false, val error: String = "",
+    val artists: List<com.muratkirazkaya.meiro.musicbrainz.MbArtist> = emptyList(),
+)
+
 /** One provider's answer to the search out, and whether it has arrived (`providerSearch`). */
 data class ProviderAnswer(val items: List<MusicItem> = emptyList(), val done: Boolean = false, val failed: Boolean = false, val error: String = "")
 
@@ -63,6 +72,8 @@ data class SearchState(
     /** SoundCloud was asked for this search (no filter, or "Şarkılar"): the mock's error says its rows are below. */
     val scAsked: Boolean = true,
     val recent: List<String> = emptyList(),
+    /** M6d: the search's MusicBrainz artists (`loadArtists`). */
+    val mb: MbArtistsAnswer = MbArtistsAnswer(),
 )
 
 /**
@@ -84,6 +95,9 @@ class SearchController(
     private val log: (String) -> Unit = {},
     /** How long after YouTube Music failed it is asked again by itself ("Biraz sonra tekrar denenecek"). */
     private val retryMs: Long = YTM_RETRY_MS,
+    /** M6d, `loadArtists`: the MusicBrainz artists a query names, most listened first (null: not asked). */
+    private val mbArtists: (suspend (String) -> List<com.muratkirazkaya.meiro.musicbrainz.MbArtist>)? = null,
+    private val mbTimeoutMs: Long = com.muratkirazkaya.meiro.musicbrainz.Artists.ARTIST_TIMEOUT_MS,
 ) {
     private val _state = MutableStateFlow(SearchState(recent = recentStore.load()))
     val state: StateFlow<SearchState> = _state
@@ -92,6 +106,7 @@ class SearchController(
     private var retryJob: Job? = null
     private var scJob: Job? = null
     private var moreJob: Job? = null
+    private var mbJob: Job? = null
     private var generation = 0
     /** SoundCloud's answer for a query, kept so switching between "Hepsi" and "Şarkılar" does not search it again. */
     private var scCache: Pair<String, List<MusicItem>>? = null
@@ -108,11 +123,39 @@ class SearchController(
             it.copy(field = q, submitted = q, chip = SearchChip.All, ytm = ProviderAnswer(), sc = ProviderAnswer(), top = null, more = "", local = null, recent = recent)
         }
         start(q, "", soundCloud = true)
+        loadArtists(q)
     }
 
     fun clear() {
         stop()
+        mbJob?.cancel()
         _state.update { SearchState(recent = it.recent, ytmOn = it.ytmOn, scOn = it.scOn) }
+    }
+
+    /**
+     * `loadArtists`: the MusicBrainz artists of a submitted query, asked once per submit (a chip change keeps them),
+     * bounded by [mbTimeoutMs]. Without a network or a client nothing is asked.
+     */
+    private fun loadArtists(q: String) {
+        mbJob?.cancel()
+        val find = mbArtists
+        if (find == null || !online()) { _state.update { it.copy(mb = MbArtistsAnswer(q)) }; return }
+        _state.update { it.copy(mb = MbArtistsAnswer(q, loading = true)) }
+        val t0 = System.nanoTime()
+        mbJob = scope.launch {
+            val r = try { Result.success(withTimeout(mbTimeoutMs) { find(q) }) } catch (e: kotlinx.coroutines.CancellationException) {
+                if (e is kotlinx.coroutines.TimeoutCancellationException) Result.failure(e) else throw e
+            } catch (e: Exception) { Result.failure(e) }
+            if (_state.value.submitted != q) return@launch
+            val ms = (System.nanoTime() - t0) / 1_000_000
+            r.onSuccess { list ->
+                log("search: musicbrainz \"$q\" ${list.size} artists in $ms ms")
+                _state.update { it.copy(mb = MbArtistsAnswer(q, artists = list)) }
+            }.onFailure { e ->
+                log("search: musicbrainz \"$q\" failed in $ms ms: ${e.javaClass.simpleName} ${e.message}")
+                _state.update { it.copy(mb = MbArtistsAnswer(q, error = e.message ?: e.javaClass.simpleName)) }
+            }
+        }
     }
 
     /** A filter chip: YouTube Music is asked again with the filter's own params when the last answer offered them. */

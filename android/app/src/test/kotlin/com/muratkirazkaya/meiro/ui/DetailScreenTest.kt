@@ -50,6 +50,8 @@ val MockArtist = ArtistUi(
     popular = listOf(
         SongRowData("s1", "Get Lucky", "Daft Punk, Pharrell Williams · 4:08", true, true, true, CoverSpec(null, 36)),
         SongRowData("s2", "Instant Crush", "Daft Punk, Julian Casablancas · 5:37", true, false, true, CoverSpec(null, 36)),
+        // M6d: a recording with no link to play it from (the mock's `naRow`): faded, no source logos, no link button, no menu.
+        SongRowData("mb:atw", "Around the World", "Daft Punk · 7:09 · çalma bağlantısı yok", false, false, true, CoverSpec(null, 160), dim = true, menu = false),
     ),
     albums = listOf(
         TileData("ram", "Random Access Memories", "2013", CoverSpec(null, 36, 80)),
@@ -135,7 +137,7 @@ class ArtistScreenTest {
 }
 
 /**
- * Mock screen `artist` scrolled by [SCROLL] px: the second popular track, "Albümler" (the third tile lies right of the
+ * Mock screen `artist` scrolled by [SCROLL] px: the third popular track (M6d), "Albümler" (the third tile lies right of the
  * screen in the mock too) and "Benzer sanatçılar" come into view.
  */
 @RunWith(RobolectricTestRunner::class)
@@ -157,5 +159,7 @@ class ArtistScrolledTest {
         }
     }
 
-    companion object { const val SCROLL = 520 }
+    // 584 (520 before M6d): the mock's third popular row (64px) moved the shelves down; at 584 the scrolled and the
+    // unscrolled comparison together cover 71 of the 73 elements (album3's title and meta lie right of the screen).
+    companion object { const val SCROLL = 584 }
 }

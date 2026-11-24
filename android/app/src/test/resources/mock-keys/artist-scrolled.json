@@ -121,95 +121,107 @@
    "key": "song2.more.icon"
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.h-sec:nth-child(6)>h2:nth-child(1)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row.na:nth-child(6)>div.cv:nth-child(1)",
+   "key": "song3.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row.na:nth-child(6)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "song3.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row.na:nth-child(6)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(1)",
+   "key": "song3.meta"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.h-sec:nth-child(7)>h2:nth-child(1)",
    "key": "albums.title"
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(7)>div.tile:nth-child(1)>div.art:nth-child(1)>span.badge:nth-child(1)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(8)>div.tile:nth-child(1)>div.art:nth-child(1)>span.badge:nth-child(1)",
    "key": "album1.badge"
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(7)>div.tile:nth-child(1)>div.art:nth-child(1)>span.badge:nth-child(1)>svg:nth-child(1)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(8)>div.tile:nth-child(1)>div.art:nth-child(1)>span.badge:nth-child(1)>svg:nth-child(1)",
    "key": "album1.logo"
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(7)>div.tile:nth-child(1)>b:nth-child(2)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(8)>div.tile:nth-child(1)>b:nth-child(2)",
    "key": "album1.title"
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(7)>div.tile:nth-child(1)>span:nth-child(3)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(8)>div.tile:nth-child(1)>span:nth-child(3)",
    "key": "album1.meta"
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(7)>div.tile:nth-child(2)>div.art:nth-child(1)>span.badge:nth-child(1)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(8)>div.tile:nth-child(2)>div.art:nth-child(1)>span.badge:nth-child(1)",
    "key": "album2.badge"
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(7)>div.tile:nth-child(2)>div.art:nth-child(1)>span.badge:nth-child(1)>svg:nth-child(1)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(8)>div.tile:nth-child(2)>div.art:nth-child(1)>span.badge:nth-child(1)>svg:nth-child(1)",
    "key": "album2.logo"
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(7)>div.tile:nth-child(2)>b:nth-child(2)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(8)>div.tile:nth-child(2)>b:nth-child(2)",
    "key": "album2.title"
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(7)>div.tile:nth-child(2)>span:nth-child(3)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(8)>div.tile:nth-child(2)>span:nth-child(3)",
    "key": "album2.meta"
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(7)>div.tile:nth-child(3)>div.art:nth-child(1)>span.badge:nth-child(1)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(8)>div.tile:nth-child(3)>div.art:nth-child(1)>span.badge:nth-child(1)",
    "key": "album3.badge"
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(7)>div.tile:nth-child(3)>div.art:nth-child(1)>span.badge:nth-child(1)>svg:nth-child(1)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(8)>div.tile:nth-child(3)>div.art:nth-child(1)>span.badge:nth-child(1)>svg:nth-child(1)",
    "key": "album3.logo"
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(7)>div.tile:nth-child(3)>b:nth-child(2)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(8)>div.tile:nth-child(3)>b:nth-child(2)",
    "key": "album3.title"
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(7)>div.tile:nth-child(3)>span:nth-child(3)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(8)>div.tile:nth-child(3)>span:nth-child(3)",
    "key": "album3.meta"
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.h-sec:nth-child(8)>h2:nth-child(1)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.h-sec:nth-child(9)>h2:nth-child(1)",
    "key": "similar.title"
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(9)>div.tile:nth-child(1)>div.art:nth-child(1)>span.badge:nth-child(1)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(10)>div.tile:nth-child(1)>div.art:nth-child(1)>span.badge:nth-child(1)",
    "key": "similar1.badge"
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(9)>div.tile:nth-child(1)>div.art:nth-child(1)>span.badge:nth-child(1)>svg:nth-child(1)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(10)>div.tile:nth-child(1)>div.art:nth-child(1)>span.badge:nth-child(1)>svg:nth-child(1)",
    "key": "similar1.logo"
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(9)>div.tile:nth-child(1)>b:nth-child(2)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(10)>div.tile:nth-child(1)>b:nth-child(2)",
    "key": "similar1.title"
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(9)>div.tile:nth-child(1)>span:nth-child(3)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(10)>div.tile:nth-child(1)>span:nth-child(3)",
    "key": "similar1.meta"
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(9)>div.tile:nth-child(2)>div.art:nth-child(1)>span.badge:nth-child(1)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(10)>div.tile:nth-child(2)>div.art:nth-child(1)>span.badge:nth-child(1)",
    "key": "similar2.badge"
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(9)>div.tile:nth-child(2)>div.art:nth-child(1)>span.badge:nth-child(1)>svg:nth-child(1)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(10)>div.tile:nth-child(2)>div.art:nth-child(1)>span.badge:nth-child(1)>svg:nth-child(1)",
    "key": "similar2.logo"
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(9)>div.tile:nth-child(2)>b:nth-child(2)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(10)>div.tile:nth-child(2)>b:nth-child(2)",
    "key": "similar2.title"
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(9)>div.tile:nth-child(2)>span:nth-child(3)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(10)>div.tile:nth-child(2)>span:nth-child(3)",
    "key": "similar2.meta"
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div:nth-child(10)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div:nth-child(11)",
    "spacer": true
   },
   {
@@ -393,6 +405,16 @@
    ]
   },
   {
+   "name": "song3 text",
+   "keys": [
+    "song3.title",
+    "song3.meta"
+   ],
+   "edges": [
+    "left"
+   ]
+  },
+  {
    "name": "mini controls",
    "keys": [
     "mini.cover",
@@ -503,5 +525,6 @@
  "hscroll": [
   "album",
   "similar"
- ]
+ ],
+ "stateNote": "M6d: the third popular row is a recording MusicBrainz names no YouTube or SoundCloud page for (`.row.na`, faded to 55%, no source logos, no link button, no menu)."
 }
