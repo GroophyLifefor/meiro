@@ -799,6 +799,7 @@ const SCREENS = [
     ['search','Arama','Son aramalar; arayınca filtreler ve sağlayıcı seçimi.'],
     ['search-done','Arama sonuçları','Sanatçılar kayar (yapışkan değil). Her satırda kaynak logosu.'],
     ['library','Kütüphane','Meiro listeleri; YouTube Music sekmesi yalnız girişliyken.'],
+    ['library-ytm','Kütüphane: YouTube Music','Girişliyken: beğenilenler, YouTube Music listeleri ve albümleri; ⋮ Meiro listesine kopyalar.'],
     ['downloads','İndirilenler','Depolama, inen listeler, indirilen şarkılar.']]],
   ['Sayfalar', [
     ['mix','Daily mix','Her şarkının altında neden önerildiği.'],
@@ -981,9 +982,11 @@ function goTo(key){
   current = key;
   reset();
   const tabs = ['home','search','library','downloads'];
-  st.searchDone = false; st.stack = []; st.histFilter = 'Hepsi';
+  st.searchDone = false; st.stack = []; st.histFilter = 'Hepsi'; st.libTab = 'meiro';
   if (key !== 'offline') st.online = $('tNet').classList.contains('on');
   if (tabs.includes(key)) { st.tab = key; }
+  // The Library's YouTube Music tab (shown only with a YouTube Music sign-in).
+  else if (key === 'library-ytm') { st.tab = 'library'; st.libTab = 'ytm'; }
   else if (key === 'search-done') { st.tab = 'search'; st.search = 'daft punk'; st.searchDone = true; }
   else if (key === 'offline') { st.online = false; st.tab = 'search'; st.search = 'gece'; st.searchDone = true; }
   else if (['np','np-prep','upnext','lyrics','related'].includes(key)) {
