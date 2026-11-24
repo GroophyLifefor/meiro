@@ -464,12 +464,52 @@
    "android": "Next: Player.COMMAND_SEEK_TO_NEXT when the queue has a next track; pressed on the emulator."
   },
   {
-   "path": "#box>div#lock.lock.open:nth-child(3)>p:nth-child(4)",
+   "path": "#box>div#lock.lock.open:nth-child(3)>div.notif:nth-child(4)",
    "system": true,
-   "android": "The mock's note about the notification: one media notification, not dismissable while it plays (foreground service), no notification per track. Checked with dumpsys notification (flags) on the emulator."
+   "android": "The download notification (M6e): DownloadService's foreground notification (channel \"İndirmeler\", type dataSync), shown while the download queue has a batch and removed when it empties. Checked with dumpsys notification --noredact, build/check/m6e/."
   },
   {
-   "path": "#box>div#lock.lock.open:nth-child(3)>button.btn.tonal:nth-child(5)",
+   "path": "#box>div#lock.lock.open:nth-child(3)>div.notif:nth-child(4)>div.app:nth-child(1)",
+   "system": true,
+   "android": "Notification header: Android draws the small icon, the app label (\"Meiro\") and the sub text \"İndirme\" (NotificationCompat.setSubText)."
+  },
+  {
+   "path": "#box>div#lock.lock.open:nth-child(3)>div.notif:nth-child(4)>div.app:nth-child(1)>svg:nth-child(1)",
+   "system": true,
+   "android": "Small icon: drawable/ic_notification_download (the mock's download glyph)."
+  },
+  {
+   "path": "#box>div#lock.lock.open:nth-child(3)>div.notif:nth-child(4)>div.t:nth-child(2)>b:nth-child(1)",
+   "system": true,
+   "android": "Content title: the batch's name, as the İniyor row (DownloadNotice.of, DownloadServiceTest); with several batches \"N indirme\"."
+  },
+  {
+   "path": "#box>div#lock.lock.open:nth-child(3)>div.notif:nth-child(4)>div.t:nth-child(2)>span:nth-child(2)",
+   "system": true,
+   "android": "Content text: the İniyor row's line (DownloadsMapping.pending meta), summed over the batches when there are several (DownloadServiceTest)."
+  },
+  {
+   "path": "#box>div#lock.lock.open:nth-child(3)>div.notif:nth-child(4)>div.line:nth-child(3)",
+   "system": true,
+   "android": "Progress bar: NotificationCompat.setProgress(100, the queue's progress), drawn by Android."
+  },
+  {
+   "path": "#box>div#lock.lock.open:nth-child(3)>div.notif:nth-child(4)>div.line:nth-child(3)>i:nth-child(1)",
+   "system": true,
+   "android": "Progress fill: as above."
+  },
+  {
+   "path": "#box>div#lock.lock.open:nth-child(3)>div.notif:nth-child(4)>div.acts:nth-child(4)>button:nth-child(1)",
+   "system": true,
+   "android": "Action \"Hepsini durdur\": DownloadService.ACTION_STOP, the downloads tab's Hepsini durdur (Downloader.cancelAll); the service then stops itself. Pressed on the emulator (build/check/m6e/)."
+  },
+  {
+   "path": "#box>div#lock.lock.open:nth-child(3)>p:nth-child(5)",
+   "system": true,
+   "android": "The mock's note about the notification: one media notification, not dismissable while it plays (foreground service), no notification per track. Checked with dumpsys notification (flags) on the emulator. Third line (M6e): the download notification goes away when the queue empties (DownloadService stops itself; dumpsys activity services in build/check/m6e/)."
+  },
+  {
+   "path": "#box>div#lock.lock.open:nth-child(3)>button.btn.tonal:nth-child(6)",
    "system": true,
    "android": "The mock's own control to close its lock overlay; on a phone that is unlocking."
   },

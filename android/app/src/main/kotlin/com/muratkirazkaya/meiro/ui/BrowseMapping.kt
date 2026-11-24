@@ -68,8 +68,10 @@ object BrowseMapping {
      */
     fun album(id: String, page: BrowsePage, linkState: (String, String) -> String? = { _, _ -> null }, playingKey: String? = null): AlbumData {
         val art = url(page.thumbnail).orEmpty()
-        val tracks = page.tracks(art)
         val byline = page.strapline.trim()
+        // An album's tracks name no artist unless they credit someone else; one that names none is the album's
+        // artist's (else plays, downloads and list adds carry no artist and the server refuses them).
+        val tracks = page.tracks(art).map { if (it.artists.isEmpty() && byline.isNotEmpty()) it.copy(artist = byline, artists = byline) else it }
         val rows = tracks.map { t ->
             val r = t.toSongRow(linkState, playingKey)
             val who = byline.ifEmpty { t.artists.ifEmpty { SearchMapping.bylineText(t) } }

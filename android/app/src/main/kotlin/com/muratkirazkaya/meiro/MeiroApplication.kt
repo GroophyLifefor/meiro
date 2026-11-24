@@ -17,10 +17,14 @@ class MeiroApplication : Application(), coil.ImageLoaderFactory {
     override fun onCreate() {
         super.onCreate()
         com.muratkirazkaya.meiro.downloads.Online.start(this)
-        ready = CoroutineScope(Dispatchers.IO).async { AppContainer(this@MeiroApplication).also { it.startRecommendations(); it.startAutoLink() } }
+        ready = CoroutineScope(Dispatchers.IO).async { AppContainer(this@MeiroApplication).also { it.startRecommendations(); it.startAutoLink(); it.startDownloadService() } }
     }
 
     suspend fun container(): AppContainer = ready.await()
+
+    /** The container if it is built already (a service's onStartCommand cannot wait for it); null before. */
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    fun containerNow(): AppContainer? = if (ready.isCompleted) runCatching { ready.getCompleted() }.getOrNull() else null
 
     /**
      * The cover cache (M5): Coil's disk cache in the app's cache dir (250 MB), read whatever the server's cache headers

@@ -14,6 +14,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import com.muratkirazkaya.meiro.playback.PlaybackHost
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import com.muratkirazkaya.meiro.ui.MeiroApp
 import kotlinx.coroutines.launch
 
@@ -28,10 +30,12 @@ class MainActivity : ComponentActivity() {
                 lifecycleScope.launch { app.container().sync("foreground") }
             }
         })
-        // The media notification needs the notification permission (Android 13+): asked once, when something first plays.
+        // The media and download notifications need the notification permission (Android 13+): asked once, when
+        // something first plays or a download is first asked for (M6e).
         val askNotifications = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
         lifecycleScope.launch {
-            PlaybackHost.ui.first { it != null }
+            val downloads = app.container().downloader.state
+            merge(PlaybackHost.ui.map { it != null }, downloads.map { it.isNotEmpty() }).first { it }
             if (Build.VERSION.SDK_INT >= 33 &&
                 ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
             ) askNotifications.launch(Manifest.permission.POST_NOTIFICATIONS)

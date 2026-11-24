@@ -251,6 +251,16 @@ class AppContainer(private val context: Context) {
         )
     }
 
+    /** The download service's rules (M6e): it runs while the queue has a batch, so downloads go on in the background. */
+    val downloadForeground: com.muratkirazkaya.meiro.downloads.DownloadForeground by lazy {
+        com.muratkirazkaya.meiro.downloads.DownloadForeground(downloader.state) { Log.i(DL_TAG, it) }
+    }
+
+    /** Starts [com.muratkirazkaya.meiro.downloads.DownloadService] whenever the queue has a batch and it is not running. */
+    fun startDownloadService() {
+        downloadForeground.watch(dlScope) { com.muratkirazkaya.meiro.downloads.DownloadService.start(context) }
+    }
+
     /** Takes a download out (its file goes); signed in, the removal is sent as `deleted` (`removeDownload`). */
     fun removeDownload(source: String, key: String) {
         val gone = downloads.remove(source, key)
