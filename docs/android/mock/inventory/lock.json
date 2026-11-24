@@ -10,7 +10,7 @@
   "dark"
  ],
  "note": "bbox is relative to the phone screen (#box), CSS px, rounded to 0.5. offscreen=true: below/right of a scroll container viewport (natural position at scrollTop 0). color/backgroundColor/borderColor/fill carry per-theme values.",
- "elementCount": 95,
+ "elementCount": 103,
  "elements": [
   {
    "path": "#box>div.app:nth-child(1)>div.statusbar:nth-child(1)>span#clock:nth-child(1)",
@@ -4772,19 +4772,433 @@
    ]
   },
   {
-   "path": "#box>div#lock.lock.open:nth-child(3)>p:nth-child(4)",
+   "path": "#box>div#lock.lock.open:nth-child(3)>div.notif:nth-child(4)",
+   "tag": "div",
+   "classes": [
+    "notif"
+   ],
+   "kind": "surface",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 16,
+    "y": 442,
+    "w": 338,
+    "h": 158
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "26px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(255, 255, 255)",
+     "dark": "rgb(255, 255, 255)"
+    },
+    "backgroundColor": {
+     "light": "rgba(255, 255, 255, 0.14)",
+     "dark": "rgba(255, 255, 255, 0.14)"
+    },
+    "borderColor": {
+     "light": "rgb(255, 255, 255)",
+     "dark": "rgb(255, 255, 255)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div#lock.lock.open:nth-child(3)>div.notif:nth-child(4)>div.app:nth-child(1)",
+   "tag": "div",
+   "classes": [
+    "app"
+   ],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Meiro · İndirme",
+   "icon": null,
+   "bbox": {
+    "x": 32,
+    "y": 456,
+    "w": 306,
+    "h": 20
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "12px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "0.8",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(255, 255, 255)",
+     "dark": "rgb(255, 255, 255)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(255, 255, 255)",
+     "dark": "rgb(255, 255, 255)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div#lock.lock.open:nth-child(3)>div.notif:nth-child(4)>div.app:nth-child(1)>svg:nth-child(1)",
+   "tag": "svg",
+   "classes": [],
+   "kind": "icon",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": "download",
+   "bbox": {
+    "x": 32,
+    "y": 458,
+    "w": 16,
+    "h": 16
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "12px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(255, 255, 255)",
+     "dark": "rgb(255, 255, 255)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(255, 255, 255)",
+     "dark": "rgb(255, 255, 255)"
+    },
+    "fill": {
+     "light": "rgb(255, 255, 255)",
+     "dark": "rgb(255, 255, 255)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div#lock.lock.open:nth-child(3)>div.notif:nth-child(4)>div.t:nth-child(2)>b:nth-child(1)",
+   "tag": "b",
+   "classes": [],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Daily mix",
+   "icon": null,
+   "bbox": {
+    "x": 32,
+    "y": 484,
+    "w": 306,
+    "h": 20
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "500",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(255, 255, 255)",
+     "dark": "rgb(255, 255, 255)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(255, 255, 255)",
+     "dark": "rgb(255, 255, 255)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div#lock.lock.open:nth-child(3)>div.notif:nth-child(4)>div.t:nth-child(2)>span:nth-child(2)",
+   "tag": "span",
+   "classes": [],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "12 / 30 şarkı · Wi-Fi bekleniyor",
+   "icon": null,
+   "bbox": {
+    "x": 32,
+    "y": 504,
+    "w": 306,
+    "h": 20
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "0.8",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(255, 255, 255)",
+     "dark": "rgb(255, 255, 255)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(255, 255, 255)",
+     "dark": "rgb(255, 255, 255)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div#lock.lock.open:nth-child(3)>div.notif:nth-child(4)>div.line:nth-child(3)",
+   "tag": "div",
+   "classes": [
+    "line"
+   ],
+   "kind": "surface",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 32,
+    "y": 534,
+    "w": 306,
+    "h": 4
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "2px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(255, 255, 255)",
+     "dark": "rgb(255, 255, 255)"
+    },
+    "backgroundColor": {
+     "light": "rgba(255, 255, 255, 0.3)",
+     "dark": "rgba(255, 255, 255, 0.3)"
+    },
+    "borderColor": {
+     "light": "rgb(255, 255, 255)",
+     "dark": "rgb(255, 255, 255)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div#lock.lock.open:nth-child(3)>div.notif:nth-child(4)>div.line:nth-child(3)>i:nth-child(1)",
+   "tag": "i",
+   "classes": [],
+   "kind": "leaf",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 32,
+    "y": 534,
+    "w": 122.5,
+    "h": 4
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "2px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(255, 255, 255)",
+     "dark": "rgb(255, 255, 255)"
+    },
+    "backgroundColor": {
+     "light": "rgb(255, 255, 255)",
+     "dark": "rgb(255, 255, 255)"
+    },
+    "borderColor": {
+     "light": "rgb(255, 255, 255)",
+     "dark": "rgb(255, 255, 255)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div#lock.lock.open:nth-child(3)>div.notif:nth-child(4)>div.acts:nth-child(4)>button:nth-child(1)",
+   "tag": "button",
+   "classes": [],
+   "kind": "control",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Hepsini durdur",
+   "icon": null,
+   "bbox": {
+    "x": 224,
+    "y": 554,
+    "w": 98,
+    "h": 40
+   },
+   "offscreen": false,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "500",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "center",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(255, 255, 255)",
+     "dark": "rgb(255, 255, 255)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(255, 255, 255)",
+     "dark": "rgb(255, 255, 255)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div#lock.lock.open:nth-child(3)>p:nth-child(5)",
    "tag": "p",
    "classes": [],
    "kind": "text",
    "role": null,
    "ariaLabel": null,
-   "text": "Medya bildirimi arka planda çalma için gerekli, kapatılamaz.Şarkı değişince ayrıca bildirim atılmaz.",
+   "text": "Medya bildirimi arka planda çalma için gerekli, kapatılamaz.Şarkı değişince ayrıca bildirim atılmaz.İndirme bildirimi sıra bitince kendiliğinden kalkar.",
    "icon": null,
    "bbox": {
     "x": 16.5,
-    "y": 450,
+    "y": 620,
     "w": 337,
-    "h": 40
+    "h": 60
    },
    "offscreen": false,
    "clipped": false,
@@ -4823,7 +5237,7 @@
    ]
   },
   {
-   "path": "#box>div#lock.lock.open:nth-child(3)>button.btn.tonal:nth-child(5)",
+   "path": "#box>div#lock.lock.open:nth-child(3)>button.btn.tonal:nth-child(6)",
    "tag": "button",
    "classes": [
     "btn",

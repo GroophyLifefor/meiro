@@ -371,6 +371,15 @@
   .media .c svg{width:30px; height:30px; fill:#fff}
   .media .c .pp{width:52px; height:52px; border-radius:16px; background:#fff; display:grid; place-items:center}
   .media .c .pp svg{fill:#1c1b1f}
+  .notif{width:100%; margin-top:12px; border-radius:26px; padding:14px 16px 6px; background:rgba(255,255,255,.14); color:#fff}
+  .notif .app{position:static; display:flex; flex-direction:row; align-items:center; gap:6px; font-size:12px; opacity:.8; margin-bottom:8px}
+  .notif .app svg{width:16px; height:16px; fill:#fff; flex:none}
+  .notif b{display:block; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .notif .t span{display:block; font-size:13px; opacity:.8}
+  .notif .line{height:4px; border-radius:2px; background:rgba(255,255,255,.3); margin:10px 0 2px}
+  .notif .line i{display:block; height:100%; border-radius:2px; background:#fff}
+  .notif .acts{display:flex; justify-content:flex-end}
+  .notif .acts button{border:0; background:transparent; color:#fff; font:inherit; font-size:14px; font-weight:500; height:40px; padding:0}
 
   .snack{position:absolute; left:12px; right:12px; bottom:160px; z-index:25; background:var(--on-surface); color:var(--surface); border-radius:6px; padding:14px 16px; display:flex; align-items:center; gap:12px; font-size:14px; box-shadow:var(--shadow); opacity:0; transform:translateY(10px); transition:.2s; pointer-events:none}
   .snack.open{opacity:1; transform:none; pointer-events:auto}
@@ -946,7 +955,11 @@ function renderLock(){
     '<div class="media" style="' + cov(s.h, 70) + '"><div class="app"><span class="src" style="width:16px">' + LOGO.meiro + '</span>Meiro · ' + NAMES[activeSrc(st.now)] + '</div>' +
     '<div class="row1"><div class="cv" style="' + cov(s.h) + '"></div><div class="t"><b>' + s.t + '</b><span>' + s.a + '</span></div>' + I('heartf') + '</div>' +
     '<div class="line"><i></i></div><div class="c">' + I('prev') + '<span class="pp">' + I('pause') + '</span>' + I('next') + '</div></div>' +
-    '<p style="margin-top:20px;font-size:12px;opacity:.75;text-align:center">Medya bildirimi arka planda çalma için gerekli, kapatılamaz.<br>Şarkı değişince ayrıca bildirim atılmaz.</p>' +
+    // Downloads go on with the app in the background and the screen off; their notification mirrors the "İniyor" row.
+    '<div class="notif"><div class="app">' + I('download') + 'Meiro · İndirme</div>' +
+    '<div class="t"><b>Daily mix</b><span>12 / 30 şarkı · Wi-Fi bekleniyor</span></div><div class="line"><i style="width:40%"></i></div>' +
+    '<div class="acts"><button>Hepsini durdur</button></div></div>' +
+    '<p style="margin-top:20px;font-size:12px;opacity:.75;text-align:center">Medya bildirimi arka planda çalma için gerekli, kapatılamaz.<br>Şarkı değişince ayrıca bildirim atılmaz.<br>İndirme bildirimi sıra bitince kendiliğinden kalkar.</p>' +
     '<button class="btn tonal" style="margin-top:auto;margin-bottom:40px" data-act="unlock">Kilidi aç</button>';
 }
 
