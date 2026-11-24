@@ -523,8 +523,20 @@ class AppContainer(private val context: Context) {
     }
     private val ytmScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
+    /**
+     * M6g: the signed-in account's library (liked songs, playlists, saved albums) and new releases, read with the
+     * session's own client; signed out it holds nothing and asks nothing.
+     */
+    val ytmFeed: com.muratkirazkaya.meiro.youtube.YtmLibraryFeed by lazy {
+        com.muratkirazkaya.meiro.youtube.YtmLibraryFeed(
+            ytmAccount.session, newClient = { auth -> com.muratkirazkaya.meiro.youtube.YtmClient(auth = auth) }, scope = ytmScope,
+            log = { Log.i(YTM_TAG, it) },
+        )
+    }
+
     /** `restoreAccount` at start, then `watchSession`: a check every minute while the process lives and a session is in use. */
     fun startYtmAccount() {
+        ytmFeed.start()
         ytmScope.launch {
             try { ytmAccount.restore() } catch (e: kotlinx.coroutines.CancellationException) { throw e } catch (e: Exception) { Log.i(YTM_TAG, "ytm: restore failed (${e.javaClass.simpleName})") }
             while (true) {

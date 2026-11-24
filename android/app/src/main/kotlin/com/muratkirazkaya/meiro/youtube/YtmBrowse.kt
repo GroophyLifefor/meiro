@@ -17,6 +17,8 @@ data class BrowsePage(
     val sections: List<Renderers.Section> = emptyList(),
     /** The page's square picture (the `microformat` one): an artist's [thumbnail] is a wide banner. */
     val square: String = "",
+    /** `ContinuationToken` (`pageContinuationToken`): the token that extends the whole page, "" when none. */
+    val continuation: String = "",
 ) {
     /** `tracksOf` (`collections.go:192`): every track of the page, in page order; one without a picture takes [art]. */
     fun tracks(art: String = ""): List<MusicItem> {
@@ -55,6 +57,6 @@ object YtmBrowse {
             second = Renderers.rendererText(h["secondSubtitle"])
         }
         val square = (root as? JObj)?.obj("microformat")?.obj("microformatDataRenderer")?.let { Renderers.rendererThumbnail(it["thumbnail"]) }.orEmpty()
-        return BrowsePage(title, thumb, subtitle, strapline, second, description, parts.items, parts.sections, square)
+        return BrowsePage(title, thumb, subtitle, strapline, second, description, parts.items, parts.sections, square, Renderers.pageContinuationToken(root))
     }
 }

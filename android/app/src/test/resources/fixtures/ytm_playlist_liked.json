@@ -1,0 +1,273 @@
+{
+ "responseContext": {},
+ "contents": {
+  "twoColumnBrowseResultsRenderer": {
+   "tabs": [
+    {
+     "tabRenderer": {
+      "content": {
+       "sectionListRenderer": {
+        "contents": [
+         {
+          "musicResponsiveHeaderRenderer": {
+           "title": {
+            "runs": [
+             {
+              "text": "Liked Music"
+             }
+            ]
+           },
+           "subtitle": {
+            "runs": [
+             {
+              "text": "Auto playlist"
+             },
+             {
+              "text": " • "
+             },
+             {
+              "text": "2025"
+             }
+            ]
+           },
+           "secondSubtitle": {
+            "runs": [
+             {
+              "text": "1,204 songs"
+             },
+             {
+              "text": " • "
+             },
+             {
+              "text": "80+ hours"
+             }
+            ]
+           },
+           "thumbnail": {
+            "musicThumbnailRenderer": {
+             "thumbnail": {
+              "thumbnails": [
+               {
+                "url": "https://lh3.googleusercontent.com/fake-liked=w60",
+                "width": 60,
+                "height": 60
+               },
+               {
+                "url": "https://lh3.googleusercontent.com/fake-liked=w226",
+                "width": 226,
+                "height": 226
+               }
+              ]
+             }
+            }
+           }
+          }
+         }
+        ]
+       }
+      }
+     }
+    }
+   ],
+   "secondaryContents": {
+    "sectionListRenderer": {
+     "contents": [
+      {
+       "musicPlaylistShelfRenderer": {
+        "playlistId": "LM",
+        "contents": [
+         {
+          "musicResponsiveListItemRenderer": {
+           "thumbnail": {
+            "musicThumbnailRenderer": {
+             "thumbnail": {
+              "thumbnails": [
+               {
+                "url": "https://lh3.googleusercontent.com/fake-vidfake0001=w60",
+                "width": 60,
+                "height": 60
+               },
+               {
+                "url": "https://lh3.googleusercontent.com/fake-vidfake0001=w226",
+                "width": 226,
+                "height": 226
+               }
+              ]
+             }
+            }
+           },
+           "flexColumns": [
+            {
+             "musicResponsiveListItemFlexColumnRenderer": {
+              "text": {
+               "runs": [
+                {
+                 "text": "Bu Kalp Seni Unutur mu",
+                 "navigationEndpoint": {
+                  "watchEndpoint": {
+                   "videoId": "vidfake0001",
+                   "playlistId": "LM",
+                   "watchEndpointMusicSupportedConfigs": {
+                    "watchEndpointMusicConfig": {
+                     "musicVideoType": "MUSIC_VIDEO_TYPE_ATV"
+                    }
+                   }
+                  }
+                 }
+                }
+               ]
+              }
+             }
+            },
+            {
+             "musicResponsiveListItemFlexColumnRenderer": {
+              "text": {
+               "runs": [
+                {
+                 "text": "Fikret Kızılok",
+                 "navigationEndpoint": {
+                  "browseEndpoint": {
+                   "browseId": "UCfakeFikretKızılok",
+                   "browseEndpointContextSupportedConfigs": {
+                    "browseEndpointContextMusicConfig": {
+                     "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                    }
+                   }
+                  }
+                 }
+                }
+               ]
+              }
+             }
+            }
+           ],
+           "fixedColumns": [
+            {
+             "musicResponsiveListItemFixedColumnRenderer": {
+              "text": {
+               "runs": [
+                {
+                 "text": "4:22"
+                }
+               ]
+              }
+             }
+            }
+           ],
+           "playlistItemData": {
+            "playlistSetVideoId": "set-vidfake0001",
+            "videoId": "vidfake0001"
+           }
+          }
+         },
+         {
+          "musicResponsiveListItemRenderer": {
+           "thumbnail": {
+            "musicThumbnailRenderer": {
+             "thumbnail": {
+              "thumbnails": [
+               {
+                "url": "https://lh3.googleusercontent.com/fake-vidfake0002=w60",
+                "width": 60,
+                "height": 60
+               },
+               {
+                "url": "https://lh3.googleusercontent.com/fake-vidfake0002=w226",
+                "width": 226,
+                "height": 226
+               }
+              ]
+             }
+            }
+           },
+           "flexColumns": [
+            {
+             "musicResponsiveListItemFlexColumnRenderer": {
+              "text": {
+               "runs": [
+                {
+                 "text": "Nightcall",
+                 "navigationEndpoint": {
+                  "watchEndpoint": {
+                   "videoId": "vidfake0002",
+                   "playlistId": "LM",
+                   "watchEndpointMusicSupportedConfigs": {
+                    "watchEndpointMusicConfig": {
+                     "musicVideoType": "MUSIC_VIDEO_TYPE_ATV"
+                    }
+                   }
+                  }
+                 }
+                }
+               ]
+              }
+             }
+            },
+            {
+             "musicResponsiveListItemFlexColumnRenderer": {
+              "text": {
+               "runs": [
+                {
+                 "text": "Kavinsky",
+                 "navigationEndpoint": {
+                  "browseEndpoint": {
+                   "browseId": "UCfakeKavinsky",
+                   "browseEndpointContextSupportedConfigs": {
+                    "browseEndpointContextMusicConfig": {
+                     "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                    }
+                   }
+                  }
+                 }
+                }
+               ]
+              }
+             }
+            }
+           ],
+           "fixedColumns": [
+            {
+             "musicResponsiveListItemFixedColumnRenderer": {
+              "text": {
+               "runs": [
+                {
+                 "text": "4:18"
+                }
+               ]
+              }
+             }
+            }
+           ],
+           "playlistItemData": {
+            "playlistSetVideoId": "set-vidfake0002",
+            "videoId": "vidfake0002"
+           }
+          }
+         },
+         {
+          "continuationItemRenderer": {
+           "trigger": "CONTINUATION_TRIGGER_ON_ITEM_SHOWN",
+           "continuationEndpoint": {
+            "continuationCommand": {
+             "token": "LMCONT1",
+             "request": "CONTINUATION_REQUEST_TYPE_BROWSE"
+            }
+           }
+          }
+         }
+        ]
+       }
+      }
+     ],
+     "continuations": [
+      {
+       "nextContinuationData": {
+        "continuation": "SUGGESTCONT"
+       }
+      }
+     ]
+    }
+   }
+  }
+ }
+}

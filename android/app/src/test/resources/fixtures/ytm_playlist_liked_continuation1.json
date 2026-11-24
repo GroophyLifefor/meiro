@@ -1,0 +1,106 @@
+{
+ "responseContext": {},
+ "onResponseReceivedActions": [
+  {
+   "appendContinuationItemsAction": {
+    "continuationItems": [
+     {
+      "musicResponsiveListItemRenderer": {
+       "thumbnail": {
+        "musicThumbnailRenderer": {
+         "thumbnail": {
+          "thumbnails": [
+           {
+            "url": "https://lh3.googleusercontent.com/fake-vidfake0003=w60",
+            "width": 60,
+            "height": 60
+           },
+           {
+            "url": "https://lh3.googleusercontent.com/fake-vidfake0003=w226",
+            "width": 226,
+            "height": 226
+           }
+          ]
+         }
+        }
+       },
+       "flexColumns": [
+        {
+         "musicResponsiveListItemFlexColumnRenderer": {
+          "text": {
+           "runs": [
+            {
+             "text": "After Dark",
+             "navigationEndpoint": {
+              "watchEndpoint": {
+               "videoId": "vidfake0003",
+               "playlistId": "LM",
+               "watchEndpointMusicSupportedConfigs": {
+                "watchEndpointMusicConfig": {
+                 "musicVideoType": "MUSIC_VIDEO_TYPE_ATV"
+                }
+               }
+              }
+             }
+            }
+           ]
+          }
+         }
+        },
+        {
+         "musicResponsiveListItemFlexColumnRenderer": {
+          "text": {
+           "runs": [
+            {
+             "text": "Mr.Kitty",
+             "navigationEndpoint": {
+              "browseEndpoint": {
+               "browseId": "UCfakeMr.Kitty",
+               "browseEndpointContextSupportedConfigs": {
+                "browseEndpointContextMusicConfig": {
+                 "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                }
+               }
+              }
+             }
+            }
+           ]
+          }
+         }
+        }
+       ],
+       "fixedColumns": [
+        {
+         "musicResponsiveListItemFixedColumnRenderer": {
+          "text": {
+           "runs": [
+            {
+             "text": "4:19"
+            }
+           ]
+          }
+         }
+        }
+       ],
+       "playlistItemData": {
+        "playlistSetVideoId": "set-vidfake0003",
+        "videoId": "vidfake0003"
+       }
+      }
+     },
+     {
+      "continuationItemRenderer": {
+       "trigger": "CONTINUATION_TRIGGER_ON_ITEM_SHOWN",
+       "continuationEndpoint": {
+        "continuationCommand": {
+         "token": "LMCONT2",
+         "request": "CONTINUATION_REQUEST_TYPE_BROWSE"
+        }
+       }
+      }
+     }
+    ]
+   }
+  }
+ ]
+}

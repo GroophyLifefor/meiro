@@ -44,6 +44,11 @@ import kotlinx.coroutines.withTimeout
  */
 data class ListMenuTarget(
     val listId: String?, val ui: ListMenuUi, val copyName: String, val copyCover: String, val copyItems: List<Item>,
+    /**
+     * M6g: a list of the YouTube Music account opened from the Library's row, whose tracks are not read yet: copy,
+     * download and link read them first (`withPageTracks`), then act on them.
+     */
+    val load: (suspend () -> Pair<String, List<Item>>)? = null,
 ) {
     companion object {
         fun own(lib: Library) = ListMenuTarget(lib.id, TrackMenuMapping.listMenu(lib), lib.name, lib.cover, lib.items)
@@ -219,17 +224,29 @@ fun MenuLayer(c: AppContainer, m: MenuState, bars: SystemBars, nav: MenuNav, sna
                 onDismiss = { m.list = null },
                 onCopy = {
                     m.list = null
-                    if (l.copyItems.isNotEmpty()) launch("copy") {
+                    if (l.load != null) launch("copy") {
+                        val (cover, items) = l.load.invoke()
+                        if (items.isNotEmpty()) {
+                            c.copyAsList(l.copyName, l.copyCover.ifEmpty { cover }, items)
+                            snack("“${l.copyName}” Meiro listesi olarak kopyalandı")
+                        }
+                    } else if (l.copyItems.isNotEmpty()) launch("copy") {
                         c.copyAsList(l.copyName, l.copyCover, l.copyItems)
                         snack("“${l.copyName}” Meiro listesi olarak kopyalandı")
                     }
                 },
                 onRename = { m.list = null; l.listId?.let { m.rename = it to l.copyName } },
-                onDownload = { m.list = null; snack(downloadAll(c, l.copyItems.map { it.toQItem() }, l.copyName, l.copyCover)) },
+                onDownload = {
+                    m.list = null
+                    if (l.load != null) launch("download") {
+                        val (cover, items) = l.load.invoke()
+                        snack(downloadAll(c, items.map { it.toQItem() }, l.copyName, l.copyCover.ifEmpty { cover }))
+                    } else snack(downloadAll(c, l.copyItems.map { it.toQItem() }, l.copyName, l.copyCover))
+                },
                 onLinkAll = {
                     m.list = null
-                    val items = l.copyItems.map { it.toQItem() }
                     launch("link all") {
+                        val items = (l.load?.invoke()?.second ?: l.copyItems).map { it.toQItem() }
                         val n = withContext(Dispatchers.IO) { c.linker.autoLinkAll(items, ignoreRecent = true) }
                         snack(if (n == 0) "Bağlanacak parça yok" else "$n parça MusicBrainz'de aranıyor")
                     }

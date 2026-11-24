@@ -26,6 +26,7 @@ import com.muratkirazkaya.meiro.ui.components.CoverSpec
 import com.muratkirazkaya.meiro.ui.components.IconButton
 import com.muratkirazkaya.meiro.ui.components.MIcon
 import com.muratkirazkaya.meiro.ui.components.MText
+import com.muratkirazkaya.meiro.ui.components.EmptyState
 import com.muratkirazkaya.meiro.ui.components.Provider
 import com.muratkirazkaya.meiro.ui.components.SongRow
 import com.muratkirazkaya.meiro.ui.components.SongRowData
@@ -44,6 +45,8 @@ data class PlaylistUi(
     val summary: String,
     val rows: List<SongRowData>,
     val similar: List<SongRowData> = emptyList(),
+    /** The logo before [kind]: Meiro for the user's own list, YouTube Music for a list of the account's (M6g). */
+    val provider: Provider = Provider.Meiro,
 )
 
 /**
@@ -54,7 +57,7 @@ data class PlaylistUi(
  */
 @Composable
 fun PlaylistScreen(
-    ui: PlaylistUi,
+    ui: PlaylistUi?,
     playing: Boolean,
     onBack: () -> Unit,
     onPlay: () -> Unit,
@@ -69,12 +72,19 @@ fun PlaylistScreen(
     onLink: (Int) -> Unit = {},
     /** The hero's download button: the list's tracks are downloaded. */
     onDownload: () -> Unit = {},
+    /** M6g, a YouTube Music list: [ui] null while it loads (only the top bar), [error] when YouTube Music did not answer. */
+    error: String? = null,
+    onRetry: () -> Unit = {},
 ) {
     val c = Meiro.colors
     Column(Modifier.fillMaxSize()) {
         TopBar("", onBack = onBack, avatar = false) {
             IconButton("topbar.searchBtn", "topbar.search.icon", MeiroIcons.Search, c.onSurfaceVariant)
             IconButton("topbar.moreBtn", "topbar.more.icon", MeiroIcons.More, c.onSurfaceVariant, onListMenu)
+        }
+        if (ui == null) {
+            if (error != null) EmptyState("YouTube Music cevap vermedi", error, "Tekrar dene", onButton = onRetry, error = true)
+            return@Column
         }
         LazyColumn(Modifier.fillMaxSize(), state) {
             item { Hero(ui, onPlay, onShuffle, onDownload) }
@@ -104,7 +114,7 @@ fun PlaylistScreen(
 @Composable
 private fun Hero(ui: PlaylistUi, onPlay: () -> Unit, onShuffle: () -> Unit, onDownload: () -> Unit = {}) {
     val c = Meiro.colors
-    DetailHero(ui.cover, ui.title, ui.kind, Provider.Meiro) {
+    DetailHero(ui.cover, ui.title, ui.kind, ui.provider) {
         IconButton("hero.downloadBtn", "hero.download.icon", MeiroIcons.Download, c.onSurfaceVariant, onDownload)
         IconButton("hero.shuffleBtn", "hero.shuffle.icon", MeiroIcons.Shuffle, c.onSurfaceVariant, onShuffle)
         HeroPlayButton(onPlay)

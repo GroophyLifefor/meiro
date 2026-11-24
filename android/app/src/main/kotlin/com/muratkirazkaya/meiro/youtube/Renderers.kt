@@ -142,7 +142,7 @@ object Renderers {
         return Parts(items, sections, top)
     }
 
-    private fun isSectionRenderer(key: String) = key in setOf(
+    internal fun isSectionRenderer(key: String) = key in setOf(
         "musicShelfRenderer", "musicShelfContinuation", "musicPlaylistShelfRenderer", "musicPlaylistShelfContinuation",
         "playlistVideoListRenderer", "playlistVideoListContinuation", "gridRenderer", "gridContinuation", "musicCarouselShelfRenderer",
     )
@@ -418,6 +418,24 @@ object Renderers {
     }
 
     // ---- browse.go tokens
+
+    /**
+     * `pageContinuationToken`: a bare `continuation` string that extends the whole page. A shelf's own continuation
+     * stays with its [Section] and is not taken here.
+     */
+    fun pageContinuationToken(root: Any?): String {
+        when (root) {
+            is List<*> -> for (c in root) pageContinuationToken(c).takeIf { it.isNotEmpty() }?.let { return it }
+            is JObj -> {
+                root.str("continuation")?.takeIf { it.isNotEmpty() }?.let { return it }
+                for ((k, v) in root.members) {
+                    if (isSectionRenderer(k)) continue
+                    pageContinuationToken(v).takeIf { it.isNotEmpty() }?.let { return it }
+                }
+            }
+        }
+        return ""
+    }
 
     /** `continuationToken`: the first `continuationCommand.token`, `nextContinuationData.continuation` or bare `continuation` string. */
     fun continuationToken(root: Any?): String {

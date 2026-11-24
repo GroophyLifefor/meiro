@@ -183,6 +183,57 @@ class YtmClient(
     }
 
     /**
+     * `ContinueBrowse` (`browse.go:177`): the next page of a browse page or of one of its shelves. A continuation page
+     * that holds no shelf names its next page only inside its trailing `continuationItemRenderer`
+     * (`continuationCommand.token`); that token is taken as the page's own (the desktop's `pageContinuationToken`
+     * reads only a bare `continuation` string and stops there).
+     */
+    suspend fun continueBrowse(token: String): BrowsePage {
+        require(token.isNotBlank()) { "youtube: browse continuation token is required" }
+        val text = execute("browse", JSONObject().put("continuation", token))
+        val page = YtmBrowse.parse(text)
+        if (page.sections.isEmpty() && page.continuation.isEmpty()) {
+            val t = Renderers.continuationToken(OrderedJson.parse(text))
+            if (t.isNotEmpty() && t != token) return page.copy(continuation = t)
+        }
+        return page
+    }
+
+    /**
+     * M6g, `StreamLibrary` (`browse.go:58`): the account's library landing page with every continuation page folded
+     * in. Needs [auth].
+     */
+    suspend fun library(): BrowsePage {
+        if (auth == null) throw YtmException("youtube: GetLibrary requires cookie authentication")
+        val first = YtmBrowse.parse(execute("browse", JSONObject().put("browseId", YtmLibraryParse.LIBRARY_ID)))
+        return YtmLibraryParse.drain(first) { continueBrowse(it) }
+    }
+
+    /**
+     * M6g, `GetPlaylist` (`browse.go:203`) and the rest of its tracks as `withTracksOf` reads them (`collections.go:150`,
+     * `readPlaylistRest`): a playlist page, "VL" added when [id] lacks it. With [all] false only the first page.
+     */
+    suspend fun playlist(id: String, all: Boolean = true): BrowsePage {
+        require(id.isNotBlank()) { "youtube: playlist ID is required" }
+        val browseId = if (id.startsWith("VL")) id else "VL$id"
+        val first = YtmBrowse.parse(execute("browse", JSONObject().put("browseId", browseId)))
+        // The playlist's own shelf names the page after its tracks; the page's token (the suggestions) is the fallback.
+        val shelf = first.sections.indexOfLast { YtmLibraryParse.isPlaylistShelf(it.kind) && it.continuationToken.isNotEmpty() }
+        val token = if (shelf >= 0) first.sections[shelf].continuationToken else first.continuation
+        if (!all || token.isEmpty()) return first
+        val rest = YtmLibraryParse.playlistRest(token) { continueBrowse(it) }
+        if (rest.isEmpty()) return first
+        val at = if (shelf >= 0) shelf else first.sections.lastIndex
+        return if (at >= 0) {
+            val s = first.sections[at]
+            first.copy(items = first.items + rest, sections = first.sections.toMutableList().also { it[at] = Renderers.Section(s.title, s.kind, s.items + rest, "") })
+        } else first.copy(items = first.items + rest, continuation = "")
+    }
+
+    /** M6g: YouTube Music's "New albums & singles" page (the mock's "YouTube Music: Yeni çıkanlar" shelf). */
+    suspend fun newReleases(): BrowsePage = YtmBrowse.parse(execute("browse", JSONObject().put("browseId", YtmLibraryParse.NEW_RELEASES_ID)))
+
+    /**
      * `GetRelated` (`tracktabs.go:111`): the track's "Related" tab. `next` for the video names the tab's browse id
      * (`MUSIC_PAGE_TYPE_TRACK_RELATED`), and that page is read like any browse page.
      */

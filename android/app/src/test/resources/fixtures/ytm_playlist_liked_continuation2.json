@@ -1,0 +1,179 @@
+{
+ "responseContext": {},
+ "onResponseReceivedActions": [
+  {
+   "appendContinuationItemsAction": {
+    "continuationItems": [
+     {
+      "musicResponsiveListItemRenderer": {
+       "thumbnail": {
+        "musicThumbnailRenderer": {
+         "thumbnail": {
+          "thumbnails": [
+           {
+            "url": "https://lh3.googleusercontent.com/fake-vidfake0004=w60",
+            "width": 60,
+            "height": 60
+           },
+           {
+            "url": "https://lh3.googleusercontent.com/fake-vidfake0004=w226",
+            "width": 226,
+            "height": 226
+           }
+          ]
+         }
+        }
+       },
+       "flexColumns": [
+        {
+         "musicResponsiveListItemFlexColumnRenderer": {
+          "text": {
+           "runs": [
+            {
+             "text": "Son Arzum",
+             "navigationEndpoint": {
+              "watchEndpoint": {
+               "videoId": "vidfake0004",
+               "playlistId": "LM",
+               "watchEndpointMusicSupportedConfigs": {
+                "watchEndpointMusicConfig": {
+                 "musicVideoType": "MUSIC_VIDEO_TYPE_ATV"
+                }
+               }
+              }
+             }
+            }
+           ]
+          }
+         }
+        },
+        {
+         "musicResponsiveListItemFlexColumnRenderer": {
+          "text": {
+           "runs": [
+            {
+             "text": "Nilüfer",
+             "navigationEndpoint": {
+              "browseEndpoint": {
+               "browseId": "UCfakeNilüfer",
+               "browseEndpointContextSupportedConfigs": {
+                "browseEndpointContextMusicConfig": {
+                 "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                }
+               }
+              }
+             }
+            }
+           ]
+          }
+         }
+        }
+       ],
+       "fixedColumns": [
+        {
+         "musicResponsiveListItemFixedColumnRenderer": {
+          "text": {
+           "runs": [
+            {
+             "text": "3:47"
+            }
+           ]
+          }
+         }
+        }
+       ],
+       "playlistItemData": {
+        "playlistSetVideoId": "set-vidfake0004",
+        "videoId": "vidfake0004"
+       }
+      }
+     },
+     {
+      "musicResponsiveListItemRenderer": {
+       "thumbnail": {
+        "musicThumbnailRenderer": {
+         "thumbnail": {
+          "thumbnails": [
+           {
+            "url": "https://lh3.googleusercontent.com/fake-vidfake0002=w60",
+            "width": 60,
+            "height": 60
+           },
+           {
+            "url": "https://lh3.googleusercontent.com/fake-vidfake0002=w226",
+            "width": 226,
+            "height": 226
+           }
+          ]
+         }
+        }
+       },
+       "flexColumns": [
+        {
+         "musicResponsiveListItemFlexColumnRenderer": {
+          "text": {
+           "runs": [
+            {
+             "text": "Nightcall",
+             "navigationEndpoint": {
+              "watchEndpoint": {
+               "videoId": "vidfake0002",
+               "playlistId": "LM",
+               "watchEndpointMusicSupportedConfigs": {
+                "watchEndpointMusicConfig": {
+                 "musicVideoType": "MUSIC_VIDEO_TYPE_ATV"
+                }
+               }
+              }
+             }
+            }
+           ]
+          }
+         }
+        },
+        {
+         "musicResponsiveListItemFlexColumnRenderer": {
+          "text": {
+           "runs": [
+            {
+             "text": "Kavinsky",
+             "navigationEndpoint": {
+              "browseEndpoint": {
+               "browseId": "UCfakeKavinsky",
+               "browseEndpointContextSupportedConfigs": {
+                "browseEndpointContextMusicConfig": {
+                 "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                }
+               }
+              }
+             }
+            }
+           ]
+          }
+         }
+        }
+       ],
+       "fixedColumns": [
+        {
+         "musicResponsiveListItemFixedColumnRenderer": {
+          "text": {
+           "runs": [
+            {
+             "text": "4:18"
+            }
+           ]
+          }
+         }
+        }
+       ],
+       "playlistItemData": {
+        "playlistSetVideoId": "set-vidfake0002",
+        "videoId": "vidfake0002"
+       }
+      }
+     }
+    ]
+   }
+  }
+ ]
+}

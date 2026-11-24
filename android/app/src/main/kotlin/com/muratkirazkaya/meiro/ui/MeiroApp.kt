@@ -162,6 +162,8 @@ private const val HISTORY_ROUTE = "history?tab={tab}"
 private const val STATS_ROUTE = "stats?tab={tab}"
 private const val SETTINGS_ROUTE = "settings?tab={tab}"
 private const val YTM_LOGIN_ROUTE = "ytmlogin?tab={tab}"
+/** M6g: a playlist of the YouTube Music account (the liked songs too), on the playlist screen. */
+private const val YTM_LIST_ROUTE = "ytmlist/{id}?tab={tab}"
 
 /** The shell with the four tab routes; Library lists the lists, and a list opens as `playlist/<id>`. */
 @Composable
@@ -176,7 +178,7 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String, signedIn
     // does; an album or artist page carries the tab it was opened from (it can be several pages deep).
     val from = when (route) {
         PLAYLIST_ROUTE, MIX_ROUTE -> nav.previousBackStackEntry?.destination?.route
-        ALBUM_ROUTE, ARTIST_ROUTE, MB_ARTIST_ROUTE, HISTORY_ROUTE, STATS_ROUTE, SETTINGS_ROUTE, YTM_LOGIN_ROUTE -> entry?.arguments?.getString("tab")
+        ALBUM_ROUTE, ARTIST_ROUTE, MB_ARTIST_ROUTE, HISTORY_ROUTE, STATS_ROUTE, SETTINGS_ROUTE, YTM_LOGIN_ROUTE, YTM_LIST_ROUTE -> entry?.arguments?.getString("tab")
         else -> route
     }
     val selected = Tab.entries.firstOrNull { it.route == from } ?: if (route == PLAYLIST_ROUTE) Tab.Library else Tab.Home
@@ -187,6 +189,7 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String, signedIn
         else nav.navigate("artist/$id?tab=${selected.route}")
     }
     val openMbArtist = { mbid: String -> nav.navigate("mbartist/$mbid?tab=${selected.route}") }
+    val openYtmList = { id: String -> nav.navigate("ytmlist/$id?tab=${selected.route}") }
     // M6b: the history, the stats and the settings keep the tab they were opened from selected.
     val openHistory = { nav.navigate("history?tab=${selected.route}") }
     val openStats = { nav.navigate("stats?tab=${selected.route}") }
@@ -239,11 +242,11 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String, signedIn
         ) {
             NavHost(nav, startDestination = Tab.Home.route) {
                 composable(Tab.Home.route) {
-                    HomeRoute(c, email, onOpen = { nav.navigate("playlist/$it") }, onMix = { nav.navigate(MIX_ROUTE) }, onSnack = { snack = it }, onStats = openStats, onHistory = openHistory)
+                    HomeRoute(c, email, onOpen = { nav.navigate("playlist/$it") }, onMix = { nav.navigate(MIX_ROUTE) }, onSnack = { snack = it }, onStats = openStats, onHistory = openHistory, onYtmList = openYtmList, onAlbum = openAlbum)
                 }
                 composable(Tab.Search.route) { SearchRoute(c, openAlbum, openArtist) }
                 composable(Tab.Library.route) {
-                    LibraryRoute(c, onOpen = { nav.navigate("playlist/$it") }, onMix = { nav.navigate(MIX_ROUTE) }, onNew = openSheet)
+                    LibraryRoute(c, onOpen = { nav.navigate("playlist/$it") }, onMix = { nav.navigate(MIX_ROUTE) }, onNew = openSheet, onYtmList = openYtmList, onAlbum = openAlbum)
                 }
                 composable(Tab.Downloads.route) { DownloadsRoute(c, onSnack = { snack = it }) }
                 composable(ALBUM_ROUTE, listOf(navArgument("tab") { defaultValue = Tab.Search.route })) { e ->
@@ -268,6 +271,9 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String, signedIn
                 }
                 composable(YTM_LOGIN_ROUTE, listOf(navArgument("tab") { defaultValue = Tab.Home.route })) {
                     YtmLoginRoute(c, onBack = { nav.popBackStack() }, onDone = { msg -> nav.popBackStack(); snack = msg }, onSnack = { snack = it })
+                }
+                composable(YTM_LIST_ROUTE, listOf(navArgument("tab") { defaultValue = Tab.Library.route })) { e ->
+                    YtmListRoute(c, e.arguments?.getString("id").orEmpty(), onBack = { nav.popBackStack() }, onSnack = { snack = it })
                 }
                 composable(PLAYLIST_ROUTE) { e ->
                     PlaylistRoute(c, e.arguments?.getString("id").orEmpty(), onBack = { nav.popBackStack() }, onSnack = { snack = it })
@@ -444,7 +450,10 @@ internal fun avatarInitial(email: String): String =
  * not exist yet.
  */
 @Composable
-private fun HomeRoute(c: AppContainer, email: String, onOpen: (String) -> Unit, onMix: () -> Unit, onSnack: (String) -> Unit, onStats: () -> Unit, onHistory: () -> Unit) {
+private fun HomeRoute(
+    c: AppContainer, email: String, onOpen: (String) -> Unit, onMix: () -> Unit, onSnack: (String) -> Unit, onStats: () -> Unit, onHistory: () -> Unit,
+    onYtmList: (String) -> Unit = {}, onAlbum: (String) -> Unit = {},
+) {
     val ctx = LocalContext.current
     val menus = LocalMenus.current
     val openPlayer = LocalOpenPlayer.current
@@ -463,8 +472,15 @@ private fun HomeRoute(c: AppContainer, email: String, onOpen: (String) -> Unit, 
     // The mock's `loading`: a new account's first read is on its way and nothing of it is here yet.
     val empty = remember(version, historyVersion) { c.libraries.list().isEmpty() && c.engine.history().isEmpty() }
     if (firstRead && empty) { HomeLoadingScreen(); return }
+    // M6g: signed in to YouTube Music, the liked songs join the quick picks and (online) the new releases shelf shows.
+    val feed by c.ytmFeed.state.collectAsState()
+    val online by com.muratkirazkaya.meiro.downloads.Online.state.collectAsState()
+    LaunchedEffect(Unit) { c.ytmFeed.refresh() }
+    val liked = feed?.library?.liked
+    val picks = remember(data, liked) { YtmMapping.picks(data.ui.picks, liked) }
+    val releases = remember(feed, online) { if (feed != null && online) feed?.releases.orEmpty() else emptyList() }
     HomeScreen(
-        data.ui, playing = now?.playing == true,
+        data.ui.copy(picks = picks, releases = releases.map { YtmMapping.releaseTile(it) }), playing = now?.playing == true,
         actions = HomeActions(
             onStats = onStats,
             onHistory = onHistory,
@@ -475,7 +491,12 @@ private fun HomeRoute(c: AppContainer, email: String, onOpen: (String) -> Unit, 
                     onSnack("Daily mix çalıyor")
                 }
             },
-            onPick = { i -> data.pickIds.getOrNull(i)?.let(onOpen) },
+            onPick = { i ->
+                val key = picks.getOrNull(i)?.key
+                if (key != null && key.startsWith(YtmMapping.PLAYLIST_PREFIX)) onYtmList(key.removePrefix(YtmMapping.PLAYLIST_PREFIX))
+                else data.pickIds.getOrNull(if (liked != null && i > 0) i - 1 else i)?.let(onOpen)
+            },
+            onRelease = { i -> releases.getOrNull(i)?.let { onAlbum(it.browseId) } },
             // The desktop plays a history row on its own (`historyPlay`).
             onResume = { i -> data.resume.getOrNull(i)?.let { playRow(ctx, listOf(it), 0, "Dinleme geçmişi", openPlayer) } },
             onResumeMore = { i -> data.resume.getOrNull(i)?.let { menus.track(MenuTarget(it)) } },
@@ -485,7 +506,10 @@ private fun HomeRoute(c: AppContainer, email: String, onOpen: (String) -> Unit, 
 }
 
 @Composable
-private fun LibraryRoute(c: AppContainer, onOpen: (String) -> Unit, onMix: () -> Unit, onNew: () -> Unit) {
+private fun LibraryRoute(
+    c: AppContainer, onOpen: (String) -> Unit, onMix: () -> Unit, onNew: () -> Unit,
+    onYtmList: (String) -> Unit = {}, onAlbum: (String) -> Unit = {},
+) {
     val version by c.libraries.version.collectAsState()
     val (rows, mixId) = remember(version) {
         val libs = c.libraries.list()
@@ -495,10 +519,48 @@ private fun LibraryRoute(c: AppContainer, onOpen: (String) -> Unit, onMix: () ->
         libs.map { if (it.id == mix?.id) MixMapping.libraryRow(it, now.toLocalDate(), now.zone) else it.toRow() } to mix?.id
     }
     val menus = LocalMenus.current
-    if (rows.isEmpty()) LibraryEmptyScreen(onNew)
-    else LibraryScreen(
+    // M6g: the "YouTube Music" tab, only while signed in to YouTube Music (`st.ytm`).
+    val feed by c.ytmFeed.state.collectAsState()
+    var ytmSelected by rememberSaveable { mutableStateOf(false) }
+    val signedIn = feed != null
+    LaunchedEffect(signedIn) { if (signedIn) c.ytmFeed.refresh() else ytmSelected = false }
+    val lib = feed?.library
+    val ytmRows = remember(lib) { YtmMapping.libraryRows(lib) }
+    val onTab = { ytm: Boolean -> ytmSelected = ytm; if (ytm) c.ytmFeed.refresh() }
+    if (!(signedIn && ytmSelected) && rows.isEmpty()) { LibraryEmptyScreen(onNew, ytmTab = signedIn, onTab = onTab); return }
+    LibraryScreen(
         rows, { id -> if (id == mixId) onMix() else onOpen(id) }, onNew,
+        ytmTab = signedIn,
         onMore = { id -> c.libraries.get(id)?.let { menus.list(ListMenuTarget.own(it)) } },
+        ytmSelected = ytmSelected, onTab = onTab, ytmRows = ytmRows,
+        onYtmOpen = { key ->
+            when {
+                key.startsWith(YtmMapping.PLAYLIST_PREFIX) -> onYtmList(key.removePrefix(YtmMapping.PLAYLIST_PREFIX))
+                key.startsWith(YtmMapping.ALBUM_PREFIX) -> onAlbum(key.removePrefix(YtmMapping.ALBUM_PREFIX))
+            }
+        },
+        onYtmMore = { key -> YtmMapping.entry(lib, key)?.let { e -> menus.list(ytmListMenu(c, e)) } },
+    )
+}
+
+/**
+ * The list menu of a row of the YouTube Music tab: copy, download and link read the list's tracks first (a playlist
+ * with the session, an album as its page). "N unknown" is the number of tracks the library names (0 when it names none).
+ */
+private fun ytmListMenu(c: AppContainer, e: com.muratkirazkaya.meiro.youtube.YtmListEntry): ListMenuTarget {
+    val name = YtmMapping.listName(e.id, e.title)
+    val cover = e.thumbnail.takeIf { it.startsWith("https://") }.orEmpty()
+    return ListMenuTarget(
+        null, ListMenuUi(e.count ?: 0, own = false), name, cover, emptyList(),
+        load = {
+            if (e.album) {
+                val d = BrowseMapping.album(e.id, c.browsePage(e.id))
+                d.cover to d.listItems()
+            } else {
+                val l = YtmMapping.asList(e.id, c.ytmFeed.playlist(e.id))
+                l.cover to l.items
+            }
+        },
     )
 }
 
@@ -596,6 +658,50 @@ private fun PlaylistRoute(c: AppContainer, id: String, onBack: () -> Unit, onSna
         onListMenu = { menus.list(ListMenuTarget.own(lib)) },
         onLink = { i -> lib.items.getOrNull(i)?.let { menus.link(LinkTarget.song(it.toQItem())) } },
         onDownload = { onSnack(downloadAll(c, lib.items.map { it.toQItem() }, lib.name, lib.cover)) },
+    )
+}
+
+/**
+ * M6g: a playlist of the YouTube Music account (the mock's `open-playlist` from the YouTube Music tab or Home's
+ * "Beğenilenler"), read with the session and shown on the playlist screen with the YouTube Music logo. Rows play the
+ * list from that track; ⋮ opens the list menu as an album's (copy, download, link; no rename or delete).
+ */
+@Composable
+private fun YtmListRoute(c: AppContainer, id: String, onBack: () -> Unit, onSnack: (String) -> Unit) {
+    val ctx = LocalContext.current
+    val menus = LocalMenus.current
+    val openPlayer = LocalOpenPlayer.current
+    val now by PlaybackHost.ui.collectAsState()
+    val linkVersion by c.linker.version.collectAsState()
+    var retry by remember { mutableStateOf(0) }
+    val loaded by produceState<Pair<com.muratkirazkaya.meiro.data.Library?, String?>?>(null, id, retry) {
+        value = try {
+            YtmMapping.asList(id, c.ytmFeed.playlist(id)) to null
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            android.util.Log.i(AppContainer.TAG, "ytm list: read failed (${e.javaClass.simpleName})")
+            null to (e.message ?: e.javaClass.simpleName)
+        }
+    }
+    val lib = loaded?.first
+    val playingKey = now?.item?.key
+    val ui = remember(lib, playingKey, linkVersion) { lib?.let { YtmMapping.playlistUi(it, c.links, playingKey) } }
+    fun queue() = lib?.items.orEmpty().map { it.toQItem() }
+    fun play(from: Int, items: List<com.muratkirazkaya.meiro.playback.QItem>) { if (items.isNotEmpty()) PlaybackHost.playQueue(ctx, items, from, lib?.name.orEmpty()) }
+    PlaylistScreen(
+        ui, playing = now?.playing == true, onBack = onBack,
+        onPlay = { play(0, queue()) },
+        onShuffle = { play(0, queue().shuffled()) },
+        onRow = { i -> queue().let { q -> if (!openIfPlaying(q, i, openPlayer)) play(i, q) } },
+        onMore = { i -> lib?.items?.getOrNull(i)?.let { menus.track(MenuTarget(it.toQItem())) } },
+        onListMenu = {
+            lib?.let { l -> menus.list(ListMenuTarget(null, ListMenuUi(l.items.count { c.linker.stateOf(it.toQItem()).let { s -> s != LinkState.MATCHED && s != LinkState.OTHER } }, own = false), l.name, l.cover, l.items)) }
+        },
+        onLink = { i -> lib?.items?.getOrNull(i)?.let { menus.link(LinkTarget.song(it.toQItem())) } },
+        onDownload = { lib?.let { l -> onSnack(downloadAll(c, queue(), l.name, l.cover)) } },
+        error = loaded?.second,
+        onRetry = { retry++ },
     )
 }
 

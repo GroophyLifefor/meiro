@@ -19,29 +19,35 @@ import com.muratkirazkaya.meiro.ui.theme.Meiro
 import com.muratkirazkaya.meiro.ui.theme.MeiroType
 
 /**
- * The mock's tabs row: "Meiro listeleri" (selected) and, only when [ytmTab] (signed in to YouTube Music; that sign-in
- * does not exist yet, so the app never sets it), "YouTube Music". 48dp + 1dp divider. Indicator: 28% inset each side.
+ * The mock's tabs row: "Meiro listeleri" and, only when [ytmTab] (signed in to YouTube Music), "YouTube Music". The
+ * selected tab ([ytmSelected]) has the primary label and the indicator (28% inset each side); a tap on a tab gives
+ * [onTab] whether it is the YouTube Music one. 48dp + 1dp divider.
  */
 @Composable
-fun LibraryTabs(modifier: Modifier = Modifier, ytmTab: Boolean = false) {
+fun LibraryTabs(modifier: Modifier = Modifier, ytmTab: Boolean = false, ytmSelected: Boolean = false, onTab: (Boolean) -> Unit = {}) {
     val c = Meiro.colors
+    val ytmOn = ytmTab && ytmSelected
     Column(modifier.fillMaxWidth().inv("tabs", bg = c.surface, radiusDp = 0f).background(c.surface)) {
         Row(Modifier.fillMaxWidth().height(48.dp)) {
-            Box(Modifier.weight(1f).height(48.dp).inv("tabs.meiro"), Alignment.Center) {
-                MText("Meiro listeleri", MeiroType.TabLabel, c.primary, "tabs.meiro.label", maxLines = 1)
-                val shape = RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp)
-                Box(
-                    Modifier.align(Alignment.BottomCenter).fillMaxWidth(0.44f).height(3.dp)
-                        .inv("tabs.meiro.indicator", bg = c.primary, radiusDp = 3f)
-                        .clip(shape).background(c.primary),
-                )
-            }
-            if (ytmTab) {
-                Box(Modifier.weight(1f).height(48.dp).inv("tabs.ytm"), Alignment.Center) {
-                    MText("YouTube Music", MeiroType.TabLabel, c.onSurfaceVariant, "tabs.ytm.label", maxLines = 1)
-                }
-            }
+            LibraryTab("tabs.meiro", "Meiro listeleri", !ytmOn) { onTab(false) }
+            if (ytmTab) LibraryTab("tabs.ytm", "YouTube Music", ytmOn) { onTab(true) }
         }
         Box(Modifier.fillMaxWidth().height(1.dp).background(c.outlineVariant))
+    }
+}
+
+@Composable
+private fun RowScope.LibraryTab(tag: String, label: String, on: Boolean, onClick: () -> Unit) {
+    val c = Meiro.colors
+    Box(Modifier.weight(1f).height(48.dp).inv(tag).clickableNoIndication(onClick), Alignment.Center) {
+        MText(label, MeiroType.TabLabel, if (on) c.primary else c.onSurfaceVariant, "$tag.label", maxLines = 1)
+        if (on) {
+            val shape = RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp)
+            Box(
+                Modifier.align(Alignment.BottomCenter).fillMaxWidth(0.44f).height(3.dp)
+                    .inv("$tag.indicator", bg = c.primary, radiusDp = 3f)
+                    .clip(shape).background(c.primary),
+            )
+        }
     }
 }
