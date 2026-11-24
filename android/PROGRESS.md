@@ -221,7 +221,8 @@ M6f deviations and open choices, for the owner:
   the phone is light (the WebView may then show Google's light page in the dark frame).
 - **Google may refuse the embedded page**: Google is known to block sign-in in embedded WebViews ("This browser or app may
   not be secure"); the page loaded, but whether Google lets the sign-in finish was not tried. The User-Agent is the
-  WebView's own; it was not changed to look like a browser (that would work around Google's check; your call).
+  WebView's own; it was not changed to look like a browser (decided 2026-11-24, Murat: "Try it first, then": Murat
+  tries the real sign-in first; the browser User-Agent is decided only if Google refuses).
 - **Unverified**: that `CookieManager.getCookie` gives every cookie the desktop sends (HttpOnly `__Secure-*` ones); that
   YouTube takes the session read this way; the account line with a real name.
 - **No channel switcher** (the mock has none): the phone always acts as the account's own channel ("kanal: kişisel");
@@ -255,8 +256,8 @@ casing), "M" without an account. `AvatarInitialTest` (fails with the fixed
 - **YouTube Music sign-in (M6f), the real sign-in**: not done by the agent (no password may be typed by it). On the
   emulator or the phone: Ayarlar → YouTube Music "Giriş", sign in on Google's page; expected: back to Ayarlar with
   "YouTube Music'e girildi · <ad>" and "Girişli · <ad> · kanal: kişisel"; then "Çıkış". If Google says the browser is
-  not secure, the embedded page is refused (see the M6f deviations). Also decide: a taller page frame in the mock, the
-  page's dark theme, a channel switcher.
+  not secure, the embedded page is refused (see the M6f deviations); then decide whether
+  the page may pretend to be a browser. Also decide: a channel switcher.
 - **meiro-server keeps removed downloads live (M5)**: `UpsertDownload` (`backend/store_data.go:360`) inserts a `deleted:true` download with `deleted_at = now()`, which the partial unique index `(user_id, track_id, device) WHERE deleted_at IS NULL` does not cover, so the `ON CONFLICT` never fires: the live row stays and a new deleted row is added. The desktop and the phone send every removal again on each push for 90 days (`Removed`), so each push adds another deleted row (4 for one removal in 2 minutes on the local server, `build/check/m5/server-downloads-3-after-new.txt`). **Fixed 2026-11-23 in meiro-server `9617c8b`, live on prod** (a removal now closes the live row; a tombstone is inserted only when no row exists; checked on the local server: 1 deleted row, 0 live, a re-download goes live again, a stale removal is ignored). Still open: rows written on prod before the fix (extra deleted rows, removed downloads still live) are not cleaned; cleaning changes prod data, so it waits for your yes.
 - **Downloads tab, choices the mock leaves open (M5)**: the bar's scale, the "Sırala" orders, the failed-download message (the "Yalnız Wi-Fi'de indir" setting exists since M6b); see "M5: deviations".
 
