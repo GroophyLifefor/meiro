@@ -1,0 +1,216 @@
+{
+ "screen": "ytmlogin",
+ "systemNote": "Status bar row (y 0..36) and the gesture pill are system UI on Android: not drawn by the app, excluded from element and pixel comparison. The body of the page frame (.webview .body: 'Oturum açın', the field, the link, 'İleri') is Google's own sign-in page in a WebView, marked web: not compared.",
+ "elements": [
+  {
+   "path": "#box>div.app:nth-child(1)>div.statusbar:nth-child(1)>span#clock:nth-child(1)",
+   "system": true
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div.statusbar:nth-child(1)>span.sys:nth-child(2)>span#netIcon:nth-child(1)",
+   "system": true
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div.statusbar:nth-child(1)>span.sys:nth-child(2)>i:nth-child(2)",
+   "system": true
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar.withback:nth-child(1)",
+   "key": "topbar"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar.withback:nth-child(1)>button.ibtn:nth-child(1)",
+   "key": "topbar.backBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar.withback:nth-child(1)>button.ibtn:nth-child(1)>svg:nth-child(1)",
+   "key": "topbar.back.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.topbar.withback:nth-child(1)>h1:nth-child(2)",
+   "key": "topbar.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.note:nth-child(2)",
+   "key": "note"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.webview:nth-child(3)",
+   "key": "web"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.webview:nth-child(3)>div.url:nth-child(1)",
+   "key": "web.url",
+   "styleFrom": "web.url.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.webview:nth-child(3)>div.url:nth-child(1)>svg:nth-child(1)",
+   "key": "web.url.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.webview:nth-child(3)>div.body:nth-child(2)>div.g:nth-child(1)",
+   "web": true,
+   "android": "Google's own sign-in page inside the WebView (the mock draws a stand-in); not the app's to draw, so not compared. Checked on the emulator: the page loads in the frame (build/check/m6f/flow-*.png)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.webview:nth-child(3)>div.body:nth-child(2)>div:nth-child(2)",
+   "web": true,
+   "android": "Google's own sign-in page inside the WebView (the mock draws a stand-in); not the app's to draw, so not compared. Checked on the emulator: the page loads in the frame (build/check/m6f/flow-*.png)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.webview:nth-child(3)>div.body:nth-child(2)>div.gi:nth-child(3)",
+   "web": true,
+   "android": "Google's own sign-in page inside the WebView (the mock draws a stand-in); not the app's to draw, so not compared. Checked on the emulator: the page loads in the frame (build/check/m6f/flow-*.png)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.webview:nth-child(3)>div.body:nth-child(2)>div:nth-child(4)",
+   "web": true,
+   "android": "Google's own sign-in page inside the WebView (the mock draws a stand-in); not the app's to draw, so not compared. Checked on the emulator: the page loads in the frame (build/check/m6f/flow-*.png)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.webview:nth-child(3)>div.body:nth-child(2)>div.gb:nth-child(5)>span:nth-child(1)",
+   "web": true,
+   "android": "Google's own sign-in page inside the WebView (the mock draws a stand-in); not the app's to draw, so not compared. Checked on the emulator: the page loads in the frame (build/check/m6f/flow-*.png)."
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.note:nth-child(4)",
+   "key": "foot"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)",
+   "key": "mini"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.cv:nth-child(1)",
+   "key": "mini.cover"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>b:nth-child(1)",
+   "key": "mini.title"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>span:nth-child(2)",
+   "key": "mini.artist",
+   "styleFrom": "mini.artist.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>span:nth-child(2)>span.src:nth-child(1)>span:nth-child(1)>svg:nth-child(1)",
+   "key": "mini.src.ytm"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.t:nth-child(2)>span:nth-child(2)>span.src:nth-child(1)>span.dim:nth-child(2)>svg:nth-child(1)",
+   "key": "mini.src.sc"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(3)",
+   "key": "mini.playBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(3)>svg:nth-child(1)",
+   "key": "mini.play.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(4)",
+   "key": "mini.nextBtn"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>button.ibtn:nth-child(4)>svg:nth-child(1)",
+   "key": "mini.next.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.bar:nth-child(5)",
+   "key": "mini.bar"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#miniWrap:nth-child(3)>div.mini:nth-child(1)>div.bar:nth-child(5)>i:nth-child(1)",
+   "key": "mini.bar.fill"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)",
+   "key": "nav"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(1)",
+   "key": "nav.home",
+   "styleFrom": "nav.home.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(1)>span.pill:nth-child(1)",
+   "key": "nav.home.pill"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav.on:nth-child(1)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "key": "nav.home.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(2)",
+   "key": "nav.search",
+   "styleFrom": "nav.search.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(2)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "key": "nav.search.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(3)",
+   "key": "nav.library",
+   "styleFrom": "nav.library.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(3)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "key": "nav.library.icon"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(4)",
+   "key": "nav.downloads",
+   "styleFrom": "nav.downloads.label"
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>nav#navbar.navbar:nth-child(4)>button.nav:nth-child(4)>span.pill:nth-child(1)>svg:nth-child(1)",
+   "key": "nav.downloads.icon"
+  },
+  {
+   "path": "#box>div.gesture:nth-child(7)",
+   "system": true
+  }
+ ],
+ "aux": [
+  "mini.artist.label",
+  "nav.downloads.label",
+  "nav.home.label",
+  "nav.library.label",
+  "nav.search.label",
+  "web.url.label"
+ ],
+ "centered": [
+  {
+   "child": "topbar.back.icon",
+   "parent": "topbar.backBtn",
+   "axes": "xy"
+  },
+  {
+   "child": "web.url.icon",
+   "parent": "web.url",
+   "axes": "y"
+  },
+  {
+   "child": "web.url.label",
+   "parent": "web.url",
+   "axes": "y"
+  }
+ ],
+ "rows": [
+  {
+   "name": "address strip",
+   "keys": [
+    "web.url.icon",
+    "web.url.label"
+   ],
+   "edges": [
+    "centerY"
+   ]
+  }
+ ],
+ "noOverlap": [],
+ "ellipsis": []
+}

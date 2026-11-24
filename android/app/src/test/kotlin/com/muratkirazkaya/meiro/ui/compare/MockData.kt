@@ -58,8 +58,12 @@ class InvEl(val json: JSONObject, val theme: String, shiftY: Double = 0.0) {
     val radiusDp: Float get() = if (radiusRaw.endsWith("%")) (minOf(w, h) / 2).toFloat() else radiusRaw.split(" ")[0].removeSuffix("px").toFloat()
 }
 
-/** [spacer]: an empty block of the mock (a `div` with a height); it has no counterpart to tag, the next element's position proves it. */
-class KeyEntry(val path: String, val key: String?, val system: Boolean, val styleFrom: String?, val spacer: Boolean = false)
+/**
+ * [spacer]: an empty block of the mock (a `div` with a height); it has no counterpart to tag, the next element's position proves it.
+ * [web]: an element of a third-party web page the mock draws inside a page frame (M6f: Google's sign-in page in `ytmlogin`'s
+ * `.webview`); the app shows the real page in a WebView, which is not the app's to draw, so it is not compared (the frame is).
+ */
+class KeyEntry(val path: String, val key: String?, val system: Boolean, val styleFrom: String?, val spacer: Boolean = false, val web: Boolean = false)
 class Centered(val child: String, val parent: String, val axes: String)
 class Row(val name: String, val keys: List<String>, val edges: List<String>)
 
@@ -83,7 +87,7 @@ class KeyMap(
             return KeyMap(
                 name,
                 arr(j.getJSONArray("elements")).map { o -> o as JSONObject
-                    KeyEntry(o.getString("path"), o.optString("key").ifEmpty { null }, o.optBoolean("system"), o.optString("styleFrom").ifEmpty { null }, o.optBoolean("spacer")) },
+                    KeyEntry(o.getString("path"), o.optString("key").ifEmpty { null }, o.optBoolean("system"), o.optString("styleFrom").ifEmpty { null }, o.optBoolean("spacer"), o.optBoolean("web")) },
                 arr(j.getJSONArray("aux")).map { it as String }.toSet(),
                 arr(j.getJSONArray("centered")).map { o -> o as JSONObject; Centered(o.getString("child"), o.getString("parent"), o.getString("axes")) },
                 arr(j.getJSONArray("rows")).map { o -> o as JSONObject

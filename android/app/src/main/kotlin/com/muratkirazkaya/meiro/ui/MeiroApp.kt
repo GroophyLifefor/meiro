@@ -161,6 +161,7 @@ private const val MB_ARTIST_ROUTE = "mbartist/{id}?tab={tab}"
 private const val HISTORY_ROUTE = "history?tab={tab}"
 private const val STATS_ROUTE = "stats?tab={tab}"
 private const val SETTINGS_ROUTE = "settings?tab={tab}"
+private const val YTM_LOGIN_ROUTE = "ytmlogin?tab={tab}"
 
 /** The shell with the four tab routes; Library lists the lists, and a list opens as `playlist/<id>`. */
 @Composable
@@ -175,7 +176,7 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String, signedIn
     // does; an album or artist page carries the tab it was opened from (it can be several pages deep).
     val from = when (route) {
         PLAYLIST_ROUTE, MIX_ROUTE -> nav.previousBackStackEntry?.destination?.route
-        ALBUM_ROUTE, ARTIST_ROUTE, MB_ARTIST_ROUTE, HISTORY_ROUTE, STATS_ROUTE, SETTINGS_ROUTE -> entry?.arguments?.getString("tab")
+        ALBUM_ROUTE, ARTIST_ROUTE, MB_ARTIST_ROUTE, HISTORY_ROUTE, STATS_ROUTE, SETTINGS_ROUTE, YTM_LOGIN_ROUTE -> entry?.arguments?.getString("tab")
         else -> route
     }
     val selected = Tab.entries.firstOrNull { it.route == from } ?: if (route == PLAYLIST_ROUTE) Tab.Library else Tab.Home
@@ -213,6 +214,8 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String, signedIn
     LaunchedEffect(c) { c.downloadEvents.collect { snack = it } }
     // A track passed over because it did not play (the mock's `playerr` snack, the desktop's notice).
     LaunchedEffect(c) { PlaybackHost.notices.collect { snack = it } }
+    // M6f: YouTube Music stopped taking the session (the desktop's `sessionExpiredNotice`).
+    LaunchedEffect(c) { c.ytmAccount.notices.collect { snack = it } }
 
     CompositionLocalProvider(
         LocalAvatarInitial provides avatarInitial(email), LocalOpenPlayer provides openPlayer, LocalMenus provides openers,
@@ -258,7 +261,13 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String, signedIn
                 }
                 composable(STATS_ROUTE, listOf(navArgument("tab") { defaultValue = Tab.Home.route })) { StatsRoute(c, signedIn, onBack = { nav.popBackStack() }) }
                 composable(SETTINGS_ROUTE, listOf(navArgument("tab") { defaultValue = Tab.Home.route })) {
-                    SettingsRoute(c, email, signedIn, onBack = { nav.popBackStack() }, onHistory = openHistory, onExit = onExit, onSnack = { snack = it })
+                    SettingsRoute(
+                        c, email, signedIn, onBack = { nav.popBackStack() }, onHistory = openHistory, onExit = onExit, onSnack = { snack = it },
+                        onYtmLogin = { nav.navigate("ytmlogin?tab=${selected.route}") },
+                    )
+                }
+                composable(YTM_LOGIN_ROUTE, listOf(navArgument("tab") { defaultValue = Tab.Home.route })) {
+                    YtmLoginRoute(c, onBack = { nav.popBackStack() }, onDone = { msg -> nav.popBackStack(); snack = msg }, onSnack = { snack = it })
                 }
                 composable(PLAYLIST_ROUTE) { e ->
                     PlaylistRoute(c, e.arguments?.getString("id").orEmpty(), onBack = { nav.popBackStack() }, onSnack = { snack = it })
@@ -911,8 +920,10 @@ private fun StatsRoute(c: AppContainer, signedIn: Boolean, onBack: () -> Unit) {
 @Composable
 private fun SettingsRoute(
     c: AppContainer, email: String, signedIn: Boolean, onBack: () -> Unit, onHistory: () -> Unit, onExit: () -> Unit, onSnack: (String) -> Unit,
+    onYtmLogin: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
+    val ytmSession by c.ytmAccount.session.collectAsState()
     val prefs by c.prefs.collectAsState()
     val mixBusy by c.mixBusy.collectAsState()
     val historyVersion by c.historyVersion.collectAsState()
@@ -936,13 +947,15 @@ private fun SettingsRoute(
             ) to "sanatçı 30 gün, şarkı 1 gün · ${com.muratkirazkaya.meiro.ui.components.sizeText(c.mbCacheUsage())}"
         }
     }
-    val ui = remember(prefs, mixBusy, historyVersion, libsVersion, sizes, tick, explore, ytdlp, ytdlpBusy, email, signedIn) {
+    val ui = remember(prefs, mixBusy, historyVersion, libsVersion, sizes, tick, explore, ytdlp, ytdlpBusy, email, signedIn, ytmSession) {
+        val (ytmSub, ytmButton) = AccountMapping.ytmLine(ytmSession)
         val mix = HomeMapping.dailyMix(c.libraries.list(), c.engine.settings.dailyMixId)
         val history = c.engine.history()
         com.muratkirazkaya.meiro.ui.screens.SettingsUi(
             accountSub = AccountMapping.settingsLine(c, email, signedIn),
             accountButton = if (signedIn) "Çıkış" else "Giriş",
             server = AppContainer.displayServer(c.engine.settings.syncUrl),
+            ytmSub = ytmSub, ytmButton = ytmButton,
             theme = prefs.theme, coverColor = prefs.coverColor, recommend = prefs.suggestions, explore = explore,
             dailyMix = AccountMapping.dailyMixLine(
                 mix?.items?.maxOfOrNull { it.updatedAt }, c.engine.settings.dailyMixDate, mixBusy, prefs.suggestions, java.time.Instant.now(), java.time.ZoneId.systemDefault(),
@@ -962,6 +975,12 @@ private fun SettingsRoute(
             onBack = onBack,
             onAccount = onExit,
             onServer = { if (signedIn) onSnack("Sunucuyu değiştirmek için önce çıkış yap") else onExit() },
+            // M6f: signed out the row and "Giriş" open the sign-in page; signed in "Çıkış" signs out at once (desktop `signOut`).
+            onYtm = {
+                if (ytmSession == null) onYtmLogin()
+                else scope.launch { kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { c.ytmAccount.signOut() }; onSnack("YouTube Music oturumu kapatıldı") }
+            },
+            onYtmRow = if (ytmSession == null) onYtmLogin else null,
             onTheme = { t -> c.updatePrefs { it.copy(theme = t) } },
             onCoverColor = { c.updatePrefs { it.copy(coverColor = !it.coverColor) } },
             onRecommend = {
@@ -997,4 +1016,78 @@ private fun SettingsRoute(
             },
         ),
     )
+}
+
+/**
+ * M6f, "YouTube Music girişi": Google's sign-in page in a WebView whose cookies and storage are wiped before it opens and
+ * again as soon as the session is read or the page is left (the desktop's throwaway browser profile). Once the page has
+ * a SAPISID cookie for music.youtube.com for 3 s (`waitSignIn`), its `Cookie:` header is read, the WebView's cookies and
+ * storage are wiped, YouTube Music is asked whom it signs in as, and a session it takes is kept in the encrypted store;
+ * [onDone] goes back to Ayarlar with the snack. A session it does not take leaves a snack and a fresh page.
+ */
+@android.annotation.SuppressLint("SetJavaScriptEnabled") // Google's sign-in page needs JavaScript.
+@Composable
+private fun YtmLoginRoute(c: AppContainer, onBack: () -> Unit, onDone: (String) -> Unit, onSnack: (String) -> Unit) {
+    val attempt = remember { c.ytmAccount.beginSignIn() }
+    var host by remember { mutableStateOf(com.muratkirazkaya.meiro.youtube.YtmSignIn.host(com.muratkirazkaya.meiro.youtube.YtmSignIn.SIGN_IN_URL)) }
+    // A new page (and a new wipe) after a sign-in YouTube Music did not take.
+    var generation by remember { mutableStateOf(0) }
+    var ready by remember { mutableStateOf(false) }
+    androidx.compose.runtime.DisposableEffect(Unit) {
+        onDispose { c.ytmAccount.dismissSignIn(attempt); wipeWebData {} }
+    }
+    LaunchedEffect(generation) {
+        ready = false
+        kotlinx.coroutines.suspendCancellableCoroutine<Unit> { k -> wipeWebData { if (k.isActive) k.resumeWith(Result.success(Unit)) } }
+        ready = true
+        val header = com.muratkirazkaya.meiro.youtube.YtmSignIn.waitForSession(
+            read = { android.webkit.CookieManager.getInstance().getCookie(com.muratkirazkaya.meiro.youtube.YtmSignIn.COOKIE_URL) },
+            now = { android.os.SystemClock.elapsedRealtime() }, sleep = { delay(it) },
+        )
+        android.util.Log.i(AppContainer.YTM_TAG, "ytm: the sign-in page is signed in; reading the session and wiping the page")
+        ready = false
+        wipeWebData {}
+        try {
+            val s = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { c.ytmAccount.completeSignIn(header, attempt) }
+            onDone(AccountMapping.ytmSignedIn(s))
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            android.util.Log.i(AppContainer.YTM_TAG, "ytm: sign-in not taken (${e.javaClass.simpleName})")
+            onSnack(
+                "YouTube Music girişi olmadı: " +
+                    if (e is com.muratkirazkaya.meiro.youtube.YtmSessionGone) "oturum tanınmadı." else "YouTube Music'e ulaşılamadı.",
+            )
+            generation++
+        }
+    }
+    com.muratkirazkaya.meiro.ui.screens.YtmLoginScreen(host, onBack) {
+        if (ready) androidx.compose.runtime.key(generation) {
+            androidx.compose.ui.viewinterop.AndroidView(
+                factory = { ctx ->
+                    android.webkit.WebView(ctx).apply {
+                        settings.javaScriptEnabled = true
+                        settings.domStorageEnabled = true
+                        android.webkit.CookieManager.getInstance().setAcceptCookie(true)
+                        android.webkit.CookieManager.getInstance().setAcceptThirdPartyCookies(this, true)
+                        webViewClient = object : android.webkit.WebViewClient() {
+                            override fun onPageStarted(view: android.webkit.WebView?, url: String?, favicon: android.graphics.Bitmap?) {
+                                com.muratkirazkaya.meiro.youtube.YtmSignIn.host(url).takeIf { it.isNotEmpty() }?.let { host = it }
+                            }
+                        }
+                        loadUrl(com.muratkirazkaya.meiro.youtube.YtmSignIn.SIGN_IN_URL)
+                    }
+                },
+                onRelease = { it.stopLoading(); it.destroy() },
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+    }
+}
+
+/** Wipes every cookie and all web storage of the app's WebViews (the phone's WebView is used for nothing else). */
+private fun wipeWebData(done: () -> Unit) {
+    android.webkit.WebStorage.getInstance().deleteAllData()
+    val cm = android.webkit.CookieManager.getInstance()
+    cm.removeAllCookies { cm.flush(); done() }
 }

@@ -101,6 +101,8 @@ class SettingsActions(
     val onAccount: () -> Unit = {},
     val onServer: () -> Unit = {},
     val onYtm: () -> Unit = {},
+    /** M6f: a tap anywhere on the YouTube Music row (signed out it opens the sign-in page, as the mock's row does); null: none. */
+    val onYtmRow: (() -> Unit)? = null,
     val onLastfm: () -> Unit = {},
     val onTheme: (ThemeChoice) -> Unit = {},
     val onWallpaper: () -> Unit = {},
@@ -143,7 +145,7 @@ fun SettingsScreen(ui: SettingsUi, actions: SettingsActions = SettingsActions(),
             item(key = "account") { SettingRow("account", MeiroIcons.Person, "Meiro hesabı", ui.accountSub) { TextButton("account.btn", ui.accountButton, actions.onAccount) } }
             item(key = "server") { SettingRow("server", MeiroIcons.Sync, "Sunucu", ui.server) { TextButton("server.btn", "Değiştir", actions.onServer) } }
             item(key = "ytm") {
-                SettingRow("ytm", null, "YouTube Music", ui.ytmSub, lead = { LogoBox { Image(MeiroLogos.Ytm, null, Modifier.size(14.dp).inv("ytm.icon")) } }, tag = "isteğe bağlı") {
+                SettingRow("ytm", null, "YouTube Music", ui.ytmSub, lead = { LogoBox { Image(MeiroLogos.Ytm, null, Modifier.size(14.dp).inv("ytm.icon")) } }, tag = "isteğe bağlı", onClick = actions.onYtmRow) {
                     TextButton("ytm.btn", ui.ytmButton, actions.onYtm)
                 }
             }
@@ -227,11 +229,13 @@ private fun LogoBox(content: @Composable () -> Unit) {
 @Composable
 private fun SettingRow(
     p: String, icon: ImageVector?, title: String, sub: String?, lead: (@Composable () -> Unit)? = null, tag: String? = null,
+    onClick: (() -> Unit)? = null,
     trailing: @Composable RowScope.() -> Unit,
 ) {
     val c = Meiro.colors
     Row(
-        Modifier.fillMaxWidth().heightIn(min = 64.dp).padding(horizontal = 16.dp, vertical = 10.dp),
+        Modifier.fillMaxWidth().then(if (onClick != null) Modifier.clickableNoIndication(onClick) else Modifier)
+            .heightIn(min = 64.dp).padding(horizontal = 16.dp, vertical = 10.dp),
         Arrangement.spacedBy(14.dp), Alignment.CenterVertically,
     ) {
         when {

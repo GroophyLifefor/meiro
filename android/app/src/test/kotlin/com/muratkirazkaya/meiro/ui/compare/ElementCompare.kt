@@ -18,8 +18,11 @@ class ElementSummary(
     val theme: String, val inventoryTotal: Int, val system: Int, val spacers: Int, val matched: Int,
     val missing: Int, val extra: Int, val maxBboxDelta: Double, val worstKey: String, val failures: MutableList<String>,
     val toleranceKeys: List<String>,
+    /** Elements of a third-party page inside a page frame (KeyEntry.web), not the app's to draw. */
+    val web: Int = 0,
 ) {
-    fun line() = "elements $theme: $matched matched of ${inventoryTotal - system - spacers} mock elements ($system system-UI and $spacers empty spacer blocks excluded), " +
+    fun line() = "elements $theme: $matched matched of ${inventoryTotal - system - spacers - web} mock elements ($system system-UI and $spacers empty spacer blocks excluded" +
+        (if (web > 0) ", $web elements of the third-party page inside the page frame excluded" else "") + "), " +
         "$missing missing, $extra extra, max bbox delta %.2fpx (%s), ${failures.size} mismatches; ${toleranceKeys.size} elements with a documented wider tolerance (renderer text width): $toleranceKeys".format(maxBboxDelta, worstKey)
 }
 
@@ -40,6 +43,7 @@ object ElementCompare {
         var matched = 0; var missing = 0; var maxDelta = 0.0; var worst = "-"
         val systemCount = keys.entries.count { it.system }
         val spacerCount = keys.entries.count { it.spacer }
+        val webCount = keys.entries.count { it.web }
 
         // Inventory entries the key map does not know (rule 2 if visible).
         val knownPaths = keys.entries.map { it.path }.toSet()
@@ -49,7 +53,7 @@ object ElementCompare {
 
         for (ke in keys.entries) {
             val e = invByPath[ke.path] ?: run { fails += "key map refers to unknown inventory path ${ke.path}"; continue }
-            if (ke.system || ke.spacer || e.offscreen || e.occluded) continue
+            if (ke.system || ke.spacer || ke.web || e.offscreen || e.occluded) continue
             val key = ke.key!!
             val list = byKey[key]
             if (list == null) { missing++; fails += "MISSING $key: no node tagged for ${e.kind} ${e.icon ?: e.text ?: ""} at ${e.x},${e.y} ${e.w}x${e.h}"; continue }
@@ -111,7 +115,7 @@ object ElementCompare {
         val kindByKey = keys.entries.mapNotNull { ke -> ke.key?.let { k -> invByPath[ke.path]?.let { k to it.kind } } }.toMap()
         var containmentChecked = 0
         containmentChecked = structural(byKey, root, keys, kindByKey, fails, stress = false)
-        return ElementSummary(theme, inv.size, systemCount, spacerCount, matched, missing, extra, maxDelta, worst, fails, keys.tolerance.keys.toList())
+        return ElementSummary(theme, inv.size, systemCount, spacerCount, matched, missing, extra, maxDelta, worst, fails, keys.tolerance.keys.toList(), webCount)
     }
 
     /** The structural rules alone, for a render that has no mock counterpart (long names, narrow widths, large fonts). */

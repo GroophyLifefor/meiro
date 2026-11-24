@@ -510,6 +510,31 @@ class AppContainer(private val context: Context) {
     }
 
     /**
+     * M6f: the optional YouTube Music account (`account.go`). The cookie lives in its own EncryptedSharedPreferences
+     * file (`meiro-ytm-session`, AES-256 keys in the Keystore) and is never logged. Search, browse, lyrics, related and
+     * up next stay on the anonymous client, as on the desktop; only the account's own requests carry the session.
+     */
+    val ytmAccount: com.muratkirazkaya.meiro.youtube.YtmAccount by lazy {
+        com.muratkirazkaya.meiro.youtube.YtmAccount(
+            EncryptedTokenStore(context, "meiro-ytm-session"),
+            newClient = { auth -> com.muratkirazkaya.meiro.youtube.YtmClient(auth = auth) },
+            log = { Log.i(YTM_TAG, it) },
+        )
+    }
+    private val ytmScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    /** `restoreAccount` at start, then `watchSession`: a check every minute while the process lives and a session is in use. */
+    fun startYtmAccount() {
+        ytmScope.launch {
+            try { ytmAccount.restore() } catch (e: kotlinx.coroutines.CancellationException) { throw e } catch (e: Exception) { Log.i(YTM_TAG, "ytm: restore failed (${e.javaClass.simpleName})") }
+            while (true) {
+                delay(com.muratkirazkaya.meiro.youtube.YtmAccount.CHECK_EVERY_MS)
+                try { ytmAccount.check() } catch (e: kotlinx.coroutines.CancellationException) { throw e } catch (e: Exception) { Log.i(YTM_TAG, "ytm: check failed (${e.javaClass.simpleName})") }
+            }
+        }
+    }
+
+    /**
      * The desktop's `recommendTick`, on its schedule: the first check 45 s after the app starts, then every hour while
      * the process lives. The phone uses the ranking only for the Daily mix (its queue takes no suggestions yet), so a
      * check does nothing once today's mix is made, here or on another device.
@@ -698,6 +723,7 @@ class AppContainer(private val context: Context) {
         const val MIX_TAG = "MeiroMix"
         const val LINK_TAG = "MeiroLink"
         const val DL_TAG = "MeiroDownload"
+        const val YTM_TAG = "MeiroYtm"
 
         /** The server field takes a bare host as the mock shows it; anything with a scheme is kept. */
         fun normalizeServer(s: String): String {

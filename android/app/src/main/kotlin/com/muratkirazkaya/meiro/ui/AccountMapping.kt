@@ -13,6 +13,24 @@ import java.util.Locale
 object AccountMapping {
     private val TR = Locale.forLanguageTag("tr")
 
+    /** M6f: the settings' YouTube Music line signed out (the mock's). */
+    const val YTM_SIGNED_OUT = "Giriş yok. Arama ve çalma hesapsız çalışır."
+
+    /**
+     * M6f: the settings' YouTube Music line and button (`youtubeAccountCard`): "Girişli · <account name> · kanal: kişisel"
+     * and "Çıkış" signed in ("kişisel" is the account's own channel, the only one the phone acts as), the mock's
+     * signed-out line and "Giriş" otherwise. An account with no name says "Girişli · kanal: kişisel".
+     */
+    fun ytmLine(session: com.muratkirazkaya.meiro.youtube.YtmSession?): Pair<String, String> {
+        if (session == null) return YTM_SIGNED_OUT to "Giriş"
+        val channel = if (session.channel.isEmpty()) "kişisel" else session.channel
+        return (listOf("Girişli") + listOfNotNull(session.name.trim().ifEmpty { null }) + "kanal: $channel").joinToString(" · ") to "Çıkış"
+    }
+
+    /** M6f: the snack once the sign-in is kept: "YouTube Music'e girildi · <name>" (the mock's `ytm-in`). */
+    fun ytmSignedIn(session: com.muratkirazkaya.meiro.youtube.YtmSession): String =
+        "YouTube Music'e girildi" + session.name.trim().let { if (it.isEmpty()) "" else " · $it" }
+
     /** The address as the mock shows it: the part before "@", then "@…" ("murat@…"). */
     fun shortEmail(email: String): String = if ('@' in email) email.substringBefore('@') + "@…" else email
 

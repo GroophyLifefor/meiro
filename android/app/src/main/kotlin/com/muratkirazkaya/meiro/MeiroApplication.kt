@@ -17,7 +17,7 @@ class MeiroApplication : Application(), coil.ImageLoaderFactory {
     override fun onCreate() {
         super.onCreate()
         com.muratkirazkaya.meiro.downloads.Online.start(this)
-        ready = CoroutineScope(Dispatchers.IO).async { AppContainer(this@MeiroApplication).also { it.startRecommendations(); it.startAutoLink(); it.startDownloadService() } }
+        ready = CoroutineScope(Dispatchers.IO).async { AppContainer(this@MeiroApplication).also { it.startRecommendations(); it.startAutoLink(); it.startDownloadService(); it.startYtmAccount() } }
     }
 
     suspend fun container(): AppContainer = ready.await()

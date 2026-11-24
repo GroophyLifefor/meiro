@@ -6,6 +6,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import okhttp3.Call
 import okhttp3.Callback
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -30,7 +31,7 @@ data class SearchResult(
 
 data class SearchSuggestions(val queries: List<String>, val items: List<MusicItem>)
 
-class YtmException(message: String) : IOException(message)
+open class YtmException(message: String) : IOException(message)
 
 /** Reading search responses (`youtube/search.go`); pure, so the recorded fixtures test it on the JVM. */
 object YtmSearch {
@@ -138,12 +139,17 @@ object YtmLyricsParse {
 }
 
 /**
- * The anonymous YouTube Music InnerTube client (`youtube/client.go`, PORTING.md 2.1): WEB_REMIX, `hl=en`, `gl=US`, no
- * cookie. The visitor id is learned from the first response and sent from then on, kept only in memory.
+ * The YouTube Music InnerTube client (`youtube/client.go`, PORTING.md 2.1): WEB_REMIX, `hl=en`, `gl=US`. Without [auth]
+ * it is anonymous: the visitor id is learned from the first response and sent from then on, kept only in memory. With
+ * [auth] (M6f, the signed-in session) every request carries the session (`setIdentity`): `Cookie`, a fresh
+ * `SAPISIDHASH` for the request's origin, `X-Goog-Authuser`, `X-Goog-PageId` for a brand channel and
+ * `context.user`; no visitor id; the cookie only ever goes to an https youtube.com URL.
  */
 class YtmClient(
     private val http: OkHttpClient = defaultHttp(),
     private val base: String = "https://music.youtube.com/youtubei/v1/",
+    private val auth: YtmCookieAuth? = null,
+    private val epochSeconds: () -> Long = { System.currentTimeMillis() / 1000 },
 ) {
     @Volatile private var visitorData: String = ""
 
@@ -230,6 +236,15 @@ class YtmClient(
     }
 
     /**
+     * `GetAccountDetails` (`accounts.go:35`): whom the session signs in as. Needs [auth]. YouTube answers a session it
+     * has retired with signed-out content and HTTP 200, so the caller checks for a name or a channel id.
+     */
+    suspend fun accountDetails(): YtmAccountDetails {
+        if (auth == null) throw YtmException("youtube: GetAccountDetails requires cookie authentication")
+        return YtmAccountParse.details(execute("account/account_menu", JSONObject()))
+    }
+
+    /**
      * One InnerTube request as the web app, or with [android] as the YouTube Music Android app (`executeAs`
      * `androidMusicClient`: ANDROID_MUSIC 7.21.50, client id 21, its own user agent, not audio-only), the only client
      * given timed lyrics.
@@ -238,22 +253,39 @@ class YtmClient(
         val name = if (android) ANDROID_NAME else CLIENT_NAME
         val version = if (android) ANDROID_VERSION else CLIENT_VERSION
         val client = JSONObject().put("hl", "en").put("gl", "US").put("clientName", name).put("clientVersion", version)
-        val vd = visitorData
+        val a = auth
+        // The visitor id is an anonymous visit's; a signed-in session is its own.
+        val vd = if (a == null) visitorData else ""
         if (vd.isNotEmpty()) client.put("visitorData", vd)
-        payload.put("context", JSONObject().put("client", client))
+        val context = JSONObject().put("client", client)
+        if (a != null) context.put("user", JSONObject().apply { if (a.onBehalfOfUser.isNotEmpty()) put("onBehalfOfUser", a.onBehalfOfUser) })
+        payload.put("context", context)
         if (!android) payload.put("isAudioOnly", true)
-        val req = Request.Builder().url(base + endpoint)
+        val url = (base + endpoint).toHttpUrl()
+        val req = Request.Builder().url(url)
             .header("Content-Type", "application/json").header("Accept", "application/json")
             .header("User-Agent", if (android) ANDROID_UA else CHROME_UA).header("Origin", "https://music.youtube.com").header("Referer", "https://music.youtube.com/")
             .header("X-YouTube-Client-Name", if (android) "21" else "67").header("X-YouTube-Client-Version", version)
             .apply { if (vd.isNotEmpty()) header("X-Goog-Visitor-Id", vd) }
+            .apply {
+                if (a != null) {
+                    // `client.go:317`: the session never goes anywhere but YouTube over https.
+                    if (!YtmCookieAuth.isYouTubeUrl(url)) throw YtmException("youtube: refusing to send the session to a non-YouTube URL")
+                    header("Cookie", a.cookie)
+                    header("Authorization", a.authorization(epochSeconds(), "${url.scheme}://${url.host}"))
+                    header("X-Goog-Authuser", a.accountIndex.toString())
+                    if (a.onBehalfOfUser.isNotEmpty()) header("X-Goog-PageId", a.onBehalfOfUser)
+                }
+            }
             .post(payload.toString().toRequestBody("application/json".toMediaType()))
             .build()
         val body = http.newCall(req).await().use { r ->
+            // The error names the endpoint and the status only: never the URL's query, a header or the cookie.
+            if (r.code == 401 || r.code == 403) throw YtmUnauthorized("youtube: $endpoint answered HTTP ${r.code}: the session was rejected")
             if (!r.isSuccessful) throw YtmException("youtube: $endpoint answered HTTP ${r.code}")
             r.body?.string().orEmpty()
         }
-        if (visitorData.isEmpty()) {
+        if (a == null && visitorData.isEmpty()) {
             val root = OrderedJson.parse(body) as? JObj
             root?.obj("responseContext")?.str("visitorData")?.takeIf { it.isNotEmpty() }?.let { visitorData = it }
         }
