@@ -28,6 +28,16 @@ class MeiroColors(
     val onErrorContainer: Color,
     val scrim: Color,
     val page: Color,
+    val wBg: Color,
+    val wText: Color,
+    val wSub: Color,
+    val wStrip: Color,
+    val wUrl: Color,
+    val wLock: Color,
+    val wLine: Color,
+    val wLink: Color,
+    val wBtn: Color,
+    val wBtnText: Color,
 )
 
 val LightMeiroColors = MeiroColors(
@@ -53,6 +63,16 @@ val LightMeiroColors = MeiroColors(
     onErrorContainer = Color(0xFF410002),
     scrim = Color(0x59000000),
     page = Color(0xFFE9E8EF),
+    wBg = Color(0xFFFFFFFF),
+    wText = Color(0xFF202124),
+    wSub = Color(0xFF5F6368),
+    wStrip = Color(0xFFF1F3F4),
+    wUrl = Color(0xFF5F6368),
+    wLock = Color(0xFF188038),
+    wLine = Color(0xFFDADCE0),
+    wLink = Color(0xFF1A73E8),
+    wBtn = Color(0xFF1A73E8),
+    wBtnText = Color(0xFFFFFFFF),
 )
 
 val DarkMeiroColors = MeiroColors(
@@ -78,6 +98,16 @@ val DarkMeiroColors = MeiroColors(
     onErrorContainer = Color(0xFFFFDAD6),
     scrim = Color(0x8C000000),
     page = Color(0xFF0C0C0F),
+    wBg = Color(0xFF0E0E0E),
+    wText = Color(0xFFE8EAED),
+    wSub = Color(0xFF9AA0A6),
+    wStrip = Color(0xFF303134),
+    wUrl = Color(0xFFBDC1C6),
+    wLock = Color(0xFF81C995),
+    wLine = Color(0xFF5F6368),
+    wLink = Color(0xFF8AB4F8),
+    wBtn = Color(0xFFA8C7FA),
+    wBtnText = Color(0xFF062E6F),
 )
 
 /** Body defaults from the mock: 14px / 20px, letter-spacing 0.2px. */

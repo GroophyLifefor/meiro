@@ -214,8 +214,11 @@ M6f deviations and open choices, for the owner:
   emulator the email field was half hidden (`flow-03`). Mock first: `.fillcol` lets the frame take the height between
   the two notes; the app's frame is `weight(1f)`. Element comparison light+dark 31/31, 0 mismatches; on the emulator the
   whole first page (email field, Next) fits (`flow-21-ytmlogin-fullscreen-dark.png`).
-- **Dark theme**: Google's page follows the app's dark theme (dark page, `flow-13`); the mock draws it white in both
-  themes. Forcing it light needs `androidx.webkit` (a new dependency, not added).
+- **Dark theme** (decided 2026-11-24, Murat: "Stay dark"): Google's page follows the theme (dark page, `flow-13`). Mock
+  first: the frame's colours are the `--w-*` tokens (dark values sampled from Google's dark page on the emulator,
+  light ones the old white page), generated into `MeiroColors` (`tools/gen-theme.mjs`); the app's frame uses them.
+  Element comparison light+dark 31/31, 0 mismatches, backgrounds included. Not checked: the app forced to "Koyu" while
+  the phone is light (the WebView may then show Google's light page in the dark frame).
 - **Google may refuse the embedded page**: Google is known to block sign-in in embedded WebViews ("This browser or app may
   not be secure"); the page loaded, but whether Google lets the sign-in finish was not tried. The User-Agent is the
   WebView's own; it was not changed to look like a browser (that would work around Google's check; your call).
