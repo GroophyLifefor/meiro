@@ -528,7 +528,9 @@ const LYR = ['Gece çöktü, şehir sustu', 'Farlar yanıyor yol boyunca', 'Bir 
 const st = {
   tab:'home', stack:[], now:'s10', playing:true, preparing:false, online:true, ytm:true, signedIn:true,
   npOpen:false, npTab:null, src:{}, liked:{s10:true}, qTab:'upnext', libTab:'meiro', search:'', searchDone:false,
-  filter:'Hepsi', histFilter:'Hepsi', mbSel:0, statsPeriod:'month', sheetKind:null, err:''
+  filter:'Hepsi', histFilter:'Hepsi', mbSel:0, statsPeriod:'month', sheetKind:null, err:'',
+  // The playlist page's search (plSearch, plQ) and order (plSort: a PLSORT index, plDesc: reversed); the colour (seed, wall).
+  plSearch:false, plQ:'', plSort:0, plDesc:false, seed:'#7c5cff', wall:false
 };
 const activeSrc = id => st.src[id] && DB[id].srcs.includes(st.src[id]) ? st.src[id] : DB[id].srcs[0];
 
@@ -648,15 +650,29 @@ V.downloads = () => {
     songRow('s5', {sub:'Milky Chance · 9,1 MB'}) + songRow('s9', {sub:'Nilüfer · 6,8 MB'}) + songRow('s4', {sub:'Kavinsky · 8,2 MB'}) +
     '<div class="note">İndirilenler önbellek temizliğinden etkilenmez. Çevrimdışıyken çalma önce buradan başlar.</div><div style="height:24px"></div>';
 };
+// The playlist page's orders (the desktop's playlist sort: original, title, artist, duration). A tap on the chosen one
+// again reverses it; "Ekleme sırası" reversed reads the list backwards. The page opens in the list's own order.
+const PLSORT = [['Ekleme sırası','add'],['Ad','lines'],['Sanatçı','person'],['Süre','history']];
+const secs = d => d.split(':').reduce((a, x) => a * 60 + +x, 0);
+function plRows(ids){
+  const q = (st.plQ || '').toLocaleLowerCase('tr');
+  let r = ids.filter(id => !q || (DB[id].t + ' ' + DB[id].a).toLocaleLowerCase('tr').includes(q));
+  const key = [null, id => DB[id].t, id => DB[id].a, id => secs(DB[id].d)][st.plSort];
+  if (key) r = r.slice().sort((x, y) => { const a = key(x), b = key(y); return typeof a === 'number' ? a - b : a.localeCompare(b, 'tr', {sensitivity:'base'}) || DB[x].t.localeCompare(DB[y].t, 'tr'); });
+  return st.plDesc ? r.reverse() : r;
+}
 V.playlist = () => {
-  return topbar('', {back:true, noAvatar:true, right:'<button class="ibtn">' + I('search') + '</button><button class="ibtn" data-act="listmenu">' + I('more') + '</button>'}) +
+  // Share and "Sırayı düzenle" do nothing on a Meiro list: it has no public link, and the desktop has no way to move a
+  // list's songs (both wait for Murat). On a YouTube Music list the app's share opens Android's share sheet with its link.
+  return topbar('', {back:true, noAvatar:true, right:'<button class="ibtn" data-act="psearch" aria-label="Listede ara">' + I('search') + '</button><button class="ibtn" data-act="listmenu">' + I('more') + '</button>'}) +
+    (st.plSearch ? '<label class="searchbar">' + I('search') + '<input id="pq" placeholder="Listede ara" value="' + (st.plQ || '') + '"><button class="ibtn" data-act="psearch" aria-label="Kapat">' + I('close') + '</button></label>' : '') +
     '<div class="hero"><div class="big" style="' + cov(280, 80) + '"></div><h2>Gece Sürüşü</h2>' +
     '<div class="kind"><span class="src">' + LOGO.meiro + '</span>Meiro listesi · 28 parça · 1 sa 52 dk</div>' +
     '<div class="hero actions"><button class="ibtn" aria-label="İndir">' + I('download') + '</button><button class="ibtn" aria-label="Karıştır">' + I('shuffle') + '</button>' +
     '<button class="play" data-act="play" data-id="s4" aria-label="Çal">' + I('play') + '</button><button class="ibtn" aria-label="Sırayı düzenle">' + I('edit') + '</button><button class="ibtn" aria-label="Paylaş">' + I('share') + '</button></div></div>' +
-    '<div class="tools"><span class="sub grow">YT 18 · SC 10 · eşleşen 24</span><button class="btn text">' + I('sort') + 'Ekleme sırası</button></div>' +
-    songRow('s4') + songRow('s5') + songRow('s6') + songRow('s7') + songRow('s8') + songRow('s10') + songRow('s12') +
-    '<div class="h-sec"><h2>Benzer şarkılar</h2></div>' + songRow('s1') + songRow('s11') + '<div style="height:24px"></div>';
+    '<div class="tools"><span class="sub grow">YT 18 · SC 10 · eşleşen 24</span><button class="btn text" data-act="sheet" data-k="plsort">' + I('sort') + PLSORT[st.plSort][0] + (st.plDesc ? ' · azalan' : '') + '</button></div>' +
+    plRows(['s4','s5','s6','s7','s8','s10','s12']).map(id => songRow(id)).join('') +
+    (st.plQ ? '' : '<div class="h-sec"><h2>Benzer şarkılar</h2></div>' + songRow('s1') + songRow('s11')) + '<div style="height:24px"></div>';
 };
 V.mix = () => {
   return topbar('', {back:true, noAvatar:true, right:'<button class="ibtn">' + I('more') + '</button>'}) +
@@ -670,7 +686,7 @@ V.album = () => {
   return topbar('', {back:true, noAvatar:true, right:'<button class="ibtn" data-act="listmenu">' + I('more') + '</button>'}) +
     '<div class="hero"><div class="big" style="' + cov(36, 80) + '"></div><h2>Random Access Memories</h2>' +
     '<div class="kind"><span class="src">' + LOGO.ytm + '</span>Albüm · Daft Punk · 2013 · 13 parça</div>' +
-    '<div class="hero actions"><button class="ibtn">' + I('download') + '</button><button class="ibtn">' + I('shuffle') + '</button><button class="play" data-act="play" data-id="s1">' + I('play') + '</button><button class="ibtn" data-act="dup" title="Meiro listesi olarak kopyala">' + I('copy') + '</button><button class="ibtn">' + I('share') + '</button></div></div>' +
+    '<div class="hero actions"><button class="ibtn">' + I('download') + '</button><button class="ibtn">' + I('shuffle') + '</button><button class="play" data-act="play" data-id="s1">' + I('play') + '</button><button class="ibtn" data-act="dup" title="Meiro listesi olarak kopyala">' + I('copy') + '</button><button class="ibtn" data-act="share" aria-label="Paylaş">' + I('share') + '</button></div></div>' +
     songRow('s2', {num:5, sub:'Daft Punk · 5:37'}) + songRow('s1', {num:8, sub:'Daft Punk · 4:08'}) +
     '<div class="note">Albüm şarkılarında kapak yoksa albüm kapağı kullanılır. Kapaklar telefonda önbelleğe alınır.</div><div style="height:24px"></div>';
 };
@@ -740,8 +756,10 @@ V.settings = () => {
     '<div class="srow"><span class="src" style="width:24px;justify-content:center"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#d51007"/></svg></span><div class="k"><b>Last.fm</b><span>Bağlı değil</span></div><button class="btn text">Bağla</button></div>' +
     '<div class="sgroup">Görünüm</div>' +
     '<div class="srow">' + I('palette') + '<div class="k"><b>Tema</b></div></div><div class="seg"><button class="on">Sistem</button><button>Açık</button><button>Koyu</button></div>' +
-    '<div class="srow"><span style="width:24px"></span><div class="k"><b>Duvar kağıdından renk</b><span>Android 12+ için. Kapalıyken aşağıdaki renk.</span></div>' + sw(false) + '</div>' +
-    '<div class="swatches" style="padding-left:54px"><i style="background:#7c5cff" class="on"></i><i style="background:#3b82f6"></i><i style="background:#10b981"></i><i style="background:#f59e0b"></i><i style="background:#ef4444"></i></div>' +
+    '<div class="srow"><span style="width:24px"></span><div class="k"><b>Duvar kağıdından renk</b><span>Android 12+ için. Kapalıyken aşağıdaki renk.</span></div>' + '<span class="sw' + (st.wall ? ' on' : '') + '" data-act="wall"></span>' + '</div>' +
+    // A swatch is the colour every role grows from (the desktop's seed); choosing one turns the wallpaper's off. The mock
+    // only moves the ring: the app redraws itself in the colour (the first one is the mock's own palette).
+    '<div class="swatches" style="padding-left:54px">' + ['#7c5cff','#3b82f6','#10b981','#f59e0b','#ef4444'].map(c => '<i data-act="swatch" data-c="' + c + '" style="background:' + c + '"' + (!st.wall && st.seed === c ? ' class="on"' : '') + '></i>').join('') + '</div>' +
     '<div class="srow"><span style="width:24px"></span><div class="k"><b>Rengi kapaktan al</b><span>Oynatıcı çalan şarkının kapağına göre renklenir.</span></div>' + sw(true) + '</div>' +
     '<div class="sgroup">Çalma</div>' +
     '<div class="srow">' + I('volume') + '<div class="k"><b>Ses seviyesini dengele</b></div>' + sw(true) + '</div>' +
@@ -804,6 +822,8 @@ const SCREENS = [
   ['Sayfalar', [
     ['mix','Daily mix','Her şarkının altında neden önerildiği.'],
     ['playlist','Meiro listesi','Satırda kaynak, eşleşme rozeti, ⋮ menüsü; altta benzer şarkılar.'],
+    ['plsearch','Listede ara','Listenin araması açık, "ka" yazılı: adı ya da sanatçısı tutan şarkılar.'],
+    ['plsort','Listeyi sırala','Ekleme sırası, ad, sanatçı, süre; seçiliye yeniden dokunmak ters çevirir.'],
     ['album','Albüm','"Meiro listesi olarak kopyala" düğmesi.'],
     ['artist','Sanatçı','MusicBrainz bilgisi, benzer sanatçılar.'],
     ['history','Dinleme geçmişi','Gün gün çalmalar; cihaz ve ne kadar dinlendiği. Geçilenler soluk.'],
@@ -889,6 +909,9 @@ function openSheet(kind, id){
 }
 function closeSheet(){ $('sheet').classList.remove('open'); $('scrim').classList.remove('open'); st.sheetKind = null; }
 const SHEET = {};
+SHEET.plsort = () => '<div class="shead"><h3>Sırala</h3></div><div class="div"></div>' +
+  PLSORT.map((f, i) => '<button class="mi" data-act="plsort" data-f="' + i + '">' + I(f[1]) + f[0] + (st.plSort === i ? '<span class="r">' + (st.plDesc ? 'azalan' : 'artan') + I('check') + '</span>' : '') + '</button>').join('') +
+  '<div class="note">Seçili sıraya yeniden dokununca ters çevrilir.</div>';
 SHEET.histmenu = () => '<div class="shead"><h3>Dinleme geçmişi</h3></div><div class="div"></div>' +
   (st.histPaused ? '<button class="mi" data-act="hpause">' + I('play') + 'Kaydı sürdür</button>' : '<button class="mi" data-act="hpause">' + I('pause') + 'Kaydı duraklat</button>') +
   '<button class="mi" data-act="go-close" data-to="stats">' + I('stats') + 'Özet\'i aç</button>' +
@@ -982,7 +1005,7 @@ function goTo(key){
   current = key;
   reset();
   const tabs = ['home','search','library','downloads'];
-  st.searchDone = false; st.stack = []; st.histFilter = 'Hepsi'; st.libTab = 'meiro';
+  st.searchDone = false; st.stack = []; st.histFilter = 'Hepsi'; st.libTab = 'meiro'; st.plSearch = false; st.plQ = ''; st.plSort = 0; st.plDesc = false;
   if (key !== 'offline') st.online = $('tNet').classList.contains('on');
   if (tabs.includes(key)) { st.tab = key; }
   // The Library's YouTube Music tab (shown only with a YouTube Music sign-in).
@@ -997,6 +1020,9 @@ function goTo(key){
   else if (key === 'lock') { render(); renderLock(); $('lock').classList.add('open'); return; }
   // Nothing after it in the queue (or 3 tracks in a row failed): the track stays, with its reason.
   else if (key === 'playerr') { st.tab = 'library'; st.stack = ['empty']; st.now = 's12'; st.err = DB.s12.bad; st.playing = false; }
+  // The playlist page with its search open and "ka" typed, and its order sheet.
+  else if (key === 'plsearch') { st.stack = ['playlist']; st.plSearch = true; st.plQ = 'ka'; }
+  else if (key === 'plsort') { st.stack = ['playlist']; render(); openSheet('plsort'); return; }
   else if (['menu','link','addto','account','dellist'].includes(key)) { st.tab = 'library'; st.stack = ['playlist']; render(); openSheet(key, key === 'account' ? null : 's7'); return; }
   else {
     // A state screen belongs to the tab it stands in for.
@@ -1024,7 +1050,14 @@ document.addEventListener('click', e => {
     case 'ytm-out': st.ytm = false; render(); snack('YouTube Music oturumu kapatıldı'); break;
     case 'go': if (el.dataset.to === 'history') { st.histFilter = 'Hepsi'; st.histSearch = false; st.histQ = ''; } st.stack.push(el.dataset.to); current = el.dataset.to; st.npOpen = false; render(); $('content').scrollTop = 0; break;
     case 'go-close': closeSheet(); st.npOpen = false; st.stack.push(el.dataset.to); render(); $('content').scrollTop = 0; break;
-    case 'open-playlist': st.stack.push('playlist'); render(); $('content').scrollTop = 0; break;
+    case 'open-playlist': st.plSearch = false; st.plQ = ''; st.plSort = 0; st.plDesc = false; st.stack.push('playlist'); render(); $('content').scrollTop = 0; break;
+    case 'psearch': st.plSearch = !st.plSearch; st.plQ = ''; render(); if (st.plSearch) $('pq').focus(); break;
+    case 'plsort': { const f = +el.dataset.f; if (st.plSort === f) st.plDesc = !st.plDesc; else st.plSort = f; closeSheet(); render(); break; }
+    // Android's share sheet with the album's YouTube Music link (the desktop's "Copy link"); nothing to show here.
+    case 'share': break;
+    // The app takes its colours from the wallpaper (Android 12+) or from the chosen swatch.
+    case 'wall': st.wall = !st.wall; render(); break;
+    case 'swatch': st.seed = el.dataset.c; st.wall = false; render(); break;
     case 'open-mix': st.stack.push('mix'); render(); $('content').scrollTop = 0; break;
     case 'open-album': st.stack.push('album'); render(); $('content').scrollTop = 0; break;
     case 'open-artist': st.stack.push('artist'); render(); $('content').scrollTop = 0; break;
@@ -1075,6 +1108,7 @@ document.addEventListener('click', e => {
 document.addEventListener('keydown', e => {
   if (e.target.id === 'q' && e.key === 'Enter') { st.search = e.target.value; st.searchDone = !!st.search; render(); }
   if (e.target.id === 'hq' && e.key === 'Enter') { st.histQ = e.target.value; render(); }
+  if (e.target.id === 'pq' && e.key === 'Enter') { st.plQ = e.target.value; render(); $('pq').focus(); }
 });
 $('scrim').addEventListener('click', closeSheet);
 
