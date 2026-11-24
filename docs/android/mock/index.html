@@ -727,7 +727,8 @@ V.settings = () => {
     '<div class="sgroup">Hesaplar</div>' +
     '<div class="srow">' + I('person') + '<div class="k"><b>Meiro hesabı</b><span>murat@… · eşitleme güncel, 2 dk önce</span></div><button class="btn text">Çıkış</button></div>' +
     '<div class="srow">' + I('sync') + '<div class="k"><b>Sunucu</b><span>meiro.muratkirazkaya.com</span></div><button class="btn text">Değiştir</button></div>' +
-    '<div class="srow" data-act="go" data-to="ytmlogin"><span class="src" style="width:24px;justify-content:center">' + LOGO.ytm + '</span><div class="k"><b>YouTube Music <span class="tag yt">isteğe bağlı</span></b><span>' + (st.ytm ? 'Girişli · Murat K. · kanal: kişisel' : 'Giriş yok. Arama ve çalma hesapsız çalışır.') + '</span></div><button class="btn text">' + (st.ytm ? 'Çıkış' : 'Giriş') + '</button></div>' +
+    // Signed out the row opens the sign-in page; signed in its "Çıkış" signs out (no question, as on the desktop).
+    '<div class="srow"' + (st.ytm ? '' : ' data-act="go" data-to="ytmlogin"') + '><span class="src" style="width:24px;justify-content:center">' + LOGO.ytm + '</span><div class="k"><b>YouTube Music <span class="tag yt">isteğe bağlı</span></b><span>' + (st.ytm ? 'Girişli · Murat K. · kanal: kişisel' : 'Giriş yok. Arama ve çalma hesapsız çalışır.') + '</span></div><button class="btn text"' + (st.ytm ? ' data-act="ytm-out"' : '') + '>' + (st.ytm ? 'Çıkış' : 'Giriş') + '</button></div>' +
     '<div class="srow"><span class="src" style="width:24px;justify-content:center"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#d51007"/></svg></span><div class="k"><b>Last.fm</b><span>Bağlı değil</span></div><button class="btn text">Bağla</button></div>' +
     '<div class="sgroup">Görünüm</div>' +
     '<div class="srow">' + I('palette') + '<div class="k"><b>Tema</b></div></div><div class="seg"><button class="on">Sistem</button><button>Açık</button><button>Koyu</button></div>' +
@@ -759,7 +760,7 @@ V.settings = () => {
 V.ytmlogin = () => {
   return topbar('YouTube Music girişi', {back:true, noAvatar:true}) +
     '<div class="note" style="margin:0 16px 12px">Giriş Google\'ın kendi sayfasında olur. Meiro şifreni görmez, yalnızca oturum çerezini bu telefonda saklar.</div>' +
-    '<div class="webview"><div class="url">' + I('lock') + 'accounts.google.com</div><div class="body"><div class="g">Oturum açın</div><div style="color:#5f6368">YouTube Music\'e devam etmek için</div><div class="gi">E-posta veya telefon</div><div style="color:#1a73e8;font-size:13px">E-postanızı mı unuttunuz?</div><div class="gb"><span>İleri</span></div></div></div>' +
+    '<div class="webview"><div class="url">' + I('lock') + 'accounts.google.com</div><div class="body"><div class="g">Oturum açın</div><div style="color:#5f6368">YouTube Music\'e devam etmek için</div><div class="gi">E-posta veya telefon</div><div style="color:#1a73e8;font-size:13px">E-postanızı mı unuttunuz?</div><div class="gb"><span data-act="ytm-in">İleri</span></div></div></div>' +
     '<div class="note" style="margin-top:14px">Giriş isteğe bağlıdır: kütüphane, beğeniler ve YouTube Music listeleri için gerekir.</div>';
 };
 V.signin = () => {
@@ -1004,6 +1005,12 @@ document.addEventListener('click', e => {
   switch (a){
     case 'tab': st.tab = el.dataset.t; st.stack = []; st.searchDone = false; current = el.dataset.t; render(); $('content').scrollTop = 0; break;
     case 'back': st.stack.pop(); render(); break;
+    // The app finishes the sign-in by itself once Google's page has set the session cookie (SAPISID): it reads the
+    // cookie, clears the page's cookies and storage, asks YouTube Music who it is and goes back to Ayarlar. Here a tap
+    // on the page's button stands in for that. If YouTube Music does not take the session the page stays and the
+    // snack says why ("YouTube Music girişi olmadı: …").
+    case 'ytm-in': st.ytm = true; st.stack.pop(); render(); snack('YouTube Music\'e girildi · Murat K.'); break;
+    case 'ytm-out': st.ytm = false; render(); snack('YouTube Music oturumu kapatıldı'); break;
     case 'go': if (el.dataset.to === 'history') { st.histFilter = 'Hepsi'; st.histSearch = false; st.histQ = ''; } st.stack.push(el.dataset.to); current = el.dataset.to; st.npOpen = false; render(); $('content').scrollTop = 0; break;
     case 'go-close': closeSheet(); st.npOpen = false; st.stack.push(el.dataset.to); render(); $('content').scrollTop = 0; break;
     case 'open-playlist': st.stack.push('playlist'); render(); $('content').scrollTop = 0; break;
