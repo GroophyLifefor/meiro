@@ -210,9 +210,10 @@ wipes, settings wiring, expiry snack), `SettingsScreen` (row tap), `AccountMappi
 `mock-keys/ytmlogin.json` (made by `build/check/m6f/gen_m6f_keys.py`), `check.sh`.
 
 M6f deviations and open choices, for the owner:
-- **The page area is small**: the mock's frame is 296dp tall (40 of it the strip), so Google's page gets 256dp; on the
-  emulator the email field is half hidden under Google's own "scroll down" button (`flow-03`). Letting the frame fill the
-  screen down to the note needs a mock change (asked, not done).
+- **The page area was small** (fixed 2026-11-24, Murat: "Yes, full screen"): the mock's frame was 296dp tall, so on the
+  emulator the email field was half hidden (`flow-03`). Mock first: `.fillcol` lets the frame take the height between
+  the two notes; the app's frame is `weight(1f)`. Element comparison light+dark 31/31, 0 mismatches; on the emulator the
+  whole first page (email field, Next) fits (`flow-21-ytmlogin-fullscreen-dark.png`).
 - **Dark theme**: Google's page follows the app's dark theme (dark page, `flow-13`); the mock draws it white in both
   themes. Forcing it light needs `androidx.webkit` (a new dependency, not added).
 - **Google may refuse the embedded page**: Google is known to block sign-in in embedded WebViews ("This browser or app may

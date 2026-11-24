@@ -38,7 +38,7 @@ private val UrlLock = Color(0xFF188038)
 /**
  * Mock screen `ytmlogin` ("YouTube Music girişi", M6f): the note, the frame of Google's own sign-in page (`.webview`:
  * 12dp margins, 16dp corners, a 1dp outline-variant border, white) with its address strip (lock and the page's host)
- * and the page itself, 296dp tall as the mock draws it, then the note under it. [page] is the page: a WebView in the
+ * and the page itself, taking the height left between the two notes (`.fillcol`), then the note under it. [page] is the page: a WebView in the
  * app, nothing in the render tests (Google's page is not the app's; `mock-keys/ytmlogin.json` marks its elements web).
  */
 @Composable
@@ -49,7 +49,7 @@ fun YtmLoginScreen(host: String, onBack: () -> Unit, page: @Composable ColumnSco
         TopBar("YouTube Music girişi", onBack = onBack, avatar = false)
         MText(YTM_LOGIN_NOTE, MeiroType.Note, c.onSurfaceVariant, "note", Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 12.dp))
         Column(
-            Modifier.padding(horizontal = 12.dp).fillMaxWidth().height(296.dp).inv("web", bg = WebWhite, radiusDp = 16f)
+            Modifier.padding(horizontal = 12.dp).fillMaxWidth().weight(1f).inv("web", bg = WebWhite, radiusDp = 16f)
                 .clip(shape).background(WebWhite).border(1.dp, c.outlineVariant, shape).padding(1.dp),
         ) {
             Row(
@@ -61,6 +61,6 @@ fun YtmLoginScreen(host: String, onBack: () -> Unit, page: @Composable ColumnSco
             }
             Box(Modifier.fillMaxWidth().weight(1f)) { Column(Modifier.fillMaxSize()) { page() } }
         }
-        MText(YTM_LOGIN_FOOT, MeiroType.Note, c.onSurfaceVariant, "foot", Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 14.dp))
+        MText(YTM_LOGIN_FOOT, MeiroType.Note, c.onSurfaceVariant, "foot", Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 16.dp))
     }
 }
