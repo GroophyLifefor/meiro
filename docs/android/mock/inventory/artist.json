@@ -10,7 +10,7 @@
   "dark"
  ],
  "note": "bbox is relative to the phone screen (#box), CSS px, rounded to 0.5. offscreen=true: below/right of a scroll container viewport (natural position at scrollTop 0). color/backgroundColor/borderColor/fill carry per-theme values.",
- "elementCount": 75,
+ "elementCount": 78,
  "elements": [
   {
    "path": "#box>div.app:nth-child(1)>div.statusbar:nth-child(1)>span#clock:nth-child(1)",
@@ -1522,7 +1522,164 @@
    ]
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.h-sec:nth-child(6)>h2:nth-child(1)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row.na:nth-child(6)>div.cv:nth-child(1)",
+   "tag": "div",
+   "classes": [
+    "cv"
+   ],
+   "kind": "leaf",
+   "role": null,
+   "ariaLabel": null,
+   "text": null,
+   "icon": null,
+   "bbox": {
+    "x": 16,
+    "y": 684,
+    "w": 48,
+    "h": 48
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "20px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "8px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row.na:nth-child(6)>div.t:nth-child(2)>b:nth-child(1)",
+   "tag": "b",
+   "classes": [],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Around the World",
+   "icon": null,
+   "bbox": {
+    "x": 76,
+    "y": 688,
+    "w": 290,
+    "h": 22
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "16px",
+    "fontWeight": "400",
+    "lineHeight": "22px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(28, 27, 31)",
+     "dark": "rgb(226, 226, 231)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.row.na:nth-child(6)>div.t:nth-child(2)>span.meta:nth-child(2)>span.txt:nth-child(1)",
+   "tag": "span",
+   "classes": [
+    "txt"
+   ],
+   "kind": "text",
+   "role": null,
+   "ariaLabel": null,
+   "text": "Daft Punk · 7:09 · çalma bağlantısı yok",
+   "icon": null,
+   "bbox": {
+    "x": 76,
+    "y": 710,
+    "w": 228,
+    "h": 18
+   },
+   "offscreen": true,
+   "clipped": false,
+   "style": {
+    "fontFamily": "\"Google Sans\", system-ui, -apple-system, Roboto, sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "400",
+    "lineHeight": "18px",
+    "letterSpacing": "0.2px",
+    "borderRadius": "0px",
+    "opacity": "1",
+    "borderWidth": "0px",
+    "textAlign": "start",
+    "textTransform": "none",
+    "color": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "backgroundColor": {
+     "light": "rgba(0, 0, 0, 0)",
+     "dark": "rgba(0, 0, 0, 0)"
+    },
+    "borderColor": {
+     "light": "rgb(71, 69, 79)",
+     "dark": "rgb(199, 197, 209)"
+    },
+    "fill": {
+     "light": "rgb(0, 0, 0)",
+     "dark": "rgb(0, 0, 0)"
+    }
+   },
+   "occluded": false,
+   "visibleIn": [
+    "light",
+    "dark"
+   ]
+  },
+  {
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.h-sec:nth-child(7)>h2:nth-child(1)",
    "tag": "h2",
    "classes": [],
    "kind": "text",
@@ -1532,7 +1689,7 @@
    "icon": null,
    "bbox": {
     "x": 16,
-    "y": 696,
+    "y": 760,
     "w": 86.5,
     "h": 26
    },
@@ -1573,7 +1730,7 @@
    ]
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(7)>div.tile:nth-child(1)>div.art:nth-child(1)>span.badge:nth-child(1)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(8)>div.tile:nth-child(1)>div.art:nth-child(1)>span.badge:nth-child(1)",
    "tag": "span",
    "classes": [
     "badge"
@@ -1585,7 +1742,7 @@
    "icon": null,
    "bbox": {
     "x": 24,
-    "y": 842,
+    "y": 906,
     "w": 22,
     "h": 22
    },
@@ -1626,7 +1783,7 @@
    ]
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(7)>div.tile:nth-child(1)>div.art:nth-child(1)>span.badge:nth-child(1)>svg:nth-child(1)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(8)>div.tile:nth-child(1)>div.art:nth-child(1)>span.badge:nth-child(1)>svg:nth-child(1)",
    "tag": "svg",
    "classes": [],
    "kind": "icon",
@@ -1636,7 +1793,7 @@
    "icon": "logo:ytm",
    "bbox": {
     "x": 28,
-    "y": 846,
+    "y": 910,
     "w": 14,
     "h": 14
    },
@@ -1677,7 +1834,7 @@
    ]
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(7)>div.tile:nth-child(1)>b:nth-child(2)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(8)>div.tile:nth-child(1)>b:nth-child(2)",
    "tag": "b",
    "classes": [],
    "kind": "text",
@@ -1687,7 +1844,7 @@
    "icon": null,
    "bbox": {
     "x": 16,
-    "y": 880,
+    "y": 944,
     "w": 140,
     "h": 36
    },
@@ -1728,7 +1885,7 @@
    ]
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(7)>div.tile:nth-child(1)>span:nth-child(3)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(8)>div.tile:nth-child(1)>span:nth-child(3)",
    "tag": "span",
    "classes": [],
    "kind": "text",
@@ -1738,7 +1895,7 @@
    "icon": null,
    "bbox": {
     "x": 16,
-    "y": 916,
+    "y": 980,
     "w": 140,
     "h": 16
    },
@@ -1779,7 +1936,7 @@
    ]
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(7)>div.tile:nth-child(2)>div.art:nth-child(1)>span.badge:nth-child(1)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(8)>div.tile:nth-child(2)>div.art:nth-child(1)>span.badge:nth-child(1)",
    "tag": "span",
    "classes": [
     "badge"
@@ -1791,7 +1948,7 @@
    "icon": null,
    "bbox": {
     "x": 176,
-    "y": 842,
+    "y": 906,
     "w": 22,
     "h": 22
    },
@@ -1832,7 +1989,7 @@
    ]
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(7)>div.tile:nth-child(2)>div.art:nth-child(1)>span.badge:nth-child(1)>svg:nth-child(1)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(8)>div.tile:nth-child(2)>div.art:nth-child(1)>span.badge:nth-child(1)>svg:nth-child(1)",
    "tag": "svg",
    "classes": [],
    "kind": "icon",
@@ -1842,7 +1999,7 @@
    "icon": "logo:ytm",
    "bbox": {
     "x": 180,
-    "y": 846,
+    "y": 910,
     "w": 14,
     "h": 14
    },
@@ -1883,7 +2040,7 @@
    ]
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(7)>div.tile:nth-child(2)>b:nth-child(2)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(8)>div.tile:nth-child(2)>b:nth-child(2)",
    "tag": "b",
    "classes": [],
    "kind": "text",
@@ -1893,7 +2050,7 @@
    "icon": null,
    "bbox": {
     "x": 168,
-    "y": 880,
+    "y": 944,
     "w": 140,
     "h": 18
    },
@@ -1934,7 +2091,7 @@
    ]
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(7)>div.tile:nth-child(2)>span:nth-child(3)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(8)>div.tile:nth-child(2)>span:nth-child(3)",
    "tag": "span",
    "classes": [],
    "kind": "text",
@@ -1944,7 +2101,7 @@
    "icon": null,
    "bbox": {
     "x": 168,
-    "y": 898,
+    "y": 962,
     "w": 140,
     "h": 16
    },
@@ -1985,7 +2142,7 @@
    ]
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(7)>div.tile:nth-child(3)>div.art:nth-child(1)>span.badge:nth-child(1)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(8)>div.tile:nth-child(3)>div.art:nth-child(1)>span.badge:nth-child(1)",
    "tag": "span",
    "classes": [
     "badge"
@@ -1997,7 +2154,7 @@
    "icon": null,
    "bbox": {
     "x": 328,
-    "y": 842,
+    "y": 906,
     "w": 22,
     "h": 22
    },
@@ -2038,7 +2195,7 @@
    ]
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(7)>div.tile:nth-child(3)>div.art:nth-child(1)>span.badge:nth-child(1)>svg:nth-child(1)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(8)>div.tile:nth-child(3)>div.art:nth-child(1)>span.badge:nth-child(1)>svg:nth-child(1)",
    "tag": "svg",
    "classes": [],
    "kind": "icon",
@@ -2048,7 +2205,7 @@
    "icon": "logo:ytm",
    "bbox": {
     "x": 332,
-    "y": 846,
+    "y": 910,
     "w": 14,
     "h": 14
    },
@@ -2089,7 +2246,7 @@
    ]
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(7)>div.tile:nth-child(3)>b:nth-child(2)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(8)>div.tile:nth-child(3)>b:nth-child(2)",
    "tag": "b",
    "classes": [],
    "kind": "text",
@@ -2099,7 +2256,7 @@
    "icon": null,
    "bbox": {
     "x": 320,
-    "y": 880,
+    "y": 944,
     "w": 140,
     "h": 18
    },
@@ -2140,7 +2297,7 @@
    ]
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(7)>div.tile:nth-child(3)>span:nth-child(3)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(8)>div.tile:nth-child(3)>span:nth-child(3)",
    "tag": "span",
    "classes": [],
    "kind": "text",
@@ -2150,7 +2307,7 @@
    "icon": null,
    "bbox": {
     "x": 320,
-    "y": 898,
+    "y": 962,
     "w": 140,
     "h": 16
    },
@@ -2191,7 +2348,7 @@
    ]
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.h-sec:nth-child(8)>h2:nth-child(1)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.h-sec:nth-child(9)>h2:nth-child(1)",
    "tag": "h2",
    "classes": [],
    "kind": "text",
@@ -2201,7 +2358,7 @@
    "icon": null,
    "bbox": {
     "x": 16,
-    "y": 956,
+    "y": 1020,
     "w": 164.5,
     "h": 26
    },
@@ -2242,7 +2399,7 @@
    ]
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(9)>div.tile:nth-child(1)>div.art:nth-child(1)>span.badge:nth-child(1)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(10)>div.tile:nth-child(1)>div.art:nth-child(1)>span.badge:nth-child(1)",
    "tag": "span",
    "classes": [
     "badge"
@@ -2254,7 +2411,7 @@
    "icon": null,
    "bbox": {
     "x": 24,
-    "y": 1102,
+    "y": 1166,
     "w": 22,
     "h": 22
    },
@@ -2295,7 +2452,7 @@
    ]
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(9)>div.tile:nth-child(1)>div.art:nth-child(1)>span.badge:nth-child(1)>svg:nth-child(1)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(10)>div.tile:nth-child(1)>div.art:nth-child(1)>span.badge:nth-child(1)>svg:nth-child(1)",
    "tag": "svg",
    "classes": [],
    "kind": "icon",
@@ -2305,7 +2462,7 @@
    "icon": "logo:meiro",
    "bbox": {
     "x": 28,
-    "y": 1106,
+    "y": 1170,
     "w": 14,
     "h": 14
    },
@@ -2346,7 +2503,7 @@
    ]
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(9)>div.tile:nth-child(1)>b:nth-child(2)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(10)>div.tile:nth-child(1)>b:nth-child(2)",
    "tag": "b",
    "classes": [],
    "kind": "text",
@@ -2356,7 +2513,7 @@
    "icon": null,
    "bbox": {
     "x": 16,
-    "y": 1140,
+    "y": 1204,
     "w": 140,
     "h": 18
    },
@@ -2397,7 +2554,7 @@
    ]
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(9)>div.tile:nth-child(1)>span:nth-child(3)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(10)>div.tile:nth-child(1)>span:nth-child(3)",
    "tag": "span",
    "classes": [],
    "kind": "text",
@@ -2407,7 +2564,7 @@
    "icon": null,
    "bbox": {
     "x": 16,
-    "y": 1158,
+    "y": 1222,
     "w": 140,
     "h": 16
    },
@@ -2448,7 +2605,7 @@
    ]
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(9)>div.tile:nth-child(2)>div.art:nth-child(1)>span.badge:nth-child(1)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(10)>div.tile:nth-child(2)>div.art:nth-child(1)>span.badge:nth-child(1)",
    "tag": "span",
    "classes": [
     "badge"
@@ -2460,7 +2617,7 @@
    "icon": null,
    "bbox": {
     "x": 176,
-    "y": 1102,
+    "y": 1166,
     "w": 22,
     "h": 22
    },
@@ -2501,7 +2658,7 @@
    ]
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(9)>div.tile:nth-child(2)>div.art:nth-child(1)>span.badge:nth-child(1)>svg:nth-child(1)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(10)>div.tile:nth-child(2)>div.art:nth-child(1)>span.badge:nth-child(1)>svg:nth-child(1)",
    "tag": "svg",
    "classes": [],
    "kind": "icon",
@@ -2511,7 +2668,7 @@
    "icon": "logo:meiro",
    "bbox": {
     "x": 180,
-    "y": 1106,
+    "y": 1170,
     "w": 14,
     "h": 14
    },
@@ -2552,7 +2709,7 @@
    ]
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(9)>div.tile:nth-child(2)>b:nth-child(2)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(10)>div.tile:nth-child(2)>b:nth-child(2)",
    "tag": "b",
    "classes": [],
    "kind": "text",
@@ -2562,7 +2719,7 @@
    "icon": null,
    "bbox": {
     "x": 168,
-    "y": 1140,
+    "y": 1204,
     "w": 140,
     "h": 18
    },
@@ -2603,7 +2760,7 @@
    ]
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(9)>div.tile:nth-child(2)>span:nth-child(3)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div.shelf:nth-child(10)>div.tile:nth-child(2)>span:nth-child(3)",
    "tag": "span",
    "classes": [],
    "kind": "text",
@@ -2613,7 +2770,7 @@
    "icon": null,
    "bbox": {
     "x": 168,
-    "y": 1158,
+    "y": 1222,
     "w": 140,
     "h": 16
    },
@@ -2654,7 +2811,7 @@
    ]
   },
   {
-   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div:nth-child(10)",
+   "path": "#box>div.app:nth-child(1)>div#content.content:nth-child(2)>div:nth-child(11)",
    "tag": "div",
    "classes": [],
    "kind": "leaf",
@@ -2664,7 +2821,7 @@
    "icon": null,
    "bbox": {
     "x": 0,
-    "y": 1178,
+    "y": 1242,
     "w": 370,
     "h": 24
    },

@@ -245,6 +245,9 @@
 
   .row .t .why.muted{color:var(--on-surface-variant); font-variant-numeric:tabular-nums}
   .hrow.skip .row{opacity:.55}
+  /* An artist page's recording with no link to play it from (MusicBrainz names no YouTube or SoundCloud page): faded as
+     a skipped play is, without source logos or the menu (artists.go: greyed, "No link"). */
+  .row.na{opacity:.55}
   /* istatistik */
   .stat{display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:0 16px}
   .stat > div{background:var(--surface-container-low); border-radius:18px; padding:14px}
@@ -536,6 +539,9 @@ function songRow(id, o){
 function tile(name, by, src, h, act){
   return '<div class="tile" data-act="' + (act || 'open-playlist') + '"><div class="art" style="' + cov(h, 80) + '"><span class="badge">' + LOGO[src] + '</span></div><b>' + name + '</b><span>' + by + '</span></div>';
 }
+function naRow(name, by, h){
+  return '<div class="row na"><div class="cv" style="' + cov(h) + '"></div><div class="t"><b>' + name + '</b><span class="meta"><span class="txt">' + by + '</span></span></div></div>';
+}
 function listRow(name, by, src, h, act){
   return '<div class="row" data-act="' + (act || 'open-playlist') + '"><div class="cv" style="' + cov(h, 80) + '"></div><div class="t"><b>' + name + '</b><span class="meta"><span class="src">' + LOGO[src] + '</span><span class="txt">' + by + '</span></span></div><button class="ibtn" data-act="listmenu">' + I('more') + '</button></div>';
 }
@@ -656,7 +662,7 @@ V.artist = () => {
     '<div class="hero"><div class="big round" style="' + cov(36, 80) + '"></div><h2>Daft Punk</h2>' +
     '<div class="kind">MusicBrainz ile eşleşti · Fransa · 1993–2021</div>' +
     '<div class="hero actions"><button class="btn tonal">' + I('shuffle') + 'Karıştır</button><button class="play" data-act="play" data-id="s1">' + I('play') + '</button><button class="btn outlined">' + I('link') + 'Bağı değiştir</button></div></div>' +
-    '<div class="h-sec"><h2>Popüler</h2></div>' + songRow('s1') + songRow('s2') +
+    '<div class="h-sec"><h2>Popüler</h2></div>' + songRow('s1') + songRow('s2') + naRow('Around the World', 'Daft Punk · 7:09 · çalma bağlantısı yok', 160) +
     '<div class="h-sec"><h2>Albümler</h2></div><div class="shelf">' + tile('Random Access Memories', '2013', 'ytm', 36, 'open-album') + tile('Discovery', '2001', 'ytm', 210, 'open-album') + tile('Homework', '1997', 'ytm', 120, 'open-album') + '</div>' +
     '<div class="h-sec"><h2>Benzer sanatçılar</h2></div><div class="shelf">' + tile('Justice', 'ListenBrainz', 'meiro', 0, 'open-artist') + tile('Kavinsky', 'ListenBrainz', 'meiro', 300, 'open-artist') + '</div><div style="height:24px"></div>';
 };
