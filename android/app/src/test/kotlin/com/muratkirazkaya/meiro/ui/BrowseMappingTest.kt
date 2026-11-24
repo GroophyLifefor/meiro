@@ -5,6 +5,7 @@ import com.muratkirazkaya.meiro.data.Source
 import com.muratkirazkaya.meiro.ui.components.LinkBadge
 import com.muratkirazkaya.meiro.ui.components.Provider
 import com.muratkirazkaya.meiro.youtube.BrowsePage
+import com.muratkirazkaya.meiro.youtube.Renderers
 import com.muratkirazkaya.meiro.youtube.YtmBrowse
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -57,6 +58,22 @@ class BrowseMappingTest {
         assertEquals(LinkState.UNKNOWN, items[4].state)
         assertEquals(338_000L, items[4].durationMs)
         assertEquals(d.cover, items[4].albumThumbnail)
+    }
+
+    @Test fun albumTracksWithoutArtistTakeTheAlbumArtist() {
+        // Some albums (Discovery, Homework) list tracks that name no artist; the server refuses a track without one.
+        val p = page("ytm_browse_album_ram.json")
+        val bare = p.copy(
+            items = p.items.map { it.copy(artist = "", artists = "") },
+            sections = p.sections.map { s -> Renderers.Section(s.title, s.kind, s.items.map { it.copy(artist = "", artists = "") }, s.continuationToken) },
+        )
+        val d = BrowseMapping.album(albumId, bare)
+        assertTrue(d.queue.isNotEmpty())
+        assertTrue(d.queue.all { it.artist == "Daft Punk" })
+        assertTrue(d.listItems().all { it.artist == "Daft Punk" })
+        assertEquals("Daft Punk · 5:38", d.ui.rows[4].subtitle)
+        // A guest credit stays the track's own.
+        assertEquals("Daft Punk, Julian Casablancas", BrowseMapping.album(albumId, p).queue[4].artist)
     }
 
     @Test fun albumKindWithoutStraplineOrYear() {
