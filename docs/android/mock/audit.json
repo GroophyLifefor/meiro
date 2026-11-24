@@ -11,9 +11,9 @@
  "screens": 32,
  "note": "Mock self-audit. Heuristic-based; false positives are possible, each finding names the heuristic. The mock is NOT modified.",
  "checkedTotals": {
-  "elements": 9278,
+  "elements": 9280,
   "overflowHidden": 6976,
-  "centringContainers": 3806,
+  "centringContainers": 3808,
   "centringIntended": 3104,
   "pseudo": 30,
   "flexRowsCentre": 1216,

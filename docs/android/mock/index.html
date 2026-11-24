@@ -400,6 +400,10 @@
   .webview .gi{border:1px solid #dadce0; border-radius:4px; padding:14px 12px; color:#5f6368; margin:18px 0 10px}
   .webview .gb{display:flex; justify-content:flex-end; margin-top:18px}
   .webview .gb span{background:#1a73e8; color:#fff; border-radius:4px; padding:9px 22px; font-weight:500}
+  /* the sign-in page takes the height left between the two notes, so Google's page fits */
+  .fillcol{display:flex; flex-direction:column; min-height:100%}
+  .fillcol .webview{flex:1; display:flex; flex-direction:column}
+  .fillcol .webview .body{flex:1}
 </style>
 </head>
 <body>
@@ -758,10 +762,10 @@ V.settings = () => {
     '<div style="height:24px"></div>';
 };
 V.ytmlogin = () => {
-  return topbar('YouTube Music girişi', {back:true, noAvatar:true}) +
+  return '<div class="fillcol">' + topbar('YouTube Music girişi', {back:true, noAvatar:true}) +
     '<div class="note" style="margin:0 16px 12px">Giriş Google\'ın kendi sayfasında olur. Meiro şifreni görmez, yalnızca oturum çerezini bu telefonda saklar.</div>' +
     '<div class="webview"><div class="url">' + I('lock') + 'accounts.google.com</div><div class="body"><div class="g">Oturum açın</div><div style="color:#5f6368">YouTube Music\'e devam etmek için</div><div class="gi">E-posta veya telefon</div><div style="color:#1a73e8;font-size:13px">E-postanızı mı unuttunuz?</div><div class="gb"><span data-act="ytm-in">İleri</span></div></div></div>' +
-    '<div class="note" style="margin-top:14px">Giriş isteğe bağlıdır: kütüphane, beğeniler ve YouTube Music listeleri için gerekir.</div>';
+    '<div class="note" style="margin-top:14px;margin-bottom:16px">Giriş isteğe bağlıdır: kütüphane, beğeniler ve YouTube Music listeleri için gerekir.</div></div>';
 };
 V.signin = () => {
   return '<div class="welcome"><div class="logo">M</div><h1>Meiro\'ya hoş geldin</h1><p>Listelerin, indirilenlerin ve dinleme özetin Meiro hesabında. Masaüstüyle aynı hesap.</p>' +
