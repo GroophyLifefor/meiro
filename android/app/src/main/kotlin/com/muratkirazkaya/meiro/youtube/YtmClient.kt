@@ -296,6 +296,25 @@ class YtmClient(
     }
 
     /**
+     * M6h, `RateTrack` (`rating.go:27`): likes [videoId] (`like/like`) or takes the like back (`like/removelike`), the
+     * video as the target. Needs [auth]. A 200 that carries an "error" object throws (`writeFailure`).
+     */
+    suspend fun rateTrack(videoId: String, like: Boolean) {
+        if (auth == null) throw YtmException("youtube: RateTrack requires cookie authentication")
+        val id = videoId.trim()
+        require(id.isNotEmpty()) { "youtube: RateTrack needs a video" }
+        val endpoint = if (like) "like/like" else "like/removelike"
+        YtmRating.checkWrite(endpoint, execute(endpoint, JSONObject().put("target", JSONObject().put("videoId", id))))
+    }
+
+    /** M6h: whether the account likes [videoId], as the signed-in `next` for it says (`likeStatus` of its panel item). Needs [auth]. */
+    suspend fun likeStatus(videoId: String): LikeStatus {
+        if (auth == null) throw YtmException("youtube: a like status requires cookie authentication")
+        require(videoId.isNotBlank()) { "youtube: video ID is required" }
+        return YtmRating.statusIn(execute("next", JSONObject().put("videoId", videoId)), videoId)
+    }
+
+    /**
      * One InnerTube request as the web app, or with [android] as the YouTube Music Android app (`executeAs`
      * `androidMusicClient`: ANDROID_MUSIC 7.21.50, client id 21, its own user agent, not audio-only), the only client
      * given timed lyrics.

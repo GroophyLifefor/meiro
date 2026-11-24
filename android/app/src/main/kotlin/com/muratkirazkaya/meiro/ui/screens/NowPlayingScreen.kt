@@ -100,6 +100,8 @@ class NowPlayingActions(
     val onMore: () -> Unit = {},
     /** The MusicBrainz chip: the link sheet of the track playing. */
     val onLink: () -> Unit = {},
+    /** M6h: the heart, the YouTube Music like of the track playing (does nothing signed out). */
+    val onLike: () -> Unit = {},
 )
 
 private val White = Color.White
@@ -154,7 +156,7 @@ fun NowPlayingScreen(ui: NowPlayingUi, bars: SystemBars, actions: NowPlayingActi
                     Spacer(Modifier.height(6.dp))
                     LinkChip(ui.link, actions.onLink)
                 }
-                IconButton("np.likeBtn", "np.like.icon", if (ui.liked) MeiroIcons.Heartf else MeiroIcons.Heart, White)
+                IconButton("np.likeBtn", "np.like.icon", if (ui.liked) MeiroIcons.Heartf else MeiroIcons.Heart, White, actions.onLike)
             }
             Row(Modifier.padding(start = 24.dp, end = 24.dp, top = 12.dp), Arrangement.spacedBy(8.dp)) {
                 SourceButton("np.src.ytm", Provider.Ytm, "YouTube Music", ui.active == Provider.Ytm, ui.ytm) { actions.onSource(Provider.Ytm) }

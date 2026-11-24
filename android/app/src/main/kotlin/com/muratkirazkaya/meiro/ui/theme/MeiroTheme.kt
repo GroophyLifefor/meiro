@@ -27,9 +27,10 @@ object Meiro {
 
 /** Light or dark colour set; follows the system setting unless forced (tests force it). */
 @Composable
-fun MeiroTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
+fun MeiroTheme(darkTheme: Boolean = isSystemInDarkTheme(), colors: MeiroColors? = null, content: @Composable () -> Unit) {
     CompositionLocalProvider(
-        LocalMeiroColors provides if (darkTheme) DarkMeiroColors else LightMeiroColors,
+        // M6h: [colors] is the wallpaper's or a swatch's (SeedColors); null is the mock's own palette.
+        LocalMeiroColors provides (colors ?: if (darkTheme) DarkMeiroColors else LightMeiroColors),
         content = content,
     )
 }

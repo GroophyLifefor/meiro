@@ -62,12 +62,14 @@ class DetailActions(
     val onDownload: () -> Unit = {},
     /** Daily mix: the hero's settings button (the settings screen, where the recommendations are). */
     val onSettings: () -> Unit = {},
+    /** M6h, album: the hero's share button (Android's share sheet with the album's YouTube Music link). */
+    val onShare: () -> Unit = {},
 )
 
 /**
  * Mock screen `album`: top bar (back and ⋮), the hero (cover, name, YouTube Music logo and kind line; download,
- * shuffle, play, "Meiro listesi olarak kopyala", share), the tracks with their numbers, and the note. Download, share,
- * are inert (⋮ opens the list menu, a track's ⋮ the track menu, its link button the link sheet). [ui] null: the page is loading (only the top bar);
+ * shuffle, play, "Meiro listesi olarak kopyala", share), the tracks with their numbers, and the note. Every control works
+ * (share: Android's share sheet with the album's link, M6h; ⋮ opens the list menu, a track's ⋮ the track menu, its link button the link sheet). [ui] null: the page is loading (only the top bar);
  * [error] set: YouTube Music did not answer (the mock's `error` block with "Tekrar dene").
  */
 @Composable
@@ -94,7 +96,7 @@ fun AlbumScreen(
                     IconButton("hero.shuffleBtn", "hero.shuffle.icon", MeiroIcons.Shuffle, c.onSurfaceVariant, actions.onShuffle)
                     HeroPlayButton(actions.onPlay)
                     IconButton("hero.copyBtn", "hero.copy.icon", MeiroIcons.Copy, c.onSurfaceVariant, actions.onCopy)
-                    IconButton("hero.shareBtn", "hero.share.icon", MeiroIcons.Share, c.onSurfaceVariant)
+                    IconButton("hero.shareBtn", "hero.share.icon", MeiroIcons.Share, c.onSurfaceVariant, actions.onShare)
                 }
             }
             itemsIndexed(ui.rows, key = { i, r -> "$i/${r.key}" }) { i, r ->

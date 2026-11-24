@@ -63,6 +63,9 @@ data class AppPrefs(
     val explore: Int = 30,
     val wifiOnly: Boolean = true,
     val historyPaused: Boolean = false,
+    /** M6h: the swatch every colour grows from ("#rrggbb", the mock's first is its own palette), and "Duvar kağıdından renk". */
+    val seed: String = com.muratkirazkaya.meiro.ui.theme.SeedColors.DEFAULT,
+    val wallpaper: Boolean = false,
 )
 
 /** What the UI needs to know about the account, read from the engine. */
@@ -534,9 +537,31 @@ class AppContainer(private val context: Context) {
         )
     }
 
+    /** M6h: the hearts of the signed-in account (liking a track); signed out it holds nothing and writes nothing. */
+    val ytmLikes: com.muratkirazkaya.meiro.youtube.YtmLikes by lazy {
+        com.muratkirazkaya.meiro.youtube.YtmLikes(
+            ytmAccount.session, newClient = { auth -> com.muratkirazkaya.meiro.youtube.YtmClient(auth = auth) }, scope = ytmScope,
+            log = { Log.i(YTM_TAG, it) },
+        )
+    }
+
+    /**
+     * M6h: a YouTube Music playlist's page with all its tracks: with the session when signed in (the account's own and
+     * private lists, kept by [ytmFeed]), else anonymously (a public list from the search). The liked songs' tracks teach
+     * [ytmLikes] that they are liked.
+     */
+    suspend fun ytmPlaylist(id: String): BrowsePage {
+        val page = if (ytmAccount.session.value != null) ytmFeed.playlist(id) else ytm.playlist(id)
+        if (id.removePrefix("VL") == com.muratkirazkaya.meiro.youtube.YtmLibraryParse.LIKED_ID) {
+            ytmLikes.learnLiked(page.tracks().map { it.videoId })
+        }
+        return page
+    }
+
     /** `restoreAccount` at start, then `watchSession`: a check every minute while the process lives and a session is in use. */
     fun startYtmAccount() {
         ytmFeed.start()
+        ytmLikes.start()
         ytmScope.launch {
             try { ytmAccount.restore() } catch (e: kotlinx.coroutines.CancellationException) { throw e } catch (e: Exception) { Log.i(YTM_TAG, "ytm: restore failed (${e.javaClass.simpleName})") }
             while (true) {
@@ -628,6 +653,8 @@ class AppContainer(private val context: Context) {
         explore = settingsPrefs.getInt("explore", 30),
         wifiOnly = settingsPrefs.getBoolean("wifiOnly", true),
         historyPaused = settingsPrefs.getBoolean("historyPaused", false),
+        seed = settingsPrefs.getString("seed", null)?.takeIf { it in com.muratkirazkaya.meiro.ui.theme.SeedColors.SWATCHES } ?: com.muratkirazkaya.meiro.ui.theme.SeedColors.DEFAULT,
+        wallpaper = settingsPrefs.getBoolean("wallpaper", false),
     )
 
     /** Changes the settings and writes them at once. */
@@ -635,7 +662,8 @@ class AppContainer(private val context: Context) {
         val p = f(_prefs.value)
         _prefs.value = p
         settingsPrefs.edit().putInt("theme", p.theme.ordinal).putBoolean("coverColor", p.coverColor).putBoolean("suggestions", p.suggestions)
-            .putInt("explore", p.explore).putBoolean("wifiOnly", p.wifiOnly).putBoolean("historyPaused", p.historyPaused).apply()
+            .putInt("explore", p.explore).putBoolean("wifiOnly", p.wifiOnly).putBoolean("historyPaused", p.historyPaused)
+            .putString("seed", p.seed).putBoolean("wallpaper", p.wallpaper).apply()
         Log.i(TAG, "settings: $p")
     }
 

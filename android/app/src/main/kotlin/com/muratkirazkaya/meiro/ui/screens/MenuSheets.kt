@@ -54,6 +54,8 @@ data class TrackMenuUi(
     val downloaded: Boolean = false,
     val album: Boolean = false,
     val inList: Boolean = false,
+    /** M6h: the account likes the track on YouTube Music (the filled heart). */
+    val liked: Boolean = false,
 )
 
 class TrackMenuActions(
@@ -159,7 +161,7 @@ fun TrackMenuSheet(ui: TrackMenuUi, bars: SystemBars, actions: TrackMenuActions 
                 MText(ui.title, MeiroType.SheetHeadTitle, c.onSurface, "menu.head.title", Modifier.fillMaxWidth(), maxLines = 1)
                 MText(ui.artist, MeiroType.SheetHeadSub, c.onSurfaceVariant, "menu.head.artist")
             }
-            IconButton("menu.likeBtn", "menu.like.icon", MeiroIcons.Heart, c.onSurfaceVariant, actions.onLike)
+            IconButton("menu.likeBtn", "menu.like.icon", if (ui.liked) MeiroIcons.Heartf else MeiroIcons.Heart, c.onSurfaceVariant, actions.onLike)
         }
         SheetDivider("menu.div1")
         Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState())) {
@@ -302,5 +304,41 @@ fun ConfirmSheet(p: String, title: String, note: String, confirm: String, bars: 
                 Alignment.Center,
             ) { MText(confirm, MeiroType.ButtonLabel, c.onPrimary, "$p.delete.label", maxLines = 1) }
         }
+    }
+}
+
+/**
+ * M6h, the playlist page's order (`SHEET.plsort`): "Sırala", a line, "Ekleme sırası", "Ad", "Sanatçı", "Süre" (the
+ * chosen one with "artan"/"azalan" and a check on the right), and the note. A tap picks the order and closes the sheet.
+ */
+@Composable
+fun PlaylistSortSheet(sort: com.muratkirazkaya.meiro.ui.PlSort, bars: SystemBars, onDismiss: () -> Unit, onPick: (com.muratkirazkaya.meiro.ui.PlSortField) -> Unit) {
+    val c = Meiro.colors
+    MenuSheetFrame("plsort", bars, onDismiss, scrimKey = true) {
+        SheetTitleHead("plsort", "Sırala")
+        SheetDivider("plsort.div")
+        for (f in com.muratkirazkaya.meiro.ui.PlSortField.entries) {
+            val key = "plsort." + when (f) {
+                com.muratkirazkaya.meiro.ui.PlSortField.Original -> "added"
+                com.muratkirazkaya.meiro.ui.PlSortField.Title -> "name"
+                com.muratkirazkaya.meiro.ui.PlSortField.Artist -> "artist"
+                com.muratkirazkaya.meiro.ui.PlSortField.Duration -> "length"
+            }
+            val icon = when (f) {
+                com.muratkirazkaya.meiro.ui.PlSortField.Original -> MeiroIcons.Add
+                com.muratkirazkaya.meiro.ui.PlSortField.Title -> MeiroIcons.Lines
+                com.muratkirazkaya.meiro.ui.PlSortField.Artist -> MeiroIcons.Person
+                com.muratkirazkaya.meiro.ui.PlSortField.Duration -> MeiroIcons.History
+            }
+            MenuItem(key, icon, f.label, { onPick(f) }, right = if (sort.field != f) null else {
+                {
+                    Row(Modifier.inv("$key.r"), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+                        MText(if (sort.desc) "azalan" else "artan", MeiroType.MenuRight, c.onSurfaceVariant, "$key.dir", maxLines = 1)
+                        MIcon(MeiroIcons.Check, c.onSurfaceVariant, "$key.check")
+                    }
+                }
+            })
+        }
+        MText("Seçili sıraya yeniden dokununca ters çevrilir.", MeiroType.Note, c.onSurfaceVariant, "plsort.note", Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp))
     }
 }

@@ -64,7 +64,10 @@ data class LinkTarget(val song: QItem? = null, val artist: String? = null) {
 }
 
 /** Opens the track menu, the list menu and the link sheet from any screen (provided by the shell). */
-class MenuOpeners(val track: (MenuTarget) -> Unit, val list: (ListMenuTarget) -> Unit, val link: (LinkTarget) -> Unit = {})
+class MenuOpeners(val track: (MenuTarget) -> Unit, val list: (ListMenuTarget) -> Unit, val link: (LinkTarget) -> Unit = {}, val sort: (SortTarget) -> Unit = {})
+
+/** M6h: the playlist page's order sheet: the order shown, and what a pick does. */
+class SortTarget(val sort: PlSort, val onPick: (PlSortField) -> Unit)
 
 internal val LocalMenus = staticCompositionLocalOf { MenuOpeners({}, {}) }
 
@@ -82,13 +85,16 @@ class MenuState {
     var link by mutableStateOf<LinkTarget?>(null)
     /** "Listeyi sil" asks first (`SHEET.dellist`): the list id and its name. */
     var delete by mutableStateOf<Pair<String, String>?>(null)
+    /** M6h: the playlist page's order sheet (`SHEET.plsort`). */
+    var sort by mutableStateOf<SortTarget?>(null)
 
-    val open get() = track != null || list != null || addTo != null || newFor != null || rename != null || link != null || delete != null
+    val open get() = track != null || list != null || addTo != null || newFor != null || rename != null || link != null || delete != null || sort != null
 
     /** Back closes the sheet on top. */
     fun back() {
         when {
             link != null -> link = null
+            sort != null -> sort = null
             delete != null -> delete = null
             rename != null -> rename = null
             newFor != null -> newFor = null
@@ -106,8 +112,8 @@ class MenuNav(val openArtist: (String) -> Unit, val openAlbum: (String) -> Unit,
  * The track menu, the add-to sheet, the new-list sheet a track is added to, the list menu and the rename sheet, over
  * everything else, and the link sheet (M6a). Every item does what the desktop does (`songMenu`, `libraryRow`'s menu,
  * `libraryPickerDialog`); "MusicBrainz'e bağla" opens the link sheet and "Hepsini MusicBrainz'e bağla" auto-links the
- * list's tracks; "İndir" (downloads, M5), the heart (YouTube Music likes need a YouTube Music sign-in), "Hepsini indir"
- * (M5) and "Bunu önerme" (the desktop has no such feature) do nothing yet.
+ * list's tracks; "İndir" and "Hepsini indir" download (M5), the heart likes on YouTube Music (M6h; nothing signed out);
+ * "Bunu önerme" (the desktop has no such feature) does nothing.
  */
 @Composable
 fun MenuLayer(c: AppContainer, m: MenuState, bars: SystemBars, nav: MenuNav, snack: (String) -> Unit) {
@@ -133,10 +139,16 @@ fun MenuLayer(c: AppContainer, m: MenuState, bars: SystemBars, nav: MenuNav, sna
         val state = remember(version, linkVersion, item) { c.linker.stateOf(item).ifEmpty { held?.state.orEmpty() } }
         val keptVersion by c.downloads.version.collectAsState()
         val kept = remember(keptVersion, item) { c.downloads.has(item) }
+        // M6h: the heart is the account's YouTube Music like of the track's video (`like-in`: it toggles and closes the
+        // sheet). Signed out, or for a track with no YouTube Music video, it does nothing.
+        val likes by c.ytmLikes.state.collectAsState()
+        val videoId = item.refFor(com.muratkirazkaya.meiro.data.Source.YTM)
+        LaunchedEffect(videoId) { c.ytmLikes.learn(videoId) }
         TrackMenuSheet(
-            TrackMenuMapping.menu(t, state).copy(downloaded = kept), bars,
+            TrackMenuMapping.menu(t, state).copy(downloaded = kept, liked = videoId != null && likes[videoId] == com.muratkirazkaya.meiro.youtube.LikeStatus.Liked), bars,
             TrackMenuActions(
                 onDismiss = { m.track = null },
+                onLike = { if (c.ytmLikes.toggle(videoId) { like, _ -> snack(likeFailed(item.title, like)) }) m.track = null },
                 onPlayNext = { PlaybackHost.enqueue(ctx, item, true); m.track = null; snack("Sıradaki olarak eklendi") },
                 onQueue = { PlaybackHost.enqueue(ctx, item, false); m.track = null; snack("Kuyruğun sonuna eklendi") },
                 onAddTo = { m.track = null; m.addTo = t },
@@ -275,6 +287,8 @@ fun MenuLayer(c: AppContainer, m: MenuState, bars: SystemBars, nav: MenuNav, sna
     }
 
     m.link?.let { t -> LinkLayer(c, t, bars, close = { m.link = null }, snack = snack, launch = ::launch) }
+
+    m.sort?.let { t -> com.muratkirazkaya.meiro.ui.screens.PlaylistSortSheet(t.sort, bars, onDismiss = { m.sort = null }) { f -> m.sort = null; t.onPick(f) } }
 }
 
 /**
@@ -372,7 +386,22 @@ private fun source(
 }
 
 /** "Bağlantıyı paylaş": Android's share sheet with the track's link. */
-private fun share(ctx: Context, title: String, link: String) {
+internal fun share(ctx: Context, title: String, link: String) {
     val send = Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_SUBJECT, title).putExtra(Intent.EXTRA_TEXT, link)
     ctx.startActivity(Intent.createChooser(send, null).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+}
+
+/** M6h: the snack when YouTube refused a like (the desktop's "Could not like “title”"; the mock has none). */
+internal fun likeFailed(title: String, like: Boolean) = if (like) "“$title” YouTube Music'te beğenilemedi" else "“$title” beğenisi YouTube Music'te geri alınamadı"
+
+/** M6h: an album's or a playlist's YouTube Music page (`youtube.BrowseURL`: the desktop's "Copy link"). */
+internal fun browseUrl(browseId: String): String {
+    // Go's `url.PathEscape`: unreserved characters and the path's own sub-delimiters stay, every other byte is %XX.
+    val keep = "-._~$&+,:;=@"
+    val out = StringBuilder("https://music.youtube.com/browse/")
+    for (b in browseId.toByteArray(Charsets.UTF_8)) {
+        val c = b.toInt() and 0xFF
+        if (c < 0x80 && (c.toChar().isLetterOrDigit() || c.toChar() in keep)) out.append(c.toChar()) else out.append("%%%02X".format(c))
+    }
+    return out.toString()
 }

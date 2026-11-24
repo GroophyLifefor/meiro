@@ -84,7 +84,13 @@ fun MeiroApp(app: MeiroApplication) {
         else -> androidx.compose.foundation.isSystemInDarkTheme()
     }
     ThemedStatusBar(dark)
-    MeiroTheme(darkTheme = dark) {
+    // M6h: "Duvar kağıdından renk" (Android 12+) or the chosen swatch; the first swatch is the mock's own palette.
+    val prefsNow = c?.prefs?.collectAsState()?.value
+    val ctx = LocalContext.current
+    val colors = remember(prefsNow?.seed, prefsNow?.wallpaper, dark) {
+        prefsNow?.let { p -> (if (p.wallpaper) com.muratkirazkaya.meiro.ui.theme.SeedColors.wallpaper(ctx, dark) else null) ?: com.muratkirazkaya.meiro.ui.theme.SeedColors.of(p.seed, dark) }
+    }
+    MeiroTheme(darkTheme = dark, colors = colors) {
         val sb = WindowInsets.systemBars.asPaddingValues()
         val bars = SystemBars(sb.calculateTopPadding(), sb.calculateBottomPadding())
         if (c == null) Box(Modifier.fillMaxSize().background(Meiro.colors.surface)) else AppRoot(c, bars)
@@ -210,7 +216,7 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String, signedIn
     val openPlayer = { if (PlaybackHost.ui.value != null) npOpen = true }
     // The track menu, the list menu and the sheets they open (M4h), over everything else.
     val menus = remember { MenuState() }
-    val openers = remember { MenuOpeners({ menus.track = it }, { menus.list = it }, { menus.link = it }) }
+    val openers = remember { MenuOpeners({ menus.track = it }, { menus.list = it }, { menus.link = it }, { menus.sort = it }) }
     // M5: the downloaded marks, the offline banner, and the downloads' own snacks (a download that failed).
     val downloaded by c.downloads.keys.collectAsState()
     val online by com.muratkirazkaya.meiro.downloads.Online.state.collectAsState()
@@ -244,7 +250,7 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String, signedIn
                 composable(Tab.Home.route) {
                     HomeRoute(c, email, onOpen = { nav.navigate("playlist/$it") }, onMix = { nav.navigate(MIX_ROUTE) }, onSnack = { snack = it }, onStats = openStats, onHistory = openHistory, onYtmList = openYtmList, onAlbum = openAlbum)
                 }
-                composable(Tab.Search.route) { SearchRoute(c, openAlbum, openArtist) }
+                composable(Tab.Search.route) { SearchRoute(c, openAlbum, openArtist, openYtmList) }
                 composable(Tab.Library.route) {
                     LibraryRoute(c, onOpen = { nav.navigate("playlist/$it") }, onMix = { nav.navigate(MIX_ROUTE) }, onNew = openSheet, onYtmList = openYtmList, onAlbum = openAlbum)
                 }
@@ -557,7 +563,7 @@ private fun ytmListMenu(c: AppContainer, e: com.muratkirazkaya.meiro.youtube.Ytm
                 val d = BrowseMapping.album(e.id, c.browsePage(e.id))
                 d.cover to d.listItems()
             } else {
-                val l = YtmMapping.asList(e.id, c.ytmFeed.playlist(e.id))
+                val l = YtmMapping.asList(e.id, c.ytmPlaylist(e.id))
                 l.cover to l.items
             }
         },
@@ -597,7 +603,7 @@ private fun MixRoute(c: AppContainer, onBack: () -> Unit, onSnack: (String) -> U
 }
 
 @Composable
-private fun SearchRoute(c: AppContainer, onAlbum: (String) -> Unit, onArtist: (String) -> Unit) {
+private fun SearchRoute(c: AppContainer, onAlbum: (String) -> Unit, onArtist: (String) -> Unit, onYtmList: (String) -> Unit) {
     val ctx = LocalContext.current
     val menus = LocalMenus.current
     val openPlayer = LocalOpenPlayer.current
@@ -632,6 +638,8 @@ private fun SearchRoute(c: AppContainer, onAlbum: (String) -> Unit, onArtist: (S
             onSongLink = { i -> with(SearchMapping) { SearchMapping.songs(ctl.state.value).getOrNull(i)?.let { menus.link(LinkTarget.song(it.toQItem())) } } },
             onArtistLink = { i -> ui.artists.getOrNull(i)?.let { menus.link(LinkTarget.artist(it.name)) } },
             onRetry = ctl::retryYtm,
+            onList = { i -> ui.lists.getOrNull(i)?.let { onYtmList(it.id) } },
+            onListMore = { i -> ui.lists.getOrNull(i)?.let { l -> menus.list(ytmListMenu(c, com.muratkirazkaya.meiro.youtube.YtmListEntry(l.id, l.name, l.cover.url.orEmpty()))) } },
         ),
     )
 }
@@ -647,17 +655,44 @@ private fun PlaylistRoute(c: AppContainer, id: String, onBack: () -> Unit, onSna
     // The list is gone (deleted on another device, say): back to the lists.
     if (lib == null) { LaunchedEffect(Unit) { onBack() }; return }
     val playingKey = now?.item?.key
-    val ui = remember(lib, playingKey) { lib.toPlaylistUi(c.links, playingKey) }
+    val tools = remember(id) { PlaylistToolsState() }
+    BackHandler(enabled = tools.searching) { tools.searching = false; tools.query = "" }
+    val order = remember(lib, tools.query, tools.sort) { PlaylistView.order(lib.items, tools.query, tools.sort) }
+    val shown = remember(lib, order) { order.map { lib.items[it] } }
+    val ui = remember(lib, playingKey, order) { lib.toPlaylistUi(c.links, playingKey).let { u -> u.copy(rows = order.map { u.rows[it] }) } }
     fun play(from: Int, items: List<com.muratkirazkaya.meiro.playback.QItem>) = PlaybackHost.playQueue(ctx, items, from, lib.name)
+    // The page plays what it shows, in the order it shows it.
+    fun queue() = shown.map { it.toQItem() }
     PlaylistScreen(
         ui, playing = now?.playing == true, onBack = onBack,
-        onPlay = { play(0, lib.items.map { it.toQItem() }) },
-        onShuffle = { play(0, lib.items.map { it.toQItem() }.shuffled()) },
-        onRow = { i -> lib.items.map { it.toQItem() }.let { q -> if (!openIfPlaying(q, i, openPlayer)) play(i, q) } },
-        onMore = { i -> lib.items.getOrNull(i)?.let { menus.track(MenuTarget(it.toQItem(), listId = lib.id)) } },
+        onPlay = { play(0, queue()) },
+        onShuffle = { play(0, queue().shuffled()) },
+        onRow = { i -> queue().let { q -> if (!openIfPlaying(q, i, openPlayer)) play(i, q) } },
+        onMore = { i -> shown.getOrNull(i)?.let { menus.track(MenuTarget(it.toQItem(), listId = lib.id)) } },
         onListMenu = { menus.list(ListMenuTarget.own(lib)) },
-        onLink = { i -> lib.items.getOrNull(i)?.let { menus.link(LinkTarget.song(it.toQItem())) } },
+        onLink = { i -> shown.getOrNull(i)?.let { menus.link(LinkTarget.song(it.toQItem())) } },
         onDownload = { onSnack(downloadAll(c, lib.items.map { it.toQItem() }, lib.name, lib.cover)) },
+        tools = tools.ui(share = false),
+        toolActions = tools.actions(menus),
+    )
+}
+
+/**
+ * M6h: a playlist page's search and order, held while the page is open (the desktop opens every playlist page
+ * unfiltered, with its search closed and in the list's own order). Back closes an open search first.
+ */
+private class PlaylistToolsState {
+    var searching by mutableStateOf(false)
+    var query by mutableStateOf("")
+    var sort by mutableStateOf(PlSort())
+
+    fun ui(share: Boolean) = com.muratkirazkaya.meiro.ui.screens.PlaylistTools(searching, query, sort.label, share)
+
+    fun actions(menus: MenuOpeners, onShare: () -> Unit = {}) = com.muratkirazkaya.meiro.ui.screens.PlaylistToolActions(
+        onSearch = { searching = !searching; query = "" },
+        onQuery = { query = it },
+        onSort = { menus.sort(SortTarget(sort) { f -> sort = sort.choose(f) }) },
+        onShare = onShare,
     )
 }
 
@@ -676,7 +711,7 @@ private fun YtmListRoute(c: AppContainer, id: String, onBack: () -> Unit, onSnac
     var retry by remember { mutableStateOf(0) }
     val loaded by produceState<Pair<com.muratkirazkaya.meiro.data.Library?, String?>?>(null, id, retry) {
         value = try {
-            YtmMapping.asList(id, c.ytmFeed.playlist(id)) to null
+            YtmMapping.asList(id, c.ytmPlaylist(id)) to null
         } catch (e: kotlinx.coroutines.CancellationException) {
             throw e
         } catch (e: Exception) {
@@ -686,22 +721,29 @@ private fun YtmListRoute(c: AppContainer, id: String, onBack: () -> Unit, onSnac
     }
     val lib = loaded?.first
     val playingKey = now?.item?.key
-    val ui = remember(lib, playingKey, linkVersion) { lib?.let { YtmMapping.playlistUi(it, c.links, playingKey) } }
-    fun queue() = lib?.items.orEmpty().map { it.toQItem() }
+    val tools = remember(id) { PlaylistToolsState() }
+    BackHandler(enabled = tools.searching) { tools.searching = false; tools.query = "" }
+    val order = remember(lib, tools.query, tools.sort) { lib?.let { PlaylistView.order(it.items, tools.query, tools.sort) }.orEmpty() }
+    val shown = remember(lib, order) { lib?.let { l -> order.map { l.items[it] } }.orEmpty() }
+    val ui = remember(lib, playingKey, linkVersion, order) { lib?.let { YtmMapping.playlistUi(it, c.links, playingKey).let { u -> u.copy(rows = order.map { u.rows[it] }) } } }
+    fun queue() = shown.map { it.toQItem() }
     fun play(from: Int, items: List<com.muratkirazkaya.meiro.playback.QItem>) { if (items.isNotEmpty()) PlaybackHost.playQueue(ctx, items, from, lib?.name.orEmpty()) }
     PlaylistScreen(
         ui, playing = now?.playing == true, onBack = onBack,
         onPlay = { play(0, queue()) },
         onShuffle = { play(0, queue().shuffled()) },
         onRow = { i -> queue().let { q -> if (!openIfPlaying(q, i, openPlayer)) play(i, q) } },
-        onMore = { i -> lib?.items?.getOrNull(i)?.let { menus.track(MenuTarget(it.toQItem())) } },
+        onMore = { i -> shown.getOrNull(i)?.let { menus.track(MenuTarget(it.toQItem())) } },
         onListMenu = {
             lib?.let { l -> menus.list(ListMenuTarget(null, ListMenuUi(l.items.count { c.linker.stateOf(it.toQItem()).let { s -> s != LinkState.MATCHED && s != LinkState.OTHER } }, own = false), l.name, l.cover, l.items)) }
         },
-        onLink = { i -> lib?.items?.getOrNull(i)?.let { menus.link(LinkTarget.song(it.toQItem())) } },
-        onDownload = { lib?.let { l -> onSnack(downloadAll(c, queue(), l.name, l.cover)) } },
+        onLink = { i -> shown.getOrNull(i)?.let { menus.link(LinkTarget.song(it.toQItem())) } },
+        onDownload = { lib?.let { l -> onSnack(downloadAll(c, l.items.map { it.toQItem() }, l.name, l.cover)) } },
         error = loaded?.second,
         onRetry = { retry++ },
+        tools = tools.ui(share = lib != null),
+        // M6h: the desktop's "Copy link" (`BrowseURL` of the list's page), through Android's share sheet.
+        toolActions = tools.actions(menus) { lib?.let { l -> share(ctx, l.name, browseUrl(if (id.startsWith("VL")) id else "VL$id")) } },
     )
 }
 
@@ -766,6 +808,8 @@ private fun AlbumRoute(c: AppContainer, id: String, onBack: () -> Unit, onSnack:
             },
             // An album's songs carry no cover of their own: the album's is what they are kept with (`pageArt`).
             onDownload = { data?.let { d -> onSnack(downloadAll(c, d.queue.map { q -> if (q.thumbnail.isEmpty()) q.copy(thumbnail = d.cover) else q }, d.ui.title, d.cover)) } },
+            // M6h: the desktop's "Copy link" (`BrowseURL`), through Android's share sheet as the track menu's share.
+            onShare = { data?.let { d -> share(ctx, d.ui.title, browseUrl(id)) } },
         ),
         error = loaded?.error,
     )
@@ -875,7 +919,12 @@ private fun PlayerRoute(
     // "Rengi kapaktan al": off, the player keeps the mock's own gradient instead of the cover's colours.
     val coverColor = c.prefs.collectAsState().value.coverColor
     val background = com.muratkirazkaya.meiro.ui.components.rememberCoverBrush(p.item.thumbnail.takeIf { it.isNotBlank() && coverColor })
-    val ui = NowPlayingMapping.player(p, linkOf(p.item.provider(), p.item.key), background)
+    // M6h: the heart is the account's YouTube Music like of the track's video; signed out it stays empty and does nothing.
+    val likes by c.ytmLikes.state.collectAsState()
+    val ytmSession by c.ytmAccount.session.collectAsState()
+    val videoId = p.item.refFor(com.muratkirazkaya.meiro.data.Source.YTM)
+    LaunchedEffect(videoId, ytmSession) { c.ytmLikes.learn(videoId) }
+    val ui = NowPlayingMapping.player(p, linkOf(p.item.provider(), p.item.key), background, liked = videoId != null && likes[videoId] == com.muratkirazkaya.meiro.youtube.LikeStatus.Liked)
     com.muratkirazkaya.meiro.ui.screens.NowPlayingScreen(
         ui, bars,
         com.muratkirazkaya.meiro.ui.screens.NowPlayingActions(
@@ -898,6 +947,7 @@ private fun PlayerRoute(
             onTab = { onSheet(it) },
             onMore = { menus.track(MenuTarget(p.item)) },
             onLink = { menus.link(LinkTarget.song(p.item)) },
+            onLike = { c.ytmLikes.toggle(videoId) { like, _ -> onSnack(likeFailed(p.item.title, like)) } },
         ),
     )
     if (sheetTab != null) {
@@ -1063,6 +1113,7 @@ private fun SettingsRoute(
             server = AppContainer.displayServer(c.engine.settings.syncUrl),
             ytmSub = ytmSub, ytmButton = ytmButton,
             theme = prefs.theme, coverColor = prefs.coverColor, recommend = prefs.suggestions, explore = explore,
+            wallpaper = prefs.wallpaper, swatch = if (prefs.wallpaper) -1 else com.muratkirazkaya.meiro.ui.theme.SeedColors.SWATCHES.indexOf(prefs.seed),
             dailyMix = AccountMapping.dailyMixLine(
                 mix?.items?.maxOfOrNull { it.updatedAt }, c.engine.settings.dailyMixDate, mixBusy, prefs.suggestions, java.time.Instant.now(), java.time.ZoneId.systemDefault(),
             ),
@@ -1089,6 +1140,10 @@ private fun SettingsRoute(
             onYtmRow = if (ytmSession == null) onYtmLogin else null,
             onTheme = { t -> c.updatePrefs { it.copy(theme = t) } },
             onCoverColor = { c.updatePrefs { it.copy(coverColor = !it.coverColor) } },
+            // M6h: the wallpaper's colours need Android 12 (the row says so); below it the switch does nothing. A swatch
+            // turns the wallpaper's off, as the desktop's swatch turns its artwork colour off.
+            onWallpaper = { if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) c.updatePrefs { it.copy(wallpaper = !it.wallpaper) } },
+            onSwatch = { i -> com.muratkirazkaya.meiro.ui.theme.SeedColors.SWATCHES.getOrNull(i)?.let { s -> c.updatePrefs { it.copy(seed = s, wallpaper = false) } } },
             onRecommend = {
                 val on = !prefs.suggestions
                 c.updatePrefs { it.copy(suggestions = on) }

@@ -92,12 +92,15 @@ class SearchActions(
     val onArtistLink: (Int) -> Unit = {},
     /** "Tekrar dene" of the error block: YouTube Music is asked again. */
     val onRetry: () -> Unit = {},
+    /** M6h: a YouTube Music list row opens its playlist page (`open-playlist`), its ⋮ the list menu (`listmenu`). */
+    val onList: (Int) -> Unit = {},
+    val onListMore: (Int) -> Unit = {},
 )
 
 /**
  * Mock screens `search` and `search-done` (`V.search`): top bar "Ara" with the avatar, the search bar, then either
  * "Son aramalar" or the results: filter chips, provider chips, Sanatçılar, Şarkılar, Albümler (a shelf) and Listeler.
- * List taps and the lists' ⋮ are inert; a track's ⋮ opens the track menu, the link buttons the link sheet.
+ * A list row opens its playlist page and its ⋮ the list menu (M6h); a track's ⋮ opens the track menu, the link buttons the link sheet.
  */
 @Composable
 fun SearchScreen(ui: SearchUi, playing: Boolean, actions: SearchActions, state: LazyListState = rememberLazyListState()) {
@@ -170,7 +173,7 @@ fun SearchScreen(ui: SearchUi, playing: Boolean, actions: SearchActions, state: 
             }
             if (ui.lists.isNotEmpty()) {
                 item(key = "lists.head") { SectionHead("Listeler", "lists.title") }
-                itemsIndexed(ui.lists, key = { i, l -> "l$i/${l.id}" }) { i, l -> ListRow("list${i + 1}", l, {}) }
+                itemsIndexed(ui.lists, key = { i, l -> "l$i/${l.id}" }) { i, l -> ListRow("list${i + 1}", l, { actions.onList(i) }, onMore = { actions.onListMore(i) }) }
             }
             item(key = "end") { Spacer(Modifier.height(24.dp)) }
         }

@@ -28,7 +28,7 @@ object NowPlayingMapping {
     private fun hue(s: String) = Math.floorMod(s.hashCode(), 360)
 
     /** The track playing as the full player shows it; [linkState] is its MusicBrainz state ("" or null: not linked). */
-    fun player(p: PlayerUi, linkState: String?, background: Brush? = null): NowPlayingUi {
+    fun player(p: PlayerUi, linkState: String?, background: Brush? = null, liked: Boolean = false): NowPlayingUi {
         val item = p.item
         val providers = item.providers()
         return NowPlayingUi(
@@ -38,8 +38,8 @@ object NowPlayingMapping {
             context = p.queue.source,
             cover = CoverSpec(item.thumbnail.takeIf { it.isNotBlank() }, hue(item.key)),
             link = when (linkState) { LinkState.MATCHED -> NpLink.Matched; LinkState.OTHER -> NpLink.Other; else -> NpLink.Unknown },
-            // Likes are YouTube Music's own (the desktop's heart): no YouTube Music sign-in yet, so never liked.
-            liked = false,
+            // M6h: likes are YouTube Music's own (the desktop's heart): what the signed-in account said, else empty.
+            liked = liked,
             ytm = Source.YTM in providers,
             sc = Source.SOUNDCLOUD in providers,
             active = if (item.provider() == Source.SOUNDCLOUD) Provider.Sc else Provider.Ytm,
