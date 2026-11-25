@@ -22,6 +22,9 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import com.muratkirazkaya.meiro.ui.components.LocalSheetProgress
+import com.muratkirazkaya.meiro.ui.components.sheetScrim
+import com.muratkirazkaya.meiro.ui.components.sheetSlide
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -89,11 +92,12 @@ fun UpNextSheet(
     tab: PlayerTab = PlayerTab.UpNext, lyrics: LyricsUi = LyricsUi(), related: RelatedUi = RelatedUi(), positionMs: Long = 0,
 ) {
     val c = Meiro.colors
+    val prog = LocalSheetProgress.current
     BoxWithConstraints(Modifier.fillMaxSize()) {
-        Box(Modifier.fillMaxSize().background(c.scrim).clickableNoIndication(actions.onClose))
+        Box(Modifier.fillMaxSize().sheetScrim(prog).background(c.scrim).clickableNoIndication(actions.onClose))
         val shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
         Column(
-            Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(maxHeight * 0.88f)
+            Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(maxHeight * 0.88f).sheetSlide(prog)
                 .inv("q.sheet", bg = c.surfaceContainerLow, radiusDp = 28f).clip(shape).background(c.surfaceContainerLow)
                 .clickableNoIndication {}.padding(bottom = maxOf(20.dp, bars.bottom)),
         ) {
@@ -208,23 +212,9 @@ private fun dropTarget(state: LazyListState, keys: List<String>, rows: List<Queu
     return best
 }
 
-/** `.sw`: 52x32 with a 2px border; on, primary with a 24px knob at the end; off, the outline colours with a 16px knob. */
+/** `.sw` of "Otomatik devam": the shared switch, with this sheet's own inventory keys. */
 @Composable
-private fun Switch(on: Boolean, onClick: () -> Unit) {
-    val c = Meiro.colors
-    val shape = RoundedCornerShape(16.dp)
-    val bg = if (on) c.primary else c.surfaceContainerHighest
-    Box(
-        Modifier.size(52.dp, 32.dp).inv("q.auto.switch", bg = bg, radiusDp = 16f).clip(shape).background(bg)
-            .border(2.dp, if (on) c.primary else c.outline, shape).clickableNoIndication(onClick),
-    ) {
-        val knob = if (on) c.onPrimary else c.outline
-        Box(
-            Modifier.offset(x = if (on) 24.dp else 8.dp, y = if (on) 4.dp else 8.dp).size(if (on) 24.dp else 16.dp)
-                .inv("q.auto.knob", bg = knob, radiusDp = if (on) 12f else 8f).clip(CircleShape).background(knob),
-        )
-    }
-}
+private fun Switch(on: Boolean, onClick: () -> Unit) = com.muratkirazkaya.meiro.ui.components.MeiroSwitch("q.auto.switch", on, onClick, knobKey = "q.auto.knob")
 
 /** `.qlabel`: "Önerilenler" and the tag of where the tracks under it came from. */
 @Composable

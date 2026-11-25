@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -61,7 +63,7 @@ fun Segmented(key: String, labels: List<String>, keys: List<String>, selected: I
 
 /** The mock's `.sw`: 52x32 with a 2px border; on, primary with a 24px knob at the end; off, the outline colours with a 16px knob. */
 @Composable
-fun MeiroSwitch(key: String, on: Boolean, onClick: () -> Unit) {
+fun MeiroSwitch(key: String, on: Boolean, onClick: () -> Unit, knobKey: String = "$key.knob") {
     val c = Meiro.colors
     val shape = RoundedCornerShape(16.dp)
     val bg = if (on) c.primary else c.surfaceContainerHighest
@@ -69,10 +71,14 @@ fun MeiroSwitch(key: String, on: Boolean, onClick: () -> Unit) {
         Modifier.size(52.dp, 32.dp).inv(key, bg = bg, radiusDp = 16f).clip(shape).background(bg)
             .border(2.dp, if (on) c.primary else c.outline, shape).clickableNoIndication(onClick),
     ) {
-        val knob = if (on) c.onPrimary else c.outline
+        // `.sw::after` moves, grows and changes colour in .15s; the first composition is already settled.
+        val knob by animateColorAsState(if (on) c.onPrimary else c.outline, Motion.switchSpec())
+        val x by animateDpAsState(if (on) 24.dp else 8.dp, Motion.switchSpec())
+        val y by animateDpAsState(if (on) 4.dp else 8.dp, Motion.switchSpec())
+        val d by animateDpAsState(if (on) 24.dp else 16.dp, Motion.switchSpec())
         Box(
-            Modifier.offset(x = if (on) 24.dp else 8.dp, y = if (on) 4.dp else 8.dp).size(if (on) 24.dp else 16.dp)
-                .inv("$key.knob", bg = knob, radiusDp = if (on) 12f else 8f).clip(CircleShape).background(knob),
+            Modifier.offset(x = x, y = y).size(d)
+                .inv(knobKey, bg = knob, radiusDp = d.value / 2f).clip(CircleShape).background(knob),
         )
     }
 }

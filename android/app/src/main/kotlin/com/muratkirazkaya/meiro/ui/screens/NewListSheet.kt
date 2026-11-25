@@ -21,6 +21,9 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
+import com.muratkirazkaya.meiro.ui.components.LocalSheetProgress
+import com.muratkirazkaya.meiro.ui.components.sheetScrim
+import com.muratkirazkaya.meiro.ui.components.sheetSlide
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,9 +60,10 @@ fun NewListSheet(
     val c = Meiro.colors
     val focus = remember { FocusRequester() }
     LaunchedEffect(Unit) { focus.requestFocus() }
-    Box(Modifier.fillMaxSize().background(c.scrim).clickableNoIndication(onCancel)) {
+    val prog = LocalSheetProgress.current
+    Box(Modifier.fillMaxSize().sheetScrim(prog).background(c.scrim).clickableNoIndication(onCancel)) {
         Column(
-            Modifier.align(Alignment.BottomCenter).imePadding().fillMaxWidth()
+            Modifier.align(Alignment.BottomCenter).imePadding().fillMaxWidth().sheetSlide(prog)
                 .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)).background(c.surfaceContainerLow)
                 .clickableNoIndication {}
                 .padding(bottom = maxOf(20.dp, bars.bottom)),

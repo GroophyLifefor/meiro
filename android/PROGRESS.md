@@ -818,3 +818,25 @@ Nothing is forgotten if each of these is built in the milestone named:
 - Single runs per measurement; numbers are rough.
 - `YoutubeDL.version()` returns null before the first update; read the binary's
   `--version` instead.
+
+## Motion (2026-11-25, Murat: Android-style slide)
+
+Murat: "all transitions are very sharp: you tap something and it opens, zero animation."
+
+What animates (all in `ui/components/Motion.kt`, values copied from the mock's CSS):
+
+- Bottom sheets (track menu, add-to, new list, rename, list menu, delete, order, link, account, history menu, clear history, queue sheet): slide up 280 ms and back down on close, `cubic-bezier(.2,0,0,1)`, from translateY(105%). The sheet stays composed while it slides out (`SheetPresence`, last value kept) and swallows touches while closing.
+- Scrim: opacity 200 ms (CSS `ease`), both ways.
+- Snack: opacity + translateY(10dp) 200 ms, both ways (`SnackHost`).
+- Switch knob (`MeiroSwitch`, also the queue sheet's "Otomatik devam"): position, size and colour 150 ms. The first composition is settled.
+- Full player: 320 ms, now with `cubic-bezier(.2,0,0,1)` (was linear-ish default easing).
+- Page to page (new, mock first): the new page slides in from the right with a 150 ms fade, the page under it moves 1/4 width left and fades; Back slides the page out to the right, 300 ms, mock easing. In the mock this is `navSlide()` in `docs/android/mock/index.html` (Web Animations API, taps only; `goTo` and the reference screens stay static, the mobile-mock copy is byte-identical). In the app: `NavHost` enter/exit/popEnter/popExit.
+- Bottom-bar tab switches: no animation. Choice: the mock's `tab` action re-renders at once and has none, so none here (also a jump from a detail page to a tab).
+
+Static screens: sheets drawn on their own (the comparison tests, previews) have no `LocalSheetProgress`, so they are drawn settled. `check.sh` build part PASS (unit incl. new `MotionTest`, element comparison 0 mismatches on every screen, lint, assembleDebug) and emulator part PASS. Mock refs regenerated with `tools/mockref`; 17 PNGs differed only by renderer noise, reverted with `git checkout`, so no ref image changed.
+
+Tests: `ui/MotionTest.kt` (durations, easings of the specs, tab vs page transitions, a sheet is mid-slide after 100 ms and still drawn 100 ms into closing, snack fades before it leaves).
+
+Evidence (`android/build/check/motion/`): screenrecord frames per transition in `<name>/fNNN.png` (30 fps) and mid-transition strips `mid-*.png`: sheet open/close (account sheet and track menu), queue sheet open/close, page open (settings, artist) and back (settings, artist), full player open/close. Changed-frame runs of 7-10 frames (about 230-330 ms) in each. An album page opens through the same NavHost transition as the artist page; it was not recorded separately.
+
+Not verified: a real phone. The emulator is software-rendered (swiftshader), so `dumpsys gfxinfo` is not representative (1400 frames, 588 janky = 42%, p50 48 ms, p99 150 ms; `motion/gfxinfo.txt`); smoothness on the phone is unknown. Not recorded: switch knob on the emulator (covered by code and build only), snack on the emulator (unit test only), the lock screen. Closing sheet while another opens (track menu to add-to) overlaps for 280 ms by design.

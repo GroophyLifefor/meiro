@@ -18,6 +18,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import com.muratkirazkaya.meiro.ui.components.LocalSheetProgress
+import com.muratkirazkaya.meiro.ui.components.sheetScrim
+import com.muratkirazkaya.meiro.ui.components.sheetSlide
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -82,13 +85,15 @@ class TrackMenuActions(
 @Composable
 fun MenuSheetFrame(p: String, bars: SystemBars, onDismiss: () -> Unit, tall: Boolean = false, scrimKey: Boolean = false, content: @Composable ColumnScope.() -> Unit) {
     val c = Meiro.colors
+    val prog = LocalSheetProgress.current
     BoxWithConstraints(Modifier.fillMaxSize()) {
         // A short sheet leaves the scrim's middle in view, so the mock lists it ([scrimKey]); a tall one covers it.
-        Box(Modifier.fillMaxSize().then(if (scrimKey) Modifier.inv("$p.scrim", bg = c.scrim) else Modifier).background(c.scrim).clickableNoIndication(onDismiss))
+        Box(Modifier.fillMaxSize().sheetScrim(prog).then(if (scrimKey) Modifier.inv("$p.scrim", bg = c.scrim) else Modifier).background(c.scrim).clickableNoIndication(onDismiss))
         val shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
         Column(
             Modifier.align(Alignment.BottomCenter).fillMaxWidth()
                 .then(if (tall) Modifier.height(maxHeight * 0.88f) else Modifier.heightIn(max = maxHeight * 0.88f))
+                .sheetSlide(prog)
                 .inv("$p.sheet", bg = c.surfaceContainerLow, radiusDp = 28f).clip(shape).background(c.surfaceContainerLow)
                 .clickableNoIndication {}.padding(bottom = maxOf(20.dp, bars.bottom)),
         ) {

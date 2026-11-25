@@ -17,6 +17,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import com.muratkirazkaya.meiro.ui.components.Motion
+import com.muratkirazkaya.meiro.ui.components.SheetPresence
+import com.muratkirazkaya.meiro.ui.components.popEnter
+import com.muratkirazkaya.meiro.ui.components.popExit
+import com.muratkirazkaya.meiro.ui.components.pushEnter
+import com.muratkirazkaya.meiro.ui.components.pushExit
+import com.muratkirazkaya.meiro.ui.components.SnackHost
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -246,7 +253,14 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String, signedIn
             onNext = { PlaybackHost.next(ctx) },
             onOpenPlayer = openPlayer,
         ) {
-            NavHost(nav, startDestination = Tab.Home.route) {
+            NavHost(
+                nav, startDestination = Tab.Home.route,
+                // The mock's page slide (Android-style, shared axis X); switching the bottom bar's tabs does not move.
+                enterTransition = { pushEnter(targetState.destination.route) },
+                exitTransition = { pushExit(targetState.destination.route) },
+                popEnterTransition = { popEnter(initialState.destination.route, targetState.destination.route) },
+                popExitTransition = { popExit(initialState.destination.route, targetState.destination.route) },
+            ) {
                 composable(Tab.Home.route) {
                     HomeRoute(c, email, onOpen = { nav.navigate("playlist/$it") }, onMix = { nav.navigate(MIX_ROUTE) }, onSnack = { snack = it }, onStats = openStats, onHistory = openHistory, onYtmList = openYtmList, onAlbum = openAlbum)
                 }
@@ -286,7 +300,7 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String, signedIn
                 }
             }
         }
-        if (sheet) {
+        SheetPresence(if (sheet) Unit else null) {
             val create = {
                 val n = newName.trim()
                 if (n.isNotEmpty()) {
@@ -301,7 +315,8 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String, signedIn
         if (playing != null) shown.value = playing
         AnimatedVisibility(
             visible = npOpen && playing != null,
-            enter = slideInVertically(tween(320)) { it }, exit = slideOutVertically(tween(320)) { it },
+            enter = slideInVertically(Motion.playerSpec()) { it },
+            exit = slideOutVertically(Motion.playerSpec()) { it },
         ) {
             shown.value?.let { p ->
                 PlayerRoute(c, p, bars, sheetTab, { sheetTab = it }, onClose = { sheetTab = null; npOpen = false }, onSnack = { snack = it })
@@ -310,8 +325,8 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String, signedIn
         BackHandler(enabled = npOpen) { if (sheetTab != null) sheetTab = null else npOpen = false }
         MenuLayer(c, menus, bars, MenuNav(openArtist, openAlbum, closePlayer = { sheetTab = null; npOpen = false }), snack = { snack = it })
         // M6b: the account sheet (every tab's avatar), the history menu and the question before clearing the history.
-        if (accountOpen) {
-            BackHandler { accountOpen = false }
+        if (accountOpen) BackHandler { accountOpen = false }
+        SheetPresence(if (accountOpen) Unit else null) {
             // "N dk önce" follows the clock and the sync while the sheet is open.
             var tick by remember { mutableStateOf(0) }
             LaunchedEffect(Unit) { while (true) { delay(5_000); tick++ } }
@@ -334,8 +349,8 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String, signedIn
             )
         }
         val prefs by c.prefs.collectAsState()
-        if (histMenu) {
-            BackHandler { histMenu = false }
+        if (histMenu) BackHandler { histMenu = false }
+        SheetPresence(if (histMenu) Unit else null) {
             com.muratkirazkaya.meiro.ui.screens.HistoryMenuSheet(
                 prefs.historyPaused, signedIn, bars,
                 com.muratkirazkaya.meiro.ui.screens.HistoryMenuActions(
@@ -351,17 +366,15 @@ private fun MainShell(c: AppContainer, bars: SystemBars, email: String, signedIn
                 ),
             )
         }
-        if (clearAsk) {
-            BackHandler { clearAsk = false }
+        if (clearAsk) BackHandler { clearAsk = false }
+        SheetPresence(if (clearAsk) Unit else null) {
             com.muratkirazkaya.meiro.ui.screens.ClearHistorySheet(signedIn, bars, onCancel = { clearAsk = false }) {
                 clearAsk = false
                 scope.launch { c.clearHistory(); snack = "Dinleme geçmişi temizlendi" }
             }
         }
-        snack?.let { m ->
-            LaunchedEffect(m) { delay(2600); if (snack == m) snack = null }
-            Snack(m, { snack = null }, Modifier.align(Alignment.BottomCenter).padding(start = 12.dp, end = 12.dp, bottom = 160.dp))
-        }
+        snack?.let { m -> LaunchedEffect(m) { delay(2600); if (snack == m) snack = null } }
+        SnackHost(snack, { snack = null }, Modifier.align(Alignment.BottomCenter).padding(start = 12.dp, end = 12.dp, bottom = 160.dp))
     } }
 }
 
@@ -950,12 +963,12 @@ private fun PlayerRoute(
             onLike = { c.ytmLikes.toggle(videoId) { like, _ -> onSnack(likeFailed(p.item.title, like)) } },
         ),
     )
-    if (sheetTab != null) {
+    SheetPresence(sheetTab) { shownTab ->
         val tabs = c.trackTabs
         val key = p.item.key
         // The tab's load starts when it shows and again when the track changes under it (`loadPanel`).
-        LaunchedEffect(sheetTab, key) {
-            when (sheetTab) {
+        LaunchedEffect(shownTab, key) {
+            when (shownTab) {
                 com.muratkirazkaya.meiro.ui.screens.PlayerTab.Lyrics -> tabs.loadLyrics(p.item, p.durationMs)
                 com.muratkirazkaya.meiro.ui.screens.PlayerTab.Related -> tabs.loadRelated(p.item)
                 else -> {}
@@ -985,7 +998,7 @@ private fun PlayerRoute(
                 onRowLink = { i -> p.queue.items.getOrNull(i)?.let { menus.link(LinkTarget.song(it)) } },
                 onRelatedLink = { i -> relatedQueue.getOrNull(i)?.let { menus.link(LinkTarget.song(it)) } },
             ),
-            tab = sheetTab, lyrics = lyrics, related = related, positionMs = p.positionMs,
+            tab = shownTab, lyrics = lyrics, related = related, positionMs = p.positionMs,
         )
     }
 }

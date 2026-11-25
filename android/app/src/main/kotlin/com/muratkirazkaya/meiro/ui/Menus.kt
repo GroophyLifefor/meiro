@@ -5,6 +5,7 @@ import android.content.Intent
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
+import com.muratkirazkaya.meiro.ui.components.SheetPresence
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -132,7 +133,7 @@ fun MenuLayer(c: AppContainer, m: MenuState, bars: SystemBars, nav: MenuNav, sna
         }
     }
 
-    m.track?.let { t ->
+    SheetPresence(m.track) { t ->
         val libs = remember(version) { c.libraries.list() }
         val item = t.item
         val held = t.listId?.let { id -> libs.firstOrNull { it.id == id }?.items?.firstOrNull { it.activeRef() == (item.provider() to item.key) } }
@@ -197,7 +198,7 @@ fun MenuLayer(c: AppContainer, m: MenuState, bars: SystemBars, nav: MenuNav, sna
         )
     }
 
-    m.addTo?.let { t ->
+    SheetPresence(m.addTo) { t ->
         val rows = remember(version) { TrackMenuMapping.addToRows(c.libraries.list(), c.engine.settings.dailyMixId) }
         AddToSheet(
             rows, bars,
@@ -214,7 +215,7 @@ fun MenuLayer(c: AppContainer, m: MenuState, bars: SystemBars, nav: MenuNav, sna
         )
     }
 
-    m.newFor?.let { t ->
+    SheetPresence(m.newFor) { t ->
         val create = {
             val n = m.newName.trim()
             if (n.isNotEmpty()) {
@@ -229,7 +230,7 @@ fun MenuLayer(c: AppContainer, m: MenuState, bars: SystemBars, nav: MenuNav, sna
         NewListSheet(m.newName, { m.newName = it }, { m.newFor = null }, create, bars)
     }
 
-    m.list?.let { l ->
+    SheetPresence(m.list) { l ->
         ListMenuSheet(
             l.ui, bars,
             ListMenuActions(
@@ -268,14 +269,14 @@ fun MenuLayer(c: AppContainer, m: MenuState, bars: SystemBars, nav: MenuNav, sna
         )
     }
 
-    m.delete?.let { (id, name) ->
+    SheetPresence(m.delete) { (id, name) ->
         DeleteListSheet(name, bars, onCancel = { m.delete = null }) {
             m.delete = null
             launch("delete") { c.deleteList(id); snack("“$name” silindi") }
         }
     }
 
-    m.rename?.let { (id, name) ->
+    SheetPresence(m.rename) { (id, name) ->
         val save = {
             val n = name.trim()
             if (n.isNotEmpty()) {
@@ -286,9 +287,9 @@ fun MenuLayer(c: AppContainer, m: MenuState, bars: SystemBars, nav: MenuNav, sna
         NewListSheet(name, { m.rename = id to it }, { m.rename = null }, save, bars, title = "Yeniden adlandır", action = "Kaydet", note = false)
     }
 
-    m.link?.let { t -> LinkLayer(c, t, bars, close = { m.link = null }, snack = snack, launch = ::launch) }
+    SheetPresence(m.link) { t -> LinkLayer(c, t, bars, close = { m.link = null }, snack = snack, launch = ::launch) }
 
-    m.sort?.let { t -> com.muratkirazkaya.meiro.ui.screens.PlaylistSortSheet(t.sort, bars, onDismiss = { m.sort = null }) { f -> m.sort = null; t.onPick(f) } }
+    SheetPresence(m.sort) { t -> com.muratkirazkaya.meiro.ui.screens.PlaylistSortSheet(t.sort, bars, onDismiss = { m.sort = null }) { f -> m.sort = null; t.onPick(f) } }
 }
 
 /**
