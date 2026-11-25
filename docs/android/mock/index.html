@@ -999,6 +999,26 @@ function renderLock(){
 let snackT;
 function snack(m){ const s = $('snack'); s.innerHTML = m + '<button data-act="hide-snack">Tamam</button>'; s.classList.add('open'); clearTimeout(snackT); snackT = setTimeout(() => s.classList.remove('open'), 2600); }
 
+/* Page-to-page motion (Android-style slide, shared axis X): a new page slides in from the right with a short fade, Back
+   slides the page out to the right. 300 ms, the same easing as the sheets and the player. Only taps animate; goTo (the
+   state jumps and the reference screens) stays static, and a settled page is the same as before. */
+const NAV_MS = 300, NAV_EASE = 'cubic-bezier(.2,0,0,1)';
+function navSlide(dir, change){
+  const c = $('content'), app = c.parentNode, old = c.cloneNode(true);
+  old.removeAttribute('id'); old.style.cssText = 'position:absolute; left:0; right:0; z-index:5; pointer-events:none; background:var(--surface); top:' + c.offsetTop + 'px; height:' + c.offsetHeight + 'px';
+  const top = c.scrollTop;
+  change();
+  if (!c.animate) return;
+  app.insertBefore(old, c); old.scrollTop = top;
+  const slide = (el, from, to, ms) => el.animate([{transform: 'translateX(' + from + ')'}, {transform: 'translateX(' + to + ')'}], {duration: ms, easing: NAV_EASE, fill: 'both'});
+  const fade = (el, from, to, ms) => el.animate([{opacity: from}, {opacity: to}], {duration: ms, easing: 'linear', fill: 'both'});
+  let done;
+  if (dir > 0) { slide(c, '100%', '0', NAV_MS); fade(c, 0, 1, 150); slide(old, '0', '-25%', NAV_MS); done = fade(old, 1, 0, 150); }
+  else { slide(old, '0', '100%', NAV_MS); done = fade(old, 1, 0, 200); slide(c, '-25%', '0', NAV_MS); fade(c, 0, 1, 150); }
+  old.style.zIndex = dir > 0 ? 1 : 5; c.style.position = 'relative'; c.style.zIndex = dir > 0 ? 5 : 1;
+  setTimeout(() => { old.remove(); c.style.position = c.style.zIndex = ''; c.getAnimations().forEach(a => a.cancel()); }, NAV_MS + 30);
+}
+
 /* ---------- gezinme ---------- */
 function reset(){ st.npOpen = false; st.preparing = false; if (st.err) { st.err = ''; st.now = 's10'; st.playing = true; } closeSheet(); $('lock').classList.remove('open'); }
 function goTo(key){
@@ -1041,16 +1061,16 @@ document.addEventListener('click', e => {
   e.stopPropagation();
   switch (a){
     case 'tab': st.tab = el.dataset.t; st.stack = []; st.searchDone = false; current = el.dataset.t; render(); $('content').scrollTop = 0; break;
-    case 'back': st.stack.pop(); render(); break;
+    case 'back': navSlide(-1, () => { st.stack.pop(); render(); }); break;
     // The app finishes the sign-in by itself once Google's page has set the session cookie (SAPISID): it reads the
     // cookie, clears the page's cookies and storage, asks YouTube Music who it is and goes back to Ayarlar. Here a tap
     // on the page's button stands in for that. If YouTube Music does not take the session the page stays and the
     // snack says why ("YouTube Music girişi olmadı: …").
     case 'ytm-in': st.ytm = true; st.stack.pop(); render(); snack('YouTube Music\'e girildi · Murat K.'); break;
     case 'ytm-out': st.ytm = false; render(); snack('YouTube Music oturumu kapatıldı'); break;
-    case 'go': if (el.dataset.to === 'history') { st.histFilter = 'Hepsi'; st.histSearch = false; st.histQ = ''; } st.stack.push(el.dataset.to); current = el.dataset.to; st.npOpen = false; render(); $('content').scrollTop = 0; break;
-    case 'go-close': closeSheet(); st.npOpen = false; st.stack.push(el.dataset.to); render(); $('content').scrollTop = 0; break;
-    case 'open-playlist': st.plSearch = false; st.plQ = ''; st.plSort = 0; st.plDesc = false; st.stack.push('playlist'); render(); $('content').scrollTop = 0; break;
+    case 'go': if (el.dataset.to === 'history') { st.histFilter = 'Hepsi'; st.histSearch = false; st.histQ = ''; } navSlide(1, () => { st.stack.push(el.dataset.to); current = el.dataset.to; st.npOpen = false; render(); $('content').scrollTop = 0; }); break;
+    case 'go-close': closeSheet(); st.npOpen = false; navSlide(1, () => { st.stack.push(el.dataset.to); render(); $('content').scrollTop = 0; }); break;
+    case 'open-playlist': st.plSearch = false; st.plQ = ''; st.plSort = 0; st.plDesc = false; navSlide(1, () => { st.stack.push('playlist'); render(); $('content').scrollTop = 0; }); break;
     case 'psearch': st.plSearch = !st.plSearch; st.plQ = ''; render(); if (st.plSearch) $('pq').focus(); break;
     case 'plsort': { const f = +el.dataset.f; if (st.plSort === f) st.plDesc = !st.plDesc; else st.plSort = f; closeSheet(); render(); break; }
     // Android's share sheet with the album's YouTube Music link (the desktop's "Copy link"); nothing to show here.
@@ -1058,9 +1078,9 @@ document.addEventListener('click', e => {
     // The app takes its colours from the wallpaper (Android 12+) or from the chosen swatch.
     case 'wall': st.wall = !st.wall; render(); break;
     case 'swatch': st.seed = el.dataset.c; st.wall = false; render(); break;
-    case 'open-mix': st.stack.push('mix'); render(); $('content').scrollTop = 0; break;
-    case 'open-album': st.stack.push('album'); render(); $('content').scrollTop = 0; break;
-    case 'open-artist': st.stack.push('artist'); render(); $('content').scrollTop = 0; break;
+    case 'open-mix': navSlide(1, () => { st.stack.push('mix'); render(); $('content').scrollTop = 0; }); break;
+    case 'open-album': navSlide(1, () => { st.stack.push('album'); render(); $('content').scrollTop = 0; }); break;
+    case 'open-artist': navSlide(1, () => { st.stack.push('artist'); render(); $('content').scrollTop = 0; }); break;
     case 'play':
       if (st.now === id) { st.npOpen = true; render(); break; }
       // A track that cannot play is passed over for the next one, and a snack says why (the desktop's notice).
